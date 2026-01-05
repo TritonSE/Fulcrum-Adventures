@@ -9,3 +9,8 @@
 
 # Backend:
 no backend needed for now, but cd backend and npm install
+
+#Linting: 
+run these commands in the backend or frontend directories for linting and formating, make sure to run before pushing
+    npm run lint-fix to fix all auto-fixable lint errors and formatting
+    npm run lint-check to check all lint errors or code style issues without modifying files
