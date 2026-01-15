@@ -15,6 +15,32 @@ export type Material = {
   isChecked: boolean; // Checked states stay (until unchecked), even if user did not save, complete, or download the activity card
 };
 
+// Structure for Prep tab content
+export type PrepTab = {
+  setup?: string[]; // Numbered list of setup instructions
+  materials?: Material[]; // Checklist of materials
+};
+
+// Structure for Play tab content
+export type PlayTab = {
+  steps: PlayStep[]; // Array of step objects (Step 1, Step 2, etc.)
+};
+
+export type PlayStep = {
+  stepNumber: number; // 1, 2, 3, etc.
+  content: string; // Paragraph text for the step
+};
+
+// Structure for additional custom tabs (Safety, Variations, Pro-Tip, etc.)
+export type CustomTab = {
+  sections: CustomSection[]; // Array of sections
+};
+
+export type CustomSection = {
+  header?: string; // Optional header (can be omitted for just text)
+  content: string; // Paragraph text
+};
+
 export type Activity = {
   id: string;
   title: string;
@@ -32,13 +58,17 @@ export type Activity = {
 
   // Optional fields for full activity page (not needed for cards, but part of shared types)
   objective?: string;
+
+  // Facilitate tabs
+  // Default tabs: Prep and Play (only display if content exists)
+  // Additional tabs (Safety, Variations, Pro-Tip, etc.) - max 6 tabs total
   facilitate?: {
-    // Customizable tabs like "Prep", "Play", "Safety", "Variations", "Pro-Tip", "Reflection", etc.
-    // Content stored as strings (Markdown/HTML) to support rich formatting (h1, h2, bold, lists, etc.)
-    // Use a Markdown renderer component to display with proper formatting
-    [tabName: string]: string;
+    prep?: PrepTab;
+    play?: PlayTab;
+    // Additional custom tabs indexed by name (e.g., "Safety", "Variations", "Pro-Tip")
+    [tabName: string]: PrepTab | PlayTab | CustomTab | undefined;
   };
-  setup?: string[]; // Step-by-step instructions
+
   selTags?: string[]; // SEL Opportunity Tags
   isCompleted?: boolean;
   isDownloaded?: boolean;
