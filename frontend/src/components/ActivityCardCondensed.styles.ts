@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16, // Same padding as content,
+    paddingHorizontal: 16,
   },
   categoryTag: {
     paddingHorizontal: 12,
