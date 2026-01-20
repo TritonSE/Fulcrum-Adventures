@@ -1,45 +1,53 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
+// SVG Imports (Make sure these paths match where your assets folder actually is!)
+// If assets is in 'src/assets', use "../assets..."
+// If assets is in the project root, use "../../assets..."
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
 import PeopleIcon from "../../assets/icons/people.svg";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
 
-import { styles } from "./ActivityCard.styles";
+import { styles } from "./ActivityCardCondensed.styles";
 
 import type { Activity } from "../types/activity";
 
-type ActivityCardProps = {
+type ActivityCardCondensedProps = {
   activity: Activity;
   onPress?: () => void;
   onSaveToggle?: (id: string) => void;
 };
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
+export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
+  activity,
+  onPress,
+  onSaveToggle,
+}) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      {/* Left Side: Image */}
-      <View style={styles.imageContainer}>
-        {activity.imageUrl ? (
-          <Image source={{ uri: activity.imageUrl }} style={styles.image} resizeMode="cover" />
-        ) : (
-          <View style={styles.imagePlaceholder} />
-        )}
-      </View>
+      <View style={styles.innerContainer}>
+        {/* Top Section: Image */}
+        <View style={styles.imageContainer}>
+          {activity.imageUrl ? (
+            <Image source={{ uri: activity.imageUrl }} style={styles.image} resizeMode="cover" />
+          ) : (
+            <View style={styles.imagePlaceholder} />
+          )}
+        </View>
 
-      {/* Right Side: Content */}
-      <View style={styles.content}>
-        {/* Title + Meta Wrapper (Gap 4px) */}
-        <View style={styles.headerContent}>
-          <Text style={styles.title} numberOfLines={2}>
+        {/* Content Section */}
+        <View style={styles.content}>
+          {/* Title - 1 Line Max */}
+          <Text style={styles.title} numberOfLines={1}>
             {activity.title}
           </Text>
 
+          {/* Meta Info */}
           <View style={styles.metaContainer}>
             <Text style={styles.metaText}>{activity.gradeLevel}</Text>
+
             <Text style={styles.metaDivider}>•</Text>
 
             <View style={styles.metaItem}>
@@ -60,7 +68,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
           </View>
         </View>
 
-        {/* Footer: Category Tag & Bookmark */}
+        {/* Footer: Category & Bookmark */}
         <View style={styles.footer}>
           <View
             style={[
@@ -73,7 +81,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
             <Text style={styles.categoryText}>{activity.category}</Text>
           </View>
 
-          {/* Bookmark Button */}
           <TouchableOpacity
             style={styles.bookmarkButton}
             onPress={(e) => {
