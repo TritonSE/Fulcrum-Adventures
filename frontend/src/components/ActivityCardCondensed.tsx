@@ -1,9 +1,7 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports (Make sure these paths match where your assets folder actually is!)
-// If assets is in 'src/assets', use "../assets..."
-// If assets is in the project root, use "../../assets..."
+// SVG Imports
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
