@@ -4,27 +4,24 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "stretch",
-
-    // Elevation/Shadow
+    marginRight: 16,
+    width: 240,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
-
-    height: 144,
+    elevation: 3,
+    paddingBottom: 16,
+    overflow: "visible",
+  },
+  innerContainer: {
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
   },
   imageContainer: {
-    width: 112,
-    height: 112,
-    borderRadius: 8,
-    overflow: "hidden",
-    marginRight: 16,
+    width: "100%",
+    height: 128,
     backgroundColor: "#E8E8E8",
   },
   image: {
@@ -37,29 +34,22 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E8E8E8",
   },
   content: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-
-  // Wrapper for Title + Meta
-  headerContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 4,
+    paddingHorizontal: 16,
+    marginTop: 16,
   },
   title: {
     fontFamily: "League Spartan",
     fontSize: 20,
     fontWeight: "700",
     color: "#153A7A",
-    lineHeight: 21,
-    marginBottom: 0,
+    marginBottom: 4,
+    lineHeight: 22,
   },
   metaContainer: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
+    marginBottom: 12,
+    flexWrap: "nowrap",
   },
   metaItem: {
     flexDirection: "row",
@@ -69,10 +59,8 @@ export const styles = StyleSheet.create({
   metaText: {
     fontFamily: "Instrument Sans",
     fontSize: 10,
-    fontWeight: "400",
     color: "#153A7A",
-    lineHeight: 15,
-    letterSpacing: 0.2,
+    fontWeight: "400",
   },
   metaDivider: {
     marginHorizontal: 6,
@@ -88,20 +76,20 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16, // Same padding as content,
   },
   categoryTag: {
+    paddingHorizontal: 12,
     paddingVertical: 4,
-    paddingHorizontal: 16,
     borderRadius: 8,
-
     justifyContent: "center",
     alignItems: "center",
   },
   categoryText: {
+    fontFamily: "Instrument Sans",
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "500",
-    fontFamily: "Instrument Sans",
   },
   bookmarkButton: {
     width: 32,
@@ -110,8 +98,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-
-    // Shadow: 0 0 4px rgba(0,0,0,0.20)
+    // Shadow matching the Figma
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
