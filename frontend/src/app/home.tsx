@@ -39,7 +39,7 @@ export default function HomeScreen() {
           );
         })}
       </ScrollView>
-      <StatusBar style="auto" />
+       <Text style={styles.browseText}>Recently Saved</Text>
     </View>
   );
 }

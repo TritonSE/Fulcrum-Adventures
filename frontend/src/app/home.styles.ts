@@ -21,25 +21,15 @@ export const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 20,
-  },
   scrollContainer: {
     width: "100%",
     marginTop: 20,
     paddingHorizontal: 20,
+    flexGrow: 0,
+    height: 150,
   },
   categoryItem: {
     alignItems: "center",
     marginRight: 20,
-  },
-  categoryLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#333",
-    marginTop: 8,
-    textAlign: "center",
   },
 });
