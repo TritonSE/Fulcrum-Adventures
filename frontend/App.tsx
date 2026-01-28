@@ -1,5 +1,18 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import { FiltersModal } from "./src/components/FiltersModal";
+
+const defaultFilters = {
+  category: undefined,
+  setup_props: undefined,
+  duration: [],
+  grade_level: [],
+  group_size: [],
+  energy_level: 0,
+  environment: [],
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -11,9 +24,20 @@ const styles = StyleSheet.create({
 });
 
 export default function App() {
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+      <Pressable onPress={() => setModalVisible(true)}>
+        <Text>Open Filters</Text>
+      </Pressable>
+
+      <FiltersModal
+        visible={modalVisible}
+        initial={defaultFilters}
+        onClose={() => setModalVisible(false)}
+        onApply={() => {}}
+      />
       <StatusBar style="auto" />
     </View>
   );
