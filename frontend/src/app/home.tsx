@@ -1,13 +1,15 @@
-import { Text, View, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { styles } from "./home.styles";
-import Header from "../../assets/Header.svg";
+import { ScrollView, Text, View } from "react-native";
+
 import Active from "../../assets/Active.svg";
 import Connection from "../../assets/Connection.svg";
 import Debrief from "../../assets/Debrief.svg";
+import Header from "../../assets/Header.svg";
 import Icebreaker from "../../assets/Icebreaker.svg";
 import Opener from "../../assets/Opener.svg";
 import TeamChallenge from "../../assets/TeamChallenge.svg";
+
+import { styles } from "./home.styles";
 
 const categories = [
   { name: "Opener", icon: Opener },
@@ -25,11 +27,7 @@ export default function HomeScreen() {
         <Header width={390} height={115} />
       </View>
       <Text style={styles.browseText}>Browse by Category</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollContainer}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollContainer}>
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
@@ -39,7 +37,7 @@ export default function HomeScreen() {
           );
         })}
       </ScrollView>
-       <Text style={styles.browseText}>Recently Saved</Text>
+      <Text style={styles.browseText}>Recently Saved</Text>
     </View>
   );
 }
