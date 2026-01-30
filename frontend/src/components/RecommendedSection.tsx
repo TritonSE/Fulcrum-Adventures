@@ -7,12 +7,12 @@ import { ActivityList } from "./ActivityList";
 import { SeeAll } from "./SeeAll";
 // === end test ===
 
-export function HomePopularSection() {
+export function RecommendedSection() {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
-        <Text style={styles.text}> Popular </Text>
-        <SeeAll screen="/PopularScreen" />
+        <Text style={styles.text}> Recommended </Text>
+        <SeeAll screen="/RecommendedScreen" />
       </View>
       <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />;
     </View>
