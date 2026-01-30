@@ -9,7 +9,7 @@ import { styles } from "./ActivityList.styles";
 import type { Activity } from "../types/activity";
 
 type ActivityListProps = {
-  header: string;
+  header?: string;
   activities: Activity[];
   variant?: "card" | "condensed";
   onActivityPress?: (activity: Activity) => void;
@@ -48,9 +48,11 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>{header}</Text>
-      </View>
+      {header && (
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>{header}</Text>
+        </View>
+      )}
 
       {/* Activity List */}
       <FlatList
