@@ -5,14 +5,16 @@ import EnergyIcon from "../../assets/icons/energy_bolt.svg";
 
 import { FilterPill } from "./FilterPill";
 
-type FiltersState = {
-  category?: string; /* Only one category can be selected at a time */
-  setup_props?: string; /* maybe change to boolean later */
+import type { Category, EnergyLevel, Environment } from "../types/activity";
+
+export type FiltersState = {
+  category?: Category | null;
+  setupProps?: string | null; /* maybe change to boolean later */
   duration?: string[];
-  grade_level?: string[];
-  group_size?: string[];
-  energy_level?: number;
-  environment?: string[];
+  gradeLevel?: string[];
+  groupSize?: string[];
+  energyLevel?: EnergyLevel | null;
+  environment?: Environment[];
 };
 
 type Props = {
@@ -24,12 +26,20 @@ type Props = {
 
 const options = {
   category: ["All", "Opener", "Icebreaker", "Active", "Connection", "Debrief", "Team Challenge"],
-  setup_props: ["Props", "No Props"],
+  setupProps: ["Props", "No Props"],
   duration: ["5-15 min", "15-30 min", "30+ min"],
-  grade_level: ["K-2", "3-5", "6-8", "9-12"],
-  group_size: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
-  environment: ["Indoor", "Outdoor", "Classroom", "Field"],
+  gradeLevel: ["K-2", "3-5", "6-8", "9-12"],
+  groupSize: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
+  environment: ["Indoor", "Outdoor", "Both"],
 };
+
+const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
+  None: 0,
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+const numberToEnergyLevel: Record<number, EnergyLevel> = { 1: "Low", 2: "Medium", 3: "High" };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
@@ -41,7 +51,8 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 24, fontWeight: "800", color: "#1F2C5C" },
   close: { fontSize: 20, color: "#1F2C5C" },
-  content: { paddingHorizontal: 16, paddingBottom: 24 },
+  scrollContainer: { flex: 1 },
+  content: { paddingHorizontal: 16 },
   section: { marginBottom: 16 },
   sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8, color: "#1C1F2A" },
   row: { flexDirection: "row", flexWrap: "wrap" },
@@ -49,7 +60,14 @@ const styles = StyleSheet.create({
   energyIcon: { padding: 6 },
   energyText: { fontSize: 24, color: "#CBD0DD" },
   energyTextActive: { color: "#1F4ED6" },
-  footer: { flexDirection: "row", padding: 16, gap: 12, borderTopWidth: 1, borderColor: "#E6E9F0" },
+  footer: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderColor: "#E6E9F0",
+    borderBottomWidth: 0,
+  },
   resetBtn: {
     flex: 1,
     height: 48,
@@ -85,11 +103,11 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible">) => {
   const [filters, setFilters] = useState<FiltersState>(initial);
 
-  const toggleSingleFilter = (key: "category" | "setup_props", value: string) =>
+  const toggleSingleFilter = (key: "category" | "setupProps", value: string | null) =>
     setFilters((prev) => ({ ...prev, [key]: prev[key] === value ? undefined : value }));
 
   const toggleMultiFilter = (
-    key: "duration" | "grade_level" | "group_size" | "environment",
+    key: "duration" | "gradeLevel" | "groupSize" | "environment",
     value: string,
   ) =>
     setFilters((prev) => {
@@ -102,24 +120,24 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
       return { ...prev, [key]: Array.from(existing) };
     });
 
-  const toggleEnergyLevel = (level: number) =>
-    setFilters((prev) => ({ ...prev, energy_level: prev.energy_level === level ? 0 : level }));
+  const toggleEnergyLevel = (level: EnergyLevel) =>
+    setFilters((prev) => ({ ...prev, energyLevel: prev.energyLevel === level ? null : level }));
 
   const resetFilters = () =>
     setFilters({
-      category: undefined,
-      setup_props: undefined,
+      category: null,
+      setupProps: null,
       duration: [],
-      grade_level: [],
-      group_size: [],
-      energy_level: 0,
+      gradeLevel: [],
+      groupSize: [],
+      energyLevel: null,
       environment: [],
     });
 
   const isFilterSelected = (values: string[] | undefined, option: string) =>
     !!values?.includes(option);
 
-  const energyLevel = filters.energy_level ?? 0;
+  const energyLevel = filters.energyLevel;
 
   return (
     <View style={styles.container}>
@@ -130,14 +148,19 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={true}
+        persistentScrollbar={true}
+      >
         <Section title="Category">
           {options.category.map((option) => (
             <FilterPill
               key={option}
               label={option}
-              selected={filters.category === option}
-              onPress={() => toggleSingleFilter("category", option)}
+              selected={filters.category === option || (option === "All" && !filters.category)}
+              onPress={() => toggleSingleFilter("category", option === "All" ? null : option)}
             />
           ))}
         </Section>
@@ -154,23 +177,23 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </Section>
 
         <Section title="Grade Level">
-          {options.grade_level.map((option) => (
+          {options.gradeLevel.map((option) => (
             <FilterPill
               key={option}
               label={option}
-              selected={isFilterSelected(filters.grade_level, option)}
-              onPress={() => toggleMultiFilter("grade_level", option)}
+              selected={isFilterSelected(filters.gradeLevel, option)}
+              onPress={() => toggleMultiFilter("gradeLevel", option)}
             />
           ))}
         </Section>
 
         <Section title="Group Size">
-          {options.group_size.map((option) => (
+          {options.groupSize.map((option) => (
             <FilterPill
               key={option}
               label={option}
-              selected={isFilterSelected(filters.group_size, option)}
-              onPress={() => toggleMultiFilter("group_size", option)}
+              selected={isFilterSelected(filters.groupSize, option)}
+              onPress={() => toggleMultiFilter("groupSize", option)}
             />
           ))}
         </Section>
@@ -178,11 +201,11 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         <Section title="Energy Level">
           <View style={styles.energyRow}>
             {[1, 2, 3].map((level) => {
-              const isActive = energyLevel >= level;
+              const isActive = energyLevelToNumber[energyLevel ?? "None"] >= level;
               return (
                 <Pressable
                   key={level}
-                  onPress={() => toggleEnergyLevel(level)}
+                  onPress={() => toggleEnergyLevel(numberToEnergyLevel[level])}
                   hitSlop={8}
                   style={styles.iconWrapper}
                 >
@@ -210,31 +233,31 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </Section>
 
         <Section title="Set Up">
-          {options.setup_props.map((option) => (
+          {options.setupProps.map((option) => (
             <FilterPill
               key={option}
               label={option}
-              selected={filters.setup_props === option}
-              onPress={() => toggleSingleFilter("setup_props", option)}
+              selected={filters.setupProps === option}
+              onPress={() => toggleSingleFilter("setupProps", option)}
             />
           ))}
         </Section>
-
-        <View style={styles.footer}>
-          <Pressable style={styles.resetBtn} onPress={resetFilters}>
-            <Text style={styles.resetText}>Reset All</Text>
-          </Pressable>
-          <Pressable
-            style={styles.applyBtn}
-            onPress={() => {
-              onApply(filters);
-              onClose();
-            }}
-          >
-            <Text style={styles.applyText}>Apply Filters</Text>
-          </Pressable>
-        </View>
       </ScrollView>
+
+      <View style={styles.footer}>
+        <Pressable style={styles.resetBtn} onPress={resetFilters}>
+          <Text style={styles.resetText}>Reset All</Text>
+        </Pressable>
+        <Pressable
+          style={styles.applyBtn}
+          onPress={() => {
+            onApply(filters);
+            onClose();
+          }}
+        >
+          <Text style={styles.applyText}>Apply Filters</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
