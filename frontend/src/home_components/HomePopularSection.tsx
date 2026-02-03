@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
+// === test new ===
+import { ActivityList } from "../components/ActivityList";
 import { mockActivities } from "../data/mockActivities";
 
-// === test new ===
-import { ActivityList } from "./ActivityList";
 import { SeeAll } from "./SeeAll";
 // === end test ===
 
