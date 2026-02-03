@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { ScrollView, Text, View } from "react-native";
 
 import Active from "../../assets/Active.svg";
