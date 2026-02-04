@@ -12,9 +12,9 @@ export function HomePopularSection() {
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.text}> Popular </Text>
-        <SeeAll screen="/PopularScreen" />
+        <SeeAll screen="/popular" />
       </View>
-      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />;
+      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />
     </View>
   );
 }

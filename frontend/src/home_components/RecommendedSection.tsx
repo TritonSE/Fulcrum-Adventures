@@ -12,7 +12,7 @@ export function RecommendedSection() {
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.text}> Recommended </Text>
-        <SeeAll screen="/RecommendedScreen" />
+        <SeeAll screen="/recommended" />
       </View>
       <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />;
     </View>

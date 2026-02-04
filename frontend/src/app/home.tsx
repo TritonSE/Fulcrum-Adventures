@@ -1,4 +1,5 @@
-import { ScrollView, Text, View } from "react-native";
+import { Link } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import Active from "../../assets/Active.svg";
 import Connection from "../../assets/Connection.svg";
@@ -7,8 +8,41 @@ import Header from "../../assets/Header.svg";
 import Icebreaker from "../../assets/Icebreaker.svg";
 import Opener from "../../assets/Opener.svg";
 import TeamChallenge from "../../assets/TeamChallenge.svg";
+import { HomePopularSection } from "../home_components/HomePopularSection";
 
-import { styles } from "./home.styles";
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  header: {
+    width: "500%",
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  browseText: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#153F7A",
+    marginTop: 20,
+    lineHeight: 27,
+    alignSelf: "flex-start",
+    marginLeft: 20,
+  },
+  scrollContainer: {
+    width: "100%",
+    marginTop: 20,
+    paddingHorizontal: 20,
+    flexGrow: 0,
+    height: 150,
+  },
+  categoryItem: {
+    alignItems: "center",
+    marginRight: 20,
+  },
+});
 
 const categories = [
   { name: "Opener", icon: Opener },
@@ -37,6 +71,7 @@ export default function HomeScreen() {
         })}
       </ScrollView>
       <Text style={styles.browseText}>Recently Saved</Text>
+      <HomePopularSection />
     </View>
   );
 }
