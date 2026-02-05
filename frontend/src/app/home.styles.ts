@@ -32,4 +32,15 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 20,
   },
+  emptyText: {
+    color: "#B4B4B4",
+    textAlign: "center",
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: 21,
+    letterSpacing: 0.28,
+    marginTop: 20,
+  },
 });

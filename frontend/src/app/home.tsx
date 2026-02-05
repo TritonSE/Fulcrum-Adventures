@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, Text, View } from "react-native";
+import { useState } from "react";
 
 import Active from "../../assets/Active.svg";
 import Connection from "../../assets/Connection.svg";
@@ -10,6 +11,10 @@ import Opener from "../../assets/Opener.svg";
 import TeamChallenge from "../../assets/TeamChallenge.svg";
 
 import { styles } from "./home.styles";
+import { ActivityCard } from "../components/ActivityCard";
+import { mockActivities } from "../data/mockActivities";
+
+import type { Activity } from "../types/activity";
 
 const categories = [
   { name: "Opener", icon: Opener },
@@ -21,6 +26,22 @@ const categories = [
 ];
 
 export default function HomeScreen() {
+  const [savedActivities, setSavedActivities] = useState<Activity[]>([]);
+
+  const handleSaveToggle = (id: string) => {
+    const activity = mockActivities.find((a) => a.id === id);
+    if (!activity) return;
+
+    setSavedActivities((prev) => {
+      const isAlreadySaved = prev.find((a) => a.id === id);
+      if (isAlreadySaved) {
+        return prev.filter((a) => a.id !== id);
+      } else {
+        return [...prev, activity];
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -37,7 +58,20 @@ export default function HomeScreen() {
           );
         })}
       </ScrollView>
-      <Text style={styles.browseText}>Recently Saved</Text>
+      <Text style={styles.browseText}>Recently Bookmarks</Text>
+      {savedActivities.length === 0 ? (
+        <Text style={styles.emptyText}>No recent bookmarks.</Text>
+      ) : (
+        <ScrollView style={styles.scrollContainer}>
+          {savedActivities.map((activity) => (
+            <ActivityCard
+              key={activity.id}
+              activity={activity}
+              onSaveToggle={handleSaveToggle}
+            />
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }

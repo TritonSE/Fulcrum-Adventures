@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "react-native-svg-transformer": "^1.5.2"
+  },
+  "dependencies": {
+    "expo": "^54.0.31",
+    "react-native-svg": "15.12.1"
+  }
+}
