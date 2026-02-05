@@ -1,4 +1,4 @@
-// import { Link } from "expo-router";
+import { Link } from "expo-router";
 // import { useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet, Text } from "react-native";
 
@@ -12,9 +12,13 @@ import { Pressable, StyleSheet, Text } from "react-native";
 
 export function SeeAll({ screen }: { screen: string }) {
   return (
-    <Pressable>
-      <Text style={styles.text}> See All → {screen} </Text>
-    </Pressable>
+    <Link href={`${screen}`} asChild>
+      <Text style={styles.text}> See All → </Text>
+    </Link>
+
+    // <Pressable>
+    //   <Text style={styles.text}> See All → {screen} </Text>
+    // </Pressable>
   );
 }
 
