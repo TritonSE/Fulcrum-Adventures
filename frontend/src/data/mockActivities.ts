@@ -249,3 +249,7 @@ export const mockActivities: Activity[] = [
     },
   },
 ];
+
+export function getActivityById(id: string): Activity | undefined {
+  return mockActivities.find((a) => a.id === id);
+}
