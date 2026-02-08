@@ -1,7 +1,5 @@
-import { Link } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
-import { mockActivities } from "../data/mockActivities";
 import { HomeBrowseCategorySection } from "../home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "../home_components/HomeHeaderSection";
 import { HomePopularSection } from "../home_components/HomePopularSection";

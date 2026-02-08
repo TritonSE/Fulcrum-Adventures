@@ -1,4 +1,5 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+
 import Active from "../../assets/Active.svg";
 import Connection from "../../assets/Connection.svg";
 import Debrief from "../../assets/Debrief.svg";

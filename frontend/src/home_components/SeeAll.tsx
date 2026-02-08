@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 // import { useNavigation } from "@react-navigation/native";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 // export function SeeAll({ screen }: { screen: string }) {
 //   return (

@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+
 import Header from "../../assets/Header.svg";
 
 const styles = StyleSheet.create({

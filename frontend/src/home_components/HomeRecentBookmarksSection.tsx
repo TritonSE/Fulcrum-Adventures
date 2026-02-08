@@ -3,11 +3,12 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList"
 import { mockActivities } from "../data/mockActivities";
+
 import { SeeAll } from "./SeeAll";
 
 import type { Activity } from "../types/activity";
 
-interface HomeRecentBookmarksSectionProps {
+type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
 }
 
