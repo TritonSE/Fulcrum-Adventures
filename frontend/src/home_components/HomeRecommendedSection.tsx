@@ -1,20 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
 
+// === test new ===
+import { ActivityList } from "../components/ActivityList";
 import { mockActivities } from "../data/mockActivities";
 
-// === test new ===
-import { ActivityList } from "./ActivityList";
 import { SeeAll } from "./SeeAll";
 // === end test ===
 
-export function RecommendedSection() {
+export function HomeRecommendedSection() {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.text}> Recommended </Text>
         <SeeAll screen="/recommended" />
       </View>
-      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />;
+      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />
     </View>
   );
 }

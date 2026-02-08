@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
 // import { LinearGradient } from 'expo-linear-gradient';
+import { router } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import BackArrowIcon from "../../assets/BackArrowIcon.svg";
 
@@ -58,9 +59,11 @@ export function HomePopUpPageHeaderSection({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.arrowIcon}>
-          <BackArrowIcon width={24} height={24} />
-        </View>
+        <Pressable onPress={() => router.back()} hitSlop={20}>
+          <View style={styles.arrowIcon}>
+            <BackArrowIcon width={24} height={24} />
+          </View>
+        </Pressable>
         <Text style={styles.title}>{sectionName}</Text>
       </View>
     </View>
