@@ -6,7 +6,7 @@ import { HomePopUpPageHeaderSection } from "../home_components/HomePopUpPageHead
 
 export default function PopularScreen() {
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <HomePopUpPageHeaderSection sectionName="Recommended" rightPadding={91} />
       <ActivityList header="" activities={mockActivities} variant="card" horizontal={false} />
     </View>
