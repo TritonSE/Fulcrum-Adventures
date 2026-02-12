@@ -1,44 +1,38 @@
-import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, View,} from "react-native";
 
-import { ActivityList } from "../components/ActivityList"
+import { ActivityCard } from "../components/ActivityCard";
 import { mockActivities } from "../data/mockActivities";
-
 import { SeeAll } from "./SeeAll";
 
 import type { Activity } from "../types/activity";
 
 type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
-}
+};
 
-export function HomeRecentBookmarksSection({ bookmarkedActivities = [] }: HomeRecentBookmarksSectionProps) {
-  const hasBookmarks = bookmarkedActivities.length > 0;
-  const scrollViewRef = useRef<ScrollView>(null);
-  const scrollPosition = useRef(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.75;
+const CARD_SPACING = 12;
+const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 
-  useEffect(() => {
-    if (!hasBookmarks) return;
+export function HomeRecentBookmarksSection({
+  bookmarkedActivities,
+}: HomeRecentBookmarksSectionProps) {
+  const activities = mockActivities;
 
-    const interval = setInterval(() => {
-      scrollPosition.current += 1;
-      scrollViewRef.current?.scrollTo({
-        x: scrollPosition.current,
-        animated: true,
-      });
+  const hasBookmarks = activities.length > 0;
+  const indicatorCount = Math.min(4, activities.length);
 
-      const cardWidth = 280;
-      const newIndex = Math.round(scrollPosition.current / cardWidth) % bookmarkedActivities.length;
-      setCurrentIndex(newIndex);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-      if (scrollPosition.current > bookmarkedActivities.length * 300) {
-        scrollPosition.current = 0;
-      }
-    }, 30);
-
-    return () => clearInterval(interval);
-  }, [hasBookmarks, bookmarkedActivities.length]);
+  const handleScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / SNAP_INTERVAL);
+    setActiveIndex(index);
+  };
 
   return (
     <View style={styles.sectionContainer}>
@@ -46,34 +40,42 @@ export function HomeRecentBookmarksSection({ bookmarkedActivities = [] }: HomeRe
         <Text style={styles.text}>Recent Bookmarks</Text>
         {hasBookmarks && <SeeAll screen="/bookmarks" />}
       </View>
+
       {hasBookmarks ? (
         <>
-          <ScrollView
-            ref={scrollViewRef}
+          <FlatList
+            data={activities}
+            renderItem={({ item }) => <ActivityCard activity={item} />}
+            keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
+            onScroll={handleScroll}
             scrollEventThrottle={16}
-          >
-            {bookmarkedActivities.map((activity) => (
-              <View>
-                 <ActivityList header="" activities={mockActivities} variant="card" horizontal={true} />
-              </View>
-            ))}
-          </ScrollView>
-          <View style={styles.dotsContainer}>
-            {bookmarkedActivities.map((_, index) => (
-              <View
-                key={index}
-                style={[styles.dot, currentIndex === index && styles.activeDot]}
-              />
-            ))}
-          </View>
+            snapToInterval={SNAP_INTERVAL}
+            decelerationRate="fast"
+          />
+
+          {indicatorCount > 1 && (
+            <View style={styles.dotsContainer}>
+              {Array.from({ length: indicatorCount }).map((_, index) => (
+                <View
+                  key={`bookmark-dot-${index}`}
+                  style={[
+                    styles.dot,
+                    index === activeIndex && styles.activeDot,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
         </>
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No recent bookmarks</Text>
+          <Text style={styles.emptyText}>
+            No recent bookmarks
+          </Text>
         </View>
       )}
     </View>
@@ -81,6 +83,9 @@ export function HomeRecentBookmarksSection({ bookmarkedActivities = [] }: HomeRe
 }
 
 const styles = StyleSheet.create({
+  sectionContainer: {
+    gap: 8,
+  },
   headerContainer: {
     flexDirection: "row",
     width: 341,
@@ -96,9 +101,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginLeft: 20,
   },
-  sectionContainer: {
-    gap: 8,
-  },
   scrollView: {
     width: "100%",
   },
@@ -106,8 +108,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 12,
   },
-  cardWrapper: {
-    marginRight: 12,
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#D0D0D0",
+  },
+  activeDot: {
+    backgroundColor: "#153F7A",
   },
   emptyContainer: {
     width: 341,
@@ -118,26 +133,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "#909090",
-    fontStyle: "normal",
     paddingVertical: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#D0D0D0",
-  },
-  activeDot: {
-    backgroundColor: "#153F7A",
   },
 });
