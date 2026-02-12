@@ -8,7 +8,7 @@ import { FilterPill } from "./FilterPill";
 type FiltersState = {
   category?: string; /* Only one category can be selected at a time */
   setup_props?: string; /* maybe change to boolean later */
-  duration?: string[];
+  duration?: string[]; /* Add strict types */
   grade_level?: string[];
   group_size?: string[];
   energy_level?: number;
