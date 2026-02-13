@@ -10,6 +10,16 @@ import { TempNavBar } from "../components/TempNavBar";
 import { mockActivities } from "../data/mockActivities";
 
 import type { FiltersState } from "../components/FiltersModal";
+import type { Category } from "../types/activity";
+
+const categories: Category[] = [
+  "Opener",
+  "Icebreaker",
+  "Active",
+  "Connection",
+  "Debrief",
+  "Team Challenge",
+];
 
 const defaultFilters: FiltersState = {
   category: undefined,
@@ -322,24 +332,15 @@ export function SearchPage() {
           <View>
             <Text style={styles.smallText}>Browse by category:</Text>
             <View style={styles.categoryCardsGrid}>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <Text style={styles.categoryCardText}>Category Card</Text>
-              </View>
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={styles.categoryCard}
+                  onPress={() => setFilters({ ...filters, category })}
+                >
+                  <Text style={styles.categoryCardText}>{category}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         )}
