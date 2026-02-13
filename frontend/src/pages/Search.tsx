@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 import FilterIcon from "../../assets/icons/filter.svg";
 import SearchIcon from "../../assets/icons/search.svg";
@@ -7,19 +15,12 @@ import { ActivityList } from "../components/ActivityList";
 import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
 import { TempNavBar } from "../components/TempNavBar";
+import { CATEGORY_COLORS } from "../constants/activityColors";
+import { CATEGORIES as categories } from "../constants/filterOptions";
 import { mockActivities } from "../data/mockActivities";
 
 import type { FiltersState } from "../components/FiltersModal";
 import type { Activity, Category } from "../types/activity";
-
-const categories: Category[] = [
-  "Opener",
-  "Icebreaker",
-  "Active",
-  "Connection",
-  "Debrief",
-  "Team Challenge",
-];
 
 const defaultFilters: FiltersState = {
   category: undefined,
@@ -255,118 +256,120 @@ export function SearchPage() {
   };
 
   return (
-    <View style={styles.page}>
-      <View style={styles.content}>
-        {/* Search Bar */}
-        <View style={styles.searchBar}>
-          {!isSearching && <SearchIcon width={24} height={24} color="#153A7A" />}
-          <TextInput
-            value={searchText}
-            onChangeText={setSearchText}
-            style={styles.searchInput}
-            placeholder="Search activities"
-            onFocus={() => setIsSearching(true)}
-          />
-          <FilterIcon
-            width={24}
-            height={24}
-            color="#153A7A"
-            onPress={() => {
-              setShowFilterModal(true);
-            }}
-          />
-        </View>
-        {/* Recent Searches */}
-        {isSearching &&
-          searchText === "" &&
-          recentSearches.length !== 0 &&
-          isFiltersEmpty(filters) && (
-            <View style={styles.recentSearchesContainer}>
-              <View style={styles.recentSearchesTextContainer}>
-                <Text style={styles.smallText}>Recent Searches</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setRecentSearches([]);
-                  }}
-                >
-                  <Text style={styles.clearAllText}>Clear All</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.recentSearchesChipsContainer}>
-                {recentSearches.map((search) => (
-                  <Chip
-                    key={search}
-                    label={search}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.page}>
+        <View style={styles.content}>
+          {/* Search Bar */}
+          <View style={styles.searchBar}>
+            {!isSearching && <SearchIcon width={24} height={24} color="#153A7A" />}
+            <TextInput
+              value={searchText}
+              onChangeText={setSearchText}
+              style={styles.searchInput}
+              placeholder="Search activities"
+              onFocus={() => setIsSearching(true)}
+            />
+            <FilterIcon
+              width={24}
+              height={24}
+              color="#153A7A"
+              onPress={() => {
+                setShowFilterModal(true);
+              }}
+            />
+          </View>
+          {/* Recent Searches */}
+          {isSearching &&
+            searchText === "" &&
+            recentSearches.length !== 0 &&
+            isFiltersEmpty(filters) && (
+              <View style={styles.recentSearchesContainer}>
+                <View style={styles.recentSearchesTextContainer}>
+                  <Text style={styles.smallText}>Recent Searches</Text>
+                  <TouchableOpacity
                     onPress={() => {
-                      setSearchText(search);
+                      setRecentSearches([]);
                     }}
-                    onClose={() => {
-                      setRecentSearches(recentSearches.filter((s) => s !== search));
-                    }}
-                  />
+                  >
+                    <Text style={styles.clearAllText}>Clear All</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.recentSearchesChipsContainer}>
+                  {recentSearches.map((search) => (
+                    <Chip
+                      key={search}
+                      label={search}
+                      onPress={() => {
+                        setSearchText(search);
+                      }}
+                      onClose={() => {
+                        setRecentSearches(recentSearches.filter((s) => s !== search));
+                      }}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+          {/* Filters */}
+          {!isFiltersEmpty(filters) && (
+            <View style={styles.filtersContainer}>
+              <Text style={styles.smallText}>Filters: </Text>
+              {convertFiltersToArray(filters).map((filter) => (
+                <Chip
+                  key={filter}
+                  label={filter}
+                  backgroundColor="#153A7A"
+                  textColor="#FFFFFF"
+                  onClose={() => {
+                    setFilters(removeFilter(filters, filter));
+                  }}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Activity or Category cards depending on search state */}
+          {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
+            <View style={styles.activityListContainer}>
+              <Text style={styles.activityNumberText}>
+                {filteredActivities.length} activit
+                {filteredActivities.length === 1 ? "y" : "ies"} found
+              </Text>
+              <ActivityList
+                activities={filteredActivities}
+                variant="card"
+                onSaveToggle={handleSaveToggle}
+              />
+            </View>
+          ) : (
+            <View>
+              <Text style={styles.smallText}>Browse by category:</Text>
+              <View style={styles.categoryCardsGrid}>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={styles.categoryCard}
+                    onPress={() => setFilters({ ...filters, category })}
+                  >
+                    <Text style={styles.categoryCardText}>{category}</Text>
+                  </TouchableOpacity>
                 ))}
               </View>
             </View>
           )}
-        {/* Filters */}
-        {!isFiltersEmpty(filters) && (
-          <View style={styles.filtersContainer}>
-            <Text style={styles.smallText}>Filters: </Text>
-            {convertFiltersToArray(filters).map((filter) => (
-              <Chip
-                key={filter}
-                label={filter}
-                backgroundColor="#153A7A"
-                textColor="#FFFFFF"
-                onClose={() => {
-                  setFilters(removeFilter(filters, filter));
-                }}
-              />
-            ))}
-          </View>
-        )}
+        </View>
 
-        {/* Activity or Category cards depending on search state */}
-        {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
-          <View style={styles.activityListContainer}>
-            <Text style={styles.activityNumberText}>
-              {filteredActivities.length} activit{filteredActivities.length === 1 ? "y" : "ies"}{" "}
-              found
-            </Text>
-            <ActivityList
-              activities={filteredActivities}
-              variant="card"
-              onSaveToggle={handleSaveToggle}
-            />
-          </View>
-        ) : (
-          <View>
-            <Text style={styles.smallText}>Browse by category:</Text>
-            <View style={styles.categoryCardsGrid}>
-              {categories.map((category) => (
-                <TouchableOpacity
-                  key={category}
-                  style={styles.categoryCard}
-                  onPress={() => setFilters({ ...filters, category })}
-                >
-                  <Text style={styles.categoryCardText}>{category}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
+        {/* Filter Modal */}
+        <FiltersModal
+          visible={showFilterModal}
+          initial={filters}
+          onApply={(newFilters) => setFilters(newFilters)}
+          onClose={() => setShowFilterModal(false)}
+        />
+
+        {/* TODO: replace with actual NavBar */}
+        <TempNavBar />
       </View>
-
-      {/* Filter Modal */}
-      <FiltersModal
-        visible={showFilterModal}
-        initial={filters}
-        onApply={(newFilters) => setFilters(newFilters)}
-        onClose={() => setShowFilterModal(false)}
-      />
-
-      {/* TODO: replace with actual NavBar */}
-      <TempNavBar />
-    </View>
+    </TouchableWithoutFeedback>
   );
 }

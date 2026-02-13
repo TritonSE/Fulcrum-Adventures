@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import EnergyIcon from "../../assets/icons/energy_bolt.svg";
+import { FILTER_OPTIONS as options } from "../constants/filterOptions";
 
 import { FilterPill } from "./FilterPill";
 
@@ -22,15 +23,6 @@ type Props = {
   initial: FiltersState;
   onClose: () => void;
   onApply: (filters: FiltersState) => void;
-};
-
-const options = {
-  category: ["All", "Opener", "Icebreaker", "Active", "Connection", "Debrief", "Team Challenge"],
-  setupProps: ["Props", "No Props"],
-  duration: ["5-15 min", "15-30 min", "30+ min"],
-  gradeLevel: ["K-2", "3-5", "6-8", "9-12"],
-  groupSize: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
-  environment: ["Indoor", "Outdoor", "Both"],
 };
 
 const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
