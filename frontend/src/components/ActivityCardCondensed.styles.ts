@@ -16,16 +16,13 @@ export const styles = StyleSheet.create({
   },
   innerContainer: {
     borderRadius: 16,
-    overflow: "visible",
+    overflow: "hidden",
     backgroundColor: "#FFFFFF",
   },
   imageContainer: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
     width: "100%",
     height: 128,
     backgroundColor: "#E8E8E8",
-    overflow: "hidden",
   },
   image: {
     width: "100%",

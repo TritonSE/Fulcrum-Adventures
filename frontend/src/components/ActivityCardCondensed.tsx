@@ -5,10 +5,8 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
-import GraduationCapIcon from "../../assets/icons/graduation-cap.svg";
 import PeopleIcon from "../../assets/icons/people.svg";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
-import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
 
 import { styles } from "./ActivityCardCondensed.styles";
 
@@ -46,12 +44,7 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
 
           {/* Meta Info */}
           <View style={styles.metaContainer}>
-            <View style={styles.metaItem}>
-              <View style={styles.iconWrapper}>
-                <GraduationCapIcon />
-              </View>
-              <Text style={styles.metaText}>{formatGradeLevel(activity.gradeLevel)}</Text>
-            </View>
+            <Text style={styles.metaText}>{activity.gradeLevel}</Text>
 
             <Text style={styles.metaDivider}>•</Text>
 
@@ -59,7 +52,7 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
               <View style={styles.iconWrapper}>
                 <PeopleIcon />
               </View>
-              <Text style={styles.metaText}>{formatGroupSize(activity.groupSize)}</Text>
+              <Text style={styles.metaText}>{activity.groupSize}</Text>
             </View>
 
             <Text style={styles.metaDivider}>•</Text>
@@ -68,7 +61,7 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
               <View style={styles.iconWrapper}>
                 <ClockIcon />
               </View>
-              <Text style={styles.metaText}>{formatDuration(activity.duration)}</Text>
+              <Text style={styles.metaText}>{activity.duration}</Text>
             </View>
           </View>
         </View>
