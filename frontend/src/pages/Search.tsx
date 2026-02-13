@@ -10,7 +10,7 @@ import { TempNavBar } from "../components/TempNavBar";
 import { mockActivities } from "../data/mockActivities";
 
 import type { FiltersState } from "../components/FiltersModal";
-import type { Category } from "../types/activity";
+import type { Activity, Category } from "../types/activity";
 
 const categories: Category[] = [
   "Opener",
@@ -191,8 +191,9 @@ export function SearchPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(["test1", "test2", "test3"]);
   const [filters, setFilters] = useState<FiltersState>(defaultFilters);
+  const [activities, setActivities] = useState<Activity[]>(mockActivities);
 
-  const filteredActivities = mockActivities.filter((activity) => {
+  const filteredActivities = activities.filter((activity) => {
     if (filters.category && activity.category !== filters.category) {
       return false;
     }
@@ -245,6 +246,14 @@ export function SearchPage() {
     return activity.title.toLowerCase().includes(searchText.toLowerCase());
   });
 
+  const handleSaveToggle = (id: string) => {
+    setActivities((prevList) =>
+      prevList.map((activity) =>
+        activity.id === id ? { ...activity, isSaved: !activity.isSaved } : activity,
+      ),
+    );
+  };
+
   return (
     <View style={styles.page}>
       <View style={styles.content}>
@@ -267,7 +276,6 @@ export function SearchPage() {
             }}
           />
         </View>
-
         {/* Recent Searches */}
         {isSearching &&
           searchText === "" &&
@@ -300,7 +308,6 @@ export function SearchPage() {
               </View>
             </View>
           )}
-
         {/* Filters */}
         {!isFiltersEmpty(filters) && (
           <View style={styles.filtersContainer}>
@@ -326,7 +333,11 @@ export function SearchPage() {
               {filteredActivities.length} activit{filteredActivities.length === 1 ? "y" : "ies"}{" "}
               found
             </Text>
-            <ActivityList activities={filteredActivities} variant="card" />
+            <ActivityList
+              activities={filteredActivities}
+              variant="card"
+              onSaveToggle={handleSaveToggle}
+            />
           </View>
         ) : (
           <View>
