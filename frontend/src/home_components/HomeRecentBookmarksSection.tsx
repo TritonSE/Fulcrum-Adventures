@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
 import { mockActivities } from "../data/mockActivities";
@@ -7,16 +7,11 @@ import { mockActivities } from "../data/mockActivities";
 import { SeeAll } from "./SeeAll";
 
 import type { Activity } from "../types/activity";
-import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import type { ViewabilityConfig, ViewToken } from "react-native";
 
 type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
 };
-
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.75;
-const CARD_SPACING = 12;
-const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
@@ -28,11 +23,19 @@ export function HomeRecentBookmarksSection({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / SNAP_INTERVAL);
-    setActiveIndex(index);
-  };
+  const viewabilityConfig = useRef<ViewabilityConfig>({
+    itemVisiblePercentThreshold: 60,
+  }).current;
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: Array<ViewToken<Activity>> }) => {
+      const firstVisible = viewableItems[0];
+
+      if (firstVisible?.index != null) {
+        setActiveIndex(firstVisible.index);
+      }
+    },
+  ).current;
 
   return (
     <View style={styles.sectionContainer}>
@@ -51,10 +54,9 @@ export function HomeRecentBookmarksSection({
             showsHorizontalScrollIndicator={false}
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            snapToInterval={SNAP_INTERVAL}
             decelerationRate="fast"
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
           />
 
           {indicatorCount > 1 && (
