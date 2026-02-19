@@ -1,6 +1,5 @@
-// src/components/ActivityList.tsx
 import React from "react";
-import { FlatList, Text, View } from "react-native";
+import { type DimensionValue, FlatList, Text, View } from "react-native";
 
 import { ActivityCard } from "./ActivityCard";
 import { ActivityCardCondensed } from "./ActivityCardCondensed";
@@ -9,12 +8,14 @@ import { styles } from "./ActivityList.styles";
 import type { Activity } from "../types/activity";
 
 type ActivityListProps = {
-  header: string;
+  header?: string;
   activities: Activity[];
   variant?: "card" | "condensed";
   onActivityPress?: (activity: Activity) => void;
   onSaveToggle?: (id: string) => void;
   horizontal?: boolean;
+  height?: number;
+  width?: DimensionValue;
 };
 
 export const ActivityList: React.FC<ActivityListProps> = ({
@@ -24,6 +25,8 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   onActivityPress,
   onSaveToggle,
   horizontal = false,
+  height,
+  width,
 }) => {
   const renderActivity = ({ item }: { item: Activity }) => {
     if (variant === "condensed") {
@@ -46,13 +49,19 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>{header}</Text>
-      </View>
+    <View
+      style={[
+        styles.container,
+        width ? { width } : undefined,
+        horizontal ? { flex: 0 } : undefined,
+      ]}
+    >
+      {header ? (
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>{header}</Text>
+        </View>
+      ) : null}
 
-      {/* Activity List */}
       <FlatList
         data={activities}
         renderItem={renderActivity}
@@ -61,6 +70,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
+        style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1 }}
       />
     </View>
   );
