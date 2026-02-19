@@ -14,7 +14,13 @@ export function HomePopularSection() {
         <Text style={styles.text}> Popular </Text>
         <SeeAll screen="/popular" />
       </View>
-      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />
+      <ActivityList
+        activities={mockActivities}
+        variant="condensed"
+        horizontal={true}
+        height={240}
+        // width={240}
+      />
     </View>
   );
 }
@@ -23,6 +29,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     width: 341,
+    marginTop: 32,
     justifyContent: "space-between",
     alignItems: "center",
   },
@@ -30,7 +37,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
-    marginTop: 20,
+    // marginTop: 20,
     lineHeight: 27,
     alignSelf: "flex-start",
     marginLeft: 15,

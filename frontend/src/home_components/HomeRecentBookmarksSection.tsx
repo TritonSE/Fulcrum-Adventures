@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, View,} from "react-native";
+import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
 import { mockActivities } from "../data/mockActivities";
+
 import { SeeAll } from "./SeeAll";
 
 import type { Activity } from "../types/activity";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
@@ -26,9 +28,7 @@ export function HomeRecentBookmarksSection({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleScroll = (
-    event: NativeSyntheticEvent<NativeScrollEvent>
-  ) => {
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / SNAP_INTERVAL);
     setActiveIndex(index);
@@ -62,10 +62,7 @@ export function HomeRecentBookmarksSection({
               {Array.from({ length: indicatorCount }).map((_, index) => (
                 <View
                   key={`bookmark-dot-${index}`}
-                  style={[
-                    styles.dot,
-                    index === activeIndex && styles.activeDot,
-                  ]}
+                  style={[styles.dot, index === activeIndex && styles.activeDot]}
                 />
               ))}
             </View>
@@ -73,9 +70,7 @@ export function HomeRecentBookmarksSection({
         </>
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            No recent bookmarks
-          </Text>
+          <Text style={styles.emptyText}>No recent bookmarks</Text>
         </View>
       )}
     </View>
@@ -91,12 +86,13 @@ const styles = StyleSheet.create({
     width: 341,
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
   },
   text: {
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
-    marginTop: 20,
+
     lineHeight: 27,
     alignSelf: "flex-start",
     marginLeft: 20,

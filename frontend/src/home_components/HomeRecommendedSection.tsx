@@ -14,7 +14,12 @@ export function HomeRecommendedSection() {
         <Text style={styles.text}> Recommended </Text>
         <SeeAll screen="/recommended" />
       </View>
-      <ActivityList header="" activities={mockActivities} variant="condensed" horizontal={true} />
+      <ActivityList
+        activities={mockActivities}
+        variant="condensed"
+        horizontal={true}
+        height={240}
+      />
     </View>
   );
 }
@@ -25,6 +30,7 @@ const styles = StyleSheet.create({
     width: 341,
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 32,
   },
   text: {
     color: "#153F7A",
@@ -33,6 +39,7 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: 700,
     lineHeight: 27.04,
+    marginLeft: 15,
   },
   sectionContainer: {
     gap: 8,
