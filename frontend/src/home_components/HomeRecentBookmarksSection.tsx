@@ -19,10 +19,10 @@ const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
-  const activities = mockActivities;
+  const activities = (mockActivities).slice(0, 6);
 
   const hasBookmarks = activities.length > 0;
-  const indicatorCount = Math.min(4, activities.length);
+  const indicatorCount = Math.min(6, activities.length);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
