@@ -12,7 +12,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     borderColor: "#EBEBEB",
-    gap: 8,
   },
   chipText: {
     fontSize: 12,

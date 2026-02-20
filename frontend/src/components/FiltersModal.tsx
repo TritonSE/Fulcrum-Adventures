@@ -6,23 +6,23 @@ import { FILTER_OPTIONS as options } from "../constants/filterOptions";
 
 import { FilterPill } from "./FilterPill";
 
-import type { Category, EnergyLevel, Environment } from "../types/activity";
+import type { Category, EnergyLevel, Environment, Range } from "../types/activity";
 
-export type FiltersState = {
+export type FilterState = {
   category?: Category | null;
   setupProps?: string | null; /* maybe change to boolean later */
-  duration?: string[];
-  gradeLevel?: string[];
-  groupSize?: string[];
+  duration?: Range[];
+  gradeLevel?: Range[];
+  groupSize?: Range[];
   energyLevel?: EnergyLevel | null;
   environment?: Environment[];
 };
 
 type Props = {
   visible: boolean;
-  initial: FiltersState;
+  initial: FilterState;
   onClose: () => void;
-  onApply: (filters: FiltersState) => void;
+  onApply: (filters: FilterState) => void;
 };
 
 const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
@@ -32,6 +32,30 @@ const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
   High: 3,
 };
 const numberToEnergyLevel: Record<number, EnergyLevel> = { 1: "Low", 2: "Medium", 3: "High" };
+
+// Helper function to convert grade level number to label
+const gradeNumberToLabel = (num: number): string => {
+  if (num === 0) return "K";
+  return `${num}`;
+};
+
+// Helper function to generate display labels for ranges
+const getRangeLabel = (range: Range, type: "duration" | "gradeLevel" | "groupSize"): string => {
+  if (type === "duration") {
+    return `${range.min}-${range.max} min`;
+  } else if (type === "gradeLevel") {
+    return `${gradeNumberToLabel(range.min)}-${gradeNumberToLabel(range.max)}`;
+  } else if (type === "groupSize") {
+    return `${range.min}-${range.max}`;
+  }
+  return "";
+};
+
+// Helper function to check if a range is selected in an array
+const isRangeSelected = (selected: Range[] | undefined, range: Range): boolean => {
+  if (!selected || selected.length === 0) return false;
+  return selected.some((r) => r.min === range.min && r.max === range.max);
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
@@ -93,21 +117,30 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 );
 
 const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible">) => {
-  const [filters, setFilters] = useState<FiltersState>(initial);
+  const [filters, setFilters] = useState<FilterState>(initial);
 
   const toggleSingleFilter = (key: "category" | "setupProps", value: string | null) =>
     setFilters((prev) => ({ ...prev, [key]: prev[key] === value ? undefined : value }));
 
-  const toggleMultiFilter = (
-    key: "duration" | "gradeLevel" | "groupSize" | "environment",
-    value: string,
-  ) =>
+  const toggleRangeFilter = (key: "duration" | "gradeLevel" | "groupSize", range: Range) =>
     setFilters((prev) => {
-      const existing = new Set(prev[key]);
-      if (existing.has(value)) {
-        existing.delete(value);
+      const current = prev[key] ?? [];
+      const isSelected = current.some((r) => r.min === range.min && r.max === range.max);
+      return {
+        ...prev,
+        [key]: isSelected
+          ? current.filter((r) => !(r.min === range.min && r.max === range.max))
+          : [...current, range],
+      };
+    });
+
+  const toggleMultiFilter = (key: "environment", value: string) =>
+    setFilters((prev) => {
+      const existing = new Set(prev[key] ?? []);
+      if (existing.has(value as Environment)) {
+        existing.delete(value as Environment);
       } else {
-        existing.add(value);
+        existing.add(value as Environment);
       }
       return { ...prev, [key]: Array.from(existing) };
     });
@@ -158,34 +191,34 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </Section>
 
         <Section title="Duration">
-          {options.duration.map((option) => (
+          {options.duration.map((range) => (
             <FilterPill
-              key={option}
-              label={option}
-              selected={isFilterSelected(filters.duration, option)}
-              onPress={() => toggleMultiFilter("duration", option)}
+              key={`${range.min}-${range.max}`}
+              label={getRangeLabel(range, "duration")}
+              selected={isRangeSelected(filters.duration, range)}
+              onPress={() => toggleRangeFilter("duration", range)}
             />
           ))}
         </Section>
 
         <Section title="Grade Level">
-          {options.gradeLevel.map((option) => (
+          {options.gradeLevel.map((range) => (
             <FilterPill
-              key={option}
-              label={option}
-              selected={isFilterSelected(filters.gradeLevel, option)}
-              onPress={() => toggleMultiFilter("gradeLevel", option)}
+              key={`${range.min}-${range.max}`}
+              label={getRangeLabel(range, "gradeLevel")}
+              selected={isRangeSelected(filters.gradeLevel, range)}
+              onPress={() => toggleRangeFilter("gradeLevel", range)}
             />
           ))}
         </Section>
 
         <Section title="Group Size">
-          {options.groupSize.map((option) => (
+          {options.groupSize.map((range) => (
             <FilterPill
-              key={option}
-              label={option}
-              selected={isFilterSelected(filters.groupSize, option)}
-              onPress={() => toggleMultiFilter("groupSize", option)}
+              key={`${range.min}-${range.max}`}
+              label={getRangeLabel(range, "groupSize")}
+              selected={isRangeSelected(filters.groupSize, range)}
+              onPress={() => toggleRangeFilter("groupSize", range)}
             />
           ))}
         </Section>

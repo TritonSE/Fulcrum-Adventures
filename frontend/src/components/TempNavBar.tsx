@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
     width: 390,
     flexDirection: "column",
     alignItems: "flex-start",
-    marginTop: 20,
   },
 });
 

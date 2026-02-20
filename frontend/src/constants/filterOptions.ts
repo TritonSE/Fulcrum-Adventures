@@ -12,8 +12,21 @@ export const CATEGORIES: Category[] = [
 export const FILTER_OPTIONS = {
   category: ["All", ...CATEGORIES],
   setupProps: ["Props", "No Props"],
-  duration: ["5-15 min", "15-30 min", "30+ min"],
-  gradeLevel: ["K-2", "3-5", "6-8", "9-12"],
-  groupSize: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
+  duration: [
+    { min: 5, max: 15 },
+    { min: 15, max: 30 },
+    { min: 30, max: 60 },
+  ],
+  gradeLevel: [
+    { min: 0, max: 2 },
+    { min: 3, max: 5 },
+    { min: 6, max: 8 },
+    { min: 9, max: 12 },
+  ],
+  groupSize: [
+    { min: 3, max: 15 },
+    { min: 15, max: 30 },
+    { min: 30, max: 100 },
+  ],
   environment: ["Indoor", "Outdoor", "Both"],
 };

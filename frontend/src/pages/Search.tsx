@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,14 +16,13 @@ import { ActivityList } from "../components/ActivityList";
 import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
 import { TempNavBar } from "../components/TempNavBar";
-import { CATEGORY_COLORS } from "../constants/activityColors";
 import { CATEGORIES as categories } from "../constants/filterOptions";
 import { mockActivities } from "../data/mockActivities";
 
-import type { FiltersState } from "../components/FiltersModal";
-import type { Activity, Category } from "../types/activity";
+import type { FilterState } from "../components/FiltersModal";
+import type { Activity } from "../types/activity";
 
-const defaultFilters: FiltersState = {
+const defaultFilters: FilterState = {
   category: undefined,
   setupProps: undefined,
   duration: [],
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     gap: 16,
-    paddingBottom: 150,
   },
   searchBar: {
     display: "flex",
@@ -71,7 +70,6 @@ const styles = StyleSheet.create({
   recentSearchesContainer: {
     display: "flex",
     alignSelf: "stretch",
-    gap: 10,
   },
   recentSearchesTextContainer: {
     display: "flex",
@@ -82,6 +80,13 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     gap: 8,
+  },
+  recentSearchesChipsContentContainer: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 8,
+    paddingEnd: 16,
+    paddingVertical: 8,
   },
   smallText: {
     color: "#153F7A",
@@ -101,6 +106,7 @@ const styles = StyleSheet.create({
   activityNumberText: {
     color: "#B4B4B4",
     fontSize: 14,
+    paddingLeft: 2,
   },
   filtersContainer: {
     display: "flex",
@@ -109,9 +115,17 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     alignItems: "center",
   },
+  filtersContentContainer: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 8,
+    paddingEnd: 16,
+    paddingVertical: 8,
+  },
   activityListContainer: {
     display: "flex",
     alignSelf: "stretch",
+    flex: 1,
   },
   categoryCardsGrid: {
     display: "flex",
@@ -141,7 +155,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function isFiltersEmpty(filters: FiltersState): boolean {
+function isFiltersEmpty(filters: FilterState): boolean {
   return (
     !filters.category &&
     !filters.setupProps &&
@@ -153,31 +167,66 @@ function isFiltersEmpty(filters: FiltersState): boolean {
   );
 }
 
-function convertFiltersToArray(filters: FiltersState): string[] {
+function convertFiltersToArray(filters: FilterState): string[] {
   const result: string[] = [];
   if (filters.category) result.push(filters.category);
   if (filters.setupProps) result.push(filters.setupProps);
-  if (filters.duration) result.push(...filters.duration);
-  if (filters.gradeLevel) result.push(...filters.gradeLevel);
-  if (filters.groupSize) result.push(...filters.groupSize);
+  if (filters.duration && filters.duration.length > 0) {
+    filters.duration.forEach((range) => {
+      result.push(`${range.min}-${range.max} min`);
+    });
+  }
+  if (filters.gradeLevel && filters.gradeLevel.length > 0) {
+    filters.gradeLevel.forEach((range) => {
+      const gradeStart = range.min === 0 ? "K" : range.min.toString();
+      const gradeEnd = range.max === 0 ? "K" : range.max.toString();
+      result.push(`Grade ${gradeStart}-${gradeEnd}`);
+    });
+  }
+  if (filters.groupSize && filters.groupSize.length > 0) {
+    filters.groupSize.forEach((range) => {
+      result.push(`${range.min}-${range.max} people`);
+    });
+  }
   if (filters.environment) result.push(...filters.environment);
   if (filters.energyLevel && filters.energyLevel !== null)
     result.push(`Energy Level: ${filters.energyLevel}`);
   return result;
 }
 
-function removeFilter(filters: FiltersState, filterToRemove: string): FiltersState {
-  const newFilters: FiltersState = { ...filters };
+function removeFilter(filters: FilterState, filterToRemove: string): FilterState {
+  const newFilters: FilterState = { ...filters };
   if (filters.category === filterToRemove) {
     newFilters.category = undefined;
   } else if (filters.setupProps === filterToRemove) {
     newFilters.setupProps = undefined;
-  } else if (filters.duration?.includes(filterToRemove)) {
-    newFilters.duration = filters.duration.filter((d) => d !== filterToRemove);
-  } else if (filters.gradeLevel?.includes(filterToRemove)) {
-    newFilters.gradeLevel = filters.gradeLevel.filter((g) => g !== filterToRemove);
-  } else if (filters.groupSize?.includes(filterToRemove)) {
-    newFilters.groupSize = filters.groupSize.filter((g) => g !== filterToRemove);
+  } else if (filterToRemove.includes(" min")) {
+    // Duration filter (e.g., "5-15 min")
+    const match = /(\d+)-(\d+)/.exec(filterToRemove);
+    if (match) {
+      newFilters.duration = (filters.duration ?? []).filter(
+        (d) => !(d.min === Number.parseInt(match[1]) && d.max === Number.parseInt(match[2])),
+      );
+    }
+  } else if (filterToRemove.includes("Grade")) {
+    // Grade level filter (e.g., "Grade K-2")
+    // Extract grade range pattern
+    const match = /Grade\s+([K\d]+)-([K\d]+)/.exec(filterToRemove);
+    if (match) {
+      const minGrade = match[1] === "K" ? 0 : Number.parseInt(match[1]);
+      const maxGrade = match[2] === "K" ? 0 : Number.parseInt(match[2]);
+      newFilters.gradeLevel = (filters.gradeLevel ?? []).filter(
+        (g) => !(g.min === minGrade && g.max === maxGrade),
+      );
+    }
+  } else if (filterToRemove.includes("people")) {
+    // Group size filter (e.g., "3-15 people")
+    const match = /(\d+)-(\d+)/.exec(filterToRemove);
+    if (match) {
+      newFilters.groupSize = (filters.groupSize ?? []).filter(
+        (g) => !(g.min === Number.parseInt(match[1]) && g.max === Number.parseInt(match[2])),
+      );
+    }
   } else if (["Indoor", "Outdoor", "Both"].includes(filterToRemove)) {
     newFilters.environment = (filters.environment ?? []).filter((e) => e !== filterToRemove);
   } else if (filterToRemove.startsWith("Energy Level: ")) {
@@ -186,12 +235,24 @@ function removeFilter(filters: FiltersState, filterToRemove: string): FiltersSta
   return newFilters;
 }
 
+function addToRecentSearches(searchQuery: string, recentSearches: string[]): string[] {
+  if (searchQuery.trim() === "") {
+    return recentSearches;
+  }
+
+  // Remove the search if it already exists to avoid duplicates
+  const filtered = recentSearches.filter((s) => s !== searchQuery);
+
+  // Add to the beginning and limit to 10 recent searches
+  return [searchQuery, ...filtered].slice(0, 3);
+}
+
 export function SearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>(["test1", "test2", "test3"]);
-  const [filters, setFilters] = useState<FiltersState>(defaultFilters);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
 
   const filteredActivities = activities.filter((activity) => {
@@ -211,7 +272,9 @@ export function SearchPage() {
     if (
       filters.duration &&
       filters.duration.length > 0 &&
-      !filters.duration.includes(activity.duration)
+      !filters.duration.some(
+        (range) => !(activity.duration.max < range.min || activity.duration.min > range.max),
+      )
     ) {
       return false;
     }
@@ -219,7 +282,9 @@ export function SearchPage() {
     if (
       filters.gradeLevel &&
       filters.gradeLevel.length > 0 &&
-      !filters.gradeLevel.includes(activity.gradeLevel)
+      !filters.gradeLevel.some(
+        (range) => !(activity.gradeLevel.max < range.min || activity.gradeLevel.min > range.max),
+      )
     ) {
       return false;
     }
@@ -227,7 +292,9 @@ export function SearchPage() {
     if (
       filters.groupSize &&
       filters.groupSize.length > 0 &&
-      !filters.groupSize.includes(activity.groupSize)
+      !filters.groupSize.some(
+        (range) => !(activity.groupSize.max < range.min || activity.groupSize.min > range.max),
+      )
     ) {
       return false;
     }
@@ -268,6 +335,11 @@ export function SearchPage() {
               style={styles.searchInput}
               placeholder="Search activities"
               onFocus={() => setIsSearching(true)}
+              onBlur={() => {
+                if (searchText.trim() !== "") {
+                  setRecentSearches(addToRecentSearches(searchText, recentSearches));
+                }
+              }}
             />
             <FilterIcon
               width={24}
@@ -294,37 +366,50 @@ export function SearchPage() {
                     <Text style={styles.clearAllText}>Clear All</Text>
                   </TouchableOpacity>
                 </View>
-                <View style={styles.recentSearchesChipsContainer}>
+                <ScrollView
+                  style={styles.recentSearchesChipsContainer}
+                  contentContainerStyle={styles.recentSearchesChipsContentContainer}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                >
                   {recentSearches.map((search) => (
                     <Chip
                       key={search}
                       label={search}
                       onPress={() => {
                         setSearchText(search);
+                        setRecentSearches(addToRecentSearches(search, recentSearches));
                       }}
                       onClose={() => {
                         setRecentSearches(recentSearches.filter((s) => s !== search));
                       }}
                     />
                   ))}
-                </View>
+                </ScrollView>
               </View>
             )}
           {/* Filters */}
           {!isFiltersEmpty(filters) && (
             <View style={styles.filtersContainer}>
               <Text style={styles.smallText}>Filters: </Text>
-              {convertFiltersToArray(filters).map((filter) => (
-                <Chip
-                  key={filter}
-                  label={filter}
-                  backgroundColor="#153A7A"
-                  textColor="#FFFFFF"
-                  onClose={() => {
-                    setFilters(removeFilter(filters, filter));
-                  }}
-                />
-              ))}
+              <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.filtersContentContainer}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              >
+                {convertFiltersToArray(filters).map((filter) => (
+                  <Chip
+                    key={filter}
+                    label={filter}
+                    backgroundColor="#153A7A"
+                    textColor="#FFFFFF"
+                    onClose={() => {
+                      setFilters(removeFilter(filters, filter));
+                    }}
+                  />
+                ))}
+              </ScrollView>
             </View>
           )}
 
@@ -349,7 +434,10 @@ export function SearchPage() {
                   <TouchableOpacity
                     key={category}
                     style={styles.categoryCard}
-                    onPress={() => setFilters({ ...filters, category })}
+                    onPress={() => {
+                      setFilters({ ...filters, category });
+                      setRecentSearches(addToRecentSearches(category, recentSearches));
+                    }}
                   >
                     <Text style={styles.categoryCardText}>{category}</Text>
                   </TouchableOpacity>
