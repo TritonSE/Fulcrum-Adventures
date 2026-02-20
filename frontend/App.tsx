@@ -1,8 +1,10 @@
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import ActivityDetail from "./src/components/ActivityDetail";
 import { getActivityById } from "./src/data/mockActivities";
+import NotesScreen from "./src/screens/NotesScreen";
 
 import type { Activity as DataActivity } from "./src/types/activity";
 
@@ -48,6 +50,7 @@ function mapToActivityDetailShape(activity: DataActivity) {
 
 export default function App() {
   const activityId = "1";
+  const [showNotes, setShowNotes] = useState(false);
   const activity = getActivityById(activityId);
 
   if (!activity) {
@@ -60,9 +63,18 @@ export default function App() {
 
   const detailActivity = mapToActivityDetailShape(activity);
 
+  if (showNotes) {
+    return (
+      <View style={styles.container}>
+        <NotesScreen activityId={activityId} onClose={() => setShowNotes(false)} />
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <ActivityDetail activity={detailActivity} />
+      <ActivityDetail activity={detailActivity} onOpenNotes={() => setShowNotes(true)} />
       <StatusBar style="auto" />
     </View>
   );
