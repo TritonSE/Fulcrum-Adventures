@@ -5,6 +5,9 @@ import type { Activity } from "../types/activity";
 type ActivityContextType = {
   activities: Activity[];
   toggleSaved: (id: string) => void;
+  toggleDownload: (id: string) => void;
+  toggleHistory: (id: string) => void;
+  togglePlaylist: (id: string) => void;
 };
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
@@ -22,6 +25,7 @@ const initialActivities: Activity[] = [
     energyLevel: "High",
     environment: "Outdoor",
     materials: [],
+    isDownloaded: true,
   },
   {
     id: "2",
@@ -35,6 +39,8 @@ const initialActivities: Activity[] = [
     energyLevel: "Low",
     environment: "Indoor",
     materials: [],
+    isDownloaded: true,
+    isPlaylist: true,
   },
 ];
 
@@ -45,7 +51,29 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: !a.isSaved } : a)));
   };
 
-  return <ActivityContext value={{ activities, toggleSaved }}>{children}</ActivityContext>;
+  const toggleDownload = (id: string) => {
+    setActivities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, isDownloaded: !a.isDownloaded } : a)),
+    );
+  };
+
+  const toggleHistory = (id: string) => {
+    setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isHistory: !a.isHistory } : a)));
+  };
+
+  const togglePlaylist = (id: string) => {
+    setActivities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, isPlaylist: !a.isPlaylist } : a)),
+    );
+  };
+
+  return (
+    <ActivityContext
+      value={{ activities, toggleSaved, toggleDownload, toggleHistory, togglePlaylist }}
+    >
+      {children}
+    </ActivityContext>
+  );
 }
 
 export function useActivities() {

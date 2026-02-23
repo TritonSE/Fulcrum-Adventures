@@ -72,4 +72,6 @@ export type Activity = {
   selTags?: string[]; // SEL Opportunity Tags
   isCompleted?: boolean;
   isDownloaded?: boolean;
+  isHistory?: boolean;
+  isPlaylist?: boolean;
 };
