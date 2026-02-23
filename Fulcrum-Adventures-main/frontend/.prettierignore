@@ -1,6 +1,0 @@
-.expo/
-android/
-ios/
-dist/
-node_modules/
-*.lock
