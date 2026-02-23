@@ -3,8 +3,9 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import ActivityDetail from "./src/components/ActivityDetail";
+import NotesScreen from "./src/components/NotesScreen";
 import { getActivityById } from "./src/data/mockActivities";
-import NotesScreen from "./src/screens/NotesScreen";
+import { formatDuration, formatGradeLevel, formatGroupSize } from "./src/utils/textUtils";
 
 import type { Activity as DataActivity } from "./src/types/activity";
 
@@ -28,16 +29,16 @@ function mapToActivityDetailShape(activity: DataActivity) {
     title: activity.title,
     description: activity.description,
     category: activity.category,
-    gradeLevel: activity.gradeLevel,
-    participants: activity.groupSize,
-    duration: activity.duration,
+    gradeLevel: formatGradeLevel(activity.gradeLevel),
+    participants: formatGroupSize(activity.groupSize),
+    duration: formatDuration(activity.duration),
     difficulty: energyToDifficulty[activity.energyLevel] ?? 2,
     tags: activity.environment ? [activity.environment] : [],
     objective: activity.objective ?? "",
     facilitate: {
       prep: {
         setup: activity.facilitate?.prep?.setup ?? [],
-        materials: prepMaterials.map((m) => m.name),
+        materials: prepMaterials,
       },
       play: playSteps.map((s) => s.content),
       safety: [],

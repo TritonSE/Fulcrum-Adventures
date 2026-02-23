@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
-import NoteIcon from "../components/NoteIcon";
+import NoteIcon from "../../assets/NoteIcon";
 
 const ROW_HEIGHT = 44;
 const MONTHS = [
