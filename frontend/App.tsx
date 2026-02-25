@@ -41,6 +41,7 @@ function mapToActivityDetailShape(activity: DataActivity) {
         materials: prepMaterials,
       },
       play: playSteps.map((s) => s.content),
+      debrief: activity.facilitate?.debrief?.questions ?? [],
       safety: [],
       variations: [],
     },

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   type LayoutChangeEvent,
@@ -29,6 +29,7 @@ type Activity = {
       materials: string[];
     };
     play: string[];
+    debrief?: string[];
     safety?: string[];
     variations?: string[];
   };
@@ -98,36 +99,23 @@ const DownloadIcon = () => (
   </Svg>
 );
 
-const CheckIcon = () => (
-  <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
-    <G clipPath="url(#checkClip)">
-      <Path
-        d="M19 9.5C19 4.80729 15.1927 1 10.5 1C5.80729 1 2 4.80729 2 9.5C2 14.1927 5.80729 18 10.5 18C15.1927 18 19 14.1927 19 9.5Z"
-        stroke="#FFFFFF"
-        strokeWidth="1.49989"
-        strokeMiterlimit={10}
-      />
-      <Path
-        d="M14.75 5.95801L8.8 13.0413L6.25 10.208"
-        stroke="#FFFFFF"
-        strokeWidth="1.49989"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </G>
-    <Defs>
-      <ClipPath id="checkClip">
-        <Rect width={20} height={20} fill="white" />
-      </ClipPath>
-    </Defs>
-  </Svg>
-);
-
 const BookmarkIcon = () => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
     <Path
       d="M17.6271 18.6861L12 16.5L6.5 18.6861V4.5H17.5L17.6271 18.6861ZM17 3H7C6.46957 3 5.96086 3.21071 5.58579 3.58579C5.21071 3.96086 5 4.46957 5 5V21L12 18L19 21V5C19 3.89 18.1 3 17 3Z"
       fill="#153A7A"
+    />
+  </Svg>
+);
+
+const SuccessCheckIcon = () => (
+  <Svg width={14} height={14} viewBox="0 0 14 14" fill="none">
+    <Path
+      d="M11.5 4L5.5 10L2.5 7"
+      stroke="#36C759"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </Svg>
 );
@@ -145,6 +133,19 @@ const GroupIcon = () => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
     <Path
       d="M12 3C12.9283 3 13.8185 3.38146 14.4749 4.06048C15.1313 4.73949 15.5 5.66042 15.5 6.62069C15.5 7.58096 15.1313 8.50189 14.4749 9.1809C13.8185 9.85991 12.9283 10.2414 12 10.2414C11.0717 10.2414 10.1815 9.85991 9.52513 9.1809C8.86875 8.50189 8.5 7.58096 8.5 6.62069C8.5 5.66042 8.86875 4.73949 9.52513 4.06048C10.1815 3.38146 11.0717 3 12 3ZM5 5.58621C5.56 5.58621 6.08 5.74138 6.53 6.02069C6.38 7.5 6.8 8.96897 7.66 10.1172C7.16 11.1103 6.16 11.7931 5 11.7931C4.20435 11.7931 3.44129 11.4661 2.87868 10.8841C2.31607 10.3021 2 9.51274 2 8.68965C2 7.86657 2.31607 7.07719 2.87868 6.49519C3.44129 5.91318 4.20435 5.58621 5 5.58621ZM19 5.58621C19.7956 5.58621 20.5587 5.91318 21.1213 6.49519C21.6839 7.07719 22 7.86657 22 8.68965C22 9.51274 21.6839 10.3021 21.1213 10.8841C20.5587 11.4661 19.7956 11.7931 19 11.7931C17.84 11.7931 16.84 11.1103 16.34 10.1172C17.2 8.96897 17.62 7.5 17.47 6.02069C17.92 5.74138 18.44 5.58621 19 5.58621ZM5.5 16.1897C5.5 14.0483 8.41 12.3103 12 12.3103C15.59 12.3103 18.5 14.0483 18.5 16.1897V18H5.5V16.1897ZM0 18V16.4483C0 15.0103 1.89 13.8 4.45 13.4483C3.86 14.1517 3.5 15.1241 3.5 16.1897V18H0ZM24 18H20.5V16.1897C20.5 15.1241 20.14 14.1517 19.55 13.4483C22.11 13.8 24 15.0103 24 16.4483V18Z"
+      fill="#153A7A"
+    />
+  </Svg>
+);
+
+const GradeLevelIcon = () => (
+  <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+    <Path
+      d="M8.46619 3.82694C9.45945 3.46068 10.5413 3.46068 11.5346 3.82694L19.3784 6.71943C20.2072 7.02608 20.2072 8.26137 19.3784 8.56802L11.5346 11.4605C10.5413 11.8268 9.45945 11.8268 8.46619 11.4605L2.78044 9.36183C2.57128 9.52498 2.41431 9.75144 2.33045 10.011C2.46644 10.1102 2.5778 10.2425 2.65514 10.3965C2.73248 10.5506 2.77354 10.722 2.77486 10.8963C2.77617 11.0706 2.73771 11.2426 2.6627 11.398C2.58769 11.5533 2.47834 11.6874 2.34386 11.7889L2.34799 11.8085L3.25107 16.0918C3.27114 16.1871 3.27066 16.2859 3.24967 16.381C3.22867 16.4761 3.1877 16.565 3.12976 16.6411C3.07182 16.7173 2.99839 16.7788 2.91489 16.8211C2.83139 16.8634 2.73995 16.8855 2.6473 16.8856H0.840117C0.747378 16.8856 0.655815 16.8637 0.572187 16.8215C0.488559 16.7792 0.415003 16.7178 0.356949 16.6416C0.298894 16.5654 0.257825 16.4764 0.236772 16.3812C0.21572 16.2861 0.215222 16.1872 0.235315 16.0918L1.13839 11.8074L1.14355 11.7889C0.998936 11.68 0.883456 11.5337 0.808296 11.364C0.733137 11.1943 0.700845 11.007 0.714548 10.8203C0.728251 10.6336 0.787485 10.4538 0.886512 10.2983C0.98554 10.1428 1.121 10.0169 1.27979 9.93271C1.35579 9.58249 1.50104 9.25309 1.70604 8.96601L0.622347 8.56693C-0.207449 8.26029 -0.207449 7.02499 0.622347 6.71835L8.46619 3.82694Z"
+      fill="#153A7A"
+    />
+    <Path
+      d="M3.71678 11.0533L3.34488 13.7832C3.28103 14.2482 3.48714 14.7296 3.92737 15.0135C5.22342 15.8518 7.33608 16.8855 9.99874 16.8855C12.2124 16.8918 14.3669 16.2289 16.1295 14.9991C16.5383 14.711 16.7142 14.2512 16.656 13.8141L16.2796 11.0522L11.6633 12.5355C10.5853 12.882 9.41107 12.882 8.33304 12.5355L3.71678 11.0533Z"
       fill="#153A7A"
     />
   </Svg>
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   },
   actionIcons: {
     flexDirection: "row",
-    gap: 16,
+    gap: 8,
     alignItems: "center",
   },
   actionIconCircle: {
@@ -521,33 +522,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     fontFamily: "Instrument Sans",
   },
-  checkboxItem: {
+  bulletItem: {
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    padding: 2,
-    borderWidth: 1,
-    borderColor: "#153A7A",
-    borderRadius: 4,
-    marginRight: 12,
+  bullet: {
+    fontSize: 14,
+    color: "#153A7A",
+    marginRight: 8,
     marginTop: 2,
-    justifyContent: "center",
-    alignItems: "center",
+    fontFamily: "Instrument Sans",
   },
-  checkboxChecked: {
-    backgroundColor: "#153A7A",
-    borderColor: "#153A7A",
-  },
-  checkboxCheck: {
-    fontSize: 12,
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
-  checkboxText: {
+  bulletText: {
     fontSize: 14,
     fontWeight: "400",
     color: "#153A7A",
@@ -573,97 +560,91 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     letterSpacing: 2,
   },
-  footer: {
+  notificationWrap: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    paddingBottom: 16,
-    backgroundColor: "#F9F9F9",
-    borderTopWidth: 1,
-    borderTopColor: "#EBEBEB",
+    paddingBottom: 34,
+    alignItems: "center",
+    zIndex: 10,
+  },
+  notificationBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#36C759",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 16,
     gap: 12,
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 6,
   },
-  bottomSpacer: {
-    height: 66,
-    minHeight: 66,
-    backgroundColor: "transparent",
-  },
-  downloadButton: {
-    width: 163,
-    flexDirection: "row",
-    alignItems: "center",
+  notificationIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
-    paddingTop: 10,
-    paddingRight: 30,
-    paddingBottom: 10,
-    paddingLeft: 30,
-    borderRadius: 100,
-    backgroundColor: "#EBEBEB",
-    gap: 8,
-  },
-  downloadText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#153A7A",
-    letterSpacing: 0,
-    fontFamily: "Instrument Sans",
-  },
-  completedButton: {
-    width: 163,
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 10,
-    paddingRight: 30,
-    paddingBottom: 10,
-    paddingLeft: 30,
-    borderRadius: 100,
-    backgroundColor: "#153A7A",
-    gap: 8,
   },
-  completedText: {
+  notificationText: {
+    flex: 1,
     fontSize: 14,
     fontWeight: "500",
     color: "#FFFFFF",
-    letterSpacing: 0,
+    fontFamily: "Instrument Sans",
+    marginLeft: 15,
+  },
+  notificationActionBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  notificationActionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
     fontFamily: "Instrument Sans",
   },
 });
 
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
-  const [activeTab, setActiveTab] = useState<"prep" | "play" | "safety" | "variations">("prep");
-  const [checkedMaterials, setCheckedMaterials] = useState<Record<number, boolean>>({});
+  const [activeTab, setActiveTab] = useState<"prep" | "play" | "debrief" | "safety" | "variations">(
+    "prep",
+  );
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
+  const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
 
-  const toggleMaterial = (index: number) => {
-    setCheckedMaterials((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
+  useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 3000);
+    return () => clearTimeout(t);
+  }, [notification]);
 
   const hasOverview = !!activity.category;
 
-  const tabs = ["Prep", "Play", "Safety", "Variations"] as const;
-  const tabKeys: ("prep" | "play" | "safety" | "variations")[] = [
+  const tabs = ["Prep", "Play", "Debrief", "Safety", "Variations"] as const;
+  const tabKeys: ("prep" | "play" | "debrief" | "safety" | "variations")[] = [
     "prep",
     "play",
+    "debrief",
     "safety",
     "variations",
   ];
   const tabsScrollViewRef = useRef<ScrollView>(null);
 
-  const handleTabPress = (tabKey: "prep" | "play" | "safety" | "variations", index: number) => {
+  const handleTabPress = (
+    tabKey: "prep" | "play" | "debrief" | "safety" | "variations",
+    index: number,
+  ) => {
     setActiveTab(tabKey);
     if (index === tabs.length - 1) {
       setTimeout(() => {
@@ -737,15 +718,28 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               <View style={styles.actionIcons}>
                 <TouchableOpacity
                   style={styles.actionIconCircle}
+                  onPress={() => setNotification("download")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Download"
+                >
+                  <DownloadIcon />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionIconCircle}
                   onPress={onOpenNotes}
                   accessibilityRole="button"
                   accessibilityLabel="Open notes"
                 >
                   <NoteIcon />
                 </TouchableOpacity>
-                <View style={styles.actionIconCircle}>
+                <TouchableOpacity
+                  style={styles.actionIconCircle}
+                  onPress={() => setNotification("bookmark")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save activity"
+                >
                   <BookmarkIcon />
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -754,6 +748,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <View style={styles.metadataRow}>
               {activity.gradeLevel && (
                 <>
+                  <View style={styles.metadataIconContainer}>
+                    <GradeLevelIcon />
+                  </View>
                   <Text style={styles.metadataText}>{activity.gradeLevel}</Text>
                   <Text style={styles.metadataDot}>•</Text>
                 </>
@@ -854,21 +851,12 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                     activity.facilitate.prep.materials.length > 0 && (
                       <View style={styles.subsection}>
                         <Text style={styles.subsectionTitle}>Materials</Text>
-                        {activity.facilitate.prep.materials.map((item, index) => {
-                          const isChecked = checkedMaterials[index] || false;
-                          return (
-                            <TouchableOpacity
-                              key={`material-${item}`}
-                              style={styles.checkboxItem}
-                              onPress={() => toggleMaterial(index)}
-                            >
-                              <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
-                                {isChecked && <Text style={styles.checkboxCheck}>✓</Text>}
-                              </View>
-                              <Text style={styles.checkboxText}>{item}</Text>
-                            </TouchableOpacity>
-                          );
-                        })}
+                        {activity.facilitate.prep.materials.map((item) => (
+                          <View key={`material-${item}`} style={styles.bulletItem}>
+                            <Text style={styles.bullet}>•</Text>
+                            <Text style={styles.bulletText}>{item}</Text>
+                          </View>
+                        ))}
                       </View>
                     )}
                 </>
@@ -878,6 +866,16 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 <View>
                   {activity.facilitate.play.map((item) => (
                     <Text key={`play-${item}`} style={styles.sectionContent}>
+                      {item}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              {activeTab === "debrief" && (
+                <View>
+                  {activity.facilitate.debrief?.map((item) => (
+                    <Text key={`debrief-${item}`} style={styles.sectionContent}>
                       {item}
                     </Text>
                   ))}
@@ -916,22 +914,29 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               ))}
             </View>
           </View>
-
-          {/* Spacer to ensure content is fully measured on iOS */}
-          <View style={styles.bottomSpacer} />
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.downloadButton}>
-          <DownloadIcon />
-          <Text style={styles.downloadText}>Download</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.completedButton}>
-          <CheckIcon />
-          <Text style={styles.completedText}>Completed</Text>
-        </TouchableOpacity>
-      </View>
+      {notification && (
+        <View style={styles.notificationWrap} pointerEvents="box-none">
+          <View style={styles.notificationBanner}>
+            <View style={styles.notificationIconCircle}>
+              <SuccessCheckIcon />
+            </View>
+            <Text style={styles.notificationText} numberOfLines={1}>
+              {notification === "download" ? "Activity downloaded!" : "Activity bookmarked!"}
+            </Text>
+            <TouchableOpacity
+              style={styles.notificationActionBtn}
+              onPress={() => setNotification(null)}
+            >
+              <Text style={styles.notificationActionText}>
+                {notification === "download" ? "View" : "Playlists"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
