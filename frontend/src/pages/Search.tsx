@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import FilterIcon from "../../assets/icons/filter.svg";
-import SearchIcon from "../../assets/icons/search.svg";
+import SearchIcon from "../../assets/icons/search-outline.svg";
 import { ActivityList } from "../components/ActivityList";
 import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
