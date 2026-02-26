@@ -1,24 +1,15 @@
 import { useState } from "react";
-import {
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Keyboard, ScrollView, Text, TouchableWithoutFeedback, View } from "react-native";
 
-import FilterIcon from "../../assets/icons/filter.svg";
-import SearchIcon from "../../assets/icons/search-outline.svg";
 import { ActivityList } from "../components/ActivityList";
 import { CategoryCardBig } from "../components/CategoryCardBig";
-import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
 import { Navbar } from "../components/Navbar";
+import { SearchHeader } from "../components/SearchHeader";
 import { CATEGORIES as categories } from "../constants/filterOptions";
 import { mockActivities } from "../data/mockActivities";
+
+import { styles } from "./Search.styles";
 
 import type { FilterState } from "../components/FiltersModal";
 import type { Activity } from "../types/activity";
@@ -32,110 +23,6 @@ const defaultFilters: FilterState = {
   energyLevel: null,
   environment: [],
 };
-
-const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    backgroundColor: "#F9F9F9",
-    display: "flex",
-    paddingTop: 64,
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  content: {
-    flex: 1,
-    display: "flex",
-    width: 342,
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 16,
-  },
-  searchBar: {
-    display: "flex",
-    flexDirection: "row",
-    height: 43,
-    paddingHorizontal: 8,
-    alignItems: "center",
-    gap: 8,
-    alignSelf: "stretch",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.20)",
-  },
-  searchInput: {
-    flex: 1,
-    height: "100%",
-    paddingHorizontal: 8,
-  },
-  recentSearchesContainer: {
-    display: "flex",
-    alignSelf: "stretch",
-  },
-  recentSearchesTextContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  recentSearchesChipsContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-  },
-  recentSearchesChipsContentContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    paddingEnd: 16,
-    paddingVertical: 8,
-  },
-  smallText: {
-    color: "#153F7A",
-    fontFamily: "Instrument Sans",
-    fontSize: 14,
-    fontStyle: "normal",
-    fontWeight: 400,
-    lineHeight: 21,
-    letterSpacing: 0.28,
-  },
-  clearAllText: {
-    color: "#B4B4B4",
-    fontSize: 14,
-    textDecorationLine: "underline",
-    textDecorationStyle: "solid",
-  },
-  activityNumberText: {
-    color: "#B4B4B4",
-    fontSize: 14,
-    paddingLeft: 2,
-  },
-  filtersContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    alignSelf: "stretch",
-    alignItems: "center",
-  },
-  filtersContentContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    paddingEnd: 16,
-    paddingVertical: 8,
-  },
-  activityListContainer: {
-    display: "flex",
-    alignSelf: "stretch",
-    flex: 1,
-  },
-  categoryCardsGrid: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    alignSelf: "stretch",
-  },
-});
 
 function isFiltersEmpty(filters: FilterState): boolean {
   return (
@@ -308,92 +195,22 @@ export function SearchPage() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.page}>
         <View style={styles.content}>
-          {/* Search Bar */}
-          <View style={styles.searchBar}>
-            {!isSearching && <SearchIcon width={24} height={24} color="#153A7A" />}
-            <TextInput
-              value={searchText}
-              onChangeText={setSearchText}
-              style={styles.searchInput}
-              placeholder="Search activities"
-              onFocus={() => setIsSearching(true)}
-              onBlur={() => {
-                if (searchText.trim() !== "") {
-                  setRecentSearches(addToRecentSearches(searchText, recentSearches));
-                }
-              }}
-            />
-            <FilterIcon
-              width={24}
-              height={24}
-              color="#153A7A"
-              onPress={() => {
-                setShowFilterModal(true);
-              }}
-            />
-          </View>
-          {/* Recent Searches */}
-          {isSearching &&
-            searchText === "" &&
-            recentSearches.length !== 0 &&
-            isFiltersEmpty(filters) && (
-              <View style={styles.recentSearchesContainer}>
-                <View style={styles.recentSearchesTextContainer}>
-                  <Text style={styles.smallText}>Recent Searches</Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setRecentSearches([]);
-                    }}
-                  >
-                    <Text style={styles.clearAllText}>Clear All</Text>
-                  </TouchableOpacity>
-                </View>
-                <ScrollView
-                  style={styles.recentSearchesChipsContainer}
-                  contentContainerStyle={styles.recentSearchesChipsContentContainer}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                >
-                  {recentSearches.map((search) => (
-                    <Chip
-                      key={search}
-                      label={search}
-                      onPress={() => {
-                        setSearchText(search);
-                        setRecentSearches(addToRecentSearches(search, recentSearches));
-                      }}
-                      onClose={() => {
-                        setRecentSearches(recentSearches.filter((s) => s !== search));
-                      }}
-                    />
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          {/* Filters */}
-          {!isFiltersEmpty(filters) && (
-            <View style={styles.filtersContainer}>
-              <Text style={styles.smallText}>Filters: </Text>
-              <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={styles.filtersContentContainer}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-              >
-                {convertFiltersToArray(filters).map((filter) => (
-                  <Chip
-                    key={filter}
-                    label={filter}
-                    backgroundColor="#153A7A"
-                    textColor="#FFFFFF"
-                    onClose={() => {
-                      setFilters(removeFilter(filters, filter));
-                    }}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          <SearchHeader
+            isSearching={isSearching}
+            setIsSearching={setIsSearching}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            showFilterModal={showFilterModal}
+            setShowFilterModal={setShowFilterModal}
+            recentSearches={recentSearches}
+            setRecentSearches={setRecentSearches}
+            filters={filters}
+            setFilters={setFilters}
+            isFiltersEmpty={isFiltersEmpty}
+            convertFiltersToArray={convertFiltersToArray}
+            removeFilter={removeFilter}
+            addToRecentSearches={addToRecentSearches}
+          />
 
           {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
@@ -443,7 +260,6 @@ export function SearchPage() {
               setSearchText("");
               setFilters(defaultFilters);
               setIsSearching(false);
-              setRecentSearches([]);
               Keyboard.dismiss();
             }
           }}
