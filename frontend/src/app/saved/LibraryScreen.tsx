@@ -132,7 +132,7 @@ export default function LibraryScreen({ navigation }: Props) {
 
         {/* Playlist list */}
         {playlists.length === 0 ? (
-          <Text style={{ color: "#777" }}>No playlists yet. Tap + to create one.</Text>
+          <Text style={{ color: "#777" }}></Text>
         ) : (
           playlists.map((p) => (
             <Pressable

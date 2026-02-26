@@ -15,9 +15,9 @@ export default function DownloadsScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <Pressable onPress={() => navigation.goBack()}>
+      {/* <Pressable onPress={() => navigation.goBack()}>
         <Text>Back</Text>
-      </Pressable>
+      </Pressable> */}
 
       <ActivityList
         header=""

@@ -25,6 +25,7 @@ type ActivityContextType = {
   editPlaylist: (playlistId: string, name: string, color: string) => void;
   deletePlaylist: (playlistId: string) => void;
   markViewed: (id: string) => void;
+  restorePlaylist: (playlist: Playlist, index?: number) => void;
 };
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
@@ -76,6 +77,18 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
           : a,
       ),
     );
+  };
+
+  const restorePlaylist = (playlist: Playlist, index?: number) => {
+    setPlaylists((prev) => {
+      // Prevent duplicates if undo is tapped twice
+      if (prev.some((p) => p.id === playlist.id)) return prev;
+
+      const copy = [...prev];
+      const insertAt = index == null ? copy.length : Math.max(0, Math.min(index, copy.length));
+      copy.splice(insertAt, 0, playlist);
+      return copy;
+    });
   };
   const setSaved = (id: string, saved: boolean) => {
     setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: saved } : a)));
@@ -164,6 +177,7 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
         editPlaylist,
         deletePlaylist,
         markViewed,
+        restorePlaylist,
       }}
     >
       {children}
