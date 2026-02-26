@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
 
 export default function HomeScreen() {
   // To be replaced with actual cards
-  const bookmarkedActivities = [];
+  // const bookmarkedActivities = [];
 
   return (
     <ScrollView style={styles.container}>

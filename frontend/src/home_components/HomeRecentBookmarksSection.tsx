@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
@@ -17,84 +17,6 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const LIST_HORIZONTAL_PADDING = 20;
 const CARD_HORIZONTAL_SPACING = 12;
 const CARD_ITEM_WIDTH = SCREEN_WIDTH - LIST_HORIZONTAL_PADDING * 2;
-
-export function HomeRecentBookmarksSection({
-  bookmarkedActivities,
-}: HomeRecentBookmarksSectionProps) {
-  const activities = (mockActivities).slice(0, 6);
-
-  const hasBookmarks = activities.length > 0;
-  const indicatorCount = Math.min(6, activities.length);
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const snapOffsets = useMemo(
-    () => activities.map((_, index) => index * (CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING)),
-    [activities],
-  );
-
-  const viewabilityConfig = useRef<ViewabilityConfig>({
-    itemVisiblePercentThreshold: 60,
-  }).current;
-
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: Array<ViewToken<Activity>> }) => {
-      const firstVisible = viewableItems[0];
-
-      if (firstVisible?.index != null) {
-        setActiveIndex(firstVisible.index);
-      }
-    },
-  ).current;
-
-  return (
-    <View style={styles.sectionContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.text}>Recent Bookmarks</Text>
-        {hasBookmarks && <SeeAll screen="/bookmarks" />}
-      </View>
-
-      {hasBookmarks ? (
-        <>
-          <FlatList
-            data={activities}
-            renderItem={({ item }) => (
-              <View style={styles.cardItemWrapper}>
-                <ActivityCard activity={item} />
-              </View>
-            )}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
-            decelerationRate="fast"
-            snapToOffsets={snapOffsets}
-            snapToAlignment="start"
-            disableIntervalMomentum
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={viewabilityConfig}
-          />
-
-          {indicatorCount > 1 && (
-            <View style={styles.dotsContainer}>
-              {Array.from({ length: indicatorCount }).map((_, index) => (
-                <View
-                  key={`bookmark-dot-${index}`}
-                  style={[styles.dot, index === activeIndex && styles.activeDot]}
-                />
-              ))}
-            </View>
-          )}
-        </>
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No recent bookmarks</Text>
-        </View>
-      )}
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   sectionContainer: {
@@ -156,3 +78,94 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
 });
+
+export function HomeRecentBookmarksSection({
+  bookmarkedActivities,
+}: HomeRecentBookmarksSectionProps) {
+  let activities = bookmarkedActivities;
+  activities = mockActivities.slice(0, 6);
+
+  const hasBookmarks = activities.length > 0;
+  const indicatorCount = Math.min(6, activities.length);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const snapOffsets = useMemo(
+    () => activities.map((_, index) => index * (CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING)),
+    [activities],
+  );
+
+  // const viewabilityConfig = useRef<ViewabilityConfig>({
+  //   itemVisiblePercentThreshold: 60,
+  // }).current;
+  const viewabilityConfig: ViewabilityConfig = {
+    itemVisiblePercentThreshold: 60,
+  };
+
+  // const onViewableItemsChanged = useRef(
+  //   ({ viewableItems }: { viewableItems: Array<ViewToken<Activity>> }) => {
+  //     const firstVisible = viewableItems[0];
+
+  //     if (firstVisible?.index != null) {
+  //       setActiveIndex(firstVisible.index);
+  //     }
+  //   },
+  // ).current;
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const firstVisible = viewableItems[0];
+      const idx = firstVisible?.index;
+      if (idx != null) setActiveIndex(idx);
+    },
+    [],
+  );
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.text}>Recent Bookmarks</Text>
+        {hasBookmarks && <SeeAll screen="/bookmarks" />}
+      </View>
+
+      {hasBookmarks ? (
+        <>
+          <FlatList
+            data={activities}
+            renderItem={({ item }) => (
+              <View style={styles.cardItemWrapper}>
+                <ActivityCard activity={item} />
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+            decelerationRate="fast"
+            snapToOffsets={snapOffsets}
+            snapToAlignment="start"
+            disableIntervalMomentum
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+          />
+
+          {indicatorCount > 1 && (
+            <View style={styles.dotsContainer}>
+              {Array.from({ length: indicatorCount }).map((_, index) => (
+                <View
+                  key={`bookmark-dot-${index}`}
+                  style={[styles.dot, index === activeIndex && styles.activeDot]}
+                />
+              ))}
+            </View>
+          )}
+        </>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No recent bookmarks</Text>
+        </View>
+      )}
+    </View>
+  );
+}
