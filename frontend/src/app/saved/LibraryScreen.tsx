@@ -1,4 +1,6 @@
-import { Pressable, Text, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useState } from "react";
+import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { useActivities } from "../../context_temp/ActivityContext";
 
@@ -7,11 +9,47 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Library">;
 
+const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
+
 export default function LibraryScreen({ navigation }: Props) {
-  const { activities, bookmarkedActivities, playlists } = useActivities();
+  const { activities, bookmarkedActivities, playlists, editPlaylist } = useActivities();
 
   const downloadsCount = activities.filter((a) => a.isDownloaded).length;
-  const historyCount = activities.filter((a) => a.isHistory).length;
+  const historyCount = activities.filter((a) => typeof a.lastViewedAt === "number").length;
+
+  // Edit modal state
+  const [editVisible, setEditVisible] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [nameDraft, setNameDraft] = useState("");
+  const [colorDraft, setColorDraft] = useState(COLORS[2]);
+
+  const openEdit = (playlistId: string) => {
+    const p = playlists.find((x) => x.id === playlistId);
+    if (!p) return;
+
+    setEditingId(playlistId);
+    setNameDraft(p.name);
+    setColorDraft(p.color);
+    setEditVisible(true);
+  };
+
+  const resetAll = () => {
+    if (!editingId) return;
+    const p = playlists.find((x) => x.id === editingId);
+    if (!p) return;
+    setNameDraft(p.name);
+    setColorDraft(p.color);
+  };
+
+  const saveEdit = () => {
+    if (!editingId) return;
+    const trimmed = nameDraft.trim();
+    if (!trimmed) return;
+
+    editPlaylist(editingId, trimmed, colorDraft);
+    setEditVisible(false);
+    setEditingId(null);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F2F3F5" }}>
@@ -19,7 +57,7 @@ export default function LibraryScreen({ navigation }: Props) {
         {/* Title */}
         <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 16 }}>Your Library</Text>
 
-        {/* Bookmarks card */}
+        {/* Bookmarks */}
         <Pressable
           onPress={() => navigation.navigate("Bookmarks")}
           style={{
@@ -35,7 +73,7 @@ export default function LibraryScreen({ navigation }: Props) {
           </Text>
         </Pressable>
 
-        {/* Downloads + History row */}
+        {/* Downloads + History */}
         <View style={{ flexDirection: "row" }}>
           <Pressable
             onPress={() => navigation.navigate("Downloads")}
@@ -92,7 +130,7 @@ export default function LibraryScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        {/* Playlists list */}
+        {/* Playlist list */}
         {playlists.length === 0 ? (
           <Text style={{ color: "#777" }}>No playlists yet. Tap + to create one.</Text>
         ) : (
@@ -107,449 +145,147 @@ export default function LibraryScreen({ navigation }: Props) {
                 marginBottom: 12,
               }}
             >
-              <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>{p.name}</Text>
-              <Text style={{ color: "rgba(255,255,255,0.85)", marginTop: 4 }}>
-                {p.activityIds.length} activities
-              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={{ fontSize: 16, fontWeight: "800", color: "white" }}>{p.name}</Text>
+                  <Text style={{ color: "rgba(255,255,255,0.85)", marginTop: 4 }}>
+                    {p.activityIds.length} activities
+                  </Text>
+                </View>
+
+                {/* ⋯ button opens EDIT ONLY */}
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation(); // don't open playlist screen
+                    openEdit(p.id);
+                  }}
+                  style={{ paddingLeft: 10, paddingVertical: 4 }}
+                >
+                  <Ionicons name="ellipsis-vertical" size={18} color="white" />
+                </Pressable>
+              </View>
             </Pressable>
           ))
         )}
       </View>
+
+      {/* Edit Playlist Modal (only edit, no delete) */}
+      <Modal visible={editVisible} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 18 }}>
+            {/* Header */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text style={{ fontSize: 22, fontWeight: "900", color: "#1E2A5A" }}>
+                Edit Playlist
+              </Text>
+
+              <Pressable
+                onPress={() => setEditVisible(false)}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: "#E6E6E6",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons name="close" size={18} color="#2F3E75" />
+              </Pressable>
+            </View>
+
+            {/* Name */}
+            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginBottom: 6 }}>
+              Playlist Name
+            </Text>
+            <TextInput
+              value={nameDraft}
+              onChangeText={setNameDraft}
+              placeholder="Enter Playlist Name"
+              placeholderTextColor="#8A8FA3"
+              style={{
+                backgroundColor: "#F2F3F5",
+                borderRadius: 12,
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+                color: "#1E2A5A",
+              }}
+            />
+
+            {/* Color */}
+            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginTop: 16, marginBottom: 10 }}>
+              Choose Color
+            </Text>
+            <View style={{ flexDirection: "row" }}>
+              {COLORS.map((c) => {
+                const selected = c === colorDraft;
+                return (
+                  <Pressable
+                    key={c}
+                    onPress={() => setColorDraft(c)}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 10,
+                      backgroundColor: c,
+                      marginRight: 10,
+                      borderWidth: selected ? 3 : 0,
+                      borderColor: selected ? "#111" : "transparent",
+                    }}
+                  />
+                );
+              })}
+            </View>
+
+            {/* Buttons */}
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 18 }}>
+              <Pressable
+                onPress={resetAll}
+                style={{
+                  flex: 1,
+                  marginRight: 10,
+                  paddingVertical: 12,
+                  borderRadius: 22,
+                  backgroundColor: "#EEF0F4",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#1E2A5A", fontWeight: "800" }}>Reset All</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={saveEdit}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 22,
+                  borderWidth: 2,
+                  borderColor: "#2F3E75",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                }}
+              >
+                <Text style={{ color: "#2F3E75", fontWeight: "900" }}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-// import { useState } from "react";
-// import { Modal, Pressable, Text, TextInput, View } from "react-native";
-
-// import { useActivities } from "../../context_temp/ActivityContext";
-
-// import type { RootStackParamList } from "../../types/navigation";
-// import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-// type Props = NativeStackScreenProps<RootStackParamList, "Library">;
-
-// export default function LibraryScreen({ navigation }: Props) {
-//   const { playlists } = useActivities();
-
-//   return (
-//     <View style={{ flex: 1, backgroundColor: "#F2F3F5" }}>
-//       <View style={{ padding: 20 }}>
-//         {/* Header */}
-//         <View
-//           style={{
-//             flexDirection: "row",
-//             justifyContent: "space-between",
-//             alignItems: "center",
-//             marginBottom: 16,
-//           }}
-//         >
-//           <Text style={{ fontSize: 22, fontWeight: "bold" }}>Your Library</Text>
-
-//           {/* + button opens modal SCREEN */}
-//           <Pressable
-//             onPress={() => navigation.navigate("CreatePlaylistModal")}
-//             style={{
-//               backgroundColor: "#2F3E75",
-//               width: 32,
-//               height: 32,
-//               borderRadius: 16,
-//               justifyContent: "center",
-//               alignItems: "center",
-//             }}
-//           >
-//             <Text style={{ color: "white", fontSize: 20 }}>+</Text>
-//           </Pressable>
-//         </View>
-
-//         {/* Playlists list */}
-//         {playlists.length === 0 ? (
-//           <Text style={{ color: "#777" }}>No playlists yet. Tap + to create one.</Text>
-//         ) : (
-//           playlists.map((p) => (
-//             <Pressable
-//               key={p.id}
-//               onPress={() => navigation.navigate("Playlist", { playlistId: p.id })}
-//               style={{
-//                 backgroundColor: "white",
-//                 padding: 16,
-//                 borderRadius: 14,
-//                 marginBottom: 12,
-//               }}
-//             >
-//               <Text style={{ fontSize: 16, fontWeight: "700" }}>{p.name}</Text>
-//               <Text style={{ color: "#777", marginTop: 4 }}>{p.activityIds.length} activities</Text>
-//             </Pressable>
-//           ))
-//         )}
-//       </View>
-//     </View>
-//   );
-// }
-// import { useState } from "react";
-// import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-// import DraggableFlatList from "react-native-draggable-flatlist";
-
-// import { usePlaylists } from "../../context_temp/PlaylistContext";
-
-// import type { Playlist } from "../../context_temp/PlaylistContext";
-// import type { RootStackParamList } from "../../types/navigation";
-// import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-// type Props = NativeStackScreenProps<RootStackParamList, "Library">;
-
-// export default function LibraryScreen({ navigation }: Props) {
-//   const [showModal, setShowModal] = useState(false);
-//   const [playlistName, setPlaylistName] = useState("");
-//   const [color, setColor] = useState("#8BC34A");
-//   const { playlists, createPlaylist, setPlaylists, updatePlaylist } = usePlaylists();
-//   const [menuVisible, setMenuVisible] = useState(false);
-//   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-//   const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
-//   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-//   const handleDelete = (id: string | null) => {
-//     if (!id) return;
-//     setPlaylists((prev) => prev.filter((p) => p.id !== id));
-//   };
-
-//   const handleEdit = () => {
-//     if (!selectedPlaylistId) return;
-
-//     const playlist = playlists.find((p) => p.id === selectedPlaylistId);
-//     if (!playlist) return;
-
-//     setEditingPlaylist(playlist);
-//     setPlaylistName(playlist.name);
-//     setColor(playlist.color);
-//     setShowModal(true);
-//   };
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <DraggableFlatList
-//         style={{ backgroundColor: "#F2F3F5" }}
-//         contentContainerStyle={{ padding: 20 }}
-//         data={playlists}
-//         keyExtractor={(item) => item.id}
-//         onDragEnd={({ data }) => setPlaylists(data)}
-//         ListHeaderComponent={
-//           <>
-//             {/* Title */}
-//             <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 16 }}>Your Library</Text>
-
-//             {/* Bookmarks card */}
-//             <Pressable
-//               onPress={() => navigation.navigate("Bookmarks")}
-//               style={{
-//                 backgroundColor: "#2F3E75",
-//                 padding: 18,
-//                 borderRadius: 14,
-//                 marginBottom: 12,
-//               }}
-//             >
-//               <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>Bookmarks</Text>
-//               <Text style={{ color: "#D0D5E8", marginTop: 4 }}>Save for later</Text>
-//             </Pressable>
-
-//             {/* Downloads + History row */}
-//             <View style={{ flexDirection: "row", marginBottom: 28 }}>
-//               <Pressable
-//                 onPress={() => navigation.navigate("Downloads")}
-//                 style={{
-//                   flex: 1,
-//                   marginRight: 12,
-//                   backgroundColor: "#2F3E75",
-//                   padding: 18,
-//                   borderRadius: 14,
-//                 }}
-//               >
-//                 <Text style={{ color: "white", fontWeight: "bold" }}>Downloads</Text>
-//                 <Text style={{ color: "#D0D5E8", marginTop: 4 }}>Available offline</Text>
-//               </Pressable>
-
-//               <Pressable
-//                 onPress={() => navigation.navigate("History")}
-//                 style={{
-//                   flex: 1,
-//                   backgroundColor: "#2F3E75",
-//                   padding: 18,
-//                   borderRadius: 14,
-//                 }}
-//               >
-//                 <Text style={{ color: "white", fontWeight: "bold" }}>History</Text>
-//                 <Text style={{ color: "#D0D5E8", marginTop: 4 }}>Recently viewed</Text>
-//               </Pressable>
-//             </View>
-
-//             {/* Playlists header */}
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 marginBottom: 12,
-//               }}
-//             >
-//               <Text style={{ fontSize: 20, fontWeight: "bold" }}>Your Playlists</Text>
-
-//               <Pressable
-//                 onPress={() => setShowModal(true)}
-//                 style={{
-//                   backgroundColor: "#2F3E75",
-//                   width: 32,
-//                   height: 32,
-//                   borderRadius: 16,
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                 }}
-//               >
-//                 <Text style={{ color: "white", fontSize: 20 }}>+</Text>
-//               </Pressable>
-//             </View>
-//           </>
-//         }
-//         renderItem={({ item, drag, isActive }) => (
-//           <Pressable
-//             onLongPress={drag}
-//             disabled={isActive}
-//             onPress={() => navigation.navigate("Playlist", { playlistId: item.id })}
-//             style={{
-//               backgroundColor: item.color,
-//               padding: 20,
-//               borderRadius: 14,
-//               marginBottom: 12,
-//               opacity: isActive ? 0.8 : 1,
-//               flexDirection: "row",
-//               justifyContent: "space-between",
-//               alignItems: "center",
-//             }}
-//           >
-//             <View>
-//               <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{item.name}</Text>
-
-//               <Text style={{ color: "#EAF5D6", marginTop: 6 }}>
-//                 {item.activityIds.length} activities
-//               </Text>
-//             </View>
-
-//             {/* 3 Dot Menu Button */}
-//             <Pressable
-//               onPress={() => {
-//                 setSelectedPlaylistId(item.id);
-//                 setMenuVisible(true);
-//               }}
-//               style={{ padding: 6 }}
-//             >
-//               <Text style={{ color: "white", fontSize: 18 }}>⋮</Text>
-//             </Pressable>
-//           </Pressable>
-//         )}
-//       />
-//       <Modal visible={showModal} transparent animationType="fade">
-//         <View
-//           style={{
-//             flex: 1,
-//             justifyContent: "center",
-//             backgroundColor: "rgba(0,0,0,0.5)",
-//             padding: 20,
-//           }}
-//         >
-//           <View
-//             style={{
-//               backgroundColor: "white",
-//               borderRadius: 16,
-//               padding: 20,
-//             }}
-//           >
-//             {/* Header */}
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//                 marginBottom: 12,
-//               }}
-//             >
-//               <Text style={{ fontWeight: "700", fontSize: 18 }}>
-//                 {editingPlaylist ? "Edit Playlist" : "New Playlist"}
-//               </Text>
-
-//               <Pressable onPress={() => setShowModal(false)}>
-//                 <Text style={{ fontSize: 18 }}>✕</Text>
-//               </Pressable>
-//             </View>
-
-//             {/* Name input */}
-//             <Text>Playlist Name</Text>
-//             <TextInput
-//               value={playlistName}
-//               onChangeText={setPlaylistName}
-//               placeholder="Enter name..."
-//               style={{
-//                 borderWidth: 1,
-//                 borderColor: "#ccc",
-//                 borderRadius: 8,
-//                 padding: 10,
-//                 marginTop: 6,
-//                 marginBottom: 16,
-//               }}
-//             />
-
-//             {/* Color picker */}
-//             <Text>Color</Text>
-//             <View style={{ flexDirection: "row", marginTop: 10 }}>
-//               {["#8BC34A", "#2196F3", "#FF9800", "#E91E63"].map((c) => (
-//                 <Pressable
-//                   key={c}
-//                   onPress={() => setColor(c)}
-//                   style={{
-//                     width: 32,
-//                     height: 32,
-//                     borderRadius: 16,
-//                     backgroundColor: c,
-//                     marginRight: 12,
-//                     borderWidth: color === c ? 3 : 0,
-//                     borderColor: "black",
-//                   }}
-//                 />
-//               ))}
-//             </View>
-
-//             {/* Buttons */}
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//                 marginTop: 24,
-//               }}
-//             >
-//               <Pressable
-//                 onPress={() => {
-//                   setPlaylistName("");
-//                   setColor("#8BC34A");
-//                 }}
-//               >
-//                 <Text>Reset</Text>
-//               </Pressable>
-
-//               <Pressable
-//                 onPress={() => {
-//                   if (editingPlaylist) {
-//                     updatePlaylist(editingPlaylist.id, playlistName, color);
-//                   } else {
-//                     createPlaylist(playlistName, color);
-//                   }
-
-//                   setEditingPlaylist(null);
-//                   setPlaylistName("");
-//                   setColor("#8BC34A");
-//                   setShowModal(false);
-//                 }}
-//                 style={{
-//                   backgroundColor: "#2F3E75",
-//                   paddingHorizontal: 16,
-//                   paddingVertical: 10,
-//                   borderRadius: 8,
-//                 }}
-//               >
-//                 <Text style={{ color: "white" }}>Create Playlist</Text>
-//               </Pressable>
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-//       <Modal visible={menuVisible} transparent animationType="fade">
-//         <Pressable
-//           style={{
-//             flex: 1,
-//             backgroundColor: "rgba(0,0,0,0.4)",
-//             justifyContent: "center",
-//             alignItems: "center",
-//           }}
-//           onPress={() => setMenuVisible(false)}
-//         >
-//           <View
-//             style={{
-//               width: 250,
-//               backgroundColor: "white",
-//               borderRadius: 12,
-//               padding: 20,
-//             }}
-//           >
-//             <Pressable
-//               onPress={() => {
-//                 setMenuVisible(false);
-//                 handleEdit();
-//               }}
-//             >
-//               <Text style={{ fontSize: 16, marginBottom: 15 }}>Edit</Text>
-//             </Pressable>
-
-//             <Pressable
-//               onPress={() => {
-//                 setMenuVisible(false);
-//                 setConfirmDeleteVisible(true);
-//               }}
-//             >
-//               <Text style={{ fontSize: 16, color: "red", marginBottom: 15 }}>Delete</Text>
-//             </Pressable>
-
-//             <Pressable onPress={() => setMenuVisible(false)}>
-//               <Text style={{ textAlign: "right" }}>Cancel</Text>
-//             </Pressable>
-//           </View>
-//         </Pressable>
-//       </Modal>
-//       <Modal visible={confirmDeleteVisible} transparent animationType="fade">
-//         <View
-//           style={{
-//             flex: 1,
-//             justifyContent: "center",
-//             alignItems: "center",
-//             backgroundColor: "rgba(0,0,0,0.4)",
-//             padding: 20,
-//           }}
-//         >
-//           <View
-//             style={{
-//               width: "100%",
-//               backgroundColor: "white",
-//               borderRadius: 16,
-//               padding: 20,
-//             }}
-//           >
-//             <Text style={{ fontSize: 18, fontWeight: "700", marginBottom: 12 }}>
-//               Delete Playlist?
-//             </Text>
-
-//             <Text style={{ marginBottom: 20, color: "#555" }}>This action cannot be undone.</Text>
-
-//             <View
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//               }}
-//             >
-//               <Pressable onPress={() => setConfirmDeleteVisible(false)}>
-//                 <Text>Cancel</Text>
-//               </Pressable>
-
-//               <Pressable
-//                 onPress={() => {
-//                   handleDelete(selectedPlaylistId);
-//                   setConfirmDeleteVisible(false);
-//                   setSelectedPlaylistId(null);
-//                 }}
-//                 style={{
-//                   backgroundColor: "red",
-//                   paddingHorizontal: 16,
-//                   paddingVertical: 8,
-//                   borderRadius: 8,
-//                 }}
-//               >
-//                 <Text style={{ color: "white", fontWeight: "600" }}>Delete</Text>
-//               </Pressable>
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-//     </View>
-//   );
-// }

@@ -17,10 +17,14 @@ type ActivityContextType = {
   toggleHistory: (id: string) => void;
   togglePlaylist: (id: string) => void;
   reorderBookmarks: (newOrder: Activity[]) => void;
-
   playlists: Playlist[];
   addToPlaylist: (playlistId: string, activityId: string) => void;
   createPlaylist: (name: string, color: string) => string;
+  setSaved: (id: string, saved: boolean) => void;
+  reorderPlaylistActivities: (playlistId: string, newActivityIds: string[]) => void;
+  editPlaylist: (playlistId: string, name: string, color: string) => void;
+  deletePlaylist: (playlistId: string) => void;
+  markViewed: (id: string) => void;
 };
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
@@ -60,6 +64,36 @@ const initialActivities: Activity[] = [
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const markViewed = (id: string) => {
+    const now = Date.now();
+    setActivities((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              lastViewedAt: now,
+            }
+          : a,
+      ),
+    );
+  };
+  const setSaved = (id: string, saved: boolean) => {
+    setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: saved } : a)));
+  };
+
+  const reorderPlaylistActivities = (playlistId: string, newActivityIds: string[]) => {
+    setPlaylists((prev) =>
+      prev.map((p) => (p.id === playlistId ? { ...p, activityIds: newActivityIds } : p)),
+    );
+  };
+
+  const editPlaylist = (playlistId: string, name: string, color: string) => {
+    setPlaylists((prev) => prev.map((p) => (p.id === playlistId ? { ...p, name, color } : p)));
+  };
+
+  const deletePlaylist = (playlistId: string) => {
+    setPlaylists((prev) => prev.filter((p) => p.id !== playlistId));
+  };
 
   const bookmarkedActivities = activities.filter((a) => a.isSaved);
 
@@ -125,6 +159,11 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
         playlists,
         addToPlaylist,
         createPlaylist,
+        setSaved,
+        reorderPlaylistActivities,
+        editPlaylist,
+        deletePlaylist,
+        markViewed,
       }}
     >
       {children}

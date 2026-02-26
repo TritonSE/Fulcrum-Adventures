@@ -9,9 +9,12 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<RootStackParamList, "History">;
 
 export default function HistoryScreen({ navigation }: Props) {
-  const { activities, toggleSaved } = useActivities();
+  const { activities, toggleSaved, markViewed } = useActivities();
 
-  const history = activities.filter((a) => a.isHistory);
+  const history = activities
+    .filter((a) => typeof a.lastViewedAt === "number")
+    .sort((a, b) => (b.lastViewedAt ?? 0) - (a.lastViewedAt ?? 0))
+    .slice(0, 50);
 
   return (
     <View style={{ flex: 1 }}>
@@ -20,14 +23,13 @@ export default function HistoryScreen({ navigation }: Props) {
       </Pressable>
 
       <ActivityList
-        header="History"
+        header=""
         activities={history}
         onSaveToggle={toggleSaved}
-        onActivityPress={(a) =>
-          navigation.navigate("ActivityDetail", {
-            activityId: a.id,
-          })
-        }
+        onActivityPress={(a) => {
+          markViewed(a.id);
+          navigation.navigate("ActivityDetail", { activityId: a.id });
+        }}
       />
     </View>
   );

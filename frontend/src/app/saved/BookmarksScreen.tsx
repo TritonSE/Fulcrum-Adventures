@@ -13,6 +13,8 @@ export default function BookmarksScreen({ navigation }: Props) {
   //const { activities, toggleSaved } = useActivities();
   const [isEditing, setIsEditing] = useState(false);
   const { bookmarkedActivities, reorderBookmarks } = useActivities();
+  const { markViewed } = useActivities();
+
   return (
     <View style={{ flex: 1 }}>
       {/* Top Blue Header Area Should Stay Wherever You Have It */}
@@ -32,7 +34,7 @@ export default function BookmarksScreen({ navigation }: Props) {
           marginTop: 10,
         }}
       >
-        <Text style={{ fontSize: 22, fontWeight: "bold" }}>Bookmarks</Text>
+        {/* <Text style={{ fontSize: 22, fontWeight: "bold" }}>Bookmarks</Text> */}
 
         <Pressable onPress={() => setIsEditing((prev) => !prev)}>
           <Text style={{ color: "#2F3E75", fontWeight: "600" }}>{isEditing ? "Done" : "Edit"}</Text>
@@ -40,15 +42,14 @@ export default function BookmarksScreen({ navigation }: Props) {
       </View>
 
       <ActivityList
-        header="Bookmarks"
+        header=""
         activities={bookmarkedActivities}
         isEditing={isEditing}
         onReorder={reorderBookmarks}
-        onActivityPress={(activity) =>
-          navigation.navigate("ActivityDetail", {
-            activityId: activity.id,
-          })
-        }
+        onActivityPress={(a) => {
+          markViewed(a.id);
+          navigation.navigate("ActivityDetail", { activityId: a.id });
+        }}
       />
     </View>
   );

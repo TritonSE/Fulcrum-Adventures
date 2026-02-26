@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useActivities } from "../context_temp/ActivityContext";
+import { showToast } from "../utils/toast";
 
 import type { RootStackParamList } from "../types/navigation";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,7 +18,7 @@ type Props = {
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) => {
-  const { playlists, addToPlaylist, toggleSaved } = useActivities();
+  const { playlists, addToPlaylist, setSaved } = useActivities();
   const navigation = useNavigation<Nav>();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -30,7 +31,12 @@ export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) 
     selectedIds.forEach((playlistId) => addToPlaylist(playlistId, activityId));
 
     // ensure it becomes bookmarked too
-    toggleSaved(activityId);
+    setSaved(activityId, true);
+    if (selectedIds.length > 0) {
+      showToast("Added to playlist", `${selectedIds.length} selected`);
+    } else {
+      showToast("Saved to Bookmarks");
+    }
 
     setSelectedIds([]);
     onClose();

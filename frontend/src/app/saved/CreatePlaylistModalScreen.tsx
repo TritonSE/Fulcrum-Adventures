@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { useActivities } from "../../context_temp/ActivityContext";
+import { showToast } from "../../utils/toast";
 
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -12,7 +13,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "CreatePlaylistModal">;
 const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
 
 export default function CreatePlaylistModalScreen({ navigation, route }: Props) {
-  const { createPlaylist, addToPlaylist, toggleSaved } = useActivities();
+  const { createPlaylist, addToPlaylist, setSaved } = useActivities();
 
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[2]); // default green like your mock
@@ -35,9 +36,11 @@ export default function CreatePlaylistModalScreen({ navigation, route }: Props) 
     // If opened from LibraryPopup, auto-add + ensure bookmarked
     if (activityId) {
       addToPlaylist(newPlaylistId, activityId);
-      toggleSaved(activityId);
+      setSaved(activityId, true);
+      showToast("Playlist created", `${trimmed} • added activity`);
+    } else {
+      showToast("Playlist created", trimmed);
     }
-
     resetAll();
     navigation.goBack();
   };

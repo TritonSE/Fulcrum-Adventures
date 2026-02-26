@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // import { StatusBar } from "expo-status-bar";
 // import { StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 
 import ActivityDetailScreen from "./src/app/saved/ActivityDetailScreen";
 import BookmarksScreen from "./src/app/saved/BookmarksScreen";
@@ -25,19 +26,68 @@ export default function App() {
       <ActivityProvider>
         <NavigationContainer>
           <Stack.Navigator>
-            <Stack.Screen name="Library" component={LibraryScreen} />
-            <Stack.Screen name="Bookmarks" component={BookmarksScreen} />
-            <Stack.Screen name="Downloads" component={DownloadsScreen} />
-            <Stack.Screen name="History" component={HistoryScreen} />
+            <Stack.Screen
+              name="Library"
+              component={LibraryScreen}
+              options={{
+                headerStyle: { backgroundColor: "#153A7A" },
+                headerTintColor: "white", // title + back arrow color
+                headerTitleStyle: {
+                  fontWeight: "800",
+                  fontSize: 20,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="Bookmarks"
+              component={BookmarksScreen}
+              options={{
+                headerStyle: { backgroundColor: "#153A7A" },
+                headerTintColor: "white", // title + back arrow color
+                headerTitleStyle: {
+                  fontWeight: "800",
+                  fontSize: 20,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="Downloads"
+              component={DownloadsScreen}
+              options={{
+                headerStyle: { backgroundColor: "#153A7A" },
+                headerTintColor: "white", // title + back arrow color
+                headerTitleStyle: {
+                  fontWeight: "800",
+                  fontSize: 20,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="History"
+              component={HistoryScreen}
+              options={{
+                headerStyle: { backgroundColor: "#153A7A" },
+                headerTintColor: "white", // title + back arrow color
+                headerTitleStyle: {
+                  fontWeight: "800",
+                  fontSize: 20,
+                },
+              }}
+            />
             <Stack.Screen name="Playlist" component={PlaylistScreen} />
             <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
             <Stack.Screen
               name="CreatePlaylistModal"
               component={CreatePlaylistModalScreen}
-              options={{ presentation: "modal", headerShown: false }}
+              options={{
+                headerStyle: { backgroundColor: "#153A7A" },
+                presentation: "modal",
+                headerShown: false,
+              }}
             />
           </Stack.Navigator>
         </NavigationContainer>
+        <Toast />
       </ActivityProvider>
     </GestureHandlerRootView>
   );

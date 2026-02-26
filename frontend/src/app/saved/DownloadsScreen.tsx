@@ -5,11 +5,11 @@ import { useActivities } from "../../context_temp/ActivityContext";
 
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-
 type Props = NativeStackScreenProps<RootStackParamList, "Downloads">;
 
 export default function DownloadsScreen({ navigation }: Props) {
   const { activities, toggleSaved } = useActivities();
+  const { markViewed } = useActivities();
 
   const downloaded = activities.filter((a) => a.isDownloaded);
 
@@ -20,14 +20,13 @@ export default function DownloadsScreen({ navigation }: Props) {
       </Pressable>
 
       <ActivityList
-        header="Downloads"
+        header=""
         activities={downloaded}
         onSaveToggle={toggleSaved}
-        onActivityPress={(a) =>
-          navigation.navigate("ActivityDetail", {
-            activityId: a.id,
-          })
-        }
+        onActivityPress={(a) => {
+          markViewed(a.id);
+          navigation.navigate("ActivityDetail", { activityId: a.id });
+        }}
       />
     </View>
   );

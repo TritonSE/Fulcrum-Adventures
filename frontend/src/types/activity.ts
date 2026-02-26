@@ -74,4 +74,5 @@ export type Activity = {
   isDownloaded?: boolean;
   isHistory?: boolean;
   isPlaylist?: boolean;
+  lastViewedAt?: number; // Timestamp of when the activity was last viewed (for history sorting)
 };
