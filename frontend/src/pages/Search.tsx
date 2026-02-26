@@ -13,6 +13,7 @@ import {
 import FilterIcon from "../../assets/icons/filter.svg";
 import SearchIcon from "../../assets/icons/search-outline.svg";
 import { ActivityList } from "../components/ActivityList";
+import { CategoryCardBig } from "../components/CategoryCardBig";
 import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
 import { Navbar } from "../components/Navbar";
@@ -133,25 +134,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 8,
     alignSelf: "stretch",
-  },
-  categoryCard: {
-    width: 167,
-    height: 173,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
-    backgroundColor: "#FFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  categoryCardText: {
-    color: "#000",
-    fontSize: 14,
   },
 });
 
@@ -431,16 +413,15 @@ export function SearchPage() {
               <Text style={styles.smallText}>Browse by category:</Text>
               <View style={styles.categoryCardsGrid}>
                 {categories.map((category) => (
-                  <TouchableOpacity
-                    key={category}
-                    style={styles.categoryCard}
-                    onPress={() => {
-                      setFilters({ ...filters, category });
-                      setRecentSearches(addToRecentSearches(category, recentSearches));
-                    }}
-                  >
-                    <Text style={styles.categoryCardText}>{category}</Text>
-                  </TouchableOpacity>
+                  <View key={category} style={{ width: "48%" }}>
+                    <CategoryCardBig
+                      category={category}
+                      onPress={() => {
+                        setFilters({ ...filters, category });
+                        setRecentSearches(addToRecentSearches(category, recentSearches));
+                      }}
+                    />
+                  </View>
                 ))}
               </View>
             </View>
@@ -455,7 +436,18 @@ export function SearchPage() {
           onClose={() => setShowFilterModal(false)}
         />
 
-        <Navbar currentTab="Search" onSwitchTab={() => {}}/>
+        <Navbar
+          currentTab="Search"
+          onSwitchTab={(tab) => {
+            if (tab === "Search") {
+              setSearchText("");
+              setFilters(defaultFilters);
+              setIsSearching(false);
+              setRecentSearches([]);
+              Keyboard.dismiss();
+            }
+          }}
+        />
       </View>
     </TouchableWithoutFeedback>
   );
