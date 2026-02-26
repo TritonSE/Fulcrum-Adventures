@@ -1,10 +1,10 @@
 import { ScrollView, StyleSheet } from "react-native";
 
-import { HomeBrowseCategorySection } from "../home_components/HomeBrowseCategorySection";
-import { HomeHeaderSection } from "../home_components/HomeHeaderSection";
-import { HomePopularSection } from "../home_components/HomePopularSection";
-import { HomeRecentBookmarksSection } from "../home_components/HomeRecentBookmarksSection";
-import { HomeRecommendedSection } from "../home_components/HomeRecommendedSection";
+import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
+import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
+import { HomePopularSection } from "@/home_components/HomePopularSection";
+import { HomeRecentBookmarksSection } from "@/home_components/HomeRecentBookmarksSection";
+import { HomeRecommendedSection } from "@/home_components/HomeRecommendedSection";
 
 export const styles = StyleSheet.create({
   container: {
