@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Keyboard, ScrollView, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { CategoryCardBig } from "../components/CategoryCardBig";
@@ -63,6 +63,69 @@ function convertFiltersToArray(filters: FilterState): string[] {
   return result;
 }
 
+function matchesActivityFilter(
+  activity: Activity,
+  filters: FilterState,
+  searchText: string,
+): boolean {
+  if (filters.category && activity.category !== filters.category) {
+    return false;
+  }
+
+  if (filters.setupProps) {
+    if (filters.setupProps === "Props" && activity.materials.length === 0) {
+      return false;
+    }
+    if (filters.setupProps === "No Props" && activity.materials.length > 0) {
+      return false;
+    }
+  }
+
+  if (
+    filters.duration &&
+    filters.duration.length > 0 &&
+    !filters.duration.some(
+      (range) => !(activity.duration.max < range.min || activity.duration.min > range.max),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    filters.gradeLevel &&
+    filters.gradeLevel.length > 0 &&
+    !filters.gradeLevel.some(
+      (range) => !(activity.gradeLevel.max < range.min || activity.gradeLevel.min > range.max),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    filters.groupSize &&
+    filters.groupSize.length > 0 &&
+    !filters.groupSize.some(
+      (range) => !(activity.groupSize.max < range.min || activity.groupSize.min > range.max),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    filters.environment &&
+    filters.environment.length > 0 &&
+    !filters.environment.includes(activity.environment)
+  ) {
+    return false;
+  }
+
+  if (filters.energyLevel && activity.energyLevel !== filters.energyLevel) {
+    return false;
+  }
+
+  return activity.title.toLowerCase().includes(searchText.toLowerCase());
+}
+
 function removeFilter(filters: FilterState, filterToRemove: string): FilterState {
   const newFilters: FilterState = { ...filters };
   if (filters.category === filterToRemove) {
@@ -124,64 +187,9 @@ export function SearchPage() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
 
-  const filteredActivities = activities.filter((activity) => {
-    if (filters.category && activity.category !== filters.category) {
-      return false;
-    }
-
-    if (filters.setupProps) {
-      if (filters.setupProps === "Props" && activity.materials.length === 0) {
-        return false;
-      }
-      if (filters.setupProps === "No Props" && activity.materials.length > 0) {
-        return false;
-      }
-    }
-
-    if (
-      filters.duration &&
-      filters.duration.length > 0 &&
-      !filters.duration.some(
-        (range) => !(activity.duration.max < range.min || activity.duration.min > range.max),
-      )
-    ) {
-      return false;
-    }
-
-    if (
-      filters.gradeLevel &&
-      filters.gradeLevel.length > 0 &&
-      !filters.gradeLevel.some(
-        (range) => !(activity.gradeLevel.max < range.min || activity.gradeLevel.min > range.max),
-      )
-    ) {
-      return false;
-    }
-
-    if (
-      filters.groupSize &&
-      filters.groupSize.length > 0 &&
-      !filters.groupSize.some(
-        (range) => !(activity.groupSize.max < range.min || activity.groupSize.min > range.max),
-      )
-    ) {
-      return false;
-    }
-
-    if (
-      filters.environment &&
-      filters.environment.length > 0 &&
-      !filters.environment.includes(activity.environment)
-    ) {
-      return false;
-    }
-
-    if (filters.energyLevel && activity.energyLevel !== filters.energyLevel) {
-      return false;
-    }
-
-    return activity.title.toLowerCase().includes(searchText.toLowerCase());
-  });
+  const filteredActivities = activities.filter((activity) =>
+    matchesActivityFilter(activity, filters, searchText),
+  );
 
   const handleSaveToggle = (id: string) => {
     setActivities((prevList) =>
@@ -192,7 +200,13 @@ export function SearchPage() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setIsSearching(false);
+      }}
+      accessible={false}
+    >
       <View style={styles.page}>
         <View style={styles.content}>
           <SearchHeader
@@ -200,7 +214,6 @@ export function SearchPage() {
             setIsSearching={setIsSearching}
             searchText={searchText}
             setSearchText={setSearchText}
-            showFilterModal={showFilterModal}
             setShowFilterModal={setShowFilterModal}
             recentSearches={recentSearches}
             setRecentSearches={setRecentSearches}

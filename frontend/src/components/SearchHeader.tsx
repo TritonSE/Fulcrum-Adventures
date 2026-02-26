@@ -1,27 +1,27 @@
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import FilterIcon from "../../assets/icons/filter.svg";
 import SearchIcon from "../../assets/icons/search-outline.svg";
 
 import { Chip } from "./Chip";
+import { styles } from "./SearchHeader.styles";
 
 import type { FilterState } from "./FiltersModal";
 
 export type SearchHeaderProps = {
-  isSearching: boolean;
-  setIsSearching: (isSearching: boolean) => void;
-  searchText: string;
-  setSearchText: (text: string) => void;
-  showFilterModal: boolean;
-  setShowFilterModal: (show: boolean) => void;
-  recentSearches: string[];
-  setRecentSearches: (recentSearches: string[]) => void;
-  filters: FilterState;
-  setFilters: (filters: FilterState) => void;
-  isFiltersEmpty: (filters: FilterState) => boolean;
-  convertFiltersToArray: (filters: FilterState) => string[];
-  removeFilter: (filters: FilterState, filterToRemove: string) => FilterState;
-  addToRecentSearches: (searchQuery: string, recentSearches: string[]) => string[];
+  readonly isSearching: boolean;
+  readonly setIsSearching: (isSearching: boolean) => void;
+  readonly searchText: string;
+  readonly setSearchText: (text: string) => void;
+  readonly setShowFilterModal: (show: boolean) => void;
+  readonly recentSearches: string[];
+  readonly setRecentSearches: (recentSearches: string[]) => void;
+  readonly filters: FilterState;
+  readonly setFilters: (filters: FilterState) => void;
+  readonly isFiltersEmpty: (filters: FilterState) => boolean;
+  readonly convertFiltersToArray: (filters: FilterState) => string[];
+  readonly removeFilter: (filters: FilterState, filterToRemove: string) => FilterState;
+  readonly addToRecentSearches: (searchQuery: string, recentSearches: string[]) => string[];
 };
 
 export function SearchHeader({
@@ -39,6 +39,13 @@ export function SearchHeader({
   removeFilter,
   addToRecentSearches,
 }: SearchHeaderProps) {
+  const handleSearchFinalize = () => {
+    if (searchText.trim() !== "") {
+      setRecentSearches(addToRecentSearches(searchText, recentSearches));
+    }
+    setIsSearching(false);
+  };
+
   return (
     <>
       {/* Search Bar */}
@@ -50,11 +57,8 @@ export function SearchHeader({
           style={styles.searchInput}
           placeholder="Search activities"
           onFocus={() => setIsSearching(true)}
-          onBlur={() => {
-            if (searchText.trim() !== "") {
-              setRecentSearches(addToRecentSearches(searchText, recentSearches));
-            }
-          }}
+          onBlur={handleSearchFinalize}
+          onSubmitEditing={handleSearchFinalize}
         />
         <FilterIcon
           width={24}
@@ -66,7 +70,7 @@ export function SearchHeader({
         />
       </View>
       {/* Recent Searches */}
-      {isSearching && searchText === "" && recentSearches.length !== 0 && (
+      {isSearching && recentSearches.length !== 0 && (
         <View style={styles.recentSearchesContainer}>
           <View style={styles.recentSearchesTextContainer}>
             <Text style={styles.smallText}>Recent Searches</Text>
@@ -127,78 +131,3 @@ export function SearchHeader({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  searchBar: {
-    display: "flex",
-    flexDirection: "row",
-    height: 43,
-    paddingHorizontal: 8,
-    alignItems: "center",
-    gap: 8,
-    alignSelf: "stretch",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    // boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.20)", // React Native uses shadow styles, not boxShadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchInput: {
-    flex: 1,
-    height: "100%",
-    paddingHorizontal: 8,
-  },
-  recentSearchesContainer: {
-    display: "flex",
-    alignSelf: "stretch",
-  },
-  recentSearchesTextContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  recentSearchesChipsContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-  },
-  recentSearchesChipsContentContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    paddingEnd: 16,
-    paddingVertical: 8,
-  },
-  smallText: {
-    color: "#153F7A",
-    fontFamily: "Instrument Sans",
-    fontSize: 14,
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: 21,
-    letterSpacing: 0.28,
-  },
-  clearAllText: {
-    color: "#B4B4B4",
-    fontSize: 14,
-    textDecorationLine: "underline",
-    textDecorationStyle: "solid",
-  },
-  filtersContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    alignSelf: "stretch",
-    alignItems: "center",
-  },
-  filtersContentContainer: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    paddingEnd: 16,
-    paddingVertical: 8,
-  },
-});
