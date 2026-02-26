@@ -26,6 +26,7 @@ type ActivityContextType = {
   deletePlaylist: (playlistId: string) => void;
   markViewed: (id: string) => void;
   restorePlaylist: (playlist: Playlist, index?: number) => void;
+  removeFromPlaylist: (playlistId: string, activityId: string) => void;
 };
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
@@ -75,6 +76,16 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
               lastViewedAt: now,
             }
           : a,
+      ),
+    );
+  };
+
+  const removeFromPlaylist = (playlistId: string, activityId: string) => {
+    setPlaylists((prev) =>
+      prev.map((p) =>
+        p.id === playlistId
+          ? { ...p, activityIds: p.activityIds.filter((id) => id !== activityId) }
+          : p,
       ),
     );
   };
@@ -178,6 +189,7 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
         deletePlaylist,
         markViewed,
         restorePlaylist,
+        removeFromPlaylist,
       }}
     >
       {children}

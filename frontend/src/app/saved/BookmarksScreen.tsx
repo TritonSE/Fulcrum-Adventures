@@ -10,10 +10,10 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<RootStackParamList, "Bookmarks">;
 
 export default function BookmarksScreen({ navigation }: Props) {
-  const { bookmarkedActivities, reorderBookmarks, markViewed } = useActivities();
+  const { bookmarkedActivities, reorderBookmarks, setSaved, markViewed } = useActivities();
   const [isEditing, setIsEditing] = useState(false);
 
-  // Keep the blue nav header like your screenshot
+  // Blue header styling
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Bookmarks",
@@ -25,7 +25,7 @@ export default function BookmarksScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      {/* This is the white row below the blue header */}
+      {/* Edit button ABOVE the cards (not in header) */}
       <View
         style={{
           flexDirection: "row",
@@ -42,15 +42,16 @@ export default function BookmarksScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      {/* Cards start immediately under that row */}
       <ActivityList
         header="Bookmarks"
-        showHeader={false} // ✅ removes “## Bookmarks”
+        showHeader={false} // removes “## Bookmarks”
         activities={bookmarkedActivities}
         isEditing={isEditing}
         onReorder={reorderBookmarks}
+        enableSwipeDelete={!isEditing} // disable swipe while reordering
+        onDelete={(id) => setSaved(id, false)} // trash removes bookmark
         onActivityPress={(a) => {
-          markViewed(a.id);
+          markViewed?.(a.id);
           navigation.navigate("ActivityDetail", { activityId: a.id });
         }}
       />

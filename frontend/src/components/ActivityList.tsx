@@ -1,8 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-// src/components/ActivityList.tsx
 import React from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { Animated, FlatList, Pressable, Text, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
+import { Swipeable } from "react-native-gesture-handler";
 
 import { ActivityCard } from "./ActivityCard";
 import { ActivityCardCondensed } from "./ActivityCardCondensed";
@@ -17,9 +17,17 @@ type ActivityListProps = {
   onActivityPress?: (activity: Activity) => void;
   onSaveToggle?: (id: string) => void;
   horizontal?: boolean;
-  isEditing?: boolean; // ✅ NEW
-  onReorder?: (newData: Activity[]) => void; // optional future use
+
+  // reorder mode (bookmarks, playlist reorder)
+  isEditing?: boolean;
+  onReorder?: (newData: Activity[]) => void;
+
+  // hide the "## Header" inside the list
   showHeader?: boolean;
+
+  // swipe-to-delete
+  enableSwipeDelete?: boolean;
+  onDelete?: (activityId: string) => void;
 };
 
 export const ActivityList: React.FC<ActivityListProps> = ({
@@ -29,14 +37,19 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   onActivityPress,
   onSaveToggle,
   horizontal = false,
+
   isEditing = false,
   onReorder,
-  showHeader = true,
-}) => {
-  const renderCard = (item: Activity, drag?: () => void, isActive?: boolean) => {
-    const CardComponent = variant === "condensed" ? ActivityCardCondensed : ActivityCard;
 
-    return (
+  showHeader = true,
+
+  enableSwipeDelete = false,
+  onDelete,
+}) => {
+  const CardComponent = variant === "condensed" ? ActivityCardCondensed : ActivityCard;
+
+  const renderRow = (item: Activity, drag?: () => void, isActive?: boolean) => {
+    const content = (
       <View
         style={{
           flexDirection: "row",
@@ -44,13 +57,14 @@ export const ActivityList: React.FC<ActivityListProps> = ({
           opacity: isActive ? 0.9 : 1,
         }}
       >
+        {/* Drag handle only in edit mode */}
         {isEditing && (
           <Pressable onPressIn={drag} style={{ paddingHorizontal: 6 }}>
             <Ionicons name="reorder-three-outline" size={22} color="#888" />
           </Pressable>
         )}
 
-        {/* THIS IS THE IMPORTANT FIX */}
+        {/* Important: make card take full width */}
         <View style={{ flex: 1 }}>
           <CardComponent
             activity={item}
@@ -60,36 +74,72 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         </View>
       </View>
     );
+
+    // Swipe delete only in normal mode, and only if provided
+    if (!enableSwipeDelete || !onDelete || isEditing) return content;
+
+    const renderRightActions = (_progress: any, dragX: Animated.AnimatedInterpolation<number>) => {
+      const scale = dragX.interpolate({
+        inputRange: [-90, -30, 0],
+        outputRange: [1, 0.9, 0.8],
+        extrapolate: "clamp",
+      });
+
+      return (
+        <Pressable
+          onPress={() => onDelete(item.id)}
+          style={{
+            width: 78,
+            marginVertical: 6,
+            borderRadius: 14,
+            backgroundColor: "#D64545",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Animated.View style={{ transform: [{ scale }] }}>
+            <Ionicons name="trash" size={22} color="white" />
+          </Animated.View>
+        </Pressable>
+      );
+    };
+
+    return (
+      <Swipeable renderRightActions={renderRightActions} overshootRight={false}>
+        {content}
+      </Swipeable>
+    );
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Optional header inside list */}
       {showHeader && (
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>{header}</Text>
         </View>
       )}
 
-      {/* Normal Mode */}
+      {/* Normal mode */}
       {!isEditing ? (
         <FlatList
           data={activities}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => renderCard(item)}
+          renderItem={({ item }) => renderRow(item)}
           horizontal={horizontal}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
         />
       ) : (
-        // Edit Mode
+        // Reorder mode
         <DraggableFlatList
           data={activities}
           keyExtractor={(item) => item.id}
           onDragEnd={({ data }) => onReorder?.(data)}
+          renderItem={({ item, drag, isActive }) => renderRow(item, drag, isActive)}
           activationDistance={0}
-          renderItem={({ item, drag, isActive }) => renderCard(item, drag, isActive)}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
         />
       )}

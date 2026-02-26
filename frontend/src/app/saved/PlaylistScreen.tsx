@@ -4,8 +4,8 @@ import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { ActivityList } from "../../components/ActivityList";
 import { useActivities } from "../../context_temp/ActivityContext";
-import { showToast } from "../../utils/toast";
 
+import type { Activity } from "../../types/activity";
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -15,10 +15,15 @@ const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"
 
 export default function PlaylistScreen({ route, navigation }: Props) {
   const { playlistId } = route.params;
-  const { markViewed } = useActivities();
 
-  const { playlists, activities, reorderPlaylistActivities, editPlaylist, deletePlaylist } =
-    useActivities();
+  const {
+    playlists,
+    activities,
+    reorderPlaylistActivities,
+    editPlaylist,
+    deletePlaylist,
+    removeFromPlaylist,
+  } = useActivities();
 
   const playlist = playlists.find((p) => p.id === playlistId);
 
@@ -28,22 +33,32 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   const [editVisible, setEditVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
 
+  // ✅ safe initial values (don’t touch playlist.* here)
   const [nameDraft, setNameDraft] = useState("");
   const [colorDraft, setColorDraft] = useState(COLORS[0]);
 
-  // Keep playlist activities in playlist order
-  const playlistActivities = useMemo(() => {
+  // ✅ when playlist becomes available (or changes), sync drafts
+  // useLayoutEffect(() => {
+  //   if (!playlist) return;
+  //   setNameDraft(playlist.name);
+  //   setColorDraft(playlist.color);
+  // }, [playlist?.id]);
+
+  // ✅ Hook must be called every render (even if playlist is missing)
+  const playlistActivities = useMemo<Activity[]>(() => {
     if (!playlist) return [];
     const byId = new Map(activities.map((a) => [a.id, a]));
-    return playlist.activityIds.map((id) => byId.get(id)).filter(Boolean) as typeof activities;
+    return playlist.activityIds.map((id) => byId.get(id)).filter(Boolean) as Activity[];
   }, [playlist, activities]);
 
+  // ✅ header styling (also must run every render)
   useLayoutEffect(() => {
     if (!playlist) return;
 
     navigation.setOptions({
       headerStyle: { backgroundColor: playlist.color },
       headerTintColor: "white",
+      headerTitleStyle: { fontWeight: "800" },
       headerTitle: playlist.name,
       headerRight: () => (
         <Pressable onPress={() => setMenuVisible(true)} style={{ paddingHorizontal: 12 }}>
@@ -51,9 +66,15 @@ export default function PlaylistScreen({ route, navigation }: Props) {
         </Pressable>
       ),
     });
-  }, [navigation, playlist]);
+  }, [navigation, playlist?.color, playlist?.name]);
 
-  if (!playlist) return null;
+  if (!playlist) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Playlist not found</Text>
+      </View>
+    );
+  }
 
   const openEdit = () => {
     setMenuVisible(false);
@@ -66,8 +87,6 @@ export default function PlaylistScreen({ route, navigation }: Props) {
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
     editPlaylist(playlist.id, trimmed, colorDraft);
-    showToast("Playlist updated", trimmed);
-
     setEditVisible(false);
   };
 
@@ -85,7 +104,8 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   return (
     <View style={{ flex: 1 }}>
       <ActivityList
-        header="" // header is in the navigation bar
+        header=""
+        showHeader={false}
         activities={playlistActivities}
         isEditing={isReordering}
         onReorder={(newOrder) =>
@@ -94,14 +114,12 @@ export default function PlaylistScreen({ route, navigation }: Props) {
             newOrder.map((a) => a.id),
           )
         }
-        onActivityPress={(a) => {
-          markViewed(a.id);
-          navigation.navigate("ActivityDetail", { activityId: a.id });
-        }}
+        enableSwipeDelete={!isReordering}
+        onDelete={(activityId) => removeFromPlaylist(playlist.id, activityId)}
+        onActivityPress={(a) => navigation.navigate("ActivityDetail", { activityId: a.id })}
       />
 
-      {/* ⋯ Menu */}
-      {/* ⋯ Styled Menu */}
+      {/* ⋯ Menu (rounded with red delete) */}
       <Modal visible={menuVisible} transparent animationType="fade">
         <Pressable
           style={{
@@ -125,16 +143,12 @@ export default function PlaylistScreen({ route, navigation }: Props) {
               elevation: 6,
             }}
           >
-            {/* Rearrange */}
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
-                setIsReordering(true);
+                setIsReordering((prev) => !prev);
               }}
-              style={{
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-              }}
+              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
               <Text style={{ fontSize: 16, color: "#1E2A5A" }}>
                 {isReordering ? "Done Rearranging" : "Rearrange"}
@@ -143,26 +157,15 @@ export default function PlaylistScreen({ route, navigation }: Props) {
 
             <View style={{ height: 1, backgroundColor: "#E6E6E6" }} />
 
-            {/* Edit */}
-            <Pressable
-              onPress={openEdit}
-              style={{
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-              }}
-            >
+            <Pressable onPress={openEdit} style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
               <Text style={{ fontSize: 16, color: "#1E2A5A" }}>Edit Name</Text>
             </Pressable>
 
             <View style={{ height: 1, backgroundColor: "#E6E6E6" }} />
 
-            {/* Delete */}
             <Pressable
               onPress={confirmDelete}
-              style={{
-                paddingVertical: 14,
-                paddingHorizontal: 16,
-              }}
+              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
               <Text style={{ fontSize: 16, color: "#D64545", fontWeight: "600" }}>
                 Delete Playlist
@@ -172,7 +175,7 @@ export default function PlaylistScreen({ route, navigation }: Props) {
         </Pressable>
       </Modal>
 
-      {/* Edit Playlist Modal */}
+      {/* Edit modal (name + color) */}
       <Modal visible={editVisible} transparent animationType="fade">
         <View
           style={{
@@ -182,23 +185,31 @@ export default function PlaylistScreen({ route, navigation }: Props) {
             padding: 20,
           }}
         >
-          <View style={{ backgroundColor: "white", borderRadius: 16, padding: 18 }}>
-            <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 12 }}>Edit Playlist</Text>
+          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 18 }}>
+            <Text style={{ fontSize: 20, fontWeight: "900", color: "#1E2A5A", marginBottom: 12 }}>
+              Edit Playlist
+            </Text>
 
-            <Text style={{ fontWeight: "700", marginBottom: 6 }}>Name</Text>
+            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginBottom: 6 }}>
+              Playlist Name
+            </Text>
             <TextInput
               value={nameDraft}
               onChangeText={setNameDraft}
-              placeholder="Playlist name"
+              placeholder="Enter Playlist Name"
+              placeholderTextColor="#8A8FA3"
               style={{
                 backgroundColor: "#F2F3F5",
                 borderRadius: 12,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
+                color: "#1E2A5A",
               }}
             />
 
-            <Text style={{ fontWeight: "700", marginTop: 14, marginBottom: 10 }}>Color</Text>
+            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginTop: 16, marginBottom: 10 }}>
+              Choose Color
+            </Text>
             <View style={{ flexDirection: "row" }}>
               {COLORS.map((c) => {
                 const selected = c === colorDraft;
@@ -225,15 +236,14 @@ export default function PlaylistScreen({ route, navigation }: Props) {
                 <Text>Cancel</Text>
               </Pressable>
               <Pressable onPress={saveEdit} style={{ padding: 10 }}>
-                <Text style={{ color: "#2F3E75", fontWeight: "800" }}>Save</Text>
+                <Text style={{ color: "#2F3E75", fontWeight: "900" }}>Save</Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Delete confirm */}
-      {/* iOS-style Delete Confirmation */}
+      {/* Delete confirm (iOS style) */}
       <Modal visible={confirmDeleteVisible} transparent animationType="fade">
         <View
           style={{
@@ -257,7 +267,6 @@ export default function PlaylistScreen({ route, navigation }: Props) {
               elevation: 6,
             }}
           >
-            {/* Title */}
             <View style={{ paddingVertical: 20, paddingHorizontal: 16 }}>
               <Text
                 style={{
@@ -271,67 +280,28 @@ export default function PlaylistScreen({ route, navigation }: Props) {
               </Text>
             </View>
 
-            {/* Horizontal divider */}
             <View style={{ height: 1, backgroundColor: "#E6E6E6" }} />
 
-            {/* Buttons row */}
             <View style={{ flexDirection: "row", height: 48 }}>
-              {/* Cancel */}
               <Pressable
                 onPress={() => setConfirmDeleteVisible(false)}
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
               >
                 <Text style={{ fontSize: 16, color: "#6B6F80" }}>Cancel</Text>
               </Pressable>
 
-              {/* Vertical divider */}
               <View style={{ width: 1, backgroundColor: "#E6E6E6" }} />
 
-              {/* Remove */}
               <Pressable
                 onPress={doDelete}
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: "#D64545",
-                    fontWeight: "700",
-                  }}
-                >
-                  Remove
-                </Text>
+                <Text style={{ fontSize: 16, color: "#D64545", fontWeight: "700" }}>Remove</Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
-
-      {/* Floating Done button while reordering (optional but nice) */}
-      {isReordering && (
-        <Pressable
-          onPress={() => setIsReordering(false)}
-          style={{
-            position: "absolute",
-            right: 16,
-            bottom: 16,
-            backgroundColor: "#2F3E75",
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            borderRadius: 999,
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "800" }}>Done</Text>
-        </Pressable>
-      )}
     </View>
   );
 }
