@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useRef, useState } from "react";
+import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
 import { mockActivities } from "../data/mockActivities";
@@ -13,6 +13,11 @@ type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
 };
 
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const LIST_HORIZONTAL_PADDING = 20;
+const CARD_HORIZONTAL_SPACING = 12;
+const CARD_ITEM_WIDTH = SCREEN_WIDTH - LIST_HORIZONTAL_PADDING * 2;
+
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
@@ -22,6 +27,10 @@ export function HomeRecentBookmarksSection({
   const indicatorCount = Math.min(6, activities.length);
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const snapOffsets = useMemo(
+    () => activities.map((_, index) => index * (CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING)),
+    [activities],
+  );
 
   const viewabilityConfig = useRef<ViewabilityConfig>({
     itemVisiblePercentThreshold: 60,
@@ -48,13 +57,21 @@ export function HomeRecentBookmarksSection({
         <>
           <FlatList
             data={activities}
-            renderItem={({ item }) => <ActivityCard activity={item} />}
+            renderItem={({ item }) => (
+              <View style={styles.cardItemWrapper}>
+                <ActivityCard activity={item} />
+              </View>
+            )}
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
+            ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
             decelerationRate="fast"
+            snapToOffsets={snapOffsets}
+            snapToAlignment="start"
+            disableIntervalMomentum
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
           />
@@ -103,8 +120,13 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    gap: 12,
+    paddingHorizontal: LIST_HORIZONTAL_PADDING,
+  },
+  cardItemWrapper: {
+    width: CARD_ITEM_WIDTH,
+  },
+  cardSeparator: {
+    width: CARD_HORIZONTAL_SPACING,
   },
   dotsContainer: {
     flexDirection: "row",
