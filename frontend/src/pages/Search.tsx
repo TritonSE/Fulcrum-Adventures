@@ -15,7 +15,7 @@ import SearchIcon from "../../assets/icons/search-outline.svg";
 import { ActivityList } from "../components/ActivityList";
 import { Chip } from "../components/Chip";
 import { FiltersModal } from "../components/FiltersModal";
-import { TempNavBar } from "../components/TempNavBar";
+import { Navbar } from "../components/Navbar";
 import { CATEGORIES as categories } from "../constants/filterOptions";
 import { mockActivities } from "../data/mockActivities";
 
@@ -455,8 +455,7 @@ export function SearchPage() {
           onClose={() => setShowFilterModal(false)}
         />
 
-        {/* TODO: replace with actual NavBar */}
-        <TempNavBar />
+        <Navbar currentTab="Search" onSwitchTab={() => {}}/>
       </View>
     </TouchableWithoutFeedback>
   );
