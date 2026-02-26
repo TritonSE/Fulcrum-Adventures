@@ -1,5 +1,8 @@
+import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import { LibraryPopup } from "../../components/LibraryPopup";
 import { useActivities } from "../../context_temp/ActivityContext";
 
 import type { RootStackParamList } from "../../types/navigation";
@@ -8,9 +11,11 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<RootStackParamList, "ActivityDetail">;
 
 export default function ActivityDetailScreen({ route }: Props) {
-  const { activities, toggleSaved } = useActivities();
+  const { activities } = useActivities();
 
   const activity = activities.find((a) => a.id === route.params.activityId);
+
+  const [popupVisible, setPopupVisible] = useState(false);
 
   if (!activity) return null;
 
@@ -30,20 +35,14 @@ export default function ActivityDetailScreen({ route }: Props) {
         <Text key={i}>• {m.name}</Text>
       ))}
 
-      <Pressable
-        onPress={() => toggleSaved(activity.id)}
-        style={{
-          marginTop: 24,
-          padding: 14,
-          backgroundColor: "#2F3E75",
-          borderRadius: 12,
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "white" }}>
-          {activity.isSaved ? "Remove Bookmark" : "Save Activity"}
-        </Text>
+      <Pressable onPress={() => setPopupVisible(true)}>
+        <Ionicons name="bookmark-outline" size={24} />
       </Pressable>
+      <LibraryPopup
+        visible={popupVisible}
+        onClose={() => setPopupVisible(false)}
+        activityId={route.params.activityId}
+      />
     </ScrollView>
   );
 }

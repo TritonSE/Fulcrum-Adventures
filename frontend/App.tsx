@@ -1,17 +1,19 @@
-// import { StatusBar } from "expo-status-bar";
-// import { StyleSheet, Text, View } from "react-native";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+// import { StatusBar } from "expo-status-bar";
+// import { StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import ActivityDetailScreen from "./src/app/saved/ActivityDetailScreen";
 import BookmarksScreen from "./src/app/saved/BookmarksScreen";
+import CreatePlaylistModalScreen from "./src/app/saved/CreatePlaylistModalScreen";
 import DownloadsScreen from "./src/app/saved/DownloadsScreen";
 import HistoryScreen from "./src/app/saved/HistoryScreen";
 import LibraryScreen from "./src/app/saved/LibraryScreen";
 import PlaylistScreen from "./src/app/saved/PlaylistScreen";
 // import LibraryScreen from "./src/app/saved/LibraryScreen";
 import { ActivityProvider } from "./src/context_temp/ActivityContext";
-import { PlaylistProvider } from "./src/context_temp/PlaylistContext";
+// import { PlaylistProvider } from "./src/context_temp/PlaylistContext";
 
 import type { RootStackParamList } from "./src/types/navigation";
 
@@ -19,7 +21,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <PlaylistProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <ActivityProvider>
         <NavigationContainer>
           <Stack.Navigator>
@@ -28,9 +30,15 @@ export default function App() {
             <Stack.Screen name="Downloads" component={DownloadsScreen} />
             <Stack.Screen name="History" component={HistoryScreen} />
             <Stack.Screen name="Playlist" component={PlaylistScreen} />
+            <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
+            <Stack.Screen
+              name="CreatePlaylistModal"
+              component={CreatePlaylistModalScreen}
+              options={{ presentation: "modal", headerShown: false }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </ActivityProvider>
-    </PlaylistProvider>
+    </GestureHandlerRootView>
   );
 }

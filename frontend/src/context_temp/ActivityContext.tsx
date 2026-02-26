@@ -2,12 +2,25 @@ import React, { createContext, use, useState } from "react";
 
 import type { Activity } from "../types/activity";
 
+type Playlist = {
+  id: string;
+  name: string;
+  color: string;
+  activityIds: string[];
+};
+
 type ActivityContextType = {
   activities: Activity[];
+  bookmarkedActivities: Activity[];
   toggleSaved: (id: string) => void;
   toggleDownload: (id: string) => void;
   toggleHistory: (id: string) => void;
   togglePlaylist: (id: string) => void;
+  reorderBookmarks: (newOrder: Activity[]) => void;
+
+  playlists: Playlist[];
+  addToPlaylist: (playlistId: string, activityId: string) => void;
+  createPlaylist: (name: string, color: string) => string;
 };
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
@@ -45,7 +58,39 @@ const initialActivities: Activity[] = [
 ];
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
-  const [activities, setActivities] = useState(initialActivities);
+  const [activities, setActivities] = useState<Activity[]>(initialActivities);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
+  const bookmarkedActivities = activities.filter((a) => a.isSaved);
+
+  const reorderBookmarks = (newOrder: Activity[]) => {
+    setActivities((prev) => {
+      const nonBookmarked = prev.filter((a) => !a.isSaved);
+      return [...newOrder, ...nonBookmarked];
+    });
+  };
+
+  const addToPlaylist = (playlistId: string, activityId: string) => {
+    setPlaylists((prev) =>
+      prev.map((p) =>
+        p.id === playlistId
+          ? {
+              ...p,
+              activityIds: p.activityIds.includes(activityId)
+                ? p.activityIds
+                : [...p.activityIds, activityId],
+            }
+          : p,
+      ),
+    );
+  };
+
+  const createPlaylist = (name: string, color: string): string => {
+    const id = Date.now().toString();
+    const newPlaylist: Playlist = { id, name, color, activityIds: [] };
+    setPlaylists((prev) => [...prev, newPlaylist]);
+    return id;
+  };
 
   const toggleSaved = (id: string) => {
     setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: !a.isSaved } : a)));
@@ -69,15 +114,26 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ActivityContext
-      value={{ activities, toggleSaved, toggleDownload, toggleHistory, togglePlaylist }}
+      value={{
+        activities,
+        bookmarkedActivities,
+        toggleSaved,
+        toggleDownload,
+        toggleHistory,
+        togglePlaylist,
+        reorderBookmarks,
+        playlists,
+        addToPlaylist,
+        createPlaylist,
+      }}
     >
       {children}
     </ActivityContext>
   );
 }
 
-export function useActivities() {
-  const ctx = use(ActivityContext);
-  if (!ctx) throw new Error("useActivities must be used in provider");
-  return ctx;
-}
+export const useActivities = (): ActivityContextType => {
+  const context = use(ActivityContext);
+  if (!context) throw new Error("useActivities must be used inside ActivityProvider");
+  return context;
+};

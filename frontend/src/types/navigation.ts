@@ -5,4 +5,5 @@ export type RootStackParamList = {
   History: undefined;
   ActivityDetail: { activityId: string };
   Playlist: { playlistId: string };
+  CreatePlaylistModal: { activityId?: string } | undefined;
 };
