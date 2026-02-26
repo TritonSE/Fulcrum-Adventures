@@ -70,7 +70,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
-        style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1 }}
+        style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1, paddingHorizontal: 2 }}
       />
     </View>
   );
