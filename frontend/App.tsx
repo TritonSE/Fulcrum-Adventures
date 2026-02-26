@@ -1,8 +1,7 @@
-import HomeScreen from "./src/app/home";
+import HomeScreen from "./src/app/(tabs)/home";
 //import { SeeAll } from "./src/components/SeeAll";
 // === test new ===
 // === end test ===
-
 // const styles = StyleSheet.create({
 //   container: {
 //     flex: 1,
