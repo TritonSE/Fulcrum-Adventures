@@ -1,6 +1,7 @@
+// src/components/LibraryPopup.tsx
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useActivities } from "../context_temp/ActivityContext";
@@ -18,24 +19,56 @@ type Props = {
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) => {
-  const { playlists, addToPlaylist, setSaved } = useActivities();
+  const {
+    activities,
+    bookmarkedActivities,
+    playlists,
+    addToPlaylist,
+    removeFromPlaylist,
+    setSaved,
+  } = useActivities();
   const navigation = useNavigation<Nav>();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [savedState, setSavedState] = useState<boolean>(false);
+
+  // Global saved state (used only to initialize when popup opens)
+  const currentlySaved = useMemo(() => {
+    return activities.find((a) => a.id === activityId)?.isSaved ?? false;
+  }, [activities, activityId]);
+
+  const bookmarksCount = bookmarkedActivities.length;
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   };
 
-  const handleDone = () => {
-    selectedIds.forEach((playlistId) => addToPlaylist(playlistId, activityId));
+  const handleToggleBookmark = () => {
+    const next = !savedState;
+    setSavedState(next);
+    setSaved(activityId, next);
+    showToast(next ? "Saved to Bookmarks" : "Removed from Bookmarks");
+  };
 
-    // ensure it becomes bookmarked too
-    setSaved(activityId, true);
+  const handleDone = () => {
     if (selectedIds.length > 0) {
-      showToast("Added to playlist", `${selectedIds.length} selected`);
+      // Keep track of what we added
+      const addedPlaylistIds = [...selectedIds];
+
+      addedPlaylistIds.forEach((playlistId) => addToPlaylist(playlistId, activityId));
+
+      setSaved(activityId, savedState);
+
+      showToast("Added to playlist!", {
+        actionLabel: "Undo",
+        onAction: () => {
+          addedPlaylistIds.forEach((playlistId) => removeFromPlaylist(playlistId, activityId));
+          setSaved(activityId, currentlySaved);
+        },
+      });
     } else {
-      showToast("Saved to Bookmarks");
+      setSaved(activityId, savedState);
+      showToast(savedState ? "Saved to Bookmarks" : "Removed from Bookmarks");
     }
 
     setSelectedIds([]);
@@ -43,51 +76,100 @@ export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) 
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onShow={() => {
+        setSavedState(currentlySaved);
+        setSelectedIds([]);
+      }}
+    >
+      <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>Save to Library</Text>
+          {/* grab handle */}
+          <View style={styles.handle} />
 
-          {playlists.length === 0 && (
-            <Text style={{ color: "#777", marginBottom: 10 }}>
-              No playlists yet. Create one below.
-            </Text>
-          )}
+          {/* header */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Library</Text>
+            <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={10}>
+              <Ionicons name="close" size={18} color="#111827" />
+            </Pressable>
+          </View>
 
-          <FlatList
-            data={playlists}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              const selected = selectedIds.includes(item.id);
+          {/* Bookmarked boxed card */}
+          <View style={styles.cardBox}>
+            <View style={styles.row}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>Bookmarked</Text>
+                <Text style={styles.cardSub}>{bookmarksCount} activities</Text>
+              </View>
 
-              return (
-                <Pressable style={styles.playlistRow} onPress={() => toggleSelect(item.id)}>
-                  <View>
-                    <Text style={styles.playlistName}>{item.name}</Text>
-                    <Text style={styles.count}>{item.activityIds.length} activities</Text>
-                  </View>
+              <Pressable
+                onPress={handleToggleBookmark}
+                style={({ pressed }) => [styles.iconPill, pressed && { opacity: 0.85 }]}
+                hitSlop={10}
+              >
+                <Ionicons
+                  name={savedState ? "bookmark" : "bookmark-outline"}
+                  size={18}
+                  color="#1F2A44"
+                />
+              </Pressable>
+            </View>
+          </View>
 
-                  {selected && <Ionicons name="checkmark-circle" size={22} color="#2F3E75" />}
-                </Pressable>
-              );
-            }}
-          />
+          {/* Playlists boxed section */}
+          <View style={styles.sectionBox}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Save to Playlist</Text>
 
-          <Pressable
-            onPress={() => {
-              onClose();
-              navigation.navigate("CreatePlaylistModal", { activityId }); // optional: pass activityId
-            }}
-          >
-            <Text style={styles.createText}>+ Create Playlist</Text>
-          </Pressable>
+              <Pressable
+                onPress={() => {
+                  onClose();
+                  navigation.navigate("CreatePlaylistModal", { activityId });
+                }}
+              >
+                <Text style={styles.createNew}>Create New</Text>
+              </Pressable>
+            </View>
 
-          <Pressable style={styles.saveButton} onPress={handleDone}>
-            <Text style={styles.saveText}>Done</Text>
-          </Pressable>
+            {playlists.length === 0 ? (
+              <Text style={styles.emptyText}>No playlists yet. Create one above.</Text>
+            ) : (
+              <FlatList
+                data={playlists}
+                keyExtractor={(item) => item.id}
+                style={{ maxHeight: 320 }}
+                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+                renderItem={({ item }) => {
+                  const selected = selectedIds.includes(item.id);
 
-          <Pressable onPress={onClose}>
-            <Text style={styles.cancel}>Cancel</Text>
+                  return (
+                    <Pressable style={styles.playlistCard} onPress={() => toggleSelect(item.id)}>
+                      <View
+                        style={[styles.colorSquare, { backgroundColor: item.color || "#D1D5DB" }]}
+                      />
+
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.playlistName}>{item.name}</Text>
+                        <Text style={styles.playlistSub}>{item.activityIds.length} activity</Text>
+                      </View>
+
+                      <View style={[styles.checkCircle, selected && styles.checkCircleOn]}>
+                        {selected && <Ionicons name="checkmark" size={16} color="white" />}
+                      </View>
+                    </Pressable>
+                  );
+                }}
+              />
+            )}
+          </View>
+
+          {/* Done */}
+          <Pressable style={styles.doneBtn} onPress={handleDone}>
+            <Text style={styles.doneText}>Done</Text>
           </Pressable>
         </View>
       </View>
@@ -96,59 +178,159 @@ export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) 
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  // bottom sheet
+  backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.45)",
     justifyContent: "flex-end",
   },
   sheet: {
     backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    maxHeight: "75%",
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    padding: 18,
+    paddingBottom: 22,
+    maxHeight: "85%",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
+  handle: {
+    alignSelf: "center",
+    width: 44,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: "#D1D5DB",
+    marginBottom: 10,
   },
-  playlistRow: {
+
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 0.5,
-    borderColor: "#ddd",
+    marginBottom: 14,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F2A44",
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // boxed sections
+  cardBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#EEF2F7",
+    marginBottom: 14,
+  },
+  sectionBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#EEF2F7",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F2A44",
+  },
+  cardSub: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#3B4A6B",
+  },
+  iconPill: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#1F2A44",
+  },
+  createNew: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#2F3E75",
+  },
+  emptyText: {
+    color: "#6B7280",
+    fontSize: 13,
+  },
+
+  playlistCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#EEF2F7",
+  },
+  colorSquare: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
   },
   playlistName: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "800",
+    color: "#1F2A44",
   },
-  count: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 2,
+  playlistSub: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#3B4A6B",
   },
-  createText: {
-    marginTop: 12,
-    color: "#2F3E75",
-    fontWeight: "600",
+  checkCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  saveButton: {
-    marginTop: 20,
+  checkCircleOn: {
     backgroundColor: "#2F3E75",
-    padding: 14,
-    borderRadius: 14,
+  },
+
+  doneBtn: {
+    marginTop: 16,
+    backgroundColor: "#2F3E75",
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: "center",
   },
-  saveText: {
+  doneText: {
     color: "white",
-    fontWeight: "600",
-  },
-  cancel: {
-    marginTop: 14,
-    textAlign: "center",
-    color: "#777",
+    fontWeight: "800",
+    fontSize: 16,
   },
 });

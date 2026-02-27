@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { useActivities } from "../../context_temp/ActivityContext";
+import { showToast } from "../../utils/toast";
 
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -12,7 +13,14 @@ type Props = NativeStackScreenProps<RootStackParamList, "Library">;
 const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
 
 export default function LibraryScreen({ navigation }: Props) {
-  const { activities, bookmarkedActivities, playlists, editPlaylist } = useActivities();
+  const {
+    activities,
+    bookmarkedActivities,
+    playlists,
+    editPlaylist,
+    //deletePlaylist,
+    //restorePlaylist,
+  } = useActivities();
 
   const downloadsCount = activities.filter((a) => a.isDownloaded).length;
   const historyCount = activities.filter((a) => typeof a.lastViewedAt === "number").length;
@@ -41,15 +49,69 @@ export default function LibraryScreen({ navigation }: Props) {
     setColorDraft(p.color);
   };
 
+  // ✅ EDIT with UNDO
   const saveEdit = () => {
     if (!editingId) return;
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
 
+    const prev = playlists.find((p) => p.id === editingId);
+    if (!prev) return;
+
     editPlaylist(editingId, trimmed, colorDraft);
+
+    // close modal first
     setEditVisible(false);
+    const id = editingId;
     setEditingId(null);
+
+    // THEN toast (next tick, so it isn't behind the Modal)
+    setTimeout(() => {
+      showToast("Playlist edited!", {
+        actionLabel: "Undo",
+        onAction: () => editPlaylist(id, prev.name, prev.color),
+      });
+    }, 0);
   };
+
+  // ✅ DELETE with UNDO
+  // const deleteWithUndo = () => {
+  //   if (!editingId) return;
+
+  //   const index = playlists.findIndex((p) => p.id === editingId);
+  //   const deleted = playlists[index];
+  //   if (!deleted) return;
+
+  //   Alert.alert(
+  //     "Delete playlist?",
+  //     `This will delete "${deleted.name}".`,
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       {
+  //         text: "Delete",
+  //         style: "destructive",
+  //         onPress: () => {
+  //           const id = editingId;
+
+  //           deletePlaylist(id);
+
+  //           // close modal first
+  //           setEditVisible(false);
+  //           setEditingId(null);
+
+  //           // THEN toast (next tick)
+  //           setTimeout(() => {
+  //             showToast("Playlist deleted!", {
+  //               actionLabel: "Undo",
+  //               onAction: () => restorePlaylist(deleted, index),
+  //             });
+  //           }, 0);
+  //         },
+  //       },
+  //     ],
+  //     { cancelable: true },
+  //   );
+  // };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F2F3F5" }}>
@@ -153,10 +215,10 @@ export default function LibraryScreen({ navigation }: Props) {
                   </Text>
                 </View>
 
-                {/* ⋯ button opens EDIT ONLY */}
+                {/* ⋯ button opens EDIT */}
                 <Pressable
                   onPress={(e) => {
-                    e.stopPropagation(); // don't open playlist screen
+                    e.stopPropagation();
                     openEdit(p.id);
                   }}
                   style={{ paddingLeft: 10, paddingVertical: 4 }}
@@ -169,7 +231,7 @@ export default function LibraryScreen({ navigation }: Props) {
         )}
       </View>
 
-      {/* Edit Playlist Modal (only edit, no delete) */}
+      {/* Edit Playlist Modal (edit + delete) */}
       <Modal visible={editVisible} transparent animationType="fade">
         <View
           style={{
@@ -283,6 +345,20 @@ export default function LibraryScreen({ navigation }: Props) {
                 <Text style={{ color: "#2F3E75", fontWeight: "900" }}>Save</Text>
               </Pressable>
             </View>
+
+            {/* ✅ Delete button
+            <Pressable
+              onPress={deleteWithUndo}
+              style={{
+                marginTop: 14,
+                paddingVertical: 12,
+                borderRadius: 22,
+                backgroundColor: "#FEE2E2",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#B91C1C", fontWeight: "900" }}>Delete Playlist</Text>
+            </Pressable> */}
           </View>
         </View>
       </Modal>

@@ -13,7 +13,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "CreatePlaylistModal">;
 const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
 
 export default function CreatePlaylistModalScreen({ navigation, route }: Props) {
-  const { createPlaylist, addToPlaylist, setSaved } = useActivities();
+  const { createPlaylist, addToPlaylist, setSaved, deletePlaylist } = useActivities();
 
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[2]); // default green like your mock
@@ -33,14 +33,18 @@ export default function CreatePlaylistModalScreen({ navigation, route }: Props) 
 
     const newPlaylistId = createPlaylist(trimmed, color);
 
-    // If opened from LibraryPopup, auto-add + ensure bookmarked
     if (activityId) {
       addToPlaylist(newPlaylistId, activityId);
       setSaved(activityId, true);
-      showToast("Playlist created", `${trimmed} • added activity`);
-    } else {
-      showToast("Playlist created", trimmed);
     }
+
+    showToast("Playlist created!", {
+      actionLabel: "Undo",
+      onAction: () => {
+        deletePlaylist(newPlaylistId);
+      },
+    });
+
     resetAll();
     navigation.goBack();
   };

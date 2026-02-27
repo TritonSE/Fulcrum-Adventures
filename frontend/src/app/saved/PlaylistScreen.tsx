@@ -4,6 +4,7 @@ import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { ActivityList } from "../../components/ActivityList";
 import { useActivities } from "../../context_temp/ActivityContext";
+import { showToast } from "../../utils/toast";
 
 import type { Activity } from "../../types/activity";
 import type { RootStackParamList } from "../../types/navigation";
@@ -22,6 +23,7 @@ export default function PlaylistScreen({ route, navigation }: Props) {
     reorderPlaylistActivities,
     editPlaylist,
     deletePlaylist,
+    restorePlaylist,
     removeFromPlaylist,
   } = useActivities();
 
@@ -86,8 +88,22 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   const saveEdit = () => {
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
+
+    // capture previous values for undo
+    const prev = { name: playlist.name, color: playlist.color };
+
     editPlaylist(playlist.id, trimmed, colorDraft);
+
+    // close modal first so toast isn't hidden behind it
     setEditVisible(false);
+
+    // show toast next tick
+    setTimeout(() => {
+      showToast("Playlist edited!", {
+        actionLabel: "Undo",
+        onAction: () => editPlaylist(playlist.id, prev.name, prev.color),
+      });
+    }, 0);
   };
 
   const confirmDelete = () => {
@@ -96,9 +112,23 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   };
 
   const doDelete = () => {
+    // capture playlist + index for undo restore
+    const index = playlists.findIndex((p) => p.id === playlist.id);
+    const deleted = playlist; // playlist object we already have
+
     deletePlaylist(playlist.id);
     setConfirmDeleteVisible(false);
+
+    // navigate back first (so toast appears on previous screen and isn't covered)
     navigation.goBack();
+
+    // toast next tick
+    setTimeout(() => {
+      showToast("Playlist deleted!", {
+        actionLabel: "Undo",
+        onAction: () => restorePlaylist(deleted, index),
+      });
+    }, 0);
   };
 
   return (
