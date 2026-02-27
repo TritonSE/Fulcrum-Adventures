@@ -501,17 +501,41 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 20.8,
   },
+  playHeading: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#153A7A",
+    marginBottom: 12,
+    fontFamily: "Instrument Sans",
+  },
+  debriefHeading: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#153A7A",
+    marginBottom: 12,
+    fontFamily: "Instrument Sans",
+  },
+  playStepLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#153A7A",
+    marginBottom: 4,
+    fontFamily: "Instrument Sans",
+  },
+  playStepSubsection: {
+    marginBottom: 24,
+  },
   numberedItem: {
     flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 8,
-    paddingLeft: 8,
   },
   number: {
     fontSize: 14,
     fontWeight: "400",
     color: "#153A7A",
-    marginRight: 8,
-    minWidth: 20,
+    marginRight: 4,
+    marginTop: 2,
   },
   numberedText: {
     fontSize: 14,
@@ -864,26 +888,31 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
 
               {activeTab === "play" && (
                 <View>
-                  {activity.facilitate.play.map((item) => (
-                    <Text key={`play-${item}`} style={styles.sectionContent}>
-                      {item}
-                    </Text>
+                  <Text style={styles.playHeading}>How to Play</Text>
+                  {activity.facilitate.play.map((item, index) => (
+                    <View key={`play-${item}`} style={styles.playStepSubsection}>
+                      <Text style={styles.playStepLabel}>Step {index + 1}</Text>
+                      <Text style={styles.sectionContent}>{item}</Text>
+                    </View>
                   ))}
                 </View>
               )}
 
               {activeTab === "debrief" && (
                 <View>
-                  {activity.facilitate.debrief?.map((item) => (
-                    <Text key={`debrief-${item}`} style={styles.sectionContent}>
-                      {item}
-                    </Text>
+                  <Text style={styles.debriefHeading}>Debrief</Text>
+                  {activity.facilitate.debrief?.map((item, index) => (
+                    <View key={`debrief-${item}`} style={styles.numberedItem}>
+                      <Text style={styles.number}>{index + 1}.</Text>
+                      <Text style={styles.numberedText}>{item}</Text>
+                    </View>
                   ))}
                 </View>
               )}
 
               {activeTab === "safety" && (
                 <View>
+                  <Text style={styles.debriefHeading}>Safety</Text>
                   {activity.facilitate.safety?.map((item) => (
                     <Text key={`safety-${item}`} style={styles.sectionContent}>
                       {item}
@@ -894,6 +923,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
 
               {activeTab === "variations" && (
                 <View>
+                  <Text style={styles.debriefHeading}>Variations</Text>
                   {activity.facilitate.variations?.map((item) => (
                     <Text key={`variations-${item}`} style={styles.sectionContent}>
                       {item}

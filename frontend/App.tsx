@@ -7,7 +7,7 @@ import NotesScreen from "./src/components/NotesScreen";
 import { getActivityById } from "./src/data/mockActivities";
 import { formatDuration, formatGradeLevel, formatGroupSize } from "./src/utils/textUtils";
 
-import type { Activity as DataActivity } from "./src/types/activity";
+import type { CustomTab, Activity as DataActivity } from "./src/types/activity";
 
 const styles = StyleSheet.create({
   container: {
@@ -24,6 +24,9 @@ function mapToActivityDetailShape(activity: DataActivity) {
   };
   const prepMaterials = activity.facilitate?.prep?.materials ?? activity.materials ?? [];
   const playSteps = activity.facilitate?.play?.steps ?? [];
+  const safetySections = (activity.facilitate?.safety as CustomTab | undefined)?.sections ?? [];
+  const variationsSections =
+    (activity.facilitate?.variations as CustomTab | undefined)?.sections ?? [];
   return {
     id: activity.id,
     title: activity.title,
@@ -42,8 +45,8 @@ function mapToActivityDetailShape(activity: DataActivity) {
       },
       play: playSteps.map((s) => s.content),
       debrief: activity.facilitate?.debrief?.questions ?? [],
-      safety: [],
-      variations: [],
+      safety: safetySections.map((s) => s.content),
+      variations: variationsSections.map((s) => s.content),
     },
     selOpportunities: activity.selTags ?? [],
     mediaUrl: activity.imageUrl,

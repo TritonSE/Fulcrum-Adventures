@@ -51,6 +51,21 @@ export const mockActivities: Activity[] = [
           "How did you communicate without talking over each other?",
         ],
       },
+      safety: {
+        sections: [
+          {
+            content: "Be mindful of the playing field and how creative handshakes may get.",
+          },
+        ],
+      },
+      variations: {
+        sections: [
+          {
+            content:
+              'Rather than taking a knee, the students who have guess incorrectly may become the "biggest fan" of another student who is still "in". They do this by standing behind them and cheering them on. If the student they\'re cheering guesses incorrectly, the two of them may go be the biggest fan of someone else.',
+          },
+        ],
+      },
     },
   },
   {
