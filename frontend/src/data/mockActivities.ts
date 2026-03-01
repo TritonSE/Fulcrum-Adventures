@@ -81,7 +81,7 @@ export const mockActivities: Activity[] = [
     description:
       "A high-energy tournament style game where students compete to become the ultimate champion.",
     energyLevel: "High",
-    environment: "Both",
+    environment: "Outdoor",
     isSaved: true,
     hasTutorial: false,
     imageUrl: "https://via.placeholder.com/400x300",
@@ -246,7 +246,7 @@ export const mockActivities: Activity[] = [
     description:
       "A physical puzzle where a group must untangle themselves without letting go of hands.",
     energyLevel: "Medium",
-    environment: "Both",
+    environment: "Indoor",
     isSaved: false,
     hasTutorial: true,
     imageUrl: "https://via.placeholder.com/400x300",
