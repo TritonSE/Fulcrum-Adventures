@@ -18,7 +18,6 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
     // Changed to simple strings
     materials: ["Bull Ring Set", "Cone or small ball"],
@@ -84,7 +83,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Resilience", "Social Awareness"],
     facilitate: {
@@ -121,7 +120,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Relationship Skills", "Self-Management"],
     facilitate: {
@@ -153,7 +152,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["2 Flags", "Cones for boundaries"],
     selTags: ["Teamwork", "Strategy", "Physical Activity"],
     facilitate: {
@@ -187,7 +186,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Social Awareness", "Gratitude"],
     facilitate: {
@@ -218,7 +217,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["Whiteboard or Flipchart", "Markers"],
     selTags: ["Self-Reflection", "Goal Setting"],
     facilitate: {
@@ -249,7 +248,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Problem Solving", "Communication", "Physical Contact"],
     facilitate: {

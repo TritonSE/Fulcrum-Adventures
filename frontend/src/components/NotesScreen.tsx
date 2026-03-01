@@ -70,30 +70,40 @@ const StarIcon = ({ filled }: { filled: boolean }) => (
 );
 
 const CloseIcon = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Path d="M18 6L6 18M6 6L18 18" stroke="#153A7A" strokeWidth="2" strokeLinecap="round" />
+  <Svg width={40} height={40} viewBox="0 0 40 40" fill="none">
+    <Path d="M14 13L27 26" stroke="#153F7A" strokeWidth="1.5" strokeLinecap="round" />
+    <Path d="M14 26L27 13" stroke="#153F7A" strokeWidth="1.5" strokeLinecap="round" />
   </Svg>
 );
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "flex-end",
+  },
   container: {
-    flex: 1,
     backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    height: "80%",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 24,
-    paddingTop: 56,
+    paddingTop: 24,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
   },
   headerLeft: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    alignItems: "flex-start",
+    gap: 8,
   },
   titleIcon: {
     width: 24,
@@ -102,24 +112,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 26,
+    color: "#153F7A",
+    fontFamily: "League Spartan",
+    fontSize: 30,
     fontWeight: "700",
-    color: "#153A7A",
+    lineHeight: 31.2,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F3F3F3",
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   scrollContent: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 0,
     paddingBottom: 24,
   },
   dateSection: {
@@ -129,7 +146,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
   },
   dateRowRight: {
     flexDirection: "row",
@@ -153,72 +169,100 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
   },
   rowLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#153A7A",
+    flexShrink: 0,
+    color: "#153F7A",
+    fontFamily: "League Spartan",
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 30,
   },
   rowValue: {
     fontSize: 14,
-    color: "#153A7A",
+    color: "#153F7A",
+    fontFamily: "Instrument Sans",
   },
   rowPlaceholder: {
+    flexShrink: 0,
+    color: "#B4B4B4",
+    textAlign: "right",
+    fontFamily: "Instrument Sans",
     fontSize: 14,
-    color: "#949494",
+    fontWeight: "400",
+    lineHeight: 21,
+    letterSpacing: 0.28,
   },
   divider: {
+    width: 342,
     height: 1,
     backgroundColor: "#D9D9D9",
+    alignSelf: "center",
   },
   stars: {
     flexDirection: "row",
-    gap: 4,
+    gap: 0,
   },
   starTouch: {
-    padding: 4,
+    padding: 0,
   },
   notesInput: {
-    marginTop: 16,
+    marginTop: 0,
+    alignSelf: "stretch",
+    color: "#153F7A",
+    fontFamily: "Instrument Sans",
     fontSize: 14,
-    color: "#153A7A",
+    fontWeight: "400",
+    lineHeight: 21,
+    letterSpacing: 0.28,
     minHeight: 160,
-    paddingVertical: 12,
+    paddingVertical: 0,
   },
   footer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 24,
     paddingBottom: 40,
     gap: 16,
   },
   cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
+    display: "flex",
+    width: 167,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     borderRadius: 100,
     backgroundColor: "#EBEBEB",
-    alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
     color: "#153A7A",
+    fontFamily: "Instrument Sans Medium",
+    fontSize: 16,
+    fontWeight: "500",
+    lineHeight: 24,
   },
   saveButton: {
-    flex: 1,
-    paddingVertical: 14,
+    display: "flex",
+    width: 167,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     borderRadius: 100,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#153A7A",
-    alignItems: "center",
   },
   saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
     color: "#153A7A",
+    fontFamily: "Instrument Sans Medium",
+    fontSize: 16,
+    fontWeight: "500",
+    lineHeight: 24,
   },
   pickerColumn: {
     flex: 1,
@@ -285,7 +329,13 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
   }, [showDatePicker, selectedMonth, selectedDay, selectedTimeIndex]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.overlay}>
+      <TouchableOpacity
+        style={{ flex: 1 }}
+        activeOpacity={1}
+        onPress={onClose}
+      />
+      <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.titleIcon}>
@@ -329,6 +379,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
               </TouchableOpacity>
             )}
           </View>
+          <View style={{ height: 8 }} />
           {showDatePicker && (
             <View style={styles.inlinePicker}>
               <ScrollView
@@ -448,7 +499,6 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
             </View>
           )}
         </View>
-        <View style={styles.divider} />
 
         <View style={styles.row}>
           <Text style={styles.rowLabel}>Rating</Text>
@@ -465,12 +515,14 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
             ))}
           </View>
         </View>
+        <View style={{ height: 8 }} />
         <View style={styles.divider} />
+        <View style={{ height: 8 }} />
 
         <TextInput
           style={styles.notesInput}
           placeholder="Add notes..."
-          placeholderTextColor="#949494"
+          placeholderTextColor="#B4B4B4"
           value={notesText}
           onChangeText={setNotesText}
           multiline
@@ -485,6 +537,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
         <TouchableOpacity style={styles.saveButton} onPress={onClose}>
           <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </View>
   );

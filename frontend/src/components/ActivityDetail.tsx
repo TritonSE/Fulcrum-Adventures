@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Image,
+  ImageBackground,
   type LayoutChangeEvent,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,14 @@ import {
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
+
+const HEADER_PLACEHOLDER_IMAGE = require("../../assets/header-placeholder.png");
+
+type CustomTabData = {
+  key: string;
+  label: string;
+  sections: { heading?: string; text: string }[];
+};
 
 type Activity = {
   id: string;
@@ -30,11 +39,10 @@ type Activity = {
     };
     play: string[];
     debrief?: string[];
-    safety?: string[];
-    variations?: string[];
+    customTabs?: CustomTabData[];
   };
   selOpportunities: string[];
-  mediaUrl?: string | number; // string for URLs, number for require() local images
+  mediaUrl?: string | number;
   tutorialUrl?: string;
 };
 
@@ -47,12 +55,11 @@ type ActivityDetailProps = {
 const dividerStyles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: "#F9F9F9",
-    paddingHorizontal: 16,
-    paddingVertical: 0,
+    alignItems: "center",
+    paddingVertical: 16,
   },
   line: {
-    width: "100%",
+    width: 342,
     height: 1,
     backgroundColor: "#D9D9D9",
   },
@@ -65,6 +72,33 @@ const SectionDivider = () => {
     </View>
   );
 };
+
+const BackArrowIcon = () => (
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M14 5L7 12L14 19"
+      stroke="#153A7A"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const PlayArrowIcon = () => (
+  <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+    <Path
+      d="M5.51419 16.7519C5.29031 16.7514 5.0704 16.6928 4.87608 16.5816C4.43852 16.3336 4.1665 15.8523 4.1665 15.3298V4.75539C4.1665 4.23141 4.43852 3.75155 4.87608 3.5036C5.07503 3.38926 5.30103 3.33047 5.53047 3.33335C5.75992 3.33624 5.98437 3.4007 6.18038 3.52001L15.2178 8.92972C15.4062 9.04782 15.5615 9.21183 15.6691 9.40635C15.7767 9.60087 15.8332 9.81954 15.8332 10.0419C15.8332 10.2642 15.7767 10.4828 15.6691 10.6774C15.5615 10.8719 15.4062 11.0359 15.2178 11.154L6.17892 16.5652C5.97833 16.6864 5.74858 16.751 5.51419 16.7519Z"
+      fill="#153A7A"
+    />
+  </Svg>
+);
+
+const MetadataDotIcon = () => (
+  <Svg width={4} height={4} viewBox="0 0 4 4" fill="none">
+    <Path d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z" fill="#153A7A" />
+  </Svg>
+);
 
 const DownloadIcon = () => (
   <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
@@ -172,81 +206,75 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 0,
+    paddingBottom: 104,
   },
   contentWrapper: {
     flex: 1,
   },
   mediaSection: {
-    width: "100%",
-    height: 240,
-    position: "relative",
-    backgroundColor: "#F3F3F3",
-  },
-  mediaImage: {
-    width: "100%",
-    height: "100%",
-  },
-  mediaPlaceholder: {
-    width: "100%",
-    height: "100%",
+    display: "flex",
+    width: 448,
+    height: 336,
+    paddingTop: 258,
+    paddingRight: 54,
+    paddingBottom: 34,
+    paddingLeft: 261,
+    justifyContent: "flex-end",
+    alignItems: "center",
     overflow: "hidden",
   },
-  checkeredPattern: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#F3F3F3",
-    opacity: 0.5,
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
+  mediaSectionBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 448,
+    height: 336,
+  },
+  placeholderImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 390,
+    height: 336,
   },
   backButton: {
     position: "absolute",
-    top: 50,
-    left: 16,
+    top: 56,
+    left: 24,
+    display: "flex",
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
+    padding: 8,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 10,
+    borderRadius: 100,
+    backgroundColor: "#FFFFFF",
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
-  },
-  backButtonIcon: {
-    fontSize: 24,
-    color: "#153A7A",
-    fontWeight: "300",
+    zIndex: 10,
   },
   tutorialButton: {
     position: "absolute",
-    bottom: 16,
-    right: 16,
+    top: 258,
+    right: 82,
+    display: "flex",
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 100,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
-    zIndex: 10,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
-  },
-  playIcon: {
-    fontSize: 12,
-    color: "#153A7A",
-    marginRight: 6,
+    zIndex: 10,
   },
   tutorialText: {
     fontSize: 14,
@@ -255,20 +283,24 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontFamily: "Instrument Sans",
   },
-  overviewSection: {
+  contentPanel: {
+    marginTop: -24,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     backgroundColor: "#F9F9F9",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-  overviewSectionNoCategory: {
-    paddingBottom: 12,
   },
   overviewHeader: {
+    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
+    alignItems: "center",
+    marginBottom: 16,
   },
   categoryTag: {
     backgroundColor: "#3C47BD",
@@ -289,38 +321,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionIconCircle: {
+    display: "flex",
     width: 40,
     height: 40,
-    borderRadius: 100,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#EBEBEB",
+    padding: 8,
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
+    borderRadius: 100,
+    backgroundColor: "#FFFFFF",
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   metadataIconContainer: {
     width: 24,
     height: 24,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 8,
   },
   title: {
-    fontSize: 26,
+    width: "100%",
+    fontSize: 30,
     fontWeight: "700",
     color: "#153A7A",
-    marginBottom: 12,
     lineHeight: 27.04,
+    fontFamily: "League Spartan",
   },
   metadataRow: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
-    gap: 8,
   },
   metadataText: {
     fontSize: 14,
@@ -331,22 +365,25 @@ const styles = StyleSheet.create({
   },
   metadataIcon: {
     fontSize: 14,
+    fontFamily: "Instrument Sans",
   },
   metadataDot: {
-    fontSize: 14,
-    color: "#153A7A",
-    marginHorizontal: 4,
+    marginHorizontal: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
   description: {
+    width: "100%",
     fontSize: 14,
     fontWeight: "400",
     color: "#153A7A",
     lineHeight: 21,
-    marginBottom: 16,
     letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    marginBottom: 16,
   },
   difficultyTagsRow: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -368,17 +405,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tag: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 100,
+    display: "flex",
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 40,
     borderWidth: 1,
     borderColor: "#EBEBEB",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    backgroundColor: "#FFFFFF",
   },
   tagText: {
     fontSize: 12,
@@ -399,10 +434,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
   },
   section: {
-    backgroundColor: "#F9F9F9",
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
+    width: "100%",
   },
   firstSection: {
     paddingTop: 16,
@@ -414,8 +446,9 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "700",
     color: "#153A7A",
-    marginBottom: 16,
+    marginBottom: 4,
     lineHeight: 27.04,
+    fontFamily: "League Spartan",
   },
   sectionContent: {
     fontSize: 14,
@@ -437,98 +470,109 @@ const styles = StyleSheet.create({
     paddingRight: 0,
   },
   tab: {
-    height: 37,
+    display: "flex",
     paddingTop: 8,
     paddingRight: 32,
     paddingBottom: 9,
     paddingLeft: 32,
-    alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F3F3F3",
-    borderWidth: 1,
+    alignItems: "center",
+    gap: 8,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 0,
     borderColor: "#D9D9D9",
-    borderRadius: 8,
+    backgroundColor: "#F3F3F3",
+    borderRadius: 0,
+  },
+  tabFirst: {
+    borderLeftWidth: 1,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+  },
+  tabLast: {
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
   tabActive: {
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  tabWithRightBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "#D9D9D9",
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "#6C6C6C",
-    letterSpacing: 0,
-    fontFamily: "Instrument Sans",
+    color: "#153A7A",
+    fontFamily: "Instrument Sans Medium",
+    fontSize: 16,
+    fontWeight: "500",
+    lineHeight: 24,
   },
   tabTextActive: {
     color: "#153A7A",
+    fontFamily: "Instrument Sans Bold",
     fontWeight: "700",
-    fontFamily: "Instrument Sans",
   },
   contentCard: {
+    display: "flex",
+    paddingTop: 24,
+    paddingRight: 16,
+    paddingBottom: 40,
+    paddingLeft: 16,
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 32,
+    alignSelf: "stretch",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#D9D9D9",
     backgroundColor: "#FFFFFF",
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 8,
-    padding: 16,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-    borderTopWidth: 0,
-    borderRightWidth: 1,
-    borderRightColor: "#D9D9D9",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D9D9D9",
-    borderLeftWidth: 0,
   },
   subsection: {
-    marginBottom: 20,
+    marginBottom: 0,
+    width: "100%",
+    gap: 8,
   },
   subsectionTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#153A7A",
-    marginBottom: 12,
+    marginBottom: 0,
     lineHeight: 20.8,
+    fontFamily: "League Spartan",
   },
   playHeading: {
+    alignSelf: "stretch",
+    color: "#153A7A",
+    fontFamily: "League Spartan",
     fontSize: 20,
     fontWeight: "700",
-    color: "#153A7A",
-    marginBottom: 12,
-    fontFamily: "Instrument Sans",
+    lineHeight: 20.8,
+    marginBottom: 0,
   },
   debriefHeading: {
+    alignSelf: "stretch",
+    color: "#153A7A",
+    fontFamily: "League Spartan",
     fontSize: 20,
     fontWeight: "700",
-    color: "#153A7A",
-    marginBottom: 12,
-    fontFamily: "Instrument Sans",
+    lineHeight: 20.8,
+    marginBottom: 0,
   },
   playStepLabel: {
+    alignSelf: "stretch",
+    color: "#153A7A",
+    fontFamily: "Instrument Sans Bold",
     fontSize: 14,
     fontWeight: "700",
-    color: "#153A7A",
-    marginBottom: 4,
-    fontFamily: "Instrument Sans",
+    lineHeight: 21,
+    letterSpacing: 0.28,
+    marginBottom: 0,
   },
   playStepSubsection: {
-    marginBottom: 24,
+    marginBottom: 0,
   },
   numberedItem: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 8,
+    width: "100%",
   },
   number: {
     fontSize: 14,
@@ -536,6 +580,7 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     marginRight: 4,
     marginTop: 2,
+    fontFamily: "Instrument Sans",
   },
   numberedText: {
     fontSize: 14,
@@ -549,7 +594,7 @@ const styles = StyleSheet.create({
   bulletItem: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 8,
+    width: "100%",
   },
   bullet: {
     fontSize: 14,
@@ -626,10 +671,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   notificationActionBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1.5,
+    display: "flex",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: "#FFFFFF",
   },
   notificationActionText: {
@@ -641,9 +690,7 @@ const styles = StyleSheet.create({
 });
 
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
-  const [activeTab, setActiveTab] = useState<"prep" | "play" | "debrief" | "safety" | "variations">(
-    "prep",
-  );
+  const [activeTab, setActiveTab] = useState<string>("prep");
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
 
@@ -653,20 +700,15 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
     return () => clearTimeout(t);
   }, [notification]);
 
-  const hasOverview = !!activity.category;
 
-  const tabs = ["Prep", "Play", "Debrief", "Safety", "Variations"] as const;
-  const tabKeys: ("prep" | "play" | "debrief" | "safety" | "variations")[] = [
-    "prep",
-    "play",
-    "debrief",
-    "safety",
-    "variations",
-  ];
+
+  const customTabs = activity.facilitate.customTabs ?? [];
+  const tabs = ["Prep", "Play", "Debrief", ...customTabs.map((t) => t.label)];
+  const tabKeys = ["prep", "play", "debrief", ...customTabs.map((t) => t.key)];
   const tabsScrollViewRef = useRef<ScrollView>(null);
 
   const handleTabPress = (
-    tabKey: "prep" | "play" | "debrief" | "safety" | "variations",
+    tabKey: string,
     index: number,
   ) => {
     setActiveTab(tabKey);
@@ -699,40 +741,40 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
           style={[styles.contentWrapper, scrollViewHeight > 0 && { minHeight: scrollViewHeight }]}
         >
           <View style={styles.mediaSection}>
-            {activity.mediaUrl ? (
-              <Image
+            {activity.mediaUrl != null && activity.mediaUrl !== "" ? (
+              <ImageBackground
                 source={
                   typeof activity.mediaUrl === "number"
                     ? activity.mediaUrl
-                    : typeof activity.mediaUrl === "string" && activity.mediaUrl.startsWith("http")
-                      ? { uri: activity.mediaUrl }
-                      : { uri: activity.mediaUrl }
+                    : { uri: String(activity.mediaUrl) }
                 }
-                style={styles.mediaImage}
+                style={styles.mediaSectionBackground}
                 resizeMode="cover"
+                imageStyle={{ backgroundColor: "lightgray" }}
               />
             ) : (
-              <View style={styles.mediaPlaceholder}>
-                <View style={styles.checkeredPattern} />
-              </View>
+              <Image
+                source={HEADER_PLACEHOLDER_IMAGE}
+                style={styles.placeholderImage}
+                resizeMode="stretch"
+              />
             )}
-
             <TouchableOpacity
               style={styles.backButton}
               onPress={onBack ? () => onBack() : undefined}
               accessibilityRole="button"
               accessibilityLabel="Go back"
             >
-              <Text style={styles.backButtonIcon}>‹</Text>
+              <BackArrowIcon />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.tutorialButton}>
-              <Text style={styles.playIcon}>▶</Text>
+              <PlayArrowIcon />
               <Text style={styles.tutorialText}>Tutorial</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.overviewSection, !hasOverview && styles.overviewSectionNoCategory]}>
+          <View style={styles.contentPanel}>
             <View style={styles.overviewHeader}>
               {activity.category && (
                 <View style={styles.categoryTag}>
@@ -776,7 +818,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                     <GradeLevelIcon />
                   </View>
                   <Text style={styles.metadataText}>{activity.gradeLevel}</Text>
-                  <Text style={styles.metadataDot}>•</Text>
+                  <View style={styles.metadataDot}><MetadataDotIcon /></View>
                 </>
               )}
               {activity.participants && (
@@ -785,7 +827,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                     <GroupIcon />
                   </View>
                   <Text style={styles.metadataText}>{activity.participants}</Text>
-                  <Text style={styles.metadataDot}>•</Text>
+                  <View style={styles.metadataDot}><MetadataDotIcon /></View>
                 </>
               )}
               {activity.duration && (
@@ -816,17 +858,16 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 ))}
               </View>
             </View>
-          </View>
 
-          <SectionDivider />
+            <SectionDivider />
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Objective</Text>
-            <Text style={styles.sectionContent}>{activity.objective}</Text>
-          </View>
+            <View style={[styles.section, { marginBottom: 24 }]}>
+              <Text style={styles.sectionTitle}>Objective</Text>
+              <Text style={styles.sectionContent}>{activity.objective}</Text>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Facilitate</Text>
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Facilitate</Text>
 
             <View style={styles.tabsWrapper}>
               <ScrollView
@@ -839,14 +880,16 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 {tabs.map((tab, index) => {
                   const tabKey = tabKeys[index];
                   const isActive = activeTab === tabKey;
+                  const isFirst = index === 0;
                   const isLast = index === tabs.length - 1;
                   return (
                     <TouchableOpacity
                       key={tab}
                       style={[
                         styles.tab,
+                        isFirst && styles.tabFirst,
+                        isLast && styles.tabLast,
                         isActive && styles.tabActive,
-                        !isLast && styles.tabWithRightBorder,
                       ]}
                       onPress={() => handleTabPress(tabKey, index)}
                     >
@@ -863,10 +906,11 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                   {activity.facilitate.prep.setup && activity.facilitate.prep.setup.length > 0 && (
                     <View style={styles.subsection}>
                       <Text style={styles.subsectionTitle}>Set-Up</Text>
-                      {activity.facilitate.prep.setup.map((item) => (
-                        <Text key={`setup-${item}`} style={styles.sectionContent}>
-                          {item}
-                        </Text>
+                      {activity.facilitate.prep.setup.map((item, index) => (
+                        <View key={`setup-${item}`} style={styles.numberedItem}>
+                          <Text style={styles.number}>{index + 1}.</Text>
+                          <Text style={styles.numberedText}>{item}</Text>
+                        </View>
                       ))}
                     </View>
                   )}
@@ -887,19 +931,21 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               )}
 
               {activeTab === "play" && (
-                <View>
-                  <Text style={styles.playHeading}>How to Play</Text>
-                  {activity.facilitate.play.map((item, index) => (
-                    <View key={`play-${item}`} style={styles.playStepSubsection}>
-                      <Text style={styles.playStepLabel}>Step {index + 1}</Text>
-                      <Text style={styles.sectionContent}>{item}</Text>
-                    </View>
-                  ))}
+                <View style={{ width: "100%" }}>
+                  <Text style={[styles.playHeading, { marginBottom: 8 }]}>Rules</Text>
+                  <View style={{ gap: 24 }}>
+                    {activity.facilitate.play.map((item, index) => (
+                      <View key={`play-${item}`} style={styles.playStepSubsection}>
+                        <Text style={styles.playStepLabel}>Step {index + 1}</Text>
+                        <Text style={styles.sectionContent}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
               )}
 
               {activeTab === "debrief" && (
-                <View>
+                <View style={{ width: "100%", gap: 8 }}>
                   <Text style={styles.debriefHeading}>Debrief</Text>
                   {activity.facilitate.debrief?.map((item, index) => (
                     <View key={`debrief-${item}`} style={styles.numberedItem}>
@@ -910,38 +956,33 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 </View>
               )}
 
-              {activeTab === "safety" && (
-                <View>
-                  <Text style={styles.debriefHeading}>Safety</Text>
-                  {activity.facilitate.safety?.map((item) => (
-                    <Text key={`safety-${item}`} style={styles.sectionContent}>
-                      {item}
-                    </Text>
-                  ))}
-                </View>
-              )}
-
-              {activeTab === "variations" && (
-                <View>
-                  <Text style={styles.debriefHeading}>Variations</Text>
-                  {activity.facilitate.variations?.map((item) => (
-                    <Text key={`variations-${item}`} style={styles.sectionContent}>
-                      {item}
-                    </Text>
-                  ))}
-                </View>
+              {customTabs.map((ct) =>
+                activeTab === ct.key ? (
+                  <View key={ct.key} style={{ width: "100%", gap: 8 }}>
+                    <Text style={styles.debriefHeading}>{ct.label}</Text>
+                    {ct.sections.map((section, sIdx) => (
+                      <View key={`${ct.key}-section-${sIdx}`} style={{ gap: 8 }}>
+                        {section.heading && (
+                          <Text style={styles.debriefHeading}>{section.heading}</Text>
+                        )}
+                        <Text style={styles.sectionContent}>{section.text}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null,
               )}
             </View>
           </View>
 
-          <View style={[styles.section, styles.lastSection]}>
-            <Text style={styles.sectionTitle}>SEL Opportunity</Text>
-            <View style={styles.selTagsContainer}>
-              {activity.selOpportunities.map((tag) => (
-                <View key={`sel-${tag}`} style={styles.selTag}>
-                  <Text style={styles.selTagText}>{tag}</Text>
-                </View>
-              ))}
+            <View style={[styles.section, styles.lastSection, { marginTop: 24 }]}>
+              <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>SEL Opportunity</Text>
+              <View style={styles.selTagsContainer}>
+                {activity.selOpportunities.map((tag) => (
+                  <View key={`sel-${tag}`} style={styles.selTag}>
+                    <Text style={styles.selTagText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
         </View>

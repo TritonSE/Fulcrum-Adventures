@@ -1,4 +1,5 @@
 import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -8,6 +9,16 @@ import { getActivityById } from "./src/data/mockActivities";
 import { formatDuration, formatGradeLevel, formatGroupSize } from "./src/utils/textUtils";
 
 import type { CustomTab, Activity as DataActivity } from "./src/types/activity";
+
+import {
+  LeagueSpartan_400Regular,
+  LeagueSpartan_700Bold,
+} from "@expo-google-fonts/league-spartan";
+import {
+  InstrumentSans_400Regular,
+  InstrumentSans_500Medium,
+  InstrumentSans_700Bold,
+} from "@expo-google-fonts/instrument-sans";
 
 const styles = StyleSheet.create({
   container: {
@@ -24,9 +35,21 @@ function mapToActivityDetailShape(activity: DataActivity) {
   };
   const prepMaterials = activity.facilitate?.prep?.materials ?? activity.materials ?? [];
   const playSteps = activity.facilitate?.play?.steps ?? [];
-  const safetySections = (activity.facilitate?.safety as CustomTab | undefined)?.sections ?? [];
-  const variationsSections =
-    (activity.facilitate?.variations as CustomTab | undefined)?.sections ?? [];
+  const knownKeys = new Set(["prep", "play", "debrief"]);
+  const customTabs = Object.entries(activity.facilitate ?? {})
+    .filter(([key]) => !knownKeys.has(key))
+    .map(([key, value]) => {
+      const tab = value as CustomTab;
+      return {
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        sections: (tab?.sections ?? []).map((s) => ({
+          heading: s.header,
+          text: s.content,
+        })),
+      };
+    });
+
   return {
     id: activity.id,
     title: activity.title,
@@ -45,8 +68,7 @@ function mapToActivityDetailShape(activity: DataActivity) {
       },
       play: playSteps.map((s) => s.content),
       debrief: activity.facilitate?.debrief?.questions ?? [],
-      safety: safetySections.map((s) => s.content),
-      variations: variationsSections.map((s) => s.content),
+      customTabs,
     },
     selOpportunities: activity.selTags ?? [],
     mediaUrl: activity.imageUrl,
@@ -54,9 +76,20 @@ function mapToActivityDetailShape(activity: DataActivity) {
 }
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    "League Spartan": LeagueSpartan_700Bold,
+    "Instrument Sans": InstrumentSans_400Regular,
+    "Instrument Sans Medium": InstrumentSans_500Medium,
+    "Instrument Sans Bold": InstrumentSans_700Bold,
+  });
+
   const activityId = "1";
   const [showNotes, setShowNotes] = useState(false);
   const activity = getActivityById(activityId);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   if (!activity) {
     return (
@@ -68,18 +101,12 @@ export default function App() {
 
   const detailActivity = mapToActivityDetailShape(activity);
 
-  if (showNotes) {
-    return (
-      <View style={styles.container}>
-        <NotesScreen activityId={activityId} onClose={() => setShowNotes(false)} />
-        <StatusBar style="auto" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <ActivityDetail activity={detailActivity} onOpenNotes={() => setShowNotes(true)} />
+      {showNotes && (
+        <NotesScreen activityId={activityId} onClose={() => setShowNotes(false)} />
+      )}
       <StatusBar style="auto" />
     </View>
   );
