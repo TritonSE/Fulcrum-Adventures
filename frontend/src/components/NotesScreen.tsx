@@ -330,214 +330,210 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
 
   return (
     <View style={styles.overlay}>
-      <TouchableOpacity
-        style={{ flex: 1 }}
-        activeOpacity={1}
-        onPress={onClose}
-      />
+      <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
       <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.titleIcon}>
-            <NoteIcon />
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <View style={styles.titleIcon}>
+              <NoteIcon />
+            </View>
+            <Text style={styles.title}>Notes</Text>
           </View>
-          <Text style={styles.title}>Notes</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
+            <CloseIcon />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-        >
-          <CloseIcon />
-        </TouchableOpacity>
-      </View>
 
-      <ScrollView
-        style={styles.scrollContent}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={true}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.dateSection}>
-          <View style={styles.dateRow}>
-            <Text style={styles.rowLabel}>Date</Text>
-            {showDatePicker ? (
-              <View style={styles.dateRowRight}>
-                <Text style={styles.rowValue}>{displayDate}</Text>
-                <TouchableOpacity
-                  onPress={clearDate}
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  style={styles.clearDateButton}
-                >
-                  <Text style={styles.clearDateX}>×</Text>
+        <ScrollView
+          style={styles.scrollContent}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={true}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.dateSection}>
+            <View style={styles.dateRow}>
+              <Text style={styles.rowLabel}>Date</Text>
+              {showDatePicker ? (
+                <View style={styles.dateRowRight}>
+                  <Text style={styles.rowValue}>{displayDate}</Text>
+                  <TouchableOpacity
+                    onPress={clearDate}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    style={styles.clearDateButton}
+                  >
+                    <Text style={styles.clearDateX}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={openDatePicker} activeOpacity={0.7}>
+                  <Text style={styles.rowPlaceholder}>Add date</Text>
                 </TouchableOpacity>
+              )}
+            </View>
+            <View style={{ height: 8 }} />
+            {showDatePicker && (
+              <View style={styles.inlinePicker}>
+                <ScrollView
+                  ref={monthScrollRef}
+                  style={styles.pickerColumn}
+                  showsVerticalScrollIndicator={false}
+                  snapToInterval={ROW_HEIGHT}
+                  decelerationRate="fast"
+                  onMomentumScrollEnd={(e) => {
+                    const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
+                    setSelectedMonth(Math.max(0, Math.min(MONTHS.length - 1, i)));
+                  }}
+                >
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  {MONTHS.map((m, i) => (
+                    <TouchableOpacity
+                      key={m}
+                      style={[
+                        styles.pickerRowCell,
+                        { height: ROW_HEIGHT },
+                        selectedMonth === i && styles.pickerRowCellSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedMonth(i);
+                        monthScrollRef.current?.scrollTo({ y: i * ROW_HEIGHT, animated: true });
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerCellText,
+                          selectedMonth === i && styles.pickerCellTextSelected,
+                        ]}
+                      >
+                        {m}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                </ScrollView>
+                <ScrollView
+                  ref={dayScrollRef}
+                  style={styles.pickerColumn}
+                  showsVerticalScrollIndicator={false}
+                  snapToInterval={ROW_HEIGHT}
+                  decelerationRate="fast"
+                  onMomentumScrollEnd={(e) => {
+                    const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
+                    setSelectedDay(Math.max(1, Math.min(daysInSelectedMonth, i + 1)));
+                  }}
+                >
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  {dayOptions.map((d) => (
+                    <TouchableOpacity
+                      key={d}
+                      style={[
+                        styles.pickerRowCell,
+                        { height: ROW_HEIGHT },
+                        selectedDay === d && styles.pickerRowCellSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedDay(d);
+                        dayScrollRef.current?.scrollTo({
+                          y: (d - 1) * ROW_HEIGHT,
+                          animated: true,
+                        });
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerCellText,
+                          selectedDay === d && styles.pickerCellTextSelected,
+                        ]}
+                      >
+                        {getDayLabel(d, selectedMonth, selectedYear)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                </ScrollView>
+                <ScrollView
+                  ref={timeScrollRef}
+                  style={styles.pickerColumn}
+                  showsVerticalScrollIndicator={false}
+                  snapToInterval={ROW_HEIGHT}
+                  decelerationRate="fast"
+                  onMomentumScrollEnd={(e) => {
+                    const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
+                    setSelectedTimeIndex(Math.max(0, Math.min(TIMES.length - 1, i)));
+                  }}
+                >
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  {TIMES.map((t, i) => (
+                    <TouchableOpacity
+                      key={`time-${t}`}
+                      style={[
+                        styles.pickerRowCell,
+                        { height: ROW_HEIGHT },
+                        selectedTimeIndex === i && styles.pickerRowCellSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedTimeIndex(i);
+                        timeScrollRef.current?.scrollTo({ y: i * ROW_HEIGHT, animated: true });
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerCellText,
+                          selectedTimeIndex === i && styles.pickerCellTextSelected,
+                        ]}
+                      >
+                        {t}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                </ScrollView>
               </View>
-            ) : (
-              <TouchableOpacity onPress={openDatePicker} activeOpacity={0.7}>
-                <Text style={styles.rowPlaceholder}>Add date</Text>
-              </TouchableOpacity>
             )}
           </View>
-          <View style={{ height: 8 }} />
-          {showDatePicker && (
-            <View style={styles.inlinePicker}>
-              <ScrollView
-                ref={monthScrollRef}
-                style={styles.pickerColumn}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={ROW_HEIGHT}
-                decelerationRate="fast"
-                onMomentumScrollEnd={(e) => {
-                  const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
-                  setSelectedMonth(Math.max(0, Math.min(MONTHS.length - 1, i)));
-                }}
-              >
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-                {MONTHS.map((m, i) => (
-                  <TouchableOpacity
-                    key={m}
-                    style={[
-                      styles.pickerRowCell,
-                      { height: ROW_HEIGHT },
-                      selectedMonth === i && styles.pickerRowCellSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedMonth(i);
-                      monthScrollRef.current?.scrollTo({ y: i * ROW_HEIGHT, animated: true });
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.pickerCellText,
-                        selectedMonth === i && styles.pickerCellTextSelected,
-                      ]}
-                    >
-                      {m}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-              </ScrollView>
-              <ScrollView
-                ref={dayScrollRef}
-                style={styles.pickerColumn}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={ROW_HEIGHT}
-                decelerationRate="fast"
-                onMomentumScrollEnd={(e) => {
-                  const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
-                  setSelectedDay(Math.max(1, Math.min(daysInSelectedMonth, i + 1)));
-                }}
-              >
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-                {dayOptions.map((d) => (
-                  <TouchableOpacity
-                    key={d}
-                    style={[
-                      styles.pickerRowCell,
-                      { height: ROW_HEIGHT },
-                      selectedDay === d && styles.pickerRowCellSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedDay(d);
-                      dayScrollRef.current?.scrollTo({
-                        y: (d - 1) * ROW_HEIGHT,
-                        animated: true,
-                      });
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.pickerCellText,
-                        selectedDay === d && styles.pickerCellTextSelected,
-                      ]}
-                    >
-                      {getDayLabel(d, selectedMonth, selectedYear)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-              </ScrollView>
-              <ScrollView
-                ref={timeScrollRef}
-                style={styles.pickerColumn}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={ROW_HEIGHT}
-                decelerationRate="fast"
-                onMomentumScrollEnd={(e) => {
-                  const i = Math.round(e.nativeEvent.contentOffset.y / ROW_HEIGHT);
-                  setSelectedTimeIndex(Math.max(0, Math.min(TIMES.length - 1, i)));
-                }}
-              >
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-                {TIMES.map((t, i) => (
-                  <TouchableOpacity
-                    key={`time-${t}`}
-                    style={[
-                      styles.pickerRowCell,
-                      { height: ROW_HEIGHT },
-                      selectedTimeIndex === i && styles.pickerRowCellSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedTimeIndex(i);
-                      timeScrollRef.current?.scrollTo({ y: i * ROW_HEIGHT, animated: true });
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.pickerCellText,
-                        selectedTimeIndex === i && styles.pickerCellTextSelected,
-                      ]}
-                    >
-                      {t}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                <View style={{ height: ROW_HEIGHT * 2 }} />
-              </ScrollView>
+
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>Rating</Text>
+            <View style={styles.stars}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <TouchableOpacity
+                  key={`star-${i}`}
+                  onPress={() => setRating(i)}
+                  style={styles.starTouch}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <StarIcon filled={i <= rating} />
+                </TouchableOpacity>
+              ))}
             </View>
-          )}
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>Rating</Text>
-          <View style={styles.stars}>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <TouchableOpacity
-                key={`star-${i}`}
-                onPress={() => setRating(i)}
-                style={styles.starTouch}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <StarIcon filled={i <= rating} />
-              </TouchableOpacity>
-            ))}
           </View>
+          <View style={{ height: 8 }} />
+          <View style={styles.divider} />
+          <View style={{ height: 8 }} />
+
+          <TextInput
+            style={styles.notesInput}
+            placeholder="Add notes..."
+            placeholderTextColor="#B4B4B4"
+            value={notesText}
+            onChangeText={setNotesText}
+            multiline
+            textAlignVertical="top"
+          />
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={onClose}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
         </View>
-        <View style={{ height: 8 }} />
-        <View style={styles.divider} />
-        <View style={{ height: 8 }} />
-
-        <TextInput
-          style={styles.notesInput}
-          placeholder="Add notes..."
-          placeholderTextColor="#B4B4B4"
-          value={notesText}
-          onChangeText={setNotesText}
-          multiline
-          textAlignVertical="top"
-        />
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={onClose}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
       </View>
     </View>
   );

@@ -13,6 +13,7 @@ import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
 
+// eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-assignment, perfectionist/sort-imports
 const HEADER_PLACEHOLDER_IMAGE = require("../../assets/header-placeholder.png");
 
 type CustomTabData = {
@@ -96,7 +97,10 @@ const PlayArrowIcon = () => (
 
 const MetadataDotIcon = () => (
   <Svg width={4} height={4} viewBox="0 0 4 4" fill="none">
-    <Path d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z" fill="#153A7A" />
+    <Path
+      d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z"
+      fill="#153A7A"
+    />
   </Svg>
 );
 
@@ -700,17 +704,12 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
     return () => clearTimeout(t);
   }, [notification]);
 
-
-
   const customTabs = activity.facilitate.customTabs ?? [];
   const tabs = ["Prep", "Play", "Debrief", ...customTabs.map((t) => t.label)];
   const tabKeys = ["prep", "play", "debrief", ...customTabs.map((t) => t.key)];
   const tabsScrollViewRef = useRef<ScrollView>(null);
 
-  const handleTabPress = (
-    tabKey: string,
-    index: number,
-  ) => {
+  const handleTabPress = (tabKey: string, index: number) => {
     setActiveTab(tabKey);
     if (index === tabs.length - 1) {
       setTimeout(() => {
@@ -754,6 +753,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               />
             ) : (
               <Image
+                // eslint-disable-next-line ts/no-unsafe-assignment
                 source={HEADER_PLACEHOLDER_IMAGE}
                 style={styles.placeholderImage}
                 resizeMode="stretch"
@@ -818,7 +818,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                     <GradeLevelIcon />
                   </View>
                   <Text style={styles.metadataText}>{activity.gradeLevel}</Text>
-                  <View style={styles.metadataDot}><MetadataDotIcon /></View>
+                  <View style={styles.metadataDot}>
+                    <MetadataDotIcon />
+                  </View>
                 </>
               )}
               {activity.participants && (
@@ -827,7 +829,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                     <GroupIcon />
                   </View>
                   <Text style={styles.metadataText}>{activity.participants}</Text>
-                  <View style={styles.metadataDot}><MetadataDotIcon /></View>
+                  <View style={styles.metadataDot}>
+                    <MetadataDotIcon />
+                  </View>
                 </>
               )}
               {activity.duration && (
@@ -869,110 +873,116 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Facilitate</Text>
 
-            <View style={styles.tabsWrapper}>
-              <ScrollView
-                ref={tabsScrollViewRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tabsScrollContent}
-                style={styles.tabsScrollView}
-              >
-                {tabs.map((tab, index) => {
-                  const tabKey = tabKeys[index];
-                  const isActive = activeTab === tabKey;
-                  const isFirst = index === 0;
-                  const isLast = index === tabs.length - 1;
-                  return (
-                    <TouchableOpacity
-                      key={tab}
-                      style={[
-                        styles.tab,
-                        isFirst && styles.tabFirst,
-                        isLast && styles.tabLast,
-                        isActive && styles.tabActive,
-                      ]}
-                      onPress={() => handleTabPress(tabKey, index)}
-                    >
-                      <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{tab}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            </View>
+              <View style={styles.tabsWrapper}>
+                <ScrollView
+                  ref={tabsScrollViewRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.tabsScrollContent}
+                  style={styles.tabsScrollView}
+                >
+                  {tabs.map((tab, index) => {
+                    const tabKey = tabKeys[index];
+                    const isActive = activeTab === tabKey;
+                    const isFirst = index === 0;
+                    const isLast = index === tabs.length - 1;
+                    return (
+                      <TouchableOpacity
+                        key={tab}
+                        style={[
+                          styles.tab,
+                          isFirst && styles.tabFirst,
+                          isLast && styles.tabLast,
+                          isActive && styles.tabActive,
+                        ]}
+                        onPress={() => handleTabPress(tabKey, index)}
+                      >
+                        <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                          {tab}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
 
-            <View style={styles.contentCard}>
-              {activeTab === "prep" && (
-                <>
-                  {activity.facilitate.prep.setup && activity.facilitate.prep.setup.length > 0 && (
-                    <View style={styles.subsection}>
-                      <Text style={styles.subsectionTitle}>Set-Up</Text>
-                      {activity.facilitate.prep.setup.map((item, index) => (
-                        <View key={`setup-${item}`} style={styles.numberedItem}>
-                          <Text style={styles.number}>{index + 1}.</Text>
-                          <Text style={styles.numberedText}>{item}</Text>
+              <View style={styles.contentCard}>
+                {activeTab === "prep" && (
+                  <>
+                    {activity.facilitate.prep.setup &&
+                      activity.facilitate.prep.setup.length > 0 && (
+                        <View style={styles.subsection}>
+                          <Text style={styles.subsectionTitle}>Set-Up</Text>
+                          {activity.facilitate.prep.setup.map((item, index) => (
+                            <View key={`setup-${item}`} style={styles.numberedItem}>
+                              <Text style={styles.number}>{index + 1}.</Text>
+                              <Text style={styles.numberedText}>{item}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                    {activity.facilitate.prep.materials &&
+                      activity.facilitate.prep.materials.length > 0 && (
+                        <View style={styles.subsection}>
+                          <Text style={styles.subsectionTitle}>Materials</Text>
+                          {activity.facilitate.prep.materials.map((item) => (
+                            <View key={`material-${item}`} style={styles.bulletItem}>
+                              <Text style={styles.bullet}>•</Text>
+                              <Text style={styles.bulletText}>{item}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                  </>
+                )}
+
+                {activeTab === "play" && (
+                  <View style={{ width: "100%" }}>
+                    <Text style={[styles.playHeading, { marginBottom: 8 }]}>Rules</Text>
+                    <View style={{ gap: 24 }}>
+                      {activity.facilitate.play.map((item, index) => (
+                        <View key={`play-${item}`} style={styles.playStepSubsection}>
+                          <Text style={styles.playStepLabel}>Step {index + 1}</Text>
+                          <Text style={styles.sectionContent}>{item}</Text>
                         </View>
                       ))}
                     </View>
-                  )}
+                  </View>
+                )}
 
-                  {activity.facilitate.prep.materials &&
-                    activity.facilitate.prep.materials.length > 0 && (
-                      <View style={styles.subsection}>
-                        <Text style={styles.subsectionTitle}>Materials</Text>
-                        {activity.facilitate.prep.materials.map((item) => (
-                          <View key={`material-${item}`} style={styles.bulletItem}>
-                            <Text style={styles.bullet}>•</Text>
-                            <Text style={styles.bulletText}>{item}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-                </>
-              )}
-
-              {activeTab === "play" && (
-                <View style={{ width: "100%" }}>
-                  <Text style={[styles.playHeading, { marginBottom: 8 }]}>Rules</Text>
-                  <View style={{ gap: 24 }}>
-                    {activity.facilitate.play.map((item, index) => (
-                      <View key={`play-${item}`} style={styles.playStepSubsection}>
-                        <Text style={styles.playStepLabel}>Step {index + 1}</Text>
-                        <Text style={styles.sectionContent}>{item}</Text>
+                {activeTab === "debrief" && (
+                  <View style={{ width: "100%", gap: 8 }}>
+                    <Text style={styles.debriefHeading}>Debrief</Text>
+                    {activity.facilitate.debrief?.map((item, index) => (
+                      <View key={`debrief-${item}`} style={styles.numberedItem}>
+                        <Text style={styles.number}>{index + 1}.</Text>
+                        <Text style={styles.numberedText}>{item}</Text>
                       </View>
                     ))}
                   </View>
-                </View>
-              )}
+                )}
 
-              {activeTab === "debrief" && (
-                <View style={{ width: "100%", gap: 8 }}>
-                  <Text style={styles.debriefHeading}>Debrief</Text>
-                  {activity.facilitate.debrief?.map((item, index) => (
-                    <View key={`debrief-${item}`} style={styles.numberedItem}>
-                      <Text style={styles.number}>{index + 1}.</Text>
-                      <Text style={styles.numberedText}>{item}</Text>
+                {customTabs.map((ct) =>
+                  activeTab === ct.key ? (
+                    <View key={ct.key} style={{ width: "100%", gap: 8 }}>
+                      <Text style={styles.debriefHeading}>{ct.label}</Text>
+                      {ct.sections.map((section) => (
+                        <View
+                          key={`${ct.key}-${section.heading ?? ""}-${section.text.slice(0, 20)}`}
+                          style={{ gap: 8 }}
+                        >
+                          {section.heading && (
+                            <Text style={styles.debriefHeading}>{section.heading}</Text>
+                          )}
+                          <Text style={styles.sectionContent}>{section.text}</Text>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
-              )}
-
-              {customTabs.map((ct) =>
-                activeTab === ct.key ? (
-                  <View key={ct.key} style={{ width: "100%", gap: 8 }}>
-                    <Text style={styles.debriefHeading}>{ct.label}</Text>
-                    {ct.sections.map((section, sIdx) => (
-                      <View key={`${ct.key}-section-${sIdx}`} style={{ gap: 8 }}>
-                        {section.heading && (
-                          <Text style={styles.debriefHeading}>{section.heading}</Text>
-                        )}
-                        <Text style={styles.sectionContent}>{section.text}</Text>
-                      </View>
-                    ))}
-                  </View>
-                ) : null,
-              )}
+                  ) : null,
+                )}
+              </View>
             </View>
-          </View>
 
             <View style={[styles.section, styles.lastSection, { marginTop: 24 }]}>
               <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>SEL Opportunity</Text>

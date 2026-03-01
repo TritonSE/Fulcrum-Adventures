@@ -1,5 +1,11 @@
-import { StatusBar } from "expo-status-bar";
+import {
+  InstrumentSans_400Regular,
+  InstrumentSans_500Medium,
+  InstrumentSans_700Bold,
+} from "@expo-google-fonts/instrument-sans";
+import { LeagueSpartan_700Bold } from "@expo-google-fonts/league-spartan";
 import { useFonts } from "expo-font";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -9,16 +15,6 @@ import { getActivityById } from "./src/data/mockActivities";
 import { formatDuration, formatGradeLevel, formatGroupSize } from "./src/utils/textUtils";
 
 import type { CustomTab, Activity as DataActivity } from "./src/types/activity";
-
-import {
-  LeagueSpartan_400Regular,
-  LeagueSpartan_700Bold,
-} from "@expo-google-fonts/league-spartan";
-import {
-  InstrumentSans_400Regular,
-  InstrumentSans_500Medium,
-  InstrumentSans_700Bold,
-} from "@expo-google-fonts/instrument-sans";
 
 const styles = StyleSheet.create({
   container: {
@@ -104,9 +100,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ActivityDetail activity={detailActivity} onOpenNotes={() => setShowNotes(true)} />
-      {showNotes && (
-        <NotesScreen activityId={activityId} onClose={() => setShowNotes(false)} />
-      )}
+      {showNotes && <NotesScreen activityId={activityId} onClose={() => setShowNotes(false)} />}
       <StatusBar style="auto" />
     </View>
   );
