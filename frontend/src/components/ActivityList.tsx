@@ -16,6 +16,7 @@ type ActivityListProps = {
   horizontal?: boolean;
   height?: number;
   width?: DimensionValue;
+  spacing?: number;
 };
 
 export const ActivityList: React.FC<ActivityListProps> = ({
@@ -27,6 +28,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   horizontal = false,
   height,
   width,
+  spacing,
 }) => {
   const renderActivity = ({ item }: { item: Activity }) => {
     if (variant === "condensed") {
@@ -69,7 +71,10 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         horizontal={horizontal}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
+        contentContainerStyle={[
+          horizontal ? styles.horizontalList : styles.verticalList,
+          spacing !== undefined ? { gap: spacing } : undefined,
+        ]}
         style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1 }}
       />
     </View>
