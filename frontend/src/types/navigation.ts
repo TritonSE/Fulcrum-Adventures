@@ -6,4 +6,5 @@ export type RootStackParamList = {
   ActivityDetail: { activityId: string };
   Playlist: { playlistId: string };
   CreatePlaylistModal: { activityId?: string } | undefined;
+  LibraryPopupModal: { activityId: string };
 };

@@ -1,336 +1,316 @@
-// src/components/LibraryPopup.tsx
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useMemo, useState } from "react";
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+// import Ionicons from "@expo/vector-icons/Ionicons";
+// import { useNavigation } from "@react-navigation/native";
+// import React, { useMemo } from "react";
+// import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { useActivities } from "../context_temp/ActivityContext";
-import { showToast } from "../utils/toast";
+// import { useActivities } from "../context_temp/ActivityContext";
+// import { showToast } from "../utils/toast";
 
-import type { RootStackParamList } from "../types/navigation";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+// import type { RootStackParamList } from "../types/navigation";
+// import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-type Props = {
-  visible: boolean;
-  onClose: () => void;
-  activityId: string;
-};
+// type Props = {
+//   visible: boolean;
+//   onClose: () => void;
+//   activityId: string;
+// };
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+// type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) => {
-  const {
-    activities,
-    bookmarkedActivities,
-    playlists,
-    addToPlaylist,
-    removeFromPlaylist,
-    setSaved,
-  } = useActivities();
-  const navigation = useNavigation<Nav>();
+// export const LibraryPopup: React.FC<Props> = ({ visible, onClose, activityId }) => {
+//   const { playlists, addToPlaylist, removeFromPlaylist, setSaved, activities } = useActivities();
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [savedState, setSavedState] = useState<boolean>(false);
+//   const navigation = useNavigation<Nav>();
 
-  // Global saved state (used only to initialize when popup opens)
-  const currentlySaved = useMemo(() => {
-    return activities.find((a) => a.id === activityId)?.isSaved ?? false;
-  }, [activities, activityId]);
+//   const activity = activities.find((a) => a.id === activityId);
+//   const currentlySaved = !!activity?.isSaved;
 
-  const bookmarksCount = bookmarkedActivities.length;
+//   // Count of bookmarked entries for the subtitle
+//   const bookmarkedCount = useMemo(() => activities.filter((a) => a.isSaved).length, [activities]);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
-  };
+//   const toggleBookmark = () => {
+//     setSaved(activityId, !currentlySaved);
+//   };
 
-  const handleToggleBookmark = () => {
-    const next = !savedState;
-    setSavedState(next);
-    setSaved(activityId, next);
-    showToast(next ? "Saved to Bookmarks" : "Removed from Bookmarks");
-  };
+//   // const isInPlaylist = (playlistId: string) => {
+//   //   const p = playlists.find((x) => x.id === playlistId);
+//   //   if (!p) return false;
+//   //   return p.activityIds.includes(activityId);
+//   // };
 
-  const handleDone = () => {
-    if (selectedIds.length > 0) {
-      // Keep track of what we added
-      const addedPlaylistIds = [...selectedIds];
+//   const togglePlaylist = (playlistId: string) => {
+//     const playlist = playlists.find((p) => p.id === playlistId);
+//     if (!playlist) return;
 
-      addedPlaylistIds.forEach((playlistId) => addToPlaylist(playlistId, activityId));
+//     const alreadyIn = playlist.activityIds.includes(activityId);
 
-      setSaved(activityId, savedState);
+//     if (alreadyIn) {
+//       removeFromPlaylist(playlistId, activityId);
 
-      showToast("Added to playlist!", {
-        actionLabel: "Undo",
-        onAction: () => {
-          addedPlaylistIds.forEach((playlistId) => removeFromPlaylist(playlistId, activityId));
-          setSaved(activityId, currentlySaved);
-        },
-      });
-    } else {
-      setSaved(activityId, savedState);
-      showToast(savedState ? "Saved to Bookmarks" : "Removed from Bookmarks");
-    }
+//       showToast("Removed from playlist", {
+//         actionLabel: "Undo",
+//         onAction: () => addToPlaylist(playlistId, activityId),
+//       });
+//     } else {
+//       addToPlaylist(playlistId, activityId);
+//       setSaved(activityId, true);
 
-    setSelectedIds([]);
-    onClose();
-  };
+//       showToast(`Added to ${playlist.name}`, {
+//         actionLabel: "Undo",
+//         onAction: () => removeFromPlaylist(playlistId, activityId),
+//       });
+//     }
+//   };
 
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onShow={() => {
-        setSavedState(currentlySaved);
-        setSelectedIds([]);
-      }}
-    >
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          {/* grab handle */}
-          <View style={styles.handle} />
+//   return (
+//     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+//       {/* Backdrop */}
+//       <Pressable style={styles.backdrop} onPress={onClose} />
 
-          {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Library</Text>
-            <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={10}>
-              <Ionicons name="close" size={18} color="#111827" />
-            </Pressable>
-          </View>
+//       {/* Bottom sheet */}
+//       <View style={styles.sheet}>
+//         {/* Header */}
+//         <View style={styles.headerRow}>
+//           <Text style={styles.title}>Library</Text>
 
-          {/* Bookmarked boxed card */}
-          <View style={styles.cardBox}>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>Bookmarked</Text>
-                <Text style={styles.cardSub}>{bookmarksCount} activities</Text>
-              </View>
+//           <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={12}>
+//             <Ionicons name="close" size={18} color="#1E2A5A" />
+//           </Pressable>
+//         </View>
 
-              <Pressable
-                onPress={handleToggleBookmark}
-                style={({ pressed }) => [styles.iconPill, pressed && { opacity: 0.85 }]}
-                hitSlop={10}
-              >
-                <Ionicons
-                  name={savedState ? "bookmark" : "bookmark-outline"}
-                  size={18}
-                  color="#1F2A44"
-                />
-              </Pressable>
-            </View>
-          </View>
+//         {/* Bookmarked card */}
+//         <View style={styles.card}>
+//           <View style={{ flex: 1 }}>
+//             <Text style={styles.cardTitle}>Bookmarked</Text>
+//             <Text style={styles.cardSub}>{bookmarkedCount} activities</Text>
+//           </View>
 
-          {/* Playlists boxed section */}
-          <View style={styles.sectionBox}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Save to Playlist</Text>
+//           <Pressable onPress={toggleBookmark} style={styles.iconCircle} hitSlop={10}>
+//             <Ionicons
+//               name={currentlySaved ? "bookmark" : "bookmark-outline"}
+//               size={18}
+//               color="#1E2A5A"
+//             />
+//           </Pressable>
+//         </View>
 
-              <Pressable
-                onPress={() => {
-                  onClose();
-                  navigation.navigate("CreatePlaylistModal", { activityId });
-                }}
-              >
-                <Text style={styles.createNew}>Create New</Text>
-              </Pressable>
-            </View>
+//         {/* Save to playlist header */}
+//         <View style={styles.sectionHeaderRow}>
+//           <Text style={styles.sectionTitle}>Save to Playlist</Text>
 
-            {playlists.length === 0 ? (
-              <Text style={styles.emptyText}>No playlists yet. Create one above.</Text>
-            ) : (
-              <FlatList
-                data={playlists}
-                keyExtractor={(item) => item.id}
-                style={{ maxHeight: 320 }}
-                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                renderItem={({ item }) => {
-                  const selected = selectedIds.includes(item.id);
+//           <Pressable
+//             onPress={() => {
+//               onClose();
+//               navigation.navigate("CreatePlaylistModal", { activityId });
+//             }}
+//             hitSlop={10}
+//           >
+//             <Text style={styles.createNew}>Create New</Text>
+//           </Pressable>
+//         </View>
 
-                  return (
-                    <Pressable style={styles.playlistCard} onPress={() => toggleSelect(item.id)}>
-                      <View
-                        style={[styles.colorSquare, { backgroundColor: item.color || "#D1D5DB" }]}
-                      />
+//         {playlists.length === 0 ? (
+//           <Text style={styles.empty}>No playlists created yet.</Text>
+//         ) : (
+//           <FlatList
+//             data={playlists}
+//             keyExtractor={(item) => item.id}
+//             contentContainerStyle={{ paddingBottom: 10 }}
+//             renderItem={({ item }) => {
+//               const selected = item.activityIds.includes(activityId);
 
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.playlistName}>{item.name}</Text>
-                        <Text style={styles.playlistSub}>{item.activityIds.length} activity</Text>
-                      </View>
+//               return (
+//                 <Pressable style={styles.playlistRow} onPress={() => togglePlaylist(item.id)}>
+//                   <View style={styles.colorDotWrap}>
+//                     <View style={[styles.colorDot, { backgroundColor: item.color }]} />
+//                   </View>
 
-                      <View style={[styles.checkCircle, selected && styles.checkCircleOn]}>
-                        {selected && <Ionicons name="checkmark" size={16} color="white" />}
-                      </View>
-                    </Pressable>
-                  );
-                }}
-              />
-            )}
-          </View>
+//                   <View style={{ flex: 1 }}>
+//                     <Text style={styles.playlistName}>{item.name}</Text>
+//                     <Text style={styles.playlistSub}>{item.activityIds.length} activity</Text>
+//                   </View>
 
-          {/* Done */}
-          <Pressable style={styles.doneBtn} onPress={handleDone}>
-            <Text style={styles.doneText}>Done</Text>
-          </Pressable>
-        </View>
-      </View>
-    </Modal>
-  );
-};
+//                   {selected ? (
+//                     <View style={styles.checkCircle}>
+//                       <Ionicons name="checkmark" size={16} color="white" />
+//                     </View>
+//                   ) : (
+//                     <View style={styles.checkCircleOutline} />
+//                   )}
+//                 </Pressable>
+//               );
+//             }}
+//           />
+//         )}
+//       </View>
+//     </Modal>
+//   );
+// };
 
-const styles = StyleSheet.create({
-  // bottom sheet
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    padding: 18,
-    paddingBottom: 22,
-    maxHeight: "85%",
-  },
-  handle: {
-    alignSelf: "center",
-    width: 44,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: "#D1D5DB",
-    marginBottom: 10,
-  },
+// const styles = StyleSheet.create({
+//   backdrop: {
+//     ...StyleSheet.absoluteFillObject,
+//     backgroundColor: "rgba(0,0,0,0.35)",
+//   },
 
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#1F2A44",
-  },
-  closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+//   sheet: {
+//     position: "absolute",
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//     backgroundColor: "white",
+//     borderTopLeftRadius: 22,
+//     borderTopRightRadius: 22,
+//     padding: 20,
+//     paddingTop: 18,
+//     maxHeight: "75%",
+//   },
 
-  // boxed sections
-  cardBox: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#EEF2F7",
-    marginBottom: 14,
-  },
-  sectionBox: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#EEF2F7",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1F2A44",
-  },
-  cardSub: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#3B4A6B",
-  },
-  iconPill: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+//   headerRow: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     marginBottom: 14,
+//   },
 
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#1F2A44",
-  },
-  createNew: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#2F3E75",
-  },
-  emptyText: {
-    color: "#6B7280",
-    fontSize: 13,
-  },
+//   title: {
+//     fontSize: 28,
+//     fontWeight: "800",
+//     color: "#1E2A5A",
+//   },
 
-  playlistCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "#EEF2F7",
-  },
-  colorSquare: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-  },
-  playlistName: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1F2A44",
-  },
-  playlistSub: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#3B4A6B",
-  },
-  checkCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#E5E7EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkCircleOn: {
-    backgroundColor: "#2F3E75",
-  },
+//   closeBtn: {
+//     width: 40,
+//     height: 40,
+//     borderRadius: 20,
+//     borderWidth: 1,
+//     borderColor: "#EBEBEB",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     backgroundColor: "white",
+//   },
 
-  doneBtn: {
-    marginTop: 16,
-    backgroundColor: "#2F3E75",
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  doneText: {
-    color: "white",
-    fontWeight: "800",
-    fontSize: 16,
-  },
-});
+//   card: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     backgroundColor: "white",
+//     borderRadius: 16,
+//     padding: 16,
+//     borderWidth: 1,
+//     borderColor: "#EEE",
+//     shadowColor: "#000",
+//     shadowOpacity: 0.06,
+//     shadowRadius: 10,
+//     shadowOffset: { width: 0, height: 4 },
+//     elevation: 2,
+//   },
+
+//   cardTitle: {
+//     fontSize: 16,
+//     fontWeight: "800",
+//     color: "#1E2A5A",
+//   },
+
+//   cardSub: {
+//     marginTop: 6,
+//     fontSize: 13,
+//     color: "#2F3E75",
+//     opacity: 0.8,
+//   },
+
+//   iconCircle: {
+//     width: 38,
+//     height: 38,
+//     borderRadius: 19,
+//     borderWidth: 1,
+//     borderColor: "#EBEBEB",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     backgroundColor: "white",
+//   },
+
+//   sectionHeaderRow: {
+//     marginTop: 20,
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     marginBottom: 10,
+//   },
+
+//   sectionTitle: {
+//     fontSize: 22,
+//     fontWeight: "800",
+//     color: "#1E2A5A",
+//   },
+
+//   createNew: {
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: "#2F3E75",
+//   },
+
+//   empty: {
+//     textAlign: "center",
+//     color: "#8A8FA3",
+//     marginTop: 30,
+//     marginBottom: 10,
+//     fontSize: 14,
+//   },
+
+//   playlistRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     borderRadius: 16,
+//     padding: 14,
+//     borderWidth: 1,
+//     borderColor: "#EEE",
+//     marginBottom: 12,
+//     backgroundColor: "white",
+//   },
+
+//   colorDotWrap: {
+//     width: 44,
+//     height: 44,
+//     borderRadius: 12,
+//     backgroundColor: "#F2F3F5",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     marginRight: 12,
+//   },
+
+//   colorDot: {
+//     width: 22,
+//     height: 22,
+//     borderRadius: 6,
+//   },
+
+//   playlistName: {
+//     fontSize: 16,
+//     fontWeight: "800",
+//     color: "#1E2A5A",
+//   },
+
+//   playlistSub: {
+//     marginTop: 4,
+//     fontSize: 13,
+//     color: "#8A8FA3",
+//   },
+
+//   checkCircle: {
+//     width: 28,
+//     height: 28,
+//     borderRadius: 14,
+//     backgroundColor: "#1E2A5A",
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+
+//   checkCircleOutline: {
+//     width: 28,
+//     height: 28,
+//     borderRadius: 14,
+//     borderWidth: 2,
+//     borderColor: "#1E2A5A",
+//     opacity: 0.25,
+//   },
+// });

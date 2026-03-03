@@ -76,11 +76,15 @@ export const ActivityList: React.FC<ActivityListProps> = ({
     );
 
     // Swipe delete only in normal mode, and only if provided
+    // Swipe delete only in normal mode, and only if provided
     if (!enableSwipeDelete || !onDelete || isEditing) return content;
+
+    const ACTION_WIDTH = 96; // controls how much red shows
+    const RADIUS = 18; // match your card radius
 
     const renderRightActions = (_progress: any, dragX: Animated.AnimatedInterpolation<number>) => {
       const scale = dragX.interpolate({
-        inputRange: [-90, -30, 0],
+        inputRange: [-ACTION_WIDTH, -30, 0],
         outputRange: [1, 0.9, 0.8],
         extrapolate: "clamp",
       });
@@ -89,25 +93,47 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         <Pressable
           onPress={() => onDelete(item.id)}
           style={{
-            width: 78,
-            marginVertical: 6,
-            borderRadius: 14,
-            backgroundColor: "#D64545",
+            width: ACTION_WIDTH,
             justifyContent: "center",
             alignItems: "center",
           }}
         >
           <Animated.View style={{ transform: [{ scale }] }}>
-            <Ionicons name="trash" size={22} color="white" />
+            <Ionicons name="trash-outline" size={26} color="white" />
           </Animated.View>
         </Pressable>
       );
     };
 
     return (
-      <Swipeable renderRightActions={renderRightActions} overshootRight={false}>
-        {content}
-      </Swipeable>
+      <View
+        style={{
+          backgroundColor: "#D64545",
+          borderRadius: RADIUS,
+          overflow: "hidden",
+          marginHorizontal: 16,
+          marginVertical: 8,
+        }}
+      >
+        <Swipeable renderRightActions={renderRightActions} overshootRight={false}>
+          <View
+            style={{
+              borderRadius: RADIUS,
+              overflow: "hidden",
+              borderWidth: 1,
+              borderColor: "#E5E5E5",
+              backgroundColor: "white",
+            }}
+          >
+            <CardComponent
+              activity={item}
+              onPress={() => onActivityPress?.(item)}
+              onSaveToggle={onSaveToggle}
+              inSwipeRow
+            />
+          </View>
+        </Swipeable>
+      </View>
     );
   };
 

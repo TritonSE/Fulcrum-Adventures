@@ -1,8 +1,6 @@
-import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Pressable, ScrollView, Text } from "react-native";
 
-import { LibraryPopup } from "../../components/LibraryPopup";
 import { useActivities } from "../../context_temp/ActivityContext";
 
 import type { RootStackParamList } from "../../types/navigation";
@@ -10,12 +8,11 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ActivityDetail">;
 
-export default function ActivityDetailScreen({ route }: Props) {
+export default function ActivityDetailScreen({ route, navigation }: Props) {
   const { activities } = useActivities();
 
-  const activity = activities.find((a) => a.id === route.params.activityId);
-
-  const [popupVisible, setPopupVisible] = useState(false);
+  const activityId = route.params.activityId;
+  const activity = activities.find((a) => a.id === activityId);
 
   if (!activity) return null;
 
@@ -35,14 +32,13 @@ export default function ActivityDetailScreen({ route }: Props) {
         <Text key={i}>• {m.name}</Text>
       ))}
 
-      <Pressable onPress={() => setPopupVisible(true)}>
-        <Ionicons name="bookmark-outline" size={24} />
+      {/* Bookmark button opens the Library bottom sheet */}
+      <Pressable
+        onPress={() => navigation.navigate("LibraryPopupModal", { activityId })}
+        style={{ marginTop: 18 }}
+      >
+        <Ionicons name="bookmark-outline" size={24} color="#1E2A5A" />
       </Pressable>
-      <LibraryPopup
-        visible={popupVisible}
-        onClose={() => setPopupVisible(false)}
-        activityId={route.params.activityId}
-      />
     </ScrollView>
   );
 }

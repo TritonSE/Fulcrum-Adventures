@@ -16,11 +16,17 @@ type ActivityCardProps = {
   activity: Activity;
   onPress?: () => void;
   onSaveToggle?: (id: string) => void;
+  inSwipeRow?: boolean;
 };
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({
+  activity,
+  onPress,
+  onSaveToggle,
+  inSwipeRow,
+}) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity style={inSwipeRow ? styles.cardInSwipeRow : styles.card} onPress={onPress}>
       {/* Left Side: Image */}
       <View style={styles.imageContainer}>
         {activity.imageUrl ? (

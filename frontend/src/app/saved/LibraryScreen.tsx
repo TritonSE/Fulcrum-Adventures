@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 import { useActivities } from "../../context_temp/ActivityContext";
 import { showToast } from "../../utils/toast";
@@ -18,12 +18,16 @@ export default function LibraryScreen({ navigation }: Props) {
     bookmarkedActivities,
     playlists,
     editPlaylist,
-    //deletePlaylist,
-    //restorePlaylist,
+    deletePlaylist,
+    restorePlaylist,
   } = useActivities();
 
   const downloadsCount = activities.filter((a) => a.isDownloaded).length;
   const historyCount = activities.filter((a) => typeof a.lastViewedAt === "number").length;
+
+  // Manage sheet state
+  const [manageVisible, setManageVisible] = useState(false);
+  const [managingId, setManagingId] = useState<string | null>(null);
 
   // Edit modal state
   const [editVisible, setEditVisible] = useState(false);
@@ -31,11 +35,24 @@ export default function LibraryScreen({ navigation }: Props) {
   const [nameDraft, setNameDraft] = useState("");
   const [colorDraft, setColorDraft] = useState(COLORS[2]);
 
-  const openEdit = (playlistId: string) => {
-    const p = playlists.find((x) => x.id === playlistId);
+  const openManage = (playlistId: string) => {
+    setManagingId(playlistId);
+    setManageVisible(true);
+  };
+
+  const closeManage = () => {
+    setManageVisible(false);
+    setManagingId(null);
+  };
+
+  const startEditFromManage = () => {
+    if (!managingId) return;
+    const p = playlists.find((x) => x.id === managingId);
     if (!p) return;
 
-    setEditingId(playlistId);
+    setManageVisible(false);
+
+    setEditingId(p.id);
     setNameDraft(p.name);
     setColorDraft(p.color);
     setEditVisible(true);
@@ -49,7 +66,7 @@ export default function LibraryScreen({ navigation }: Props) {
     setColorDraft(p.color);
   };
 
-  // ✅ EDIT with UNDO
+  // Edit with undo toast
   const saveEdit = () => {
     if (!editingId) return;
     const trimmed = nameDraft.trim();
@@ -60,12 +77,10 @@ export default function LibraryScreen({ navigation }: Props) {
 
     editPlaylist(editingId, trimmed, colorDraft);
 
-    // close modal first
     setEditVisible(false);
     const id = editingId;
     setEditingId(null);
 
-    // THEN toast (next tick, so it isn't behind the Modal)
     setTimeout(() => {
       showToast("Playlist edited!", {
         actionLabel: "Undo",
@@ -74,44 +89,26 @@ export default function LibraryScreen({ navigation }: Props) {
     }, 0);
   };
 
-  // ✅ DELETE with UNDO
-  // const deleteWithUndo = () => {
-  //   if (!editingId) return;
+  // Delete with undo toast (from manage sheet)
+  const deleteFromManage = () => {
+    if (!managingId) return;
 
-  //   const index = playlists.findIndex((p) => p.id === editingId);
-  //   const deleted = playlists[index];
-  //   if (!deleted) return;
+    const index = playlists.findIndex((p) => p.id === managingId);
+    const deleted = playlists[index];
+    if (!deleted) return;
 
-  //   Alert.alert(
-  //     "Delete playlist?",
-  //     `This will delete "${deleted.name}".`,
-  //     [
-  //       { text: "Cancel", style: "cancel" },
-  //       {
-  //         text: "Delete",
-  //         style: "destructive",
-  //         onPress: () => {
-  //           const id = editingId;
+    // Close sheet first so toast isn't hidden
+    closeManage();
 
-  //           deletePlaylist(id);
+    deletePlaylist(deleted.id);
 
-  //           // close modal first
-  //           setEditVisible(false);
-  //           setEditingId(null);
-
-  //           // THEN toast (next tick)
-  //           setTimeout(() => {
-  //             showToast("Playlist deleted!", {
-  //               actionLabel: "Undo",
-  //               onAction: () => restorePlaylist(deleted, index),
-  //             });
-  //           }, 0);
-  //         },
-  //       },
-  //     ],
-  //     { cancelable: true },
-  //   );
-  // };
+    setTimeout(() => {
+      showToast("Playlist deleted!", {
+        actionLabel: "Undo",
+        onAction: () => restorePlaylist(deleted, index),
+      });
+    }, 0);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F2F3F5" }}>
@@ -215,11 +212,11 @@ export default function LibraryScreen({ navigation }: Props) {
                   </Text>
                 </View>
 
-                {/* ⋯ button opens EDIT */}
+                {/* ⋯ button opens MANAGE */}
                 <Pressable
                   onPress={(e) => {
                     e.stopPropagation();
-                    openEdit(p.id);
+                    openManage(p.id);
                   }}
                   style={{ paddingLeft: 10, paddingVertical: 4 }}
                 >
@@ -231,48 +228,150 @@ export default function LibraryScreen({ navigation }: Props) {
         )}
       </View>
 
-      {/* Edit Playlist Modal (edit + delete) */}
-      <Modal visible={editVisible} transparent animationType="fade">
-        <View
+      {/* Manage Playlist Bottom Sheet */}
+      <Modal visible={manageVisible} transparent animationType="slide">
+        <Pressable
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "center",
-            padding: 20,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            justifyContent: "flex-end",
           }}
+          onPress={closeManage}
         >
-          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 18 }}>
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: "white",
+              borderTopLeftRadius: 22,
+              borderTopRightRadius: 22,
+              padding: 24,
+            }}
+          >
             {/* Header */}
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 12,
               }}
             >
-              <Text style={{ fontSize: 22, fontWeight: "900", color: "#1E2A5A" }}>
+              <Text style={{ fontSize: 28, fontWeight: "800", color: "#1E2A5A" }}>
+                Manage Playlist
+              </Text>
+
+              <Pressable
+                onPress={closeManage}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "white",
+                  borderWidth: 1,
+                  borderColor: "#EBEBEB",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                hitSlop={10}
+              >
+                <Ionicons name="close" size={18} color="#1E2A5A" />
+              </Pressable>
+            </View>
+
+            {/* Rows */}
+            <Pressable
+              onPress={startEditFromManage}
+              style={{ flexDirection: "row", alignItems: "center", paddingVertical: 18, gap: 12 }}
+            >
+              <Ionicons name="pencil" size={20} color="#1E2A5A" />
+              <Text style={{ fontSize: 16, fontWeight: "600", color: "#1E2A5A" }}>
+                Edit Playlist
+              </Text>
+            </Pressable>
+
+            <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
+
+            <Pressable
+              onPress={deleteFromManage}
+              style={{ flexDirection: "row", alignItems: "center", paddingVertical: 18, gap: 12 }}
+            >
+              <Ionicons name="trash-outline" size={20} color="#D64545" />
+              <Text style={{ fontSize: 16, fontWeight: "600", color: "#D64545" }}>
+                Delete Playlist
+              </Text>
+            </Pressable>
+
+            <View style={{ height: 6 }} />
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Edit Playlist Modal */}
+      {/* Edit modal (name + color) - slide up bottom sheet */}
+      <Modal
+        visible={editVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditVisible(false)}
+      >
+        {/* Backdrop */}
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            justifyContent: "flex-end",
+          }}
+          onPress={() => setEditVisible(false)}
+        >
+          {/* Sheet (stop propagation) */}
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: "white",
+              borderTopLeftRadius: 22,
+              borderTopRightRadius: 22,
+              padding: 24,
+            }}
+          >
+            {/* Header */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 24, fontWeight: "800", color: "#1E2A5A" }}>
                 Edit Playlist
               </Text>
 
               <Pressable
                 onPress={() => setEditVisible(false)}
                 style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
                   borderWidth: 1,
-                  borderColor: "#E6E6E6",
-                  justifyContent: "center",
+                  borderColor: "#EBEBEB",
                   alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "white",
                 }}
+                hitSlop={10}
               >
-                <Ionicons name="close" size={18} color="#2F3E75" />
+                <Ionicons name="close" size={18} color="#1E2A5A" />
               </Pressable>
             </View>
 
             {/* Name */}
-            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginBottom: 6 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "800",
+                color: "#1E2A5A",
+                marginTop: 16,
+                marginBottom: 8,
+              }}
+            >
               Playlist Name
             </Text>
             <TextInput
@@ -286,14 +385,25 @@ export default function LibraryScreen({ navigation }: Props) {
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 color: "#1E2A5A",
+                fontSize: 14,
+                fontWeight: "500",
               }}
             />
 
             {/* Color */}
-            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginTop: 16, marginBottom: 10 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "800",
+                color: "#1E2A5A",
+                marginTop: 18,
+                marginBottom: 10,
+              }}
+            >
               Choose Color
             </Text>
-            <View style={{ flexDirection: "row" }}>
+
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               {COLORS.map((c) => {
                 const selected = c === colorDraft;
                 return (
@@ -305,7 +415,6 @@ export default function LibraryScreen({ navigation }: Props) {
                       height: 44,
                       borderRadius: 10,
                       backgroundColor: c,
-                      marginRight: 10,
                       borderWidth: selected ? 3 : 0,
                       borderColor: selected ? "#111" : "transparent",
                     }}
@@ -314,53 +423,57 @@ export default function LibraryScreen({ navigation }: Props) {
               })}
             </View>
 
-            {/* Buttons */}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 18 }}>
-              <Pressable
-                onPress={resetAll}
-                style={{
-                  flex: 1,
-                  marginRight: 10,
-                  paddingVertical: 12,
-                  borderRadius: 22,
-                  backgroundColor: "#EEF0F4",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#1E2A5A", fontWeight: "800" }}>Reset All</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={saveEdit}
-                style={{
-                  flex: 1,
-                  paddingVertical: 12,
-                  borderRadius: 22,
-                  borderWidth: 2,
-                  borderColor: "#2F3E75",
-                  alignItems: "center",
-                  backgroundColor: "white",
-                }}
-              >
-                <Text style={{ color: "#2F3E75", fontWeight: "900" }}>Save</Text>
-              </Pressable>
-            </View>
-
-            {/* ✅ Delete button
-            <Pressable
-              onPress={deleteWithUndo}
+            {/* Bottom bar */}
+            <View
               style={{
-                marginTop: 14,
-                paddingVertical: 12,
-                borderRadius: 22,
-                backgroundColor: "#FEE2E2",
-                alignItems: "center",
+                marginTop: 18,
+                marginHorizontal: -24,
+                backgroundColor: "#F9F9F9",
+                borderBottomLeftRadius: 22,
+                borderBottomRightRadius: 22,
+                paddingBottom: 24,
               }}
             >
-              <Text style={{ color: "#B91C1C", fontWeight: "900" }}>Delete Playlist</Text>
-            </Pressable> */}
-          </View>
-        </View>
+              <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
+
+              <View
+                style={{ paddingTop: 16, paddingHorizontal: 24, flexDirection: "row", gap: 12 }}
+              >
+                <Pressable
+                  onPress={resetAll}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 22,
+                    backgroundColor: "#EEF0F4",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#1E2A5A", fontSize: 16, fontWeight: "600" }}>
+                    Reset All
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={saveEdit}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 22,
+                    borderWidth: 2,
+                    borderColor: "#2F3E75",
+                    backgroundColor: "white",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#1E2A5A", fontSize: 16, fontWeight: "600" }}>Save</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
