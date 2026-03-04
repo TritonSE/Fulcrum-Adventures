@@ -144,10 +144,11 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   const menuTop = anchor ? anchor.y + anchor.height + 8 : 0;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, marginTop: 12 }}>
       <ActivityList
         header=""
         activities={playlistActivities}
+        fill
         isEditing={isReordering}
         onReorder={(newOrder) =>
           reorderPlaylistActivities(

@@ -9,14 +9,16 @@ import { ActivityCardCondensed } from "./ActivityCardCondensed";
 import { styles } from "./ActivityList.styles";
 
 import type { Activity } from "../types/activity";
+import type { DimensionValue } from "react-native";
 
 type ActivityListProps = {
-  header: string;
+  header?: string;
   activities: Activity[];
   variant?: "card" | "condensed";
   onActivityPress?: (activity: Activity) => void;
   onSaveToggle?: (id: string) => void;
   horizontal?: boolean;
+  fill?: boolean; //  if true, the ActivityList container will flex to fill available space
 
   // reorder mode (bookmarks, playlist reorder)
   isEditing?: boolean;
@@ -24,6 +26,8 @@ type ActivityListProps = {
 
   // hide the "## Header" inside the list
   showHeader?: boolean;
+  height?: number;
+  width?: DimensionValue;
 
   // swipe-to-delete
   enableSwipeDelete?: boolean;
@@ -37,6 +41,9 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   onActivityPress,
   onSaveToggle,
   horizontal = false,
+  fill = false,
+  height,
+  width,
 
   isEditing = false,
   onReorder,
@@ -48,7 +55,18 @@ export const ActivityList: React.FC<ActivityListProps> = ({
 }) => {
   const CardComponent = variant === "condensed" ? ActivityCardCondensed : ActivityCard;
 
+  const renderCardOnly = (item: Activity) => (
+    <CardComponent
+      activity={item}
+      onPress={() => onActivityPress?.(item)}
+      onSaveToggle={onSaveToggle}
+    />
+  );
+
   const renderRow = (item: Activity, drag?: () => void, isActive?: boolean) => {
+    if (!isEditing && (!enableSwipeDelete || !onDelete)) {
+      return renderCardOnly(item);
+    }
     const content = (
       <View
         style={{
@@ -138,13 +156,21 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        // !horizontal ? { flex: 1 } : null,
+        fill ? { flex: 1 } : null,
+        width ? { width } : null,
+        horizontal ? { flex: 0 } : null,
+      ]}
+    >
       {/* Optional header inside list */}
-      {showHeader && (
+      {showHeader && !!header ? (
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>{header}</Text>
         </View>
-      )}
+      ) : null}
 
       {/* Normal mode */}
       {!isEditing ? (
@@ -156,6 +182,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
+          style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1 }}
         />
       ) : (
         // Reorder mode

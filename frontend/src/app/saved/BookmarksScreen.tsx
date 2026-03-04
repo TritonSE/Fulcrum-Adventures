@@ -67,6 +67,7 @@ export default function BookmarksScreen({ navigation }: Props) {
       <ActivityList
         header={`(${bookmarkedActivities.length} bookmarks)`}
         activities={bookmarkedActivities}
+        fill
         showHeader={false} // removes “## Bookmarks”
         isEditing={isEditing}
         onReorder={reorderBookmarks}

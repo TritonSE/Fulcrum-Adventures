@@ -47,6 +47,7 @@ export default function DownloadsScreen({ navigation }: Props) {
       <ActivityList
         header=""
         activities={downloaded}
+        fill
         showHeader={false}
         onSaveToggle={toggleSaved}
         onActivityPress={(a) => {

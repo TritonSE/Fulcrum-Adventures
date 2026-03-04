@@ -38,6 +38,7 @@ export default function HistoryScreen({ navigation }: Props) {
         header=""
         showHeader={false}
         activities={history}
+        fill
         onSaveToggle={toggleSaved}
         onActivityPress={(a) => {
           markViewed(a.id);
