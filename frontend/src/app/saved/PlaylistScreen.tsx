@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useLayoutEffect, useMemo, useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Animated, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 
 import { ActivityList } from "../../components/ActivityList";
 import { useActivities } from "../../context_temp/ActivityContext";
@@ -13,6 +14,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<RootStackParamList, "Playlist">;
 
 const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
+
+type Anchor = { x: number; y: number; width: number; height: number } | null;
 
 export default function PlaylistScreen({ route, navigation }: Props) {
   const { playlistId } = route.params;
@@ -29,31 +32,34 @@ export default function PlaylistScreen({ route, navigation }: Props) {
 
   const playlist = playlists.find((p) => p.id === playlistId);
 
+  //Menu header anchor
+  const menuAnchorRef = useRef<View>(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [anchor, setAnchor] = useState<Anchor>(null);
+  const MENU_WIDTH = 220;
+
+  const openMenu = () => {
+    menuAnchorRef.current?.measureInWindow((x, y, width, height) => {
+      setAnchor({ x, y, width, height });
+      setMenuVisible(true);
+    });
+  };
+
+  //reoder and modals
   const [isReordering, setIsReordering] = useState(false);
 
   const [editVisible, setEditVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
 
-  // ✅ safe initial values (don’t touch playlist.* here)
   const [nameDraft, setNameDraft] = useState("");
   const [colorDraft, setColorDraft] = useState(COLORS[0]);
 
-  // ✅ when playlist becomes available (or changes), sync drafts
-  // useLayoutEffect(() => {
-  //   if (!playlist) return;
-  //   setNameDraft(playlist.name);
-  //   setColorDraft(playlist.color);
-  // }, [playlist?.id]);
-
-  // ✅ Hook must be called every render (even if playlist is missing)
   const playlistActivities = useMemo<Activity[]>(() => {
     if (!playlist) return [];
     const byId = new Map(activities.map((a) => [a.id, a]));
     return playlist.activityIds.map((id) => byId.get(id)).filter(Boolean) as Activity[];
   }, [playlist, activities]);
 
-  // ✅ header styling (also must run every render)
   useLayoutEffect(() => {
     if (!playlist) return;
 
@@ -63,9 +69,11 @@ export default function PlaylistScreen({ route, navigation }: Props) {
       headerTitleStyle: { fontWeight: "800" },
       headerTitle: playlist.name,
       headerRight: () => (
-        <Pressable onPress={() => setMenuVisible(true)} style={{ paddingHorizontal: 12 }}>
-          <Ionicons name="ellipsis-vertical" size={18} color="white" />
-        </Pressable>
+        <View ref={menuAnchorRef} collapsable={false}>
+          <Pressable onPress={openMenu} style={{ paddingHorizontal: 12 }}>
+            <Ionicons name="ellipsis-vertical" size={18} color="white" />
+          </Pressable>
+        </View>
       ),
     });
   }, [navigation, playlist?.color, playlist?.name]);
@@ -78,6 +86,7 @@ export default function PlaylistScreen({ route, navigation }: Props) {
     );
   }
 
+  //Actions
   const openEdit = () => {
     setMenuVisible(false);
     setNameDraft(playlist.name);
@@ -89,21 +98,19 @@ export default function PlaylistScreen({ route, navigation }: Props) {
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
 
-    // capture previous values for undo
-    const prev = { name: playlist.name, color: playlist.color };
+    const prevName = playlist.name;
+    const prevColor = playlist.color;
+    const nextName = trimmed;
+    const nextColor = colorDraft;
 
-    editPlaylist(playlist.id, trimmed, colorDraft);
-
-    // close modal first so toast isn't hidden behind it
+    editPlaylist(playlist.id, nextName, nextColor);
     setEditVisible(false);
 
-    // show toast next tick
-    setTimeout(() => {
-      showToast("Playlist edited!", {
-        actionLabel: "Undo",
-        onAction: () => editPlaylist(playlist.id, prev.name, prev.color),
-      });
-    }, 0);
+    // Undo edit toast
+    showToast("Playlist updated", {
+      actionLabel: "Undo",
+      onAction: () => editPlaylist(playlist.id, prevName, prevColor),
+    });
   };
 
   const confirmDelete = () => {
@@ -112,30 +119,34 @@ export default function PlaylistScreen({ route, navigation }: Props) {
   };
 
   const doDelete = () => {
-    // capture playlist + index for undo restore
+    // Snapshot for undo
     const index = playlists.findIndex((p) => p.id === playlist.id);
-    const deleted = playlist; // playlist object we already have
+    const snapshot = {
+      id: playlist.id,
+      name: playlist.name,
+      color: playlist.color,
+      activityIds: [...playlist.activityIds],
+    };
 
     deletePlaylist(playlist.id);
     setConfirmDeleteVisible(false);
-
-    // navigate back first (so toast appears on previous screen and isn't covered)
     navigation.goBack();
 
-    // toast next tick
-    setTimeout(() => {
-      showToast("Playlist deleted!", {
-        actionLabel: "Undo",
-        onAction: () => restorePlaylist(deleted, index),
-      });
-    }, 0);
+    //Undo delete toast
+    showToast("Playlist deleted", {
+      actionLabel: "Undo",
+      onAction: () => restorePlaylist(snapshot, index),
+    });
   };
+
+  //Anchored menu positioning (slightly left of ⋯)
+  const menuLeft = anchor ? anchor.x + anchor.width - MENU_WIDTH - 6 : 0; // -6 for a tiny offset
+  const menuTop = anchor ? anchor.y + anchor.height + 8 : 0;
 
   return (
     <View style={{ flex: 1 }}>
       <ActivityList
         header=""
-        showHeader={false}
         activities={playlistActivities}
         isEditing={isReordering}
         onReorder={(newOrder) =>
@@ -149,80 +160,128 @@ export default function PlaylistScreen({ route, navigation }: Props) {
         onActivityPress={(a) => navigation.navigate("ActivityDetail", { activityId: a.id })}
       />
 
-      {/* ⋯ Menu (rounded with red delete) */}
-      <Modal visible={menuVisible} transparent animationType="fade">
+      {/*Menu (anchored near header dots, slightly left) */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
         <Pressable
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.25)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.15)" }}
           onPress={() => setMenuVisible(false)}
         >
-          <View
-            style={{
-              width: 220,
-              backgroundColor: "white",
-              borderRadius: 16,
-              overflow: "hidden",
-              shadowColor: "#000",
-              shadowOpacity: 0.15,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 4 },
-              elevation: 6,
-            }}
-          >
-            <Pressable
-              onPress={() => {
-                setMenuVisible(false);
-                setIsReordering((prev) => !prev);
+          {!!anchor && (
+            <View
+              style={{
+                position: "absolute",
+                top: menuTop,
+                left: Math.max(8, menuLeft), // clamp left edge
+                width: MENU_WIDTH,
+                backgroundColor: "white",
+                borderRadius: 16,
+                overflow: "hidden",
+                shadowColor: "#000",
+                shadowOpacity: 0.15,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 8,
               }}
-              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
             >
-              <Text style={{ fontSize: 16, color: "#1E2A5A" }}>
-                {isReordering ? "Done Rearranging" : "Rearrange"}
-              </Text>
-            </Pressable>
+              <Pressable
+                onPress={() => {
+                  setMenuVisible(false);
+                  setIsReordering((prev) => !prev);
+                }}
+                style={{ paddingVertical: 14, paddingHorizontal: 16 }}
+              >
+                <Text style={{ fontSize: 16, color: "#1E2A5A" }}>
+                  {isReordering ? "Done Rearranging" : "Rearrange"}
+                </Text>
+              </Pressable>
 
-            <View style={{ height: 1, backgroundColor: "#E6E6E6" }} />
+              <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
 
-            <Pressable onPress={openEdit} style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-              <Text style={{ fontSize: 16, color: "#1E2A5A" }}>Edit Name</Text>
-            </Pressable>
+              <Pressable onPress={openEdit} style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
+                <Text style={{ fontSize: 16, color: "#1E2A5A" }}>Edit Playlist</Text>
+              </Pressable>
 
-            <View style={{ height: 1, backgroundColor: "#E6E6E6" }} />
+              <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
 
-            <Pressable
-              onPress={confirmDelete}
-              style={{ paddingVertical: 14, paddingHorizontal: 16 }}
-            >
-              <Text style={{ fontSize: 16, color: "#D64545", fontWeight: "600" }}>
-                Delete Playlist
-              </Text>
-            </Pressable>
-          </View>
+              <Pressable
+                onPress={confirmDelete}
+                style={{ paddingVertical: 14, paddingHorizontal: 16 }}
+              >
+                <Text style={{ fontSize: 16, color: "#D64545", fontWeight: "600" }}>
+                  Delete Playlist
+                </Text>
+              </Pressable>
+            </View>
+          )}
         </Pressable>
       </Modal>
 
-      {/* Edit modal (name + color) */}
-      <Modal visible={editVisible} transparent animationType="fade">
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "center",
-            padding: 20,
-          }}
+      {/* Edit modal (slides up from bottom) */}
+      <Modal
+        visible={editVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditVisible(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "flex-end" }}
+          onPress={() => setEditVisible(false)}
         >
-          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 18 }}>
-            <Text style={{ fontSize: 20, fontWeight: "900", color: "#1E2A5A", marginBottom: 12 }}>
-              Edit Playlist
-            </Text>
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: "white",
+              borderTopLeftRadius: 22,
+              borderTopRightRadius: 22,
+              padding: 24,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 24, fontWeight: "800", color: "#1E2A5A" }}>
+                Edit Playlist
+              </Text>
 
-            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginBottom: 6 }}>
+              <Pressable
+                onPress={() => setEditVisible(false)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: "#EBEBEB",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "white",
+                }}
+                hitSlop={12}
+              >
+                <Ionicons name="close" size={18} color="#1E2A5A" />
+              </Pressable>
+            </View>
+
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "800",
+                color: "#1E2A5A",
+                marginTop: 16,
+                marginBottom: 8,
+              }}
+            >
               Playlist Name
             </Text>
+
             <TextInput
               value={nameDraft}
               onChangeText={setNameDraft}
@@ -234,13 +293,24 @@ export default function PlaylistScreen({ route, navigation }: Props) {
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 color: "#1E2A5A",
+                fontSize: 14,
+                fontWeight: "500",
               }}
             />
 
-            <Text style={{ fontWeight: "800", color: "#1E2A5A", marginTop: 16, marginBottom: 10 }}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "800",
+                color: "#1E2A5A",
+                marginTop: 18,
+                marginBottom: 10,
+              }}
+            >
               Choose Color
             </Text>
-            <View style={{ flexDirection: "row" }}>
+
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               {COLORS.map((c) => {
                 const selected = c === colorDraft;
                 return (
@@ -252,7 +322,6 @@ export default function PlaylistScreen({ route, navigation }: Props) {
                       height: 44,
                       borderRadius: 10,
                       backgroundColor: c,
-                      marginRight: 10,
                       borderWidth: selected ? 3 : 0,
                       borderColor: selected ? "#111" : "transparent",
                     }}
@@ -261,20 +330,68 @@ export default function PlaylistScreen({ route, navigation }: Props) {
               })}
             </View>
 
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 16 }}>
-              <Pressable onPress={() => setEditVisible(false)} style={{ padding: 10 }}>
-                <Text>Cancel</Text>
-              </Pressable>
-              <Pressable onPress={saveEdit} style={{ padding: 10 }}>
-                <Text style={{ color: "#2F3E75", fontWeight: "900" }}>Save</Text>
-              </Pressable>
+            <View
+              style={{
+                marginTop: 18,
+                marginHorizontal: -24,
+                backgroundColor: "#F9F9F9",
+                borderBottomLeftRadius: 22,
+                borderBottomRightRadius: 22,
+                paddingBottom: 24,
+              }}
+            >
+              <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
+
+              <View
+                style={{ paddingTop: 16, paddingHorizontal: 24, flexDirection: "row", gap: 12 }}
+              >
+                <Pressable
+                  onPress={() => {
+                    setNameDraft(playlist.name);
+                    setColorDraft(playlist.color);
+                  }}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 22,
+                    backgroundColor: "#EEF0F4",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#1E2A5A", fontSize: 16, fontWeight: "600" }}>
+                    Reset All
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={saveEdit}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 22,
+                    borderWidth: 2,
+                    borderColor: "#2F3E75",
+                    backgroundColor: "white",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#1E2A5A", fontSize: 16, fontWeight: "600" }}>Save</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
 
-      {/* Delete confirm (iOS style) */}
-      <Modal visible={confirmDeleteVisible} transparent animationType="fade">
+      {/* Delete confirm (center) */}
+      <Modal
+        visible={confirmDeleteVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmDeleteVisible(false)}
+      >
         <View
           style={{
             flex: 1,
@@ -299,12 +416,7 @@ export default function PlaylistScreen({ route, navigation }: Props) {
           >
             <View style={{ paddingVertical: 20, paddingHorizontal: 16 }}>
               <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "800",
-                  textAlign: "center",
-                  color: "#1E2A5A",
-                }}
+                style={{ fontSize: 18, fontWeight: "800", textAlign: "center", color: "#1E2A5A" }}
               >
                 Remove Playlist?
               </Text>

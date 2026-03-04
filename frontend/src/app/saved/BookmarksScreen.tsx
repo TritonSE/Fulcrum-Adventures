@@ -26,15 +26,37 @@ export default function BookmarksScreen({ navigation }: Props) {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       {/* Edit button ABOVE the cards (not in header) */}
+      <Text
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: 6,
+          color: "#8A8FA3",
+          fontSize: 13,
+          fontWeight: "500",
+        }}
+      ></Text>
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingHorizontal: 20,
-          paddingTop: 10,
+          paddingTop: 5,
           paddingBottom: 6,
         }}
       >
+        {/* Bookmark count (left side) */}
+        <Text
+          style={{
+            color: "#B4B4B4",
+            fontSize: 13,
+            fontWeight: "500",
+          }}
+        >
+          {`${bookmarkedActivities.length} Bookmarks`}
+        </Text>
+
+        {/* Edit button (right side) */}
         <Pressable onPress={() => setIsEditing((prev) => !prev)} hitSlop={10}>
           <Text style={{ color: "#153A7A", fontWeight: "700", fontSize: 16 }}>
             {isEditing ? "Done" : "Edit"}
@@ -43,9 +65,9 @@ export default function BookmarksScreen({ navigation }: Props) {
       </View>
 
       <ActivityList
-        header="Bookmarks"
-        showHeader={false} // removes “## Bookmarks”
+        header={`(${bookmarkedActivities.length} bookmarks)`}
         activities={bookmarkedActivities}
+        showHeader={false} // removes “## Bookmarks”
         isEditing={isEditing}
         onReorder={reorderBookmarks}
         enableSwipeDelete={!isEditing} // disable swipe while reordering

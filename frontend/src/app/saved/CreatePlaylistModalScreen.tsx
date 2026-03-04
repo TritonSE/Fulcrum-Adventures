@@ -19,7 +19,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreatePlaylistModal">;
 
-const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
+const COLORS = ["#153A7A", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
 
 export default function CreatePlaylistModalScreen({ navigation, route }: Props) {
   const { createPlaylist, deletePlaylist, addToPlaylist, setSaved } = useActivities();
@@ -166,12 +166,19 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    alignItems: "center",
+    paddingHorizontal: 1,
   },
 
   sheet: {
     backgroundColor: "white",
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
+
+    width: "100%",
+    maxWidth: 390,
+    height: 400,
+
     paddingTop: 24,
     paddingHorizontal: 24,
     paddingBottom: 0,
@@ -185,9 +192,10 @@ const styles = StyleSheet.create({
   },
 
   h1: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#1E2A5A",
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#153A7A",
+    lineHeight: 31.2,
   },
 
   closeBtn: {
@@ -203,7 +211,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#1E2A5A",
+    color: "#153A7A",
     marginBottom: 8,
   },
 
@@ -212,7 +220,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: "#1E2A5A",
+    color: "#153A7A",
     fontSize: 14,
     fontWeight: "500",
   },
@@ -229,7 +237,7 @@ const styles = StyleSheet.create({
   },
   colorSwatchSelected: {
     borderWidth: 3,
-    borderColor: "#111",
+    borderColor: "#153A7A",
   },
 
   bottomBar: {
@@ -265,14 +273,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 22,
     borderWidth: 2,
-    borderColor: "#2F3E75",
+    borderColor: "#153A7A",
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
   },
 
   bottomBtnText: {
-    color: "#1E2A5A",
+    color: "#153A7A",
     fontSize: 16,
     fontWeight: "600",
   },

@@ -1,6 +1,20 @@
+import {
+  InstrumentSans_400Regular,
+  InstrumentSans_500Medium,
+  InstrumentSans_600SemiBold,
+  useFonts as useInstrumentSansFonts,
+} from "@expo-google-fonts/instrument-sans";
+import {
+  LeagueSpartan_500Medium,
+  LeagueSpartan_700Bold,
+  LeagueSpartan_800ExtraBold,
+  useFonts as useLeagueSpartanFonts,
+} from "@expo-google-fonts/league-spartan";
+import { Ionicons } from "@expo/vector-icons";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { isLoaded } from "expo-font";
+import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
 import ActivityDetailScreen from "./src/app/saved/ActivityDetailScreen";
 import BookmarksScreen from "./src/app/saved/BookmarksScreen";
@@ -10,6 +24,7 @@ import HistoryScreen from "./src/app/saved/HistoryScreen";
 import LibraryPopupModalScreen from "./src/app/saved/LibraryPopupModalScreen";
 import LibraryScreen from "./src/app/saved/LibraryScreen";
 import PlaylistScreen from "./src/app/saved/PlaylistScreen";
+import { HeaderBackButton } from "./src/components/HeaderBackButton";
 import { ToastProvider } from "./src/components/ToastProvider";
 import { ActivityProvider } from "./src/context_temp/ActivityContext";
 
@@ -21,38 +36,57 @@ const TransparentTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "transparent", // ✅ key
+    background: "transparent",
   },
 };
 
 export default function App() {
+  const [lsLoaded] = useLeagueSpartanFonts({
+    LeagueSpartan_500Medium,
+    LeagueSpartan_700Bold,
+    LeagueSpartan_800ExtraBold,
+  });
+  const [isLoaded1] = useInstrumentSansFonts({
+    InstrumentSans_400Regular,
+    InstrumentSans_500Medium,
+    InstrumentSans_600SemiBold,
+  });
+
+  if (!lsLoaded || !isLoaded1) return null;
+
   return (
     <ToastProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ActivityProvider>
           <NavigationContainer theme={TransparentTheme}>
-            <Stack.Navigator>
+            <Stack.Navigator
+              screenOptions={({ navigation }) => ({
+                headerBackVisible: false,
+                headerLeft: () =>
+                  navigation.canGoBack() ? (
+                    <HeaderBackButton onPress={() => navigation.goBack()} />
+                  ) : null,
+              })}
+            >
               <Stack.Screen
                 name="Library"
                 component={LibraryScreen}
                 options={{
-                  headerStyle: { backgroundColor: "#153A7A" },
-                  headerTintColor: "white", // title + back arrow color
-                  headerTitleStyle: {
-                    fontWeight: "800",
-                    fontSize: 20,
-                  },
+                  headerLeft: () => null,
+                  headerStyle: { backgroundColor: "#F2F3F5" },
+                  headerShadowVisible: false, // iOS
+                  headerTintColor: "#153A7A",
+                  headerTitle: "",
                 }}
               />
               <Stack.Screen
                 name="Bookmarks"
                 component={BookmarksScreen}
                 options={{
-                  headerStyle: { backgroundColor: "#153A7A" },
-                  headerTintColor: "white", // title + back arrow color
+                  title: "Bookmarks",
                   headerTitleStyle: {
-                    fontWeight: "800",
-                    fontSize: 20,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 32,
                   },
                 }}
               />
@@ -63,8 +97,8 @@ export default function App() {
                   headerStyle: { backgroundColor: "#153A7A" },
                   headerTintColor: "white", // title + back arrow color
                   headerTitleStyle: {
-                    fontWeight: "800",
-                    fontSize: 20,
+                    fontWeight: "700",
+                    fontSize: 32,
                   },
                 }}
               />
@@ -75,8 +109,8 @@ export default function App() {
                   headerStyle: { backgroundColor: "#153A7A" },
                   headerTintColor: "white", // title + back arrow color
                   headerTitleStyle: {
-                    fontWeight: "800",
-                    fontSize: 20,
+                    fontWeight: "700",
+                    fontSize: 26,
                   },
                 }}
               />

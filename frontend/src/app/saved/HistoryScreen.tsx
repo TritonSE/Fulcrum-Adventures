@@ -17,13 +17,26 @@ export default function HistoryScreen({ navigation }: Props) {
     .slice(0, 50);
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* <Pressable onPress={() => navigation.goBack()}>
-        <Text>Back</Text>
-      </Pressable> */}
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 20,
+          paddingTop: 15,
+          paddingBottom: 10,
+        }}
+      >
+        <Text style={{ color: "#8A8FA3", fontSize: 13, fontWeight: "500" }}>
+          {`${history.length} History Items`}
+        </Text>
 
+        <View />
+      </View>
       <ActivityList
         header=""
+        showHeader={false}
         activities={history}
         onSaveToggle={toggleSaved}
         onActivityPress={(a) => {
