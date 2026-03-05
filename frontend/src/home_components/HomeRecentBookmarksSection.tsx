@@ -24,19 +24,20 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     flexDirection: "row",
-    width: 341,
+    width: "100%",
+    paddingHorizontal: 20,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 10,
   },
   text: {
+    fontFamily: "League Spartan",
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
 
     lineHeight: 27,
     alignSelf: "flex-start",
-    marginLeft: 20,
   },
   scrollView: {
     width: "100%",
@@ -55,7 +56,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    marginTop: 10,
   },
   dot: {
     width: 8,
@@ -73,9 +73,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   emptyText: {
+    textAlign: "center",
     fontSize: 16,
-    color: "#909090",
+    color: "#B4B4B4",
     paddingVertical: 24,
+    fontFamily: "Instrument Sans",
   },
 });
 
@@ -163,7 +165,7 @@ export function HomeRecentBookmarksSection({
         </>
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No recent bookmarks</Text>
+          <Text style={styles.emptyText}>No recent bookmarks.</Text>
         </View>
       )}
     </View>

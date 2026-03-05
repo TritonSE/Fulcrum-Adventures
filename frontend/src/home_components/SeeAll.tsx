@@ -33,5 +33,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.28,
     textDecorationLine: "underline",
     textDecorationStyle: "solid",
+    textAlign: "right",
   },
 });

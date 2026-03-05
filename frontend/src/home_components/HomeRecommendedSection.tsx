@@ -18,7 +18,7 @@ export function HomeRecommendedSection() {
         activities={mockActivities}
         variant="condensed"
         horizontal={true}
-        height={240}
+        height={252}
       />
     </View>
   );
@@ -27,7 +27,8 @@ export function HomeRecommendedSection() {
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
-    width: 341,
+    width: "100%",
+    paddingHorizontal: 20,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 32,
@@ -39,7 +40,6 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: 700,
     lineHeight: 27.04,
-    marginLeft: 15,
   },
   sectionContainer: {
     gap: 8,

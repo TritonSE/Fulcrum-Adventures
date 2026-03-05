@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+﻿import { StyleSheet, Text, View } from "react-native";
 
 // === test new ===
 import { ActivityList } from "../components/ActivityList";
@@ -18,7 +18,7 @@ export function HomePopularSection() {
         activities={mockActivities}
         variant="condensed"
         horizontal={true}
-        height={240}
+        height={252}
         // width={240}
       />
     </View>
@@ -28,19 +28,20 @@ export function HomePopularSection() {
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
-    width: 341,
+    width: "100%",
+    paddingHorizontal: 20,
     marginTop: 32,
     justifyContent: "space-between",
     alignItems: "center",
   },
   text: {
+    fontFamily: "League Spartan",
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
     // marginTop: 20,
     lineHeight: 27,
     alignSelf: "flex-start",
-    marginLeft: 15,
   },
   sectionContainer: {
     gap: 8,

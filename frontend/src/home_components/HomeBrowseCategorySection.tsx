@@ -9,6 +9,7 @@ import TeamChallenge from "../../assets/TeamChallenge.svg";
 
 const styles = StyleSheet.create({
   browseText: {
+    fontFamily: "League Spartan",
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
@@ -26,7 +27,12 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     alignItems: "center",
-    marginRight: 20,
+    marginRight: 16,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
 });
 
