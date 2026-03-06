@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
+
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
 import { HomeMailingListModal } from "@/home_components/HomeMailingListModal";
@@ -12,6 +13,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9F9F9",
+    gap: 32,
   },
 });
 

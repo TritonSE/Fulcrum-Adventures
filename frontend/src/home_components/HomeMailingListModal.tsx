@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import CloseButton from "../../assets/CloseButton.svg";
 
 type HomeMailingListModalProps = {
@@ -17,11 +18,7 @@ type HomeMailingListModalProps = {
   onSubmit?: (email: string) => void;
 };
 
-export function HomeMailingListModal({
-  visible,
-  onClose,
-  onSubmit,
-}: HomeMailingListModalProps) {
+export function HomeMailingListModal({ visible, onClose, onSubmit }: HomeMailingListModalProps) {
   const [email, setEmail] = useState("");
 
   const handleSubmit = () => {
