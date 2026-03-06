@@ -21,7 +21,6 @@ export const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: "100%",
-    paddingHorizontal: 8,
   },
   recentSearchesContainer: {
     display: "flex",

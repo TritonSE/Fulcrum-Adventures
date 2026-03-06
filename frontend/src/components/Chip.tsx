@@ -9,9 +9,8 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     paddingLeft: 16,
     paddingRight: 8,
-    borderWidth: 1,
+    borderWidth: 0,
     borderRadius: 20,
-    borderColor: "#EBEBEB",
   },
   chipText: {
     fontSize: 12,

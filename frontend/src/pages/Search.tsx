@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { CategoryCardBig } from "../components/CategoryCardBig";
@@ -228,10 +228,20 @@ export function SearchPage() {
           {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
             <View style={styles.activityListContainer}>
-              <Text style={styles.activityNumberText}>
-                {filteredActivities.length} activit
-                {filteredActivities.length === 1 ? "y" : "ies"} found
-              </Text>
+              <View style={styles.activityNumberAndClearAllContainer}>
+                <Text style={styles.activityNumberText}>
+                  {filteredActivities.length} activit
+                  {filteredActivities.length === 1 ? "y" : "ies"} found
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFilters(defaultFilters);
+                  }}
+                >
+                  <Text style={styles.clearAllText}>Clear All</Text>
+                </TouchableOpacity>
+              </View>
+
               <ActivityList
                 activities={filteredActivities}
                 variant="card"

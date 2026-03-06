@@ -50,7 +50,9 @@ export function SearchHeader({
     <>
       {/* Search Bar */}
       <View style={styles.searchBar}>
-        {!isSearching && <SearchIcon width={24} height={24} color="#153A7A" />}
+        {(!isSearching || searchText === "") && (
+          <SearchIcon width={24} height={24} color="#153A7A" />
+        )}
         <TextInput
           value={searchText}
           onChangeText={setSearchText}
@@ -61,8 +63,8 @@ export function SearchHeader({
           onSubmitEditing={handleSearchFinalize}
         />
         <FilterIcon
-          width={20}
-          height={20}
+          width={18}
+          height={18}
           color="#153A7A"
           onPress={() => {
             setShowFilterModal(true);
