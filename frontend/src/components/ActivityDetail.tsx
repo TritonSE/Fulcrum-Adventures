@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -724,7 +724,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
 
   const notificationAnim = useRef(new Animated.Value(0)).current;
 
-  const hideNotification = () => {
+  const hideNotification = useCallback(() => {
     Animated.timing(notificationAnim, {
       toValue: 0,
       duration: 250,
@@ -733,7 +733,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
     }).start(() => {
       setNotification(null);
     });
-  };
+  }, [notificationAnim]);
 
   useEffect(() => {
     if (!notification) return;
