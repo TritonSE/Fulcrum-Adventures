@@ -53,7 +53,6 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     color: "#153A7A",
-    // Slightly tightened to align with spec (≈104–105%)
     lineHeight: 21,
     marginBottom: 0,
   },
@@ -73,7 +72,6 @@ export const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#153A7A",
     lineHeight: 15,
-    // 2% letter spacing on 10px
     letterSpacing: 0.2,
   },
   metaDivider: {
@@ -91,16 +89,6 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  tagRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   categoryTag: {
     paddingVertical: 4,
     paddingHorizontal: 16,
@@ -114,60 +102,6 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     fontFamily: "Instrument Sans",
-    // 2% letter spacing on 12px
-    letterSpacing: 0.24,
-  },
-  environmentTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#E6EEF9",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  environmentTagText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#153A7A",
-    // 150% line height for 12px
-    lineHeight: 18,
-    // 2% letter spacing on 12px
-    letterSpacing: 0.24,
-  },
-  propsTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#F3F4F8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  propsTagText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#153A7A",
-    lineHeight: 18,
-    letterSpacing: 0.24,
-  },
-  tutorialButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#153A7A",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  tutorialButtonText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#FFFFFF",
-    // 150% line height for 14px
-    lineHeight: 21,
-    // 2% letter spacing on 14px
-    letterSpacing: 0.28,
   },
   bookmarkButton: {
     width: 32,

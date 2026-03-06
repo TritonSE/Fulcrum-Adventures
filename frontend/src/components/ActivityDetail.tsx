@@ -757,6 +757,8 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
   const tabKeys = ["prep", "play", "debrief", ...customTabs.map((t) => t.key)];
   const tabsScrollViewRef = useRef<ScrollView>(null);
 
+  const hasProps = activity.facilitate.prep.materials.length > 0;
+
   const handleTabPress = (tabKey: string, index: number) => {
     setActiveTab(tabKey);
     if (index === tabs.length - 1) {
@@ -903,6 +905,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 ))}
               </View>
               <View style={styles.tagsContainer}>
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>{hasProps ? "Props" : "No props"}</Text>
+                </View>
                 {activity.tags.map((tag) => (
                   <View key={tag} style={styles.tag}>
                     <Text style={styles.tagText}>{tag}</Text>

@@ -46,8 +46,7 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#153A7A",
     marginBottom: 4,
-    // Slightly tightened to align with spec (≈104–105%)
-    lineHeight: 21,
+    lineHeight: 22,
   },
   metaContainer: {
     flexDirection: "row",
@@ -65,8 +64,6 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     color: "#153A7A",
     fontWeight: "400",
-    // 2% letter spacing on 10px
-    letterSpacing: 0.2,
   },
   metaDivider: {
     marginHorizontal: 6,
@@ -84,18 +81,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
   },
-  tagRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   categoryTag: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
     justifyContent: "center",
@@ -106,40 +93,6 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "500",
-    // 2% letter spacing on 12px
-    letterSpacing: 0.24,
-  },
-  environmentTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#E6EEF9",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  environmentTagText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#153A7A",
-    lineHeight: 18,
-    letterSpacing: 0.24,
-  },
-  propsTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#F3F4F8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  propsTagText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#153A7A",
-    lineHeight: 18,
-    letterSpacing: 0.24,
   },
   bookmarkButton: {
     width: 32,
@@ -154,21 +107,5 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-  },
-  tutorialButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#153A7A",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  tutorialButtonText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#FFFFFF",
-    lineHeight: 21,
-    letterSpacing: 0.28,
   },
 });

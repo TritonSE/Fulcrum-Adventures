@@ -21,8 +21,6 @@ type ActivityCardProps = {
 };
 
 export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
-  const hasProps = (activity.materials ?? []).length > 0;
-
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       {/* Left Side: Image */}
@@ -70,55 +68,29 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
           </View>
         </View>
 
-        {/* Footer: Tags, Tutorial CTA & Bookmark */}
+        {/* Footer: Category Tag & Bookmark */}
         <View style={styles.footer}>
-          <View style={styles.tagRow}>
-            <View
-              style={[
-                styles.categoryTag,
-                {
-                  backgroundColor: CATEGORY_COLORS[activity.category] || DEFAULT_CATEGORY_COLOR,
-                },
-              ]}
-            >
-              <Text style={styles.categoryText}>{activity.category}</Text>
-            </View>
-
-            {activity.environment ? (
-              <View style={styles.environmentTag}>
-                <Text style={styles.environmentTagText}>{activity.environment}</Text>
-              </View>
-            ) : null}
-
-            <View style={styles.propsTag}>
-              <Text style={styles.propsTagText}>{hasProps ? "Props" : "No props"}</Text>
-            </View>
+          <View
+            style={[
+              styles.categoryTag,
+              {
+                backgroundColor: CATEGORY_COLORS[activity.category] || DEFAULT_CATEGORY_COLOR,
+              },
+            ]}
+          >
+            <Text style={styles.categoryText}>{activity.category}</Text>
           </View>
 
-          <View style={styles.actionsRow}>
-            {activity.hasTutorial ? (
-              <TouchableOpacity
-                style={styles.tutorialButton}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  // Tutorial button currently acts as a visual affordance only
-                  onPress?.();
-                }}
-              >
-                <Text style={styles.tutorialButtonText}>Tutorial</Text>
-              </TouchableOpacity>
-            ) : null}
-
-            <TouchableOpacity
-              style={styles.bookmarkButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                onSaveToggle?.(activity.id);
-              }}
-            >
-              {activity.isSaved ? <BookmarkFilledIcon /> : <BookmarkIcon />}
-            </TouchableOpacity>
-          </View>
+          {/* Bookmark Button */}
+          <TouchableOpacity
+            style={styles.bookmarkButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onSaveToggle?.(activity.id);
+            }}
+          >
+            {activity.isSaved ? <BookmarkFilledIcon /> : <BookmarkIcon />}
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
