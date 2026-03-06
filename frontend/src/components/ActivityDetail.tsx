@@ -1071,10 +1071,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <Text style={styles.notificationText} numberOfLines={1}>
               {notification === "download" ? "Activity downloaded!" : "Activity bookmarked!"}
             </Text>
-            <TouchableOpacity
-              style={styles.notificationActionBtn}
-              onPress={hideNotification}
-            >
+            <TouchableOpacity style={styles.notificationActionBtn} onPress={hideNotification}>
               <Text style={styles.notificationActionText}>
                 {notification === "download" ? "View" : "Playlists"}
               </Text>
