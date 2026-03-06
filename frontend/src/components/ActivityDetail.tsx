@@ -750,7 +750,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
     }, 3000);
 
     return () => clearTimeout(t);
-  }, [notification, notificationAnim]);
+  }, [notification, notificationAnim, hideNotification]);
 
   const customTabs = activity.facilitate.customTabs ?? [];
   const tabs = ["Prep", "Play", "Debrief", ...customTabs.map((t) => t.label)];
