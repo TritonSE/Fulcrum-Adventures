@@ -12,7 +12,7 @@ import { mockActivities } from "../data/mockActivities";
 import { styles } from "./Search.styles";
 
 import type { FilterState } from "../components/FiltersModal";
-import type { Activity } from "../types/activity";
+import type { Activity, Environment, Range } from "../types/activity";
 
 const defaultFilters: FilterState = {
   category: undefined,
@@ -63,108 +63,165 @@ function convertFiltersToArray(filters: FilterState): string[] {
   return result;
 }
 
+function rangesOverlap(activityRange: Range, selectedRanges: Range[] | undefined): boolean {
+  if (!selectedRanges || selectedRanges.length === 0) {
+    return true;
+  }
+
+  return selectedRanges.some(
+    (range) => !(activityRange.max < range.min || activityRange.min > range.max),
+  );
+}
+
+function matchesSetupPropsFilter(
+  activity: Activity,
+  setupProps: FilterState["setupProps"],
+): boolean {
+  if (!setupProps) {
+    return true;
+  }
+
+  if (setupProps === "Props") {
+    return activity.materials.length > 0;
+  }
+
+  if (setupProps === "No Props") {
+    return activity.materials.length === 0;
+  }
+
+  return true;
+}
+
+function mapActivityEnvironmentToSelections(activityEnvironment: Environment): Environment[] {
+  if (activityEnvironment === "Outdoor") {
+    return ["Blacktop", "Field"];
+  }
+  if (activityEnvironment === "Indoor") {
+    return ["Classroom", "Gym/MPR"];
+  }
+  return [activityEnvironment];
+}
+
+function matchesEnvironmentFilter(
+  activityEnvironment: Environment,
+  selectedEnvironments: Environment[] | undefined,
+): boolean {
+  if (!selectedEnvironments || selectedEnvironments.length === 0) {
+    return true;
+  }
+
+  const mappedSelections = mapActivityEnvironmentToSelections(activityEnvironment);
+  return selectedEnvironments.some((environment) => mappedSelections.includes(environment));
+}
+
+function parseNumericRange(value: string): Range | null {
+  const match = /(\d+)-(\d+)/.exec(value);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    min: Number.parseInt(match[1]),
+    max: Number.parseInt(match[2]),
+  };
+}
+
+function parseGradeRange(value: string): Range | null {
+  const match = /Grade\s+([K\d]+)-([K\d]+)/.exec(value);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    min: match[1] === "K" ? 0 : Number.parseInt(match[1]),
+    max: match[2] === "K" ? 0 : Number.parseInt(match[2]),
+  };
+}
+
+function removeRangeSelection(selected: Range[] | undefined, target: Range | null): Range[] {
+  if (!target) {
+    return selected ?? [];
+  }
+
+  return (selected ?? []).filter((item) => !(item.min === target.min && item.max === target.max));
+}
+
 function matchesActivityFilter(
   activity: Activity,
   filters: FilterState,
   searchText: string,
 ): boolean {
-  if (filters.category && activity.category !== filters.category) {
-    return false;
-  }
+  const matchesCategory = !filters.category || activity.category === filters.category;
+  const matchesSetup = matchesSetupPropsFilter(activity, filters.setupProps);
+  const matchesDuration = rangesOverlap(activity.duration, filters.duration);
+  const matchesGradeLevel = rangesOverlap(activity.gradeLevel, filters.gradeLevel);
+  const matchesGroupSize = rangesOverlap(activity.groupSize, filters.groupSize);
+  const matchesEnvironment = matchesEnvironmentFilter(activity.environment, filters.environment);
+  const matchesEnergyLevel = !filters.energyLevel || activity.energyLevel === filters.energyLevel;
+  const matchesSearchText = activity.title.toLowerCase().includes(searchText.toLowerCase());
 
-  if (filters.setupProps) {
-    if (filters.setupProps === "Props" && activity.materials.length === 0) {
-      return false;
-    }
-    if (filters.setupProps === "No Props" && activity.materials.length > 0) {
-      return false;
-    }
-  }
-
-  if (
-    filters.duration &&
-    filters.duration.length > 0 &&
-    !filters.duration.some(
-      (range) => !(activity.duration.max < range.min || activity.duration.min > range.max),
-    )
-  ) {
-    return false;
-  }
-
-  if (
-    filters.gradeLevel &&
-    filters.gradeLevel.length > 0 &&
-    !filters.gradeLevel.some(
-      (range) => !(activity.gradeLevel.max < range.min || activity.gradeLevel.min > range.max),
-    )
-  ) {
-    return false;
-  }
-
-  if (
-    filters.groupSize &&
-    filters.groupSize.length > 0 &&
-    !filters.groupSize.some(
-      (range) => !(activity.groupSize.max < range.min || activity.groupSize.min > range.max),
-    )
-  ) {
-    return false;
-  }
-
-  if (
-    filters.environment &&
-    filters.environment.length > 0 &&
-    !filters.environment.includes(activity.environment)
-  ) {
-    return false;
-  }
-
-  if (filters.energyLevel && activity.energyLevel !== filters.energyLevel) {
-    return false;
-  }
-
-  return activity.title.toLowerCase().includes(searchText.toLowerCase());
+  return (
+    matchesCategory &&
+    matchesSetup &&
+    matchesDuration &&
+    matchesGradeLevel &&
+    matchesGroupSize &&
+    matchesEnvironment &&
+    matchesEnergyLevel &&
+    matchesSearchText
+  );
 }
 
 function removeFilter(filters: FilterState, filterToRemove: string): FilterState {
-  const newFilters: FilterState = { ...filters };
   if (filters.category === filterToRemove) {
-    newFilters.category = undefined;
-  } else if (filters.setupProps === filterToRemove) {
-    newFilters.setupProps = undefined;
-  } else if (filterToRemove.includes(" min")) {
-    // Duration filter (e.g., "5-15 min")
-    const match = /(\d+)-(\d+)/.exec(filterToRemove);
-    if (match) {
-      newFilters.duration = (filters.duration ?? []).filter(
-        (d) => !(d.min === Number.parseInt(match[1]) && d.max === Number.parseInt(match[2])),
-      );
-    }
-  } else if (filterToRemove.includes("Grade")) {
-    // Grade level filter (e.g., "Grade K-2")
-    // Extract grade range pattern
-    const match = /Grade\s+([K\d]+)-([K\d]+)/.exec(filterToRemove);
-    if (match) {
-      const minGrade = match[1] === "K" ? 0 : Number.parseInt(match[1]);
-      const maxGrade = match[2] === "K" ? 0 : Number.parseInt(match[2]);
-      newFilters.gradeLevel = (filters.gradeLevel ?? []).filter(
-        (g) => !(g.min === minGrade && g.max === maxGrade),
-      );
-    }
-  } else if (filterToRemove.includes("people")) {
-    // Group size filter (e.g., "3-15 people")
-    const match = /(\d+)-(\d+)/.exec(filterToRemove);
-    if (match) {
-      newFilters.groupSize = (filters.groupSize ?? []).filter(
-        (g) => !(g.min === Number.parseInt(match[1]) && g.max === Number.parseInt(match[2])),
-      );
-    }
-  } else if (["Indoor", "Outdoor", "Both"].includes(filterToRemove)) {
-    newFilters.environment = (filters.environment ?? []).filter((e) => e !== filterToRemove);
-  } else if (filterToRemove.startsWith("Energy Level: ")) {
-    newFilters.energyLevel = null;
+    return { ...filters, category: undefined };
   }
-  return newFilters;
+
+  if (filters.setupProps === filterToRemove) {
+    return { ...filters, setupProps: undefined };
+  }
+
+  if (filterToRemove.includes(" min")) {
+    const durationToRemove = parseNumericRange(filterToRemove);
+    return {
+      ...filters,
+      duration: removeRangeSelection(filters.duration, durationToRemove),
+    };
+  }
+
+  if (filterToRemove.includes("Grade")) {
+    const gradeToRemove = parseGradeRange(filterToRemove);
+    return {
+      ...filters,
+      gradeLevel: removeRangeSelection(filters.gradeLevel, gradeToRemove),
+    };
+  }
+
+  if (filterToRemove.includes("people")) {
+    const groupSizeToRemove = parseNumericRange(filterToRemove);
+    return {
+      ...filters,
+      groupSize: removeRangeSelection(filters.groupSize, groupSizeToRemove),
+    };
+  }
+
+  if ((filters.environment ?? []).includes(filterToRemove as Environment)) {
+    return {
+      ...filters,
+      environment: (filters.environment ?? []).filter(
+        (environment) => environment !== filterToRemove,
+      ),
+    };
+  }
+
+  if (filterToRemove.startsWith("Energy Level: ")) {
+    return {
+      ...filters,
+      energyLevel: null,
+    };
+  }
+
+  return filters;
 }
 
 function addToRecentSearches(searchQuery: string, recentSearches: string[]): string[] {

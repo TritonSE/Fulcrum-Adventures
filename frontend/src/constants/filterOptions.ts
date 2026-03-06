@@ -28,5 +28,5 @@ export const FILTER_OPTIONS = {
     { min: 15, max: 30 },
     { min: 30, max: 100 },
   ],
-  environment: ["Indoor", "Outdoor", "Both"],
+  environment: ["Blacktop", "Field", "Classroom", "Gym/MPR"],
 };

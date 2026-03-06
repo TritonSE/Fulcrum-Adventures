@@ -8,7 +8,7 @@ export type Category =
 
 export type EnergyLevel = "Low" | "Medium" | "High";
 
-export type Environment = "Indoor" | "Outdoor";
+export type Environment = "Blacktop" | "Field" | "Classroom" | "Gym/MPR" | "Indoor" | "Outdoor";
 
 // Helper type for numeric ranges (filtering)
 export type Range = {

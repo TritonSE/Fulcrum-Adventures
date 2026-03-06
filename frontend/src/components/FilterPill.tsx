@@ -1,26 +1,56 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 
-type Props = { label: string; selected: boolean; onPress: () => void };
+type Props = {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  variant?: "default" | "category";
+};
+
+const PRIMARY_COLOR = "#153A7A";
+const NATURAL_GRAPH_COLOR = "#EBEBEB";
 
 const styles = StyleSheet.create({
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#D5D9E2",
+    borderColor: NATURAL_GRAPH_COLOR,
     backgroundColor: "#fff",
-    margin: 4,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  selected: { borderColor: "#1F4ED6", backgroundColor: "#E8EEFF" },
-  text: { color: "#1C1F2A", fontWeight: "600" },
-  textSelected: { color: "#1F4ED6" },
+  selectedDefault: { borderColor: PRIMARY_COLOR, backgroundColor: PRIMARY_COLOR },
+  selectedCategory: { borderColor: "transparent", backgroundColor: PRIMARY_COLOR },
+  text: {
+    color: PRIMARY_COLOR,
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    fontWeight: "500",
+    lineHeight: 20,
+  },
+  textSelectedDefault: { color: "#FFFFFF" },
+  textSelectedCategory: { color: "#FFFFFF" },
 });
 
-export const FilterPill = ({ label, selected, onPress }: Props) => {
+export const FilterPill = ({ label, selected, onPress, variant = "default" }: Props) => {
+  let selectedPillStyle = null;
+  let selectedTextStyle = null;
+
+  if (selected) {
+    if (variant === "category") {
+      selectedPillStyle = styles.selectedCategory;
+      selectedTextStyle = styles.textSelectedCategory;
+    } else {
+      selectedPillStyle = styles.selectedDefault;
+      selectedTextStyle = styles.textSelectedDefault;
+    }
+  }
+
   return (
-    <Pressable onPress={onPress} style={[styles.pill, selected && styles.selected]}>
-      <Text style={[styles.text, selected && styles.textSelected]}>{label}</Text>
+    <Pressable onPress={onPress} style={[styles.pill, selectedPillStyle]}>
+      <Text style={[styles.text, selectedTextStyle]}>{label}</Text>
     </Pressable>
   );
 };
