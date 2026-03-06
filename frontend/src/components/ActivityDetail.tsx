@@ -722,7 +722,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
 
-  const notificationAnim = useRef(new Animated.Value(0)).current;
+  const [notificationAnim] = useState(() => new Animated.Value(0));
 
   const hideNotification = useCallback(() => {
     Animated.timing(notificationAnim, {
