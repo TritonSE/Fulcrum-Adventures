@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Easing,
   Image,
   ImageBackground,
   type LayoutChangeEvent,
@@ -210,7 +212,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 104,
+    // Combined with contentPanel paddingBottom (40) gives 104px space below content
+    paddingBottom: 64,
   },
   contentWrapper: {
     flex: 1,
@@ -266,12 +269,12 @@ const styles = StyleSheet.create({
     right: 82,
     display: "flex",
     flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    borderRadius: 100,
+    borderRadius: 8,
     backgroundColor: "#FFFFFF",
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 0 },
@@ -284,8 +287,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#153A7A",
-    letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    lineHeight: 21,
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
   },
   contentPanel: {
     marginTop: -24,
@@ -308,16 +313,19 @@ const styles = StyleSheet.create({
   },
   categoryTag: {
     backgroundColor: "#3C47BD",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   categoryTagText: {
     fontSize: 12,
     fontWeight: "500",
     color: "#FFFFFF",
-    letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    // 150% line height for 12px
+    lineHeight: 18,
+    // 2% letter spacing on 12px
+    letterSpacing: 0.24,
   },
   actionIcons: {
     flexDirection: "row",
@@ -352,7 +360,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "700",
     color: "#153A7A",
-    lineHeight: 27.04,
+    // 104% line height for 30px
+    lineHeight: 31.2,
     fontFamily: "League Spartan",
   },
   metadataRow: {
@@ -364,8 +373,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "400",
     color: "#153A7A",
-    letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    lineHeight: 21,
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
   },
   metadataIcon: {
     fontSize: 14,
@@ -382,8 +393,9 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#153A7A",
     lineHeight: 21,
-    letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
     marginBottom: 16,
   },
   difficultyTagsRow: {
@@ -423,8 +435,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "400",
     color: "#153A7A",
-    letterSpacing: 2,
     fontFamily: "Instrument Sans",
+    // 150% line height for 12px
+    lineHeight: 18,
+    // 2% letter spacing on 12px
+    letterSpacing: 0.24,
   },
   dividerContainer: {
     width: "100%",
@@ -459,12 +474,15 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#153A7A",
     lineHeight: 21,
-    letterSpacing: 0,
     fontFamily: "Instrument Sans",
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
   },
   tabsWrapper: {
     marginBottom: 8,
     backgroundColor: "#FFFFFF",
+    // Allow tabs to extend to screen edges beyond the content padding
+    marginHorizontal: -24,
   },
   tabsScrollView: {
     flexGrow: 0,
@@ -503,16 +521,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   tabText: {
-    color: "#153A7A",
+    // Neutral/Gray 5 for unselected tabs
+    color: "#737373",
     fontFamily: "Instrument Sans Medium",
     fontSize: 16,
     fontWeight: "500",
     lineHeight: 24,
   },
   tabTextActive: {
+    // Selected tab keeps medium weight, only color changes
     color: "#153A7A",
-    fontFamily: "Instrument Sans Bold",
-    fontWeight: "700",
   },
   contentCard: {
     display: "flex",
@@ -592,8 +610,9 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     lineHeight: 21,
     flex: 1,
-    letterSpacing: 0,
     fontFamily: "Instrument Sans",
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
   },
   bulletItem: {
     flexDirection: "row",
@@ -613,8 +632,9 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     lineHeight: 21,
     flex: 1,
-    letterSpacing: 0,
     fontFamily: "Instrument Sans",
+    // 2% letter spacing on 14px
+    letterSpacing: 0.28,
   },
   selTagsContainer: {
     flexDirection: "row",
@@ -623,15 +643,19 @@ const styles = StyleSheet.create({
   },
   selTag: {
     backgroundColor: "#153A7A",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   selTagText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "400",
     color: "#FFFFFF",
-    letterSpacing: 2,
+    fontFamily: "Instrument Sans",
+    // 150% line height for 12px
+    lineHeight: 18,
+    // 2% letter spacing on 12px
+    letterSpacing: 0.24,
   },
   notificationWrap: {
     position: "absolute",
@@ -698,11 +722,35 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
 
+  const notificationAnim = useRef(new Animated.Value(0)).current;
+
+  const hideNotification = () => {
+    Animated.timing(notificationAnim, {
+      toValue: 0,
+      duration: 250,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => {
+      setNotification(null);
+    });
+  };
+
   useEffect(() => {
     if (!notification) return;
-    const t = setTimeout(() => setNotification(null), 3000);
+
+    Animated.timing(notificationAnim, {
+      toValue: 1,
+      duration: 250,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    const t = setTimeout(() => {
+      hideNotification();
+    }, 3000);
+
     return () => clearTimeout(t);
-  }, [notification]);
+  }, [notification, notificationAnim]);
 
   const customTabs = activity.facilitate.customTabs ?? [];
   const tabs = ["Prep", "Play", "Debrief", ...customTabs.map((t) => t.label)];
@@ -999,7 +1047,23 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
       </ScrollView>
 
       {notification && (
-        <View style={styles.notificationWrap} pointerEvents="box-none">
+        <Animated.View
+          style={[
+            styles.notificationWrap,
+            {
+              opacity: notificationAnim,
+              transform: [
+                {
+                  translateY: notificationAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [40, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+          pointerEvents="box-none"
+        >
           <View style={styles.notificationBanner}>
             <View style={styles.notificationIconCircle}>
               <SuccessCheckIcon />
@@ -1009,14 +1073,14 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             </Text>
             <TouchableOpacity
               style={styles.notificationActionBtn}
-              onPress={() => setNotification(null)}
+              onPress={hideNotification}
             >
               <Text style={styles.notificationActionText}>
                 {notification === "download" ? "View" : "Playlists"}
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       )}
     </View>
   );
