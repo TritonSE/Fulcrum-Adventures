@@ -64,6 +64,7 @@ export const styles = StyleSheet.create({
     fontWeight: 400,
     lineHeight: 21,
     letterSpacing: 0.28,
+    paddingBottom: 16,
   },
   clearAllText: {
     color: "#B4B4B4",
@@ -99,7 +100,12 @@ export const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
     alignSelf: "stretch",
+    justifyContent: "space-between",
+  },
+  categoryCardWrapper: {
+    flexBasis: "48%",
+    flexGrow: 0,
+    marginBottom: 16,
   },
 });

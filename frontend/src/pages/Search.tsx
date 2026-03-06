@@ -243,7 +243,7 @@ export function SearchPage() {
               <Text style={styles.smallText}>Browse by category:</Text>
               <View style={styles.categoryCardsGrid}>
                 {categories.map((category) => (
-                  <View key={category} style={{ width: "48%" }}>
+                  <View key={category} style={styles.categoryCardWrapper}>
                     <CategoryCardBig
                       category={category}
                       onPress={() => {

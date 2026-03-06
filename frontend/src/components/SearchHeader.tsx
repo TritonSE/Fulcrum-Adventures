@@ -61,8 +61,8 @@ export function SearchHeader({
           onSubmitEditing={handleSearchFinalize}
         />
         <FilterIcon
-          width={24}
-          height={24}
+          width={20}
+          height={20}
           color="#153A7A"
           onPress={() => {
             setShowFilterModal(true);
