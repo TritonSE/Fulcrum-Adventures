@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     width: 342,
     flexDirection: "column",
     alignItems: "flex-start",
-    gap: 8,
+    gap: 16,
   },
   searchBar: {
     display: "flex",

@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   selected: { borderColor: "#1F4ED6", backgroundColor: "#E8EEFF" },
-  text: { color: "#1C1F2A", fontWeight: "600" },
+  text: { color: "#153A7A", fontWeight: "400" },
   textSelected: { color: "#1F4ED6" },
 });
 

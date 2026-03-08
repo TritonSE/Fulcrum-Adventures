@@ -58,6 +58,7 @@ export function SearchHeader({
           onChangeText={setSearchText}
           style={styles.searchInput}
           placeholder="Search activities"
+          placeholderTextColor="#153A7A"
           onFocus={() => setIsSearching(true)}
           onBlur={handleSearchFinalize}
           onSubmitEditing={handleSearchFinalize}

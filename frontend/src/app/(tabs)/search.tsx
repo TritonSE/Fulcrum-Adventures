@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-import { ActivityList } from "../components/ActivityList";
-import { CategoryCardBig } from "../components/CategoryCardBig";
-import { FiltersModal } from "../components/FiltersModal";
-import { Navbar } from "../components/Navbar";
-import { SearchHeader } from "../components/SearchHeader";
-import { CATEGORIES as categories } from "../constants/filterOptions";
-import { mockActivities } from "../data/mockActivities";
+import { ActivityList } from "../../components/ActivityList";
+import { CategoryCardBig } from "../../components/CategoryCardBig";
+import { FiltersModal } from "../../components/FiltersModal";
+import { SearchHeader } from "../../components/SearchHeader";
+import { CATEGORIES as categories } from "../../constants/filterOptions";
+import { mockActivities } from "../../data/mockActivities";
 
-import { styles } from "./Search.styles";
+import { styles } from "./search.styles";
 
-import type { FilterState } from "../components/FiltersModal";
-import type { Activity } from "../types/activity";
+import type { FilterState } from "../../components/FiltersModal";
+import type { Activity } from "../../types/activity";
 
 const defaultFilters: FilterState = {
   category: undefined,
@@ -274,18 +273,6 @@ export function SearchPage() {
           initial={filters}
           onApply={(newFilters) => setFilters(newFilters)}
           onClose={() => setShowFilterModal(false)}
-        />
-
-        <Navbar
-          currentTab="Search"
-          onSwitchTab={(tab) => {
-            if (tab === "Search") {
-              setSearchText("");
-              setFilters(defaultFilters);
-              setIsSearching(false);
-              Keyboard.dismiss();
-            }
-          }}
         />
       </View>
     </TouchableWithoutFeedback>

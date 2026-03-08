@@ -46,7 +46,16 @@ const getRangeLabel = (range: Range, type: "duration" | "gradeLevel" | "groupSiz
   } else if (type === "gradeLevel") {
     return `${gradeNumberToLabel(range.min)}-${gradeNumberToLabel(range.max)}`;
   } else if (type === "groupSize") {
-    return `${range.min}-${range.max}`;
+    switch (range.min) {
+      case 3:
+        return "Small (3-15)";
+      case 15:
+        return "Medium (15-30)";
+      case 30:
+        return "Large (30+)";
+      default:
+        return "Error";
+    }
   }
   return "";
 };
@@ -65,12 +74,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
   },
-  title: { fontSize: 24, fontWeight: "800", color: "#1F2C5C" },
+  title: { fontSize: 24, fontWeight: "800", color: "#1F2C5C", fontFamily: "League Spartan" },
   close: { fontSize: 20, color: "#1F2C5C" },
   scrollContainer: { flex: 1 },
   content: { paddingHorizontal: 16 },
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8, color: "#1C1F2A" },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
+    color: "#1C1F2A",
+    fontFamily: "League Spartan",
+  },
   row: { flexDirection: "row", flexWrap: "wrap" },
   energyRow: { flexDirection: "row", gap: 12, paddingHorizontal: 4 },
   energyIcon: { padding: 6 },
