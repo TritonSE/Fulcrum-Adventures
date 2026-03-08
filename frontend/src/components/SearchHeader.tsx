@@ -95,6 +95,7 @@ export function SearchHeader({
               <Chip
                 key={search}
                 label={search}
+                borderWidth={1}
                 onPress={() => {
                   setSearchText(search);
                   setRecentSearches(addToRecentSearches(search, recentSearches));

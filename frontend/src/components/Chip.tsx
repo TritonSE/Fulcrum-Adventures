@@ -9,8 +9,8 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     paddingLeft: 16,
     paddingRight: 8,
-    borderWidth: 0,
-    borderRadius: 20,
+    borderRadius: 40,
+    borderColor: "#EBEBEB",
   },
   chipText: {
     fontSize: 12,
@@ -28,13 +28,14 @@ type ChipProps = {
   label: string;
   backgroundColor?: string;
   textColor?: string;
+  borderWidth?: number;
   onPress?: () => void;
   onClose?: () => void;
 };
 
-export function Chip({ label, backgroundColor, textColor, onClose, onPress }: ChipProps) {
+export function Chip({ label, backgroundColor, textColor, borderWidth, onClose, onPress }: ChipProps) {
   return (
-    <View style={[styles.chip, { backgroundColor: backgroundColor || "#ffffff" }]}>
+    <View style={[styles.chip, { backgroundColor: backgroundColor || "#ffffff", borderWidth: borderWidth || 0 }]}>
       <Text style={[styles.chipText, { color: textColor || "#153A7A" }]} onPress={onPress}>
         {label}
       </Text>
