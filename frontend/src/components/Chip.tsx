@@ -33,9 +33,21 @@ type ChipProps = {
   onClose?: () => void;
 };
 
-export function Chip({ label, backgroundColor, textColor, borderWidth, onClose, onPress }: ChipProps) {
+export function Chip({
+  label,
+  backgroundColor,
+  textColor,
+  borderWidth,
+  onClose,
+  onPress,
+}: ChipProps) {
   return (
-    <View style={[styles.chip, { backgroundColor: backgroundColor || "#ffffff", borderWidth: borderWidth || 0 }]}>
+    <View
+      style={[
+        styles.chip,
+        { backgroundColor: backgroundColor || "#ffffff", borderWidth: borderWidth || 0 },
+      ]}
+    >
       <Text style={[styles.chipText, { color: textColor || "#153A7A" }]} onPress={onPress}>
         {label}
       </Text>
