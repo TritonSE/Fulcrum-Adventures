@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     alignItems: "center",
-    marginRight: 16,
+    marginRight: 7,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
