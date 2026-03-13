@@ -20,7 +20,7 @@ export function HomePopUpPageHeaderSection({
     StyleSheet.create({
       container: {
         display: "flex",
-        width: 390,
+        width: "100%",
         height: 132,
         // backgroundColor: "#153A7A",
         experimental_backgroundImage: "linear-gradient(90deg, #153A7A 0%, #276BE0 100%)",

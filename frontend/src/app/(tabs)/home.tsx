@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet } from "react-native";
 
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
-import { HomeMailingListModal } from "@/home_components/HomeMailingListModal";
 import { HomeMailingListSection } from "@/home_components/HomeMailingListSection";
 import { HomePopularSection } from "@/home_components/HomePopularSection";
 import { HomeRecentBookmarksSection } from "@/home_components/HomeRecentBookmarksSection";
@@ -30,13 +29,9 @@ export default function HomeScreen() {
         <HomeRecentBookmarksSection bookmarkedActivities={[]} />
         <HomePopularSection />
         <HomeRecommendedSection />
-        <HomeMailingListSection onStartSignup={() => setIsMailingListVisible(true)} />
+        <HomeMailingListSection />
       </ScrollView>
 
-      <HomeMailingListModal
-        visible={isMailingListVisible}
-        onClose={() => setIsMailingListVisible(false)}
-      />
     </>
   );
 }

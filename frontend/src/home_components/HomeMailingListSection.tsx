@@ -1,17 +1,10 @@
 import { useRef } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-type HomeMailingListSectionProps = {
-  onStartSignup: () => void;
-};
 
-export function HomeMailingListSection({ onStartSignup }: HomeMailingListSectionProps) {
+export function HomeMailingListSection() {
   const inputRef = useRef<TextInput>(null);
 
-  const handleInputFocus = () => {
-    inputRef.current?.blur();
-    onStartSignup();
-  };
 
   return (
     <View style={styles.wrapper}>
@@ -28,14 +21,12 @@ export function HomeMailingListSection({ onStartSignup }: HomeMailingListSection
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          onFocus={handleInputFocus}
           style={styles.input}
         />
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open mailing list signup"
-          onPress={onStartSignup}
           style={styles.button}
         >
           <Text style={styles.buttonText}>Sign up</Text>
@@ -86,8 +77,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#B4B4B4",
     backgroundColor: "#FFFFFF",
-    textAlign: "center",
-    color: "#777777",
+    textAlign: "left",
+    color:"#484848",
     fontFamily: "Instrument Sans",
     fontSize: 14,
     paddingHorizontal: 12,

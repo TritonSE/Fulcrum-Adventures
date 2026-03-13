@@ -1,19 +1,32 @@
 import { StyleSheet, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-import Header from "../../assets/Header.svg";
+import Header from "../../assets/FulcrumLogo.svg";
 
 const styles = StyleSheet.create({
   header: {
     width: "100%",
-    justifyContent: "center",
+    height: 115,
+    alignSelf: "center",
+  },
+  logoWrapper: {
     alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 57,
   },
 });
 
 export const HomeHeaderSection = () => {
   return (
-    <View style={styles.header}>
-      <Header width={390} height={115} />
-    </View>
+    <LinearGradient
+      colors={["#153A7A", "#276BE0"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.header}
+   >
+      <View style={styles.logoWrapper}>
+        <Header height={39} width={130}/>
+      </View>
+    </LinearGradient>
   );
 };
