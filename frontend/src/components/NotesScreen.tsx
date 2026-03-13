@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 import NoteIcon from "../../assets/NoteIcon";
 
@@ -22,13 +23,13 @@ const MONTHS = [
 
 const TIMES = (() => {
   const out: string[] = [];
-  out.push("12:00 Am");
+  out.push("12:00 AM");
   for (let h = 1; h <= 11; h++) {
-    out.push(`${h.toString().padStart(2, "0")}:00 Am`);
+    out.push(`${h.toString().padStart(2, "0")}:00 AM`);
   }
-  out.push("12:00 Pm");
+  out.push("12:00 PM");
   for (let h = 1; h <= 11; h++) {
-    out.push(`${h.toString().padStart(2, "0")}:00 Pm`);
+    out.push(`${h.toString().padStart(2, "0")}:00 PM`);
   }
   return out;
 })();
@@ -153,7 +154,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   clearDateButton: {
-    padding: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   clearDateX: {
     fontSize: 20,
@@ -161,9 +163,36 @@ const styles = StyleSheet.create({
   },
   inlinePicker: {
     flexDirection: "row",
-    height: ROW_HEIGHT * 5,
+    // Show exactly one row above and one row below the selected row
+    height: ROW_HEIGHT * 3,
     marginTop: 8,
     marginBottom: 8,
+  },
+  inlinePickerMaskTop: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 0,
+    backgroundColor: "transparent",
+  },
+  inlinePickerMaskBottom: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 0,
+    backgroundColor: "transparent",
+  },
+  inlinePickerHighlight: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    // Center band: middle row of a 3-row picker
+    top: ROW_HEIGHT,
+    height: ROW_HEIGHT,
+    backgroundColor: "#F3F3F3",
+    pointerEvents: "none",
   },
   row: {
     flexDirection: "row",
@@ -272,7 +301,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   pickerRowCellSelected: {
-    backgroundColor: "#F3F3F3",
   },
   pickerCellText: {
     fontSize: 14,
@@ -321,6 +349,8 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
   useEffect(() => {
     if (!showDatePicker) return;
     const t = setTimeout(() => {
+      // With a single top spacer of ROW_HEIGHT, scrolling to i * ROW_HEIGHT
+      // keeps row i centered in the 3-row viewport.
       monthScrollRef.current?.scrollTo({ y: selectedMonth * ROW_HEIGHT, animated: false });
       dayScrollRef.current?.scrollTo({ y: (selectedDay - 1) * ROW_HEIGHT, animated: false });
       timeScrollRef.current?.scrollTo({ y: selectedTimeIndex * ROW_HEIGHT, animated: false });
@@ -378,6 +408,10 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
             <View style={{ height: 8 }} />
             {showDatePicker && (
               <View style={styles.inlinePicker}>
+                {/* Static gray selection band centered in the picker (background layer) */}
+                <View style={styles.inlinePickerHighlight} pointerEvents="none" />
+
+                {/* Scroll wheels rendered above the gray band */}
                 <ScrollView
                   ref={monthScrollRef}
                   style={styles.pickerColumn}
@@ -389,7 +423,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                     setSelectedMonth(Math.max(0, Math.min(MONTHS.length - 1, i)));
                   }}
                 >
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                   {MONTHS.map((m, i) => (
                     <TouchableOpacity
                       key={m}
@@ -413,7 +447,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                       </Text>
                     </TouchableOpacity>
                   ))}
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                 </ScrollView>
                 <ScrollView
                   ref={dayScrollRef}
@@ -426,7 +460,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                     setSelectedDay(Math.max(1, Math.min(daysInSelectedMonth, i + 1)));
                   }}
                 >
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                   {dayOptions.map((d) => (
                     <TouchableOpacity
                       key={d}
@@ -453,7 +487,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                       </Text>
                     </TouchableOpacity>
                   ))}
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                 </ScrollView>
                 <ScrollView
                   ref={timeScrollRef}
@@ -466,7 +500,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                     setSelectedTimeIndex(Math.max(0, Math.min(TIMES.length - 1, i)));
                   }}
                 >
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                   {TIMES.map((t, i) => (
                     <TouchableOpacity
                       key={`time-${t}`}
@@ -490,8 +524,24 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                       </Text>
                     </TouchableOpacity>
                   ))}
-                  <View style={{ height: ROW_HEIGHT * 2 }} />
+                  <View style={{ height: ROW_HEIGHT }} />
                 </ScrollView>
+
+                {/* Top gradient fog rendered above text (slightly stronger fade) */}
+                <LinearGradient
+                  pointerEvents="none"
+                  colors={["#FFFFFF", "rgba(255,255,255,0.2)"]}
+                  locations={[0, 1]}
+                  style={{ position: "absolute", top: 0, left: 0, right: 0, height: ROW_HEIGHT }}
+                />
+
+                {/* Bottom gradient fog rendered above text (slightly stronger fade) */}
+                <LinearGradient
+                  pointerEvents="none"
+                  colors={["rgba(255,255,255,0.2)", "#FFFFFF"]}
+                  locations={[0, 1]}
+                  style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: ROW_HEIGHT }}
+                />
               </View>
             )}
           </View>

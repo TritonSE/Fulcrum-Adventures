@@ -266,11 +266,12 @@ const styles = StyleSheet.create({
   tutorialButton: {
     position: "absolute",
     top: 258,
-    right: 82,
+    // Small but safe gap from the right edge
+    right: 56,
     display: "flex",
     flexDirection: "row",
-    paddingVertical: 12,
-    paddingHorizontal: 28,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
@@ -481,13 +482,15 @@ const styles = StyleSheet.create({
   tabsWrapper: {
     marginBottom: 8,
     backgroundColor: "#FFFFFF",
-    // Allow tabs to extend to screen edges beyond the content padding
-    marginHorizontal: -24,
+    // Align tab group with Facilitate label (24px from content edge)
+    marginLeft: 0,
+    marginRight: 0,
   },
   tabsScrollView: {
     flexGrow: 0,
   },
   tabsScrollContent: {
+    // No extra inset; left edge of first tab aligns with Facilitate text
     paddingLeft: 0,
     paddingRight: 0,
   },
