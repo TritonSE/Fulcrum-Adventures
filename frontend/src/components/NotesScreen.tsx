@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Path } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
 
@@ -300,8 +300,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 4,
   },
-  pickerRowCellSelected: {
-  },
+  pickerRowCellSelected: {},
   pickerCellText: {
     fontSize: 14,
     color: "#949494",
