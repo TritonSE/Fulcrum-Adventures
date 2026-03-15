@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     width: 342,
     flexDirection: "column",
     alignItems: "flex-start",
-    gap: 16,
+    gap: 12,
   },
   searchBar: {
     display: "flex",
@@ -68,6 +68,8 @@ export const styles = StyleSheet.create({
   },
   clearAllText: {
     color: "#B4B4B4",
+    fontFamily: "Instrument Sans",
+    letterSpacing: 0.28,
     fontSize: 14,
     textDecorationLine: "underline",
     textDecorationStyle: "solid",

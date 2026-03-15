@@ -1,27 +1,26 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
-import ActiveGraphic from "../../assets/icons/active_graphic.svg";
-import ConnectionGraphic from "../../assets/icons/connection_graphic.svg";
-import DebriefGraphic from "../../assets/icons/debrief_graphic.svg";
-import IcebreakerGraphic from "../../assets/icons/icebreaker_graphic.svg";
-import OpenerGraphic from "../../assets/icons/opener_graphic.svg";
-import TeamChallengeGraphic from "../../assets/icons/team_challenge_graphic.svg";
+import ActiveGraphic from "../../assets/images/active_graphic.png";
+import ConnectionGraphic from "../../assets/images/connection_graphic.png";
+import DebriefGraphic from "../../assets/images/debrief_graphic.png";
+import IcebreakerGraphic from "../../assets/images/icebreaker_graphic.png";
+import OpenerGraphic from "../../assets/images/opener_graphic.png";
+import TeamChallengeGraphic from "../../assets/images/team_challenge_graphic.png";
 import { CATEGORY_COLORS } from "../constants/activityColors";
 
 import { styles } from "./CategoryCardBig.styles";
 
 import type { Category } from "../types/activity";
-import type { SvgProps } from "react-native-svg";
+import type { ImageSourcePropType } from "react-native";
 
-const CATEGORY_GRAPHICS: Record<Category, React.FC<SvgProps>> = {
-  Opener: OpenerGraphic,
-  Icebreaker: IcebreakerGraphic,
-  Active: ActiveGraphic,
-  Connection: ConnectionGraphic,
-  Debrief: DebriefGraphic,
-  "Team Challenge": TeamChallengeGraphic,
+const CATEGORY_GRAPHICS: Record<Category, ImageSourcePropType> = {
+  Opener: OpenerGraphic as ImageSourcePropType,
+  Icebreaker: IcebreakerGraphic as ImageSourcePropType,
+  Active: ActiveGraphic as ImageSourcePropType,
+  Connection: ConnectionGraphic as ImageSourcePropType,
+  Debrief: DebriefGraphic as ImageSourcePropType,
+  "Team Challenge": TeamChallengeGraphic as ImageSourcePropType,
 };
 
 //Arramged in order of top, left, right, bottom
@@ -41,7 +40,8 @@ type CategoryCardBigProps = {
 
 export const CategoryCardBig: React.FC<CategoryCardBigProps> = ({ category, onPress }) => {
   const textColor = CATEGORY_COLORS[category];
-  const ImageComponent = CATEGORY_GRAPHICS[category];
+  const categoryGraphic = CATEGORY_GRAPHICS[category];
+  const src = Image.resolveAssetSource(categoryGraphic);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
@@ -57,8 +57,12 @@ export const CategoryCardBig: React.FC<CategoryCardBigProps> = ({ category, onPr
           },
         ]}
       >
-        {/* Render the SVG component derived from category */}
-        <ImageComponent width="100%" height="100%" />
+        {/* Render the PNG at half the original width/height since it 
+        was exported at 2x to prevent it looking pixelated */}
+        <Image
+          source={categoryGraphic}
+          style={{ width: src.width / 2, height: src.height / 2, resizeMode: "contain" }}
+        />
       </View>
     </TouchableOpacity>
   );

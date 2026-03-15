@@ -52,7 +52,7 @@ export function Chip({
         {label}
       </Text>
       <Pressable style={styles.xButtonPressable} onPress={onClose}>
-        <XIcon width={6} height={6} fill={textColor || "#153A7A"} stroke={textColor || "#153A7A"} />
+        <XIcon width={10} height={10} fill={textColor || "#153A7A"} stroke={textColor || "#153A7A"} />
       </Pressable>
     </View>
   );
