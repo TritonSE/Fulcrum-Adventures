@@ -73,7 +73,7 @@ export function SearchHeader({
         />
       </View>
       {/* Recent Searches */}
-      {isSearching && recentSearches.length !== 0 && (
+      {isSearching && recentSearches.length !== 0 && isFiltersEmpty(filters) && (
         <View style={styles.recentSearchesContainer}>
           <View style={styles.recentSearchesTextContainer}>
             <Text style={styles.smallText}>Recent Searches</Text>
@@ -82,7 +82,7 @@ export function SearchHeader({
                 setRecentSearches([]);
               }}
             >
-              <Text style={styles.clearAllText}>Clear All</Text>
+              <Text style={styles.clearAllText}>Clear all</Text>
             </TouchableOpacity>
           </View>
           <ScrollView

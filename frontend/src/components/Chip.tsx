@@ -42,18 +42,22 @@ export function Chip({
   onPress,
 }: ChipProps) {
   return (
-    <View
+    <Pressable
       style={[
         styles.chip,
         { backgroundColor: backgroundColor || "#ffffff", borderWidth: borderWidth || 0 },
       ]}
+      onPress={onPress}
     >
-      <Text style={[styles.chipText, { color: textColor || "#153A7A" }]} onPress={onPress}>
-        {label}
-      </Text>
+      <Text style={[styles.chipText, { color: textColor || "#153A7A" }]}> {label} </Text>
       <Pressable style={styles.xButtonPressable} onPress={onClose}>
-        <XIcon width={10} height={10} fill={textColor || "#153A7A"} stroke={textColor || "#153A7A"} />
+        <XIcon
+          width={10}
+          height={10}
+          fill={textColor || "#153A7A"}
+          stroke={textColor || "#153A7A"}
+        />
       </Pressable>
-    </View>
+    </Pressable>
   );
 }

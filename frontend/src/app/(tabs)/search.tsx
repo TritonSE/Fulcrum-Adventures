@@ -226,19 +226,22 @@ export function SearchPage() {
 
           {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
+            // Activity list (filtered)
             <View style={styles.activityListContainer}>
               <View style={styles.activityNumberAndClearAllContainer}>
                 <Text style={styles.activityNumberText}>
                   {filteredActivities.length} activit
                   {filteredActivities.length === 1 ? "y" : "ies"} found
                 </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setFilters(defaultFilters);
-                  }}
-                >
-                  <Text style={styles.clearAllText}>Clear All</Text>
-                </TouchableOpacity>
+                {!isFiltersEmpty(filters) && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFilters(defaultFilters);
+                    }}
+                  >
+                    <Text style={styles.clearAllText}>Clear all</Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               <ActivityList
@@ -248,6 +251,7 @@ export function SearchPage() {
               />
             </View>
           ) : (
+            // Category cards
             <View>
               <Text style={styles.smallText}>Browse by category:</Text>
               <View style={styles.categoryCardsGrid}>
