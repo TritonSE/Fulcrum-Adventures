@@ -8,7 +8,7 @@ export type Category =
 
 export type EnergyLevel = "Low" | "Medium" | "High";
 
-export type Environment = "Indoor" | "Outdoor" | "Both";
+export type Environment = "Indoor" | "Outdoor";
 
 export type Material = {
   name: string;
