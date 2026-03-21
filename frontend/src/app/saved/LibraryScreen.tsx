@@ -509,7 +509,7 @@ export default function LibraryScreen({ navigation }: Props) {
                     flex: 1,
                     paddingVertical: 12,
                     borderRadius: 22,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: "#153A7A",
                     backgroundColor: "white",
                     alignItems: "center",
