@@ -1,4 +1,3 @@
-// src/components/toast/ToastProvider.tsx
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, {
   createContext,
@@ -10,28 +9,30 @@ import React, {
   useState,
 } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { registerToast } from "../utils/toast";
 
 export type ToastOptions = {
   message: string;
-  durationMs?: number; // default 3500
-  actionLabel?: string; // e.g. "Undo"
+  durationMs?: number;
+  actionLabel?: string;
   onAction?: () => void;
+  bottomOffset?: number;
 };
 
 type ToastContextType = {
   show: (opts: ToastOptions) => void;
   hide: () => void;
 };
-
 const ToastContext = createContext<ToastContextType | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastOptions | null>(null);
-
+  const DEFAULT_BOTTOM_OFFSET = 82;
   // Create once, stable across renders (avoids "ref during render" warnings)
   const [slide] = useState(() => new Animated.Value(0));
+  const insets = useSafeAreaInsets();
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -89,7 +90,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {toast && (
         <Animated.View
           pointerEvents="box-none"
-          style={[styles.wrapper, { transform: [{ translateY }], opacity: slide }]}
+          style={[
+            styles.wrapper,
+            {
+              bottom: insets.bottom + (toast?.bottomOffset ?? DEFAULT_BOTTOM_OFFSET),
+              transform: [{ translateY }],
+              opacity: slide,
+            },
+          ]}
         >
           <View style={styles.toast}>
             <View style={styles.left}>
@@ -129,15 +137,16 @@ export function useToast() {
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    left: 16,
-    right: 16,
-    bottom: 24,
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
   toast: {
-    backgroundColor: "#6BC56E",
+    backgroundColor: "#22C55E",
+    width: 310,
+    height: 38,
     borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -145,9 +154,9 @@ const styles = StyleSheet.create({
   left: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
     flex: 1,
-    paddingRight: 10,
+    minWidth: 0,
   },
   iconCircle: {
     width: 26,
@@ -160,19 +169,22 @@ const styles = StyleSheet.create({
   message: {
     color: "white",
     fontWeight: "800",
-    fontSize: 16,
+    fontFamily: "InstrumentSans_700Bold",
+    flexShrink: 1,
+    fontSize: 14,
   },
   undoBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
     borderRadius: 999,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: "rgba(255,255,255,0.9)",
-    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   undoText: {
     color: "white",
-    fontWeight: "800",
-    fontSize: 14,
+    fontSize: 12,
+    fontFamily: "InstrumentSans_700Bold",
   },
 });

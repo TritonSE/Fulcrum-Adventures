@@ -1,22 +1,54 @@
 export const Typography = {
   // DISPLAY (League Spartan)
-  displayLg: {
+  displayLgBold: {
     fontFamily: "LeagueSpartan_700Bold",
-    fontSize: 26,
+    fontSize: 32,
     lineHeight: 32,
   },
-  displayMd: {
+  displayMdBold: {
     fontFamily: "LeagueSpartan_700Bold",
-    fontSize: 20,
+    fontSize: 30,
     lineHeight: 28,
   },
-  displaySm: {
+  displaySmBold: {
     fontFamily: "LeagueSpartan_700Bold",
-    fontSize: 20,
+    fontSize: 26,
     lineHeight: 24,
   },
 
+  displayXSmBold: {
+    fontFamily: "LeagueSpartan_700Bold",
+    fontSize: 20,
+    lineHeight: 20,
+  },
+  displayLg: {
+    fontFamily: "LeagueSpartan_700",
+    fontSize: 32,
+    lineHeight: 32,
+  },
+  displayMd: {
+    fontFamily: "LeagueSpartan_700",
+    fontSize: 30,
+    lineHeight: 30,
+  },
+
+  displaySm: {
+    fontFamily: "LeagueSpartan_700",
+    fontSize: 26,
+    lineHeight: 24,
+  },
+  displayXSm: {
+    fontFamily: "LeagueSpartan_700",
+    fontSize: 20,
+    lineHeight: 20,
+  },
+
   // BODY (Instrument Sans)
+  bodyMdBold: {
+    fontFamily: "InstrumentSans_700Bold",
+    fontSize: 16,
+    lineHeight: 24,
+  },
   bodyMd: {
     fontFamily: "InstrumentSans_500Medium",
     fontSize: 16,

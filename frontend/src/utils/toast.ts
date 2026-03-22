@@ -4,6 +4,7 @@ type ShowToastParams = {
   durationMs?: number;
   actionLabel?: string;
   onAction?: () => void;
+  bottomOffset?: number;
 };
 
 // This will be injected by ToastProvider
@@ -24,5 +25,6 @@ export const showToast = (message: string, options?: ShowToastParams) => {
     durationMs: options?.durationMs,
     actionLabel: options?.actionLabel,
     onAction: options?.onAction,
+    bottomOffset: options?.bottomOffset,
   });
 };

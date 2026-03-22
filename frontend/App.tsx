@@ -2,6 +2,7 @@ import {
   InstrumentSans_400Regular,
   InstrumentSans_500Medium,
   InstrumentSans_600SemiBold,
+  InstrumentSans_700Bold,
   useFonts as useInstrumentSansFonts,
 } from "@expo-google-fonts/instrument-sans";
 import {
@@ -15,6 +16,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { isLoaded } from "expo-font";
 import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import ActivityDetailScreen from "./src/app/saved/ActivityDetailScreen";
 import BookmarksScreen from "./src/app/saved/BookmarksScreen";
@@ -50,96 +52,100 @@ export default function App() {
     InstrumentSans_400Regular,
     InstrumentSans_500Medium,
     InstrumentSans_600SemiBold,
+    InstrumentSans_700Bold,
   });
 
   if (!lsLoaded || !isLoaded1) return null;
 
   return (
-    <ToastProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <ActivityProvider>
-          <NavigationContainer theme={TransparentTheme}>
-            <Stack.Navigator
-              screenOptions={({ navigation }) => ({
-                headerBackVisible: false,
-                headerLeft: () =>
-                  navigation.canGoBack() ? (
-                    <HeaderBackButton onPress={() => navigation.goBack()} />
-                  ) : null,
-              })}
-            >
-              <Stack.Screen
-                name="Library"
-                component={LibraryScreen}
-                options={{
-                  headerLeft: () => null,
-                  headerStyle: { backgroundColor: "#F2F3F5" },
-                  headerShadowVisible: false, // iOS
-                  headerTintColor: "#153A7A",
-                  headerTitle: "",
-                }}
-              />
-              <Stack.Screen
-                name="Bookmarks"
-                component={BookmarksScreen}
-                options={{
-                  title: "Bookmarks",
-                  headerTitleStyle: {
-                    fontFamily: "LeagueSpartan_700Bold",
-                    fontSize: 32,
-                  },
-                }}
-              />
-              <Stack.Screen
-                name="Downloads"
-                component={DownloadsScreen}
-                options={{
-                  headerStyle: { backgroundColor: "#153A7A" },
-                  headerTintColor: "white", // title + back arrow color
-                  headerTitleStyle: {
-                    fontWeight: "700",
-                    fontSize: 32,
-                  },
-                }}
-              />
-              <Stack.Screen
-                name="History"
-                component={HistoryScreen}
-                options={{
-                  headerStyle: { backgroundColor: "#153A7A" },
-                  headerTintColor: "white", // title + back arrow color
-                  headerTitleStyle: {
-                    fontWeight: "700",
-                    fontSize: 26,
-                  },
-                }}
-              />
-              <Stack.Screen name="Playlist" component={PlaylistScreen} />
-              <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
-              <Stack.Screen
-                name="CreatePlaylistModal"
-                component={CreatePlaylistModalScreen}
-                options={{
-                  headerShown: false,
-                  presentation: "transparentModal",
-                  animation: "slide_from_bottom",
-                  contentStyle: { backgroundColor: "transparent" },
-                }}
-              />
-              <Stack.Screen
-                name="LibraryPopupModal"
-                component={LibraryPopupModalScreen}
-                options={{
-                  headerShown: false,
-                  presentation: "transparentModal",
-                  animation: "slide_from_bottom",
-                  contentStyle: { backgroundColor: "transparent" },
-                }}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </ActivityProvider>
-      </GestureHandlerRootView>
-    </ToastProvider>
+    <SafeAreaProvider>
+      <ToastProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ActivityProvider>
+            <NavigationContainer theme={TransparentTheme}>
+              <Stack.Navigator
+                screenOptions={({ navigation }) => ({
+                  headerBackVisible: false,
+                  headerLeft: () =>
+                    navigation.canGoBack() ? (
+                      <HeaderBackButton onPress={() => navigation.goBack()} />
+                    ) : null,
+                })}
+              >
+                <Stack.Screen
+                  name="Library"
+                  component={LibraryScreen}
+                  options={{
+                    headerLeft: () => null,
+                    headerStyle: { backgroundColor: "#F2F3F5" },
+                    headerShadowVisible: false, // iOS
+                    headerTintColor: "#153A7A",
+                    headerTitle: "",
+                  }}
+                />
+                <Stack.Screen
+                  name="Bookmarks"
+                  component={BookmarksScreen}
+                  options={{
+                    headerShown: false,
+                    title: "Bookmarks",
+                    headerTitleStyle: {
+                      fontFamily: "LeagueSpartan_700Bold",
+                      fontSize: 32,
+                    },
+                  }}
+                />
+                <Stack.Screen
+                  name="Downloads"
+                  component={DownloadsScreen}
+                  options={{
+                    headerStyle: { backgroundColor: "#153A7A" },
+                    headerTintColor: "white", // title + back arrow color
+                    headerTitleStyle: {
+                      fontWeight: "700",
+                      fontSize: 32,
+                    },
+                  }}
+                />
+                <Stack.Screen
+                  name="History"
+                  component={HistoryScreen}
+                  options={{
+                    headerStyle: { backgroundColor: "#153A7A" },
+                    headerTintColor: "white", // title + back arrow color
+                    headerTitleStyle: {
+                      fontWeight: "700",
+                      fontSize: 26,
+                    },
+                  }}
+                />
+                <Stack.Screen name="Playlist" component={PlaylistScreen} />
+                <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
+                <Stack.Screen
+                  name="CreatePlaylistModal"
+                  component={CreatePlaylistModalScreen}
+                  options={{
+                    headerShown: false,
+                    presentation: "transparentModal",
+                    animation: "slide_from_bottom",
+                    contentStyle: { backgroundColor: "transparent" },
+                  }}
+                />
+                <Stack.Screen
+                  name="LibraryPopupModal"
+                  component={LibraryPopupModalScreen}
+                  options={{
+                    headerShown: false,
+                    presentation: "transparentModal",
+                    animation: "slide_from_bottom",
+                    contentStyle: { backgroundColor: "transparent" },
+                  }}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </ActivityProvider>
+        </GestureHandlerRootView>
+      </ToastProvider>
+    </SafeAreaProvider>
   );
 }

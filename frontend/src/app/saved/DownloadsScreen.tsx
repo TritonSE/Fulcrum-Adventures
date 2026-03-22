@@ -1,7 +1,9 @@
 import { useLayoutEffect } from "react";
 import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ActivityList } from "../../components/ActivityList";
+import { Navbar } from "../../components/Navbar";
 import { useActivities } from "../../context_temp/ActivityContext";
 
 import type { RootStackParamList } from "../../types/navigation";
@@ -13,6 +15,7 @@ export default function DownloadsScreen({ navigation }: Props) {
   const { activities, toggleSaved, markViewed } = useActivities();
 
   const downloaded = activities.filter((a) => a.isDownloaded);
+  const insets = useSafeAreaInsets();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -55,6 +58,14 @@ export default function DownloadsScreen({ navigation }: Props) {
           navigation.navigate("ActivityDetail", { activityId: a.id });
         }}
       />
+      <View style={{ paddingBottom: insets.bottom + 8, backgroundColor: "#F2F3F5" }}>
+        <Navbar
+          currentTab="Library"
+          onSwitchTab={(tab) => {
+            if (tab === "Library") navigation.navigate("Library");
+          }}
+        />
+      </View>
     </View>
   );
 }

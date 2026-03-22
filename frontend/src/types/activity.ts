@@ -15,6 +15,11 @@ export type Material = {
   isChecked: boolean; // Checked states stay (until unchecked), even if user did not save, complete, or download the activity card
 };
 
+export type Range = {
+  min: number;
+  max: number;
+};
+
 // Structure for Prep tab content
 export type PrepTab = {
   setup?: string[]; // Numbered list of setup instructions

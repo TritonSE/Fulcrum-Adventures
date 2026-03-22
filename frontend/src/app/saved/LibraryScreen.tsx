@@ -1,10 +1,16 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BookmarkLibraryIcon from "../../../assets/icons/bookmark_icon.svg";
+import CloseButton from "../../../assets/icons/CloseButton.svg";
 import DownloadLibraryIcon from "../../../assets/icons/download-library.svg";
 import HistoryLibraryIcon from "../../../assets/icons/history-library.svg";
+import Plus from "../../../assets/icons/lucide_plus.svg";
+import Pencil from "../../../assets/icons/PencilIcon.svg";
+import TrashIcon from "../../../assets/icons/TrashIcon.svg";
+import { Navbar } from "../../components/Navbar";
 import { useActivities } from "../../context_temp/ActivityContext";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
@@ -15,28 +21,18 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<RootStackParamList, "Library">;
 
 const COLORS = ["#153A7A", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
+const CLOSE_ICON_SIZE = 20;
 
 export default function LibraryScreen({ navigation }: Props) {
-  const {
-    activities,
-    bookmarkedActivities,
-    playlists,
-    editPlaylist,
-    deletePlaylist,
-    restorePlaylist,
-  } = useActivities();
+  const { playlists, editPlaylist, deletePlaylist, restorePlaylist } = useActivities();
 
-  const downloadsCount = activities.filter((a) => a.isDownloaded).length;
-  const historyCount = activities.filter((a) => typeof a.lastViewedAt === "number").length;
+  const insets = useSafeAreaInsets();
 
-  // Manage sheet state
   const [manageVisible, setManageVisible] = useState(false);
   const [managingId, setManagingId] = useState<string | null>(null);
-
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [playlistToDelete, setPlaylistToDelete] = useState<string | null>(null);
 
-  // Edit modal state
   const [editVisible, setEditVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState("");
@@ -54,56 +50,49 @@ export default function LibraryScreen({ navigation }: Props) {
 
   const startEditFromManage = () => {
     if (!managingId) return;
-    const p = playlists.find((x) => x.id === managingId);
-    if (!p) return;
+    const playlist = playlists.find((item) => item.id === managingId);
+    if (!playlist) return;
 
     setManageVisible(false);
-
-    setEditingId(p.id);
-    setNameDraft(p.name);
-    setColorDraft(p.color);
+    setEditingId(playlist.id);
+    setNameDraft(playlist.name);
+    setColorDraft(playlist.color);
     setEditVisible(true);
   };
 
   const resetAll = () => {
     if (!editingId) return;
-    const p = playlists.find((x) => x.id === editingId);
-    if (!p) return;
-    setNameDraft(p.name);
-    setColorDraft(p.color);
+    const playlist = playlists.find((item) => item.id === editingId);
+    if (!playlist) return;
+    setNameDraft(playlist.name);
+    setColorDraft(playlist.color);
   };
 
-  // Edit with undo toast
   const saveEdit = () => {
     if (!editingId) return;
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
 
-    const prev = playlists.find((p) => p.id === editingId);
-    if (!prev) return;
+    const previous = playlists.find((playlist) => playlist.id === editingId);
+    if (!previous) return;
 
     editPlaylist(editingId, trimmed, colorDraft);
-
     setEditVisible(false);
-    const id = editingId;
+
+    const editedId = editingId;
     setEditingId(null);
 
     setTimeout(() => {
       showToast("Playlist edited!", {
         actionLabel: "Undo",
-        onAction: () => editPlaylist(id, prev.name, prev.color),
+        onAction: () => editPlaylist(editedId, previous.name, previous.color),
       });
     }, 0);
   };
 
-  // Delete with undo toast (from manage sheet)
   const deleteFromManage = () => {
     if (!managingId) return;
-
-    // close manage sheet first
     closeManage();
-
-    // open confirmation popup
     setPlaylistToDelete(managingId);
     setConfirmDeleteVisible(true);
   };
@@ -111,7 +100,7 @@ export default function LibraryScreen({ navigation }: Props) {
   const confirmDeletePlaylist = () => {
     if (!playlistToDelete) return;
 
-    const index = playlists.findIndex((p) => p.id === playlistToDelete);
+    const index = playlists.findIndex((playlist) => playlist.id === playlistToDelete);
     const deleted = playlists[index];
     if (!deleted) {
       setConfirmDeleteVisible(false);
@@ -120,11 +109,9 @@ export default function LibraryScreen({ navigation }: Props) {
     }
 
     deletePlaylist(deleted.id);
-
     setConfirmDeleteVisible(false);
     setPlaylistToDelete(null);
 
-    // toast undo
     setTimeout(() => {
       showToast("Playlist deleted!", {
         actionLabel: "Undo",
@@ -135,33 +122,44 @@ export default function LibraryScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F2F3F5" }}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 20 }}>
-        {/* Title */}
-        <Text style={[Typography.displayLg, { marginBottom: 24, color: "#153A7A" }]}>
-          Your Library
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 73 - insets.top,
+          paddingBottom: 100,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[Typography.displayMdBold, { marginBottom: 16, color: "#153A7A" }]}>
+          Library
         </Text>
 
-        {/* Bookmarks */}
         <Pressable
           onPress={() => navigation.navigate("Bookmarks")}
           style={{
             backgroundColor: "#153A7A",
-            padding: 18,
+            padding: 12,
             height: 123,
-            borderRadius: 14,
+            borderRadius: 16,
             marginBottom: 12,
+            display: "flex",
+            alignSelf: "stretch",
+            flexDirection: "column",
+            justifyContent: "space-between",
           }}
         >
-          <View style={{ padding: 6, paddingLeft: 0 }}>
+          <View>
             <BookmarkLibraryIcon width={34} height={34} />
           </View>
-          <Text style={[Typography.displayMd, { color: "white" }]}>Bookmarks</Text>
-          <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 4 }]}>
-            {bookmarkedActivities.length} activities
-          </Text>
+          <View>
+            <Text style={[Typography.displayXSmBold, { color: "white" }]}>Bookmarks</Text>
+            <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 2 }]}>
+              Save for later
+            </Text>
+          </View>
         </Pressable>
 
-        {/* Downloads + History */}
         <View style={{ flexDirection: "row" }}>
           <Pressable
             onPress={() => navigation.navigate("Downloads")}
@@ -169,18 +167,21 @@ export default function LibraryScreen({ navigation }: Props) {
               flex: 1,
               marginRight: 12,
               backgroundColor: "#153A7A",
-              padding: 18,
-              borderRadius: 14,
+              padding: 12,
+              borderRadius: 16,
               height: 123,
+              justifyContent: "space-between",
             }}
           >
-            <View style={{ padding: 6, paddingLeft: 0 }}>
+            <View>
               <DownloadLibraryIcon width={34} height={34} />
             </View>
-            <Text style={[Typography.displayMd, { color: "white" }]}>Downloads</Text>
-            <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 4 }]}>
-              {downloadsCount} activities
-            </Text>
+            <View>
+              <Text style={[Typography.displayXSmBold, { color: "white" }]}>Downloads</Text>
+              <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 2 }]}>
+                Available offline
+              </Text>
+            </View>
           </Pressable>
 
           <Pressable
@@ -188,34 +189,34 @@ export default function LibraryScreen({ navigation }: Props) {
             style={{
               flex: 1,
               backgroundColor: "#153A7A",
-              padding: 18,
-              borderRadius: 14,
+              padding: 12,
+              borderRadius: 16,
               height: 123,
+              justifyContent: "space-between",
             }}
           >
-            <View style={{ padding: 6, paddingLeft: 0 }}>
+            <View>
               <HistoryLibraryIcon width={34} height={34} />
             </View>
-            <Text style={[Typography.displayMd, { color: "white" }]}>History</Text>
-            <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 4 }]}>
-              {historyCount} activities
-            </Text>
+            <View>
+              <Text style={[Typography.displayXSmBold, { color: "white" }]}>History</Text>
+              <Text style={[Typography.caption, { color: "#D0D5E8", marginTop: 2 }]}>
+                Recently viewed
+              </Text>
+            </View>
           </Pressable>
         </View>
 
-        {/* Playlists header */}
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 28,
-            marginBottom: 12,
+            paddingTop: 40,
+            marginBottom: 16,
           }}
         >
-          <Text style={[Typography.displayLg, { color: "#153A7A", marginBottom: 16 }]}>
-            Your Playlists
-          </Text>
+          <Text style={[Typography.displaySmBold, { color: "#153A7A" }]}>Your Playlists</Text>
 
           <Pressable
             onPress={() => navigation.navigate("CreatePlaylistModal")}
@@ -228,40 +229,49 @@ export default function LibraryScreen({ navigation }: Props) {
               alignItems: "center",
             }}
           >
-            <Text style={{ color: "white", fontSize: 20 }}>+</Text>
+            <Plus width={38} height={38} color="white" />
           </Pressable>
         </View>
-
-        {/* Playlist list */}
         {playlists.length === 0 ? (
           <Text style={{ color: "#EBEBEB" }}></Text>
         ) : (
-          playlists.map((p) => (
+          playlists.map((playlist) => (
             <Pressable
-              key={p.id}
-              onPress={() => navigation.navigate("Playlist", { playlistId: p.id })}
+              key={playlist.id}
+              onPress={() => navigation.navigate("Playlist", { playlistId: playlist.id })}
               style={{
-                backgroundColor: p.color,
-                padding: 16,
-                borderRadius: 14,
+                backgroundColor: playlist.color,
+                height: 102,
+                paddingHorizontal: 16,
+                paddingVertical: 18,
+                borderRadius: 16,
                 marginBottom: 12,
+                justifyContent: "center",
               }}
             >
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <View style={{ flex: 1, paddingRight: 10 }}>
-                  <Text style={{ fontSize: 16, fontWeight: "800", color: "white" }}>{p.name}</Text>
-                  <Text style={{ color: "#EBEBEB", marginTop: 4 }}>
-                    {p.activityIds.length} activities
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={[Typography.displayXSmBold, { color: "white", lineHeight: 22 }]}>
+                    {playlist.name}
+                  </Text>
+                  <Text style={[Typography.caption, { color: "#EBEBEB", marginTop: 8 }]}>
+                    {playlist.activityIds.length} activities
                   </Text>
                 </View>
 
-                {/* ⋯ button opens MANAGE */}
                 <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    openManage(p.id);
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    openManage(playlist.id);
                   }}
-                  style={{ paddingLeft: 10, paddingVertical: 4 }}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "rgba(255,255,255,0.14)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
                   <Ionicons name="ellipsis-vertical" size={18} color="white" />
                 </Pressable>
@@ -269,9 +279,17 @@ export default function LibraryScreen({ navigation }: Props) {
             </Pressable>
           ))
         )}
+      </ScrollView>
+
+      <View style={{ paddingBottom: insets.bottom + 8, backgroundColor: "#F2F3F5" }}>
+        <Navbar
+          currentTab="Library"
+          onSwitchTab={(tab) => {
+            if (tab === "Library") navigation.navigate("Library");
+          }}
+        />
       </View>
 
-      {/* Manage Playlist Bottom Sheet */}
       <Modal visible={manageVisible} transparent animationType="slide">
         <Pressable
           style={{
@@ -287,20 +305,20 @@ export default function LibraryScreen({ navigation }: Props) {
               backgroundColor: "white",
               borderTopLeftRadius: 22,
               borderTopRightRadius: 22,
-              padding: 24,
+              paddingHorizontal: 24,
+              paddingTop: 32,
+              paddingBottom: 20,
             }}
           >
-            {/* Header */}
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
+                paddingBottom: 16,
               }}
             >
-              <Text style={{ fontSize: 28, fontWeight: "800", color: "#153A7A" }}>
-                Manage Playlist
-              </Text>
+              <Text style={[Typography.displayMdBold, { color: "#153A7A" }]}>Manage Playlist</Text>
 
               <Pressable
                 onPress={closeManage}
@@ -316,45 +334,46 @@ export default function LibraryScreen({ navigation }: Props) {
                 }}
                 hitSlop={10}
               >
-                <Ionicons name="close" size={18} color="#153A7A" />
+                <View>
+                  <CloseButton width={34} height={34} />
+                </View>
               </Pressable>
             </View>
 
-            {/* Rows */}
             <Pressable
               onPress={startEditFromManage}
-              style={{ flexDirection: "row", alignItems: "center", paddingVertical: 18, gap: 12 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingBottom: 8,
+                gap: 10,
+              }}
             >
-              <Ionicons name="pencil" size={20} color="#153A7A" />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: "#153A7A" }}>
-                Edit Playlist
-              </Text>
+              <Pencil width={17} height={17} />
+              <Text style={[Typography.bodyMd, { color: "#153A7A" }]}>Edit Playlist</Text>
             </Pressable>
 
             <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
 
             <Pressable
               onPress={deleteFromManage}
-              style={{ flexDirection: "row", alignItems: "center", paddingVertical: 18, gap: 12 }}
+              style={{ flexDirection: "row", alignItems: "center", paddingVertical: 8, gap: 10 }}
             >
-              <Ionicons name="trash-outline" size={20} color="#D64545" />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: "#D64545" }}>
-                Delete Playlist
-              </Text>
+              <TrashIcon width={17} height={17} />
+              <Text style={[Typography.bodyMd, { color: "#EF4444" }]}>Delete Playlist</Text>
             </Pressable>
 
             <View style={{ height: 6 }} />
           </Pressable>
         </Pressable>
       </Modal>
-      {/* Edit modal (name + color) - slide up bottom sheet */}
+
       <Modal
         visible={editVisible}
         transparent
         animationType="slide"
         onRequestClose={() => setEditVisible(false)}
       >
-        {/* Backdrop */}
         <Pressable
           style={{
             flex: 1,
@@ -363,17 +382,16 @@ export default function LibraryScreen({ navigation }: Props) {
           }}
           onPress={() => setEditVisible(false)}
         >
-          {/* Sheet (stop propagation) */}
           <Pressable
             onPress={() => {}}
             style={{
               backgroundColor: "white",
               borderTopLeftRadius: 22,
               borderTopRightRadius: 22,
-              padding: 24,
+              paddingHorizontal: 24,
+              paddingTop: 24,
             }}
           >
-            {/* Header */}
             <View
               style={{
                 flexDirection: "row",
@@ -382,12 +400,10 @@ export default function LibraryScreen({ navigation }: Props) {
               }}
             >
               <Text
-                style={{
-                  fontFamily: "LeagueSpartan_700Bold",
-                  fontSize: 30,
-                  fontWeight: "700",
-                  color: "#153A7A",
-                }}
+                style={[
+                  Typography.displayMdBold,
+                  { color: "#153A7A", fontSize: 30, lineHeight: 30 },
+                ]}
               >
                 Edit Playlist
               </Text>
@@ -406,18 +422,16 @@ export default function LibraryScreen({ navigation }: Props) {
                 }}
                 hitSlop={10}
               >
-                <Ionicons name="close" size={18} color="#153A7A" />
+                <Ionicons name="close-outline" size={CLOSE_ICON_SIZE} color="#153A7A" />
               </Pressable>
             </View>
 
-            {/* Name */}
             <Text
               style={{
-                fontSize: 14,
-                fontWeight: "800",
                 color: "#153A7A",
-                marginTop: 16,
+                paddingTop: 24,
                 marginBottom: 8,
+                ...Typography.displayXSmBold,
               }}
             >
               Playlist Name
@@ -426,43 +440,42 @@ export default function LibraryScreen({ navigation }: Props) {
               value={nameDraft}
               onChangeText={setNameDraft}
               placeholder="Enter Playlist Name"
-              placeholderTextColor="#8A8FA3"
+              placeholderTextColor="#153A7A"
               style={{
                 backgroundColor: "#F2F3F5",
                 borderRadius: 12,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 color: "#153A7A",
+                fontFamily: "InstrumentSans_400Regular",
                 fontSize: 14,
-                fontWeight: "500",
+                lineHeight: 21,
               }}
             />
 
-            {/* Color */}
             <Text
               style={{
-                fontSize: 14,
-                fontWeight: "800",
                 color: "#153A7A",
-                marginTop: 18,
+                paddingTop: 24,
                 marginBottom: 10,
+                ...Typography.displayXSmBold,
               }}
             >
               Choose Color
             </Text>
 
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              {COLORS.map((c) => {
-                const selected = c === colorDraft;
+              {COLORS.map((color) => {
+                const selected = color === colorDraft;
                 return (
                   <Pressable
-                    key={c}
-                    onPress={() => setColorDraft(c)}
+                    key={color}
+                    onPress={() => setColorDraft(color)}
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
-                      backgroundColor: c,
+                      width: 48,
+                      height: 48,
+                      borderRadius: 7,
+                      backgroundColor: color,
                       borderWidth: selected ? 3 : 0,
                       borderColor: selected ? "#153A7A" : "transparent",
                     }}
@@ -471,7 +484,6 @@ export default function LibraryScreen({ navigation }: Props) {
               })}
             </View>
 
-            {/* Bottom bar */}
             <View
               style={{
                 marginTop: 18,
@@ -498,9 +510,7 @@ export default function LibraryScreen({ navigation }: Props) {
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ color: "#153A7A", fontSize: 16, fontWeight: "600" }}>
-                    Reset All
-                  </Text>
+                  <Text style={[Typography.bodyMd, { color: "#153A7A" }]}>Reset All</Text>
                 </Pressable>
 
                 <Pressable
@@ -516,14 +526,14 @@ export default function LibraryScreen({ navigation }: Props) {
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ color: "#1E2A5A", fontSize: 16, fontWeight: "600" }}>Save</Text>
+                  <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Save</Text>
                 </Pressable>
               </View>
             </View>
           </Pressable>
         </Pressable>
       </Modal>
-      {/* Delete confirmation popup (iOS style) */}
+
       <Modal
         visible={confirmDeleteVisible}
         transparent
@@ -544,21 +554,15 @@ export default function LibraryScreen({ navigation }: Props) {
             onPress={() => {}}
             style={{
               width: "100%",
-              maxWidth: 360,
+              maxWidth: 294,
+              height: 112,
               backgroundColor: "white",
-              borderRadius: 18,
+              borderRadius: 12,
               overflow: "hidden",
             }}
           >
-            <View style={{ paddingVertical: 18, paddingHorizontal: 16 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "800",
-                  color: "#153A7A",
-                  textAlign: "center",
-                }}
-              >
+            <View style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 }}>
+              <Text style={[Typography.bodyMdBold, { color: "#153A7A", textAlign: "center" }]}>
                 Delete Playlist?
               </Text>
             </View>
@@ -568,18 +572,28 @@ export default function LibraryScreen({ navigation }: Props) {
             <View style={{ flexDirection: "row", height: 48 }}>
               <Pressable
                 onPress={() => setConfirmDeleteVisible(false)}
-                style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                style={{
+                  paddingBottom: 10,
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                <Text style={{ fontSize: 16, color: "#6B6F80", fontWeight: "500" }}>Cancel</Text>
+                <Text style={[Typography.bodySm, { color: "#6B6F80" }]}>Cancel</Text>
               </Pressable>
 
               <View style={{ width: 1, backgroundColor: "#D9D9D9" }} />
 
               <Pressable
                 onPress={confirmDeletePlaylist}
-                style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                style={{
+                  paddingBottom: 10,
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                <Text style={{ fontSize: 16, color: "#D64545", fontWeight: "600" }}>Delete</Text>
+                <Text style={[Typography.bodySm, { color: "#EF4444" }]}>Delete</Text>
               </Pressable>
             </View>
           </Pressable>
