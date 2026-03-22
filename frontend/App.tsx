@@ -99,6 +99,7 @@ export default function App() {
                   name="Downloads"
                   component={DownloadsScreen}
                   options={{
+                    headerShown: false,
                     headerStyle: { backgroundColor: "#153A7A" },
                     headerTintColor: "white", // title + back arrow color
                     headerTitleStyle: {
@@ -111,6 +112,7 @@ export default function App() {
                   name="History"
                   component={HistoryScreen}
                   options={{
+                    headerShown: false,
                     headerStyle: { backgroundColor: "#153A7A" },
                     headerTintColor: "white", // title + back arrow color
                     headerTitleStyle: {

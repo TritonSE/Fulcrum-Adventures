@@ -220,7 +220,9 @@ export default function LibraryPopupModalScreen() {
         </View>
 
         {playlists.length === 0 ? (
-          <Text style={[Typography.caption, { color: "#153A7A" }]}>No playlists created yet.</Text>
+          <View style={{ paddingVertical: 35, justifyContent: "center", alignItems: "center" }}>
+            <Text style={[Typography.bodyMd, { color: "#909090" }]}>No playlists created yet.</Text>
+          </View>
         ) : (
           <FlatList
             data={playlists}

@@ -3,6 +3,7 @@ import { useLayoutEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityList } from "../../components/ActivityList";
 import { Navbar } from "../../components/Navbar";
 import { useActivities } from "../../context_temp/ActivityContext";
@@ -27,15 +28,18 @@ export default function BookmarksScreen({ navigation }: Props) {
           paddingBottom: 12,
           flexDirection: "row",
           alignItems: "center",
+          paddingLeft: 24,
+          gap: 4,
         }}
       >
         <Pressable onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <BackButton width={40} height={40} />
         </Pressable>
 
         <Text
           style={{
             marginLeft: 12,
+            marginBottom: 5,
             fontFamily: "LeagueSpartan_700Bold",
             fontSize: 28,
             color: "#FFF",

@@ -1,7 +1,9 @@
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { useLayoutEffect } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityList } from "../../components/ActivityList";
 import { Navbar } from "../../components/Navbar";
 import { useActivities } from "../../context_temp/ActivityContext";
@@ -32,16 +34,30 @@ export default function HistoryScreen({ navigation }: Props) {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View
         style={{
+          paddingTop: insets.top + 8,
+          backgroundColor: "#153A7A",
+          paddingHorizontal: 16,
+          paddingBottom: 12,
           flexDirection: "row",
-          justifyContent: "space-between",
           alignItems: "center",
-          paddingHorizontal: 20,
-          paddingTop: 15,
-          paddingBottom: 10,
+          paddingLeft: 24,
+          gap: 4,
         }}
       >
-        <Text style={{ color: "#8A8FA3", fontSize: 13, fontWeight: "500" }}>
-          {`${history.length} History Items`}
+        <Pressable onPress={() => navigation.goBack()}>
+          <BackButton width={40} height={40} />
+        </Pressable>
+
+        <Text
+          style={{
+            marginLeft: 12,
+            marginBottom: 5,
+            fontFamily: "LeagueSpartan_700Bold",
+            fontSize: 28,
+            color: "#FFF",
+          }}
+        >
+          History
         </Text>
 
         <View />
