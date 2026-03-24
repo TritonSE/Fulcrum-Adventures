@@ -14,6 +14,8 @@ import {
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
+import type { Activity, CustomTab } from "../types/activity";
+import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
 
 // eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-assignment, perfectionist/sort-imports
 const HEADER_PLACEHOLDER_IMAGE = require("../../assets/header-placeholder.png");
@@ -22,31 +24,6 @@ type CustomTabData = {
   key: string;
   label: string;
   sections: { heading?: string; text: string }[];
-};
-
-type Activity = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  gradeLevel: string;
-  participants: string;
-  duration: string;
-  difficulty: number;
-  tags: string[];
-  objective: string;
-  facilitate: {
-    prep: {
-      setup: string[];
-      materials: string[];
-    };
-    play: string[];
-    debrief?: string[];
-    customTabs?: CustomTabData[];
-  };
-  selOpportunities: string[];
-  mediaUrl?: string | number;
-  tutorialUrl?: string;
 };
 
 type ActivityDetailProps = {
@@ -720,12 +697,42 @@ const styles = StyleSheet.create({
   },
 });
 
+const ENERGY_TO_DIFFICULTY: Record<string, number> = {
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+
+function getCustomTabs(activity: Activity): CustomTabData[] {
+  const knownKeys = new Set(["prep", "play", "debrief"]);
+  return Object.entries(activity.facilitate ?? {})
+    .filter(([key]) => !knownKeys.has(key))
+    .map(([key, value]) => {
+      const tab = value as CustomTab;
+      return {
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        sections: (tab?.sections ?? []).map((s) => ({
+          heading: s.header,
+          text: s.content,
+        })),
+      };
+    });
+}
+
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
   const [activeTab, setActiveTab] = useState<string>("prep");
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
 
   const [notificationAnim] = useState(() => new Animated.Value(0));
+
+  const difficulty = ENERGY_TO_DIFFICULTY[activity.energyLevel] ?? 2;
+  const customTabs = getCustomTabs(activity);
+  const prepMaterials = activity.facilitate?.prep?.materials ?? activity.materials ?? [];
+  const prepSetup = activity.facilitate?.prep?.setup ?? [];
+  const playSteps = activity.facilitate?.play?.steps ?? [];
+  const debriefQuestions = activity.facilitate?.debrief?.questions ?? [];
 
   const hideNotification = useCallback(() => {
     Animated.timing(notificationAnim, {
@@ -755,12 +762,11 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
     return () => clearTimeout(t);
   }, [notification, notificationAnim, hideNotification]);
 
-  const customTabs = activity.facilitate.customTabs ?? [];
   const tabs = ["Prep", "Play", "Debrief", ...customTabs.map((t) => t.label)];
   const tabKeys = ["prep", "play", "debrief", ...customTabs.map((t) => t.key)];
   const tabsScrollViewRef = useRef<ScrollView>(null);
 
-  const hasProps = activity.facilitate.prep.materials.length > 0;
+  const hasProps = prepMaterials.length > 0;
 
   const handleTabPress = (tabKey: string, index: number) => {
     setActiveTab(tabKey);
@@ -793,13 +799,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
           style={[styles.contentWrapper, scrollViewHeight > 0 && { minHeight: scrollViewHeight }]}
         >
           <View style={styles.mediaSection}>
-            {activity.mediaUrl != null && activity.mediaUrl !== "" ? (
+            {activity.imageUrl != null && activity.imageUrl !== "" ? (
               <ImageBackground
-                source={
-                  typeof activity.mediaUrl === "number"
-                    ? activity.mediaUrl
-                    : { uri: String(activity.mediaUrl) }
-                }
+                source={{ uri: activity.imageUrl }}
                 style={styles.mediaSectionBackground}
                 resizeMode="cover"
                 imageStyle={{ backgroundColor: "lightgray" }}
@@ -870,18 +872,18 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                   <View style={styles.metadataIconContainer}>
                     <GradeLevelIcon />
                   </View>
-                  <Text style={styles.metadataText}>{activity.gradeLevel}</Text>
+                  <Text style={styles.metadataText}>{formatGradeLevel(activity.gradeLevel)}</Text>
                   <View style={styles.metadataDot}>
                     <MetadataDotIcon />
                   </View>
                 </>
               )}
-              {activity.participants && (
+              {activity.groupSize && (
                 <>
                   <View style={styles.metadataIconContainer}>
                     <GroupIcon />
                   </View>
-                  <Text style={styles.metadataText}>{activity.participants}</Text>
+                  <Text style={styles.metadataText}>{formatGroupSize(activity.groupSize)}</Text>
                   <View style={styles.metadataDot}>
                     <MetadataDotIcon />
                   </View>
@@ -892,18 +894,18 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                   <View style={styles.metadataIconContainer}>
                     <ClockIcon />
                   </View>
-                  <Text style={styles.metadataText}>{activity.duration}</Text>
+                  <Text style={styles.metadataText}>{formatDuration(activity.duration)}</Text>
                 </>
               )}
             </View>
 
-            {activity.description && <Text style={styles.description}>{activity.description}</Text>}
+            {activity.description ? <Text style={styles.description}>{activity.description}</Text> : null}
 
             <View style={styles.difficultyTagsRow}>
               <View style={styles.difficultyIcons}>
                 {[1, 2, 3].map((level) => (
                   <View key={level} style={styles.lightningIconContainer}>
-                    <LightningIcon filled={level <= activity.difficulty} />
+                    <LightningIcon filled={level <= difficulty} />
                   </View>
                 ))}
               </View>
@@ -911,11 +913,11 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 <View style={styles.tag}>
                   <Text style={styles.tagText}>{hasProps ? "Props" : "No props"}</Text>
                 </View>
-                {activity.tags.map((tag) => (
-                  <View key={tag} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
+                {activity.environment && (
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>{activity.environment}</Text>
                   </View>
-                ))}
+                )}
               </View>
             </View>
 
@@ -923,7 +925,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
 
             <View style={[styles.section, { marginBottom: 24 }]}>
               <Text style={styles.sectionTitle}>Objective</Text>
-              <Text style={styles.sectionContent}>{activity.objective}</Text>
+              <Text style={styles.sectionContent}>{activity.objective ?? ""}</Text>
             </View>
 
             <View style={styles.section}>
@@ -965,31 +967,29 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               <View style={styles.contentCard}>
                 {activeTab === "prep" && (
                   <>
-                    {activity.facilitate.prep.setup &&
-                      activity.facilitate.prep.setup.length > 0 && (
-                        <View style={styles.subsection}>
-                          <Text style={styles.subsectionTitle}>Set-Up</Text>
-                          {activity.facilitate.prep.setup.map((item, index) => (
-                            <View key={`setup-${item}`} style={styles.numberedItem}>
-                              <Text style={styles.number}>{index + 1}.</Text>
-                              <Text style={styles.numberedText}>{item}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      )}
+                    {prepSetup.length > 0 && (
+                      <View style={styles.subsection}>
+                        <Text style={styles.subsectionTitle}>Set-Up</Text>
+                        {prepSetup.map((item, index) => (
+                          <View key={`setup-${item}`} style={styles.numberedItem}>
+                            <Text style={styles.number}>{index + 1}.</Text>
+                            <Text style={styles.numberedText}>{item}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
 
-                    {activity.facilitate.prep.materials &&
-                      activity.facilitate.prep.materials.length > 0 && (
-                        <View style={styles.subsection}>
-                          <Text style={styles.subsectionTitle}>Materials</Text>
-                          {activity.facilitate.prep.materials.map((item) => (
-                            <View key={`material-${item}`} style={styles.bulletItem}>
-                              <Text style={styles.bullet}>•</Text>
-                              <Text style={styles.bulletText}>{item}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      )}
+                    {prepMaterials.length > 0 && (
+                      <View style={styles.subsection}>
+                        <Text style={styles.subsectionTitle}>Materials</Text>
+                        {prepMaterials.map((item) => (
+                          <View key={`material-${item}`} style={styles.bulletItem}>
+                            <Text style={styles.bullet}>•</Text>
+                            <Text style={styles.bulletText}>{item}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </>
                 )}
 
@@ -997,10 +997,10 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                   <View style={{ width: "100%" }}>
                     <Text style={[styles.playHeading, { marginBottom: 8 }]}>Rules</Text>
                     <View style={{ gap: 24 }}>
-                      {activity.facilitate.play.map((item, index) => (
-                        <View key={`play-${item}`} style={styles.playStepSubsection}>
+                      {playSteps.map((step, index) => (
+                        <View key={`play-${step.stepNumber}`} style={styles.playStepSubsection}>
                           <Text style={styles.playStepLabel}>Step {index + 1}</Text>
-                          <Text style={styles.sectionContent}>{item}</Text>
+                          <Text style={styles.sectionContent}>{step.content}</Text>
                         </View>
                       ))}
                     </View>
@@ -1010,7 +1010,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 {activeTab === "debrief" && (
                   <View style={{ width: "100%", gap: 8 }}>
                     <Text style={styles.debriefHeading}>Debrief</Text>
-                    {activity.facilitate.debrief?.map((item, index) => (
+                    {debriefQuestions.map((item, index) => (
                       <View key={`debrief-${item}`} style={styles.numberedItem}>
                         <Text style={styles.number}>{index + 1}.</Text>
                         <Text style={styles.numberedText}>{item}</Text>
@@ -1043,7 +1043,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <View style={[styles.section, styles.lastSection, { marginTop: 24 }]}>
               <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>SEL Opportunity</Text>
               <View style={styles.selTagsContainer}>
-                {activity.selOpportunities.map((tag) => (
+                {(activity.selTags ?? []).map((tag) => (
                   <View key={`sel-${tag}`} style={styles.selTag}>
                     <Text style={styles.selTagText}>{tag}</Text>
                   </View>
