@@ -88,9 +88,6 @@ export default antfu({
 
     // React Native specific
     "react/no-unknown-property": "off",
-
-    // Disable rules that require full type information in flat config
-    // to avoid parser/project wiring issues in this repo.
     "react/no-implicit-key": "off",
   },
 });
