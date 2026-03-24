@@ -12,6 +12,8 @@ export default antfu({
     "**/dist/**/",
     "node_modules/",
     "**/node_modules/**/",
+    "babel.config.js",
+    "**/babel.config.js",
   ],
 
   // Disables stylistic rules to avoid conflicts with Prettier

@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   headerText: {
-    color: "#153A7A",
+    color: "#153F7A",
     fontFamily: "League Spartan",
     fontSize: 26,
     fontWeight: "700",
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingHorizontal: 24,
+    gap: 6,
     paddingBottom: 16,
-    gap: 16,
   },
 });
