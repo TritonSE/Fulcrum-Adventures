@@ -14,8 +14,10 @@ import {
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
-import type { Activity, CustomTab } from "../types/activity";
+
 import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
+
+import type { Activity, CustomTab } from "../types/activity";
 
 // eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-assignment, perfectionist/sort-imports
 const HEADER_PLACEHOLDER_IMAGE = require("../../assets/header-placeholder.png");
@@ -899,7 +901,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               )}
             </View>
 
-            {activity.description ? <Text style={styles.description}>{activity.description}</Text> : null}
+            {activity.description ? (
+              <Text style={styles.description}>{activity.description}</Text>
+            ) : null}
 
             <View style={styles.difficultyTagsRow}>
               <View style={styles.difficultyIcons}>
