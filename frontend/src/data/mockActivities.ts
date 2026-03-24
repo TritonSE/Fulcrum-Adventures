@@ -18,7 +18,6 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
     // Changed to simple strings
     materials: ["Bull Ring Set", "Cone or small ball"],
@@ -51,6 +50,21 @@ export const mockActivities: Activity[] = [
           "How did you communicate without talking over each other?",
         ],
       },
+      safety: {
+        sections: [
+          {
+            content: "Be mindful of the playing field and how creative handshakes may get.",
+          },
+        ],
+      },
+      variations: {
+        sections: [
+          {
+            content:
+              'Rather than taking a knee, the students who have guess incorrectly may become the "biggest fan" of another student who is still "in". They do this by standing behind them and cheering them on. If the student they\'re cheering guesses incorrectly, the two of them may go be the biggest fan of someone else.',
+          },
+        ],
+      },
     },
   },
   {
@@ -69,7 +83,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Resilience", "Social Awareness"],
     facilitate: {
@@ -106,7 +120,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Relationship Skills", "Self-Management"],
     facilitate: {
@@ -138,7 +152,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["2 Flags", "Cones for boundaries"],
     selTags: ["Teamwork", "Strategy", "Physical Activity"],
     facilitate: {
@@ -172,7 +186,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Social Awareness", "Gratitude"],
     facilitate: {
@@ -203,7 +217,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["Whiteboard or Flipchart", "Markers"],
     selTags: ["Self-Reflection", "Goal Setting"],
     facilitate: {
@@ -234,7 +248,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Problem Solving", "Communication", "Physical Contact"],
     facilitate: {
@@ -257,3 +271,7 @@ export const mockActivities: Activity[] = [
     },
   },
 ];
+
+export function getActivityById(id: string): Activity | undefined {
+  return mockActivities.find((a) => a.id === id);
+}
