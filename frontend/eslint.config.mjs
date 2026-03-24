@@ -88,5 +88,6 @@ export default antfu({
 
     // React Native specific
     "react/no-unknown-property": "off",
+    "react/no-implicit-key": "off",
   },
 });
