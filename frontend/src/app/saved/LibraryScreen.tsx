@@ -11,7 +11,7 @@ import Plus from "../../../assets/icons/lucide_plus.svg";
 import Pencil from "../../../assets/icons/PencilIcon.svg";
 import TrashIcon from "../../../assets/icons/TrashIcon.svg";
 import { Navbar } from "../../components/Navbar";
-import { useActivities } from "../../context_temp/ActivityContext";
+import { useActivities } from "../../context/ActivityContext";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 

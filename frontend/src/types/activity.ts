@@ -10,11 +10,6 @@ export type EnergyLevel = "Low" | "Medium" | "High";
 
 export type Environment = "Indoor" | "Outdoor";
 
-export type Material = {
-  name: string;
-  isChecked: boolean; // Checked states stay (until unchecked), even if user did not save, complete, or download the activity card
-};
-
 export type Range = {
   min: number;
   max: number;
@@ -23,61 +18,62 @@ export type Range = {
 // Structure for Prep tab content
 export type PrepTab = {
   setup?: string[]; // Numbered list of setup instructions
-  materials?: Material[]; // Checklist of materials
+  materials?: string[];
 };
 
 // Structure for Play tab content
 export type PlayTab = {
-  steps: PlayStep[]; // Array of step objects (Step 1, Step 2, etc.)
+  steps: PlayStep[];
 };
 
 export type PlayStep = {
-  stepNumber: number; // 1, 2, 3, etc.
-  content: string; // Paragraph text for the step
+  stepNumber: number;
+  content: string;
+};
+
+export type DebriefTab = {
+  questions: string[];
 };
 
 // Structure for additional custom tabs (Safety, Variations, Pro-Tip, etc.)
 export type CustomTab = {
-  sections: CustomSection[]; // Array of sections
+  sections: CustomSection[];
 };
 
 export type CustomSection = {
-  header?: string; // Optional header (can be omitted for just text)
-  content: string; // Paragraph text
+  header?: string;
+  content: string;
 };
 
 export type Activity = {
   id: string;
   title: string;
-  gradeLevel: string; // e.g., "K-12", "6-8", "9-12"
-  groupSize: string; // e.g., "5-20", "10-30", "Any"
-  duration: string; // e.g., "5-15 min", "15-30 min"
+  gradeLevel: Range;
+  groupSize: Range;
+  duration: Range; // In minutes
   category: Category;
-  description: string; // One sentence overview of the activity
+  description: string;
   energyLevel: EnergyLevel;
   environment: Environment;
-  materials: Material[]; // Props/materials needed for the activity
+  materials: string[];
   isSaved?: boolean;
   imageUrl?: string;
   hasTutorial?: boolean;
 
-  // Optional fields for full activity page (not needed for cards, but part of shared types)
   objective?: string;
 
   // Facilitate tabs
-  // Default tabs: Prep and Play (only display if content exists)
-  // Additional tabs (Safety, Variations, Pro-Tip, etc.) - max 6 tabs total
   facilitate?: {
     prep?: PrepTab;
     play?: PlayTab;
-    // Additional custom tabs indexed by name (e.g., "Safety", "Variations", "Pro-Tip")
-    [tabName: string]: PrepTab | PlayTab | CustomTab | undefined;
+    debrief?: DebriefTab;
+    [tabName: string]: PrepTab | PlayTab | DebriefTab | CustomTab | undefined;
   };
 
-  selTags?: string[]; // SEL Opportunity Tags
+  selTags?: string[];
   isCompleted?: boolean;
   isDownloaded?: boolean;
   isHistory?: boolean;
   isPlaylist?: boolean;
-  lastViewedAt?: number; // Timestamp of when the activity was last viewed (for history sorting)
+  lastViewedAt?: number;
 };

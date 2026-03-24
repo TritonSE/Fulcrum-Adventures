@@ -28,7 +28,7 @@ import LibraryScreen from "./src/app/saved/LibraryScreen";
 import PlaylistScreen from "./src/app/saved/PlaylistScreen";
 import { HeaderBackButton } from "./src/components/HeaderBackButton";
 import { ToastProvider } from "./src/components/ToastProvider";
-import { ActivityProvider } from "./src/context_temp/ActivityContext";
+import { ActivityProvider } from "./src/context/ActivityContext";
 
 import type { RootStackParamList } from "./src/types/navigation";
 
@@ -48,14 +48,14 @@ export default function App() {
     LeagueSpartan_700Bold,
     LeagueSpartan_800ExtraBold,
   });
-  const [isLoaded1] = useInstrumentSansFonts({
+  const [isInstrumentSansLoaded] = useInstrumentSansFonts({
     InstrumentSans_400Regular,
     InstrumentSans_500Medium,
     InstrumentSans_600SemiBold,
     InstrumentSans_700Bold,
   });
 
-  if (!lsLoaded || !isLoaded1) return null;
+  if (!lsLoaded || !isInstrumentSansLoaded) return null;
 
   return (
     <SafeAreaProvider>

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityList } from "../../components/ActivityList";
 import { Navbar } from "../../components/Navbar";
-import { useActivities } from "../../context_temp/ActivityContext";
+import { useActivities } from "../../context/ActivityContext";
 
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";

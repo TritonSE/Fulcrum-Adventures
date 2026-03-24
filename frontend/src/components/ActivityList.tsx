@@ -94,13 +94,15 @@ export const ActivityList: React.FC<ActivityListProps> = ({
     );
 
     // Swipe delete only in normal mode, and only if provided
-    // Swipe delete only in normal mode, and only if provided
     if (!enableSwipeDelete || !onDelete || isEditing) return content;
 
     const ACTION_WIDTH = 96; // controls how much red shows
     const RADIUS = 18; // match your card radius
 
-    const renderRightActions = (_progress: any, dragX: Animated.AnimatedInterpolation<number>) => {
+    const renderRightActions = (
+      _progress: Animated.AnimatedInterpolation<number>,
+      dragX: Animated.AnimatedInterpolation<number>,
+    ) => {
       const scale = dragX.interpolate({
         inputRange: [-ACTION_WIDTH, -30, 0],
         outputRange: [1, 0.9, 0.8],

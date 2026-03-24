@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, ScrollView, Text } from "react-native";
 
-import { useActivities } from "../../context_temp/ActivityContext";
+import { useActivities } from "../../context/ActivityContext";
+import { formatDuration, formatGroupSize } from "../../utils/textUtils";
 
 import type { RootStackParamList } from "../../types/navigation";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -21,7 +22,7 @@ export default function ActivityDetailScreen({ route, navigation }: Props) {
       <Text style={{ fontSize: 24, fontWeight: "700" }}>{activity.title}</Text>
 
       <Text style={{ marginTop: 8 }}>
-        {activity.duration} • {activity.groupSize} people
+        {formatDuration(activity.duration)} • {formatGroupSize(activity.groupSize)} people
       </Text>
 
       <Text style={{ marginTop: 16 }}>{activity.description}</Text>
@@ -29,7 +30,7 @@ export default function ActivityDetailScreen({ route, navigation }: Props) {
       <Text style={{ marginTop: 20, fontWeight: "700" }}>Materials</Text>
 
       {activity.materials.map((m, i) => (
-        <Text key={i}>• {m.name}</Text>
+        <Text key={i}>• {m}</Text>
       ))}
 
       {/* Bookmark button opens the Library bottom sheet */}

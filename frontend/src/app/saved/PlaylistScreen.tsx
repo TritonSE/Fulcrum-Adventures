@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ActivityList } from "../../components/ActivityList";
 import { Navbar } from "../../components/Navbar";
-import { useActivities } from "../../context_temp/ActivityContext";
+import { useActivities } from "../../context/ActivityContext";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 
