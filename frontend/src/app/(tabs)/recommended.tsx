@@ -4,7 +4,7 @@ import { ActivityList } from "@/components/ActivityList";
 import { mockActivities } from "@/data/mockActivities";
 import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeaderSection";
 
-export default function PopularScreen() {
+export default function RecommendedScreen() {
   return (
     <View style={{ flex: 1 }}>
       <HomePopUpPageHeaderSection sectionName="Recommended" rightPadding={91} />

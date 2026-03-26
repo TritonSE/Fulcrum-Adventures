@@ -18,9 +18,6 @@ const PlaceHolderScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Placeholder Screen</Text>
-      <Text style={styles.text}>Placeholder Screen</Text>
-      <Text style={styles.text}>Placeholder Screen</Text>
-      <Text style={styles.text}>Placeholder Screen</Text>
     </View>
   );
 };

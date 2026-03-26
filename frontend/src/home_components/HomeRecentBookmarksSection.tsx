@@ -84,8 +84,11 @@ const styles = StyleSheet.create({
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
-  let activities = bookmarkedActivities;
-  activities = mockActivities.slice(0, 6);
+  // TODO: use actual bookmarked activities once wired up
+  const activities =
+    bookmarkedActivities && bookmarkedActivities.length > 0
+      ? bookmarkedActivities.slice(0, 6)
+      : mockActivities.slice(0, 6);
 
   const hasBookmarks = activities.length > 0;
   const indicatorCount = Math.min(6, activities.length);
@@ -96,22 +99,9 @@ export function HomeRecentBookmarksSection({
     [activities],
   );
 
-  // const viewabilityConfig = useRef<ViewabilityConfig>({
-  //   itemVisiblePercentThreshold: 60,
-  // }).current;
   const viewabilityConfig: ViewabilityConfig = {
     itemVisiblePercentThreshold: 60,
   };
-
-  // const onViewableItemsChanged = useRef(
-  //   ({ viewableItems }: { viewableItems: Array<ViewToken<Activity>> }) => {
-  //     const firstVisible = viewableItems[0];
-
-  //     if (firstVisible?.index != null) {
-  //       setActiveIndex(firstVisible.index);
-  //     }
-  //   },
-  // ).current;
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {

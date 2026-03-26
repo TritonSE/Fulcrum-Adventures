@@ -1,17 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 
-// === test new ===
 import { ActivityList } from "../components/ActivityList";
 import { mockActivities } from "../data/mockActivities";
 
 import { SeeAll } from "./SeeAll";
-// === end test ===
 
 export function HomeRecommendedSection() {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
-        <Text style={styles.text}> Recommended </Text>
+        <Text style={styles.text}>Recommended</Text>
         <SeeAll screen="/recommended" />
       </View>
       <ActivityList

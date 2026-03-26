@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
@@ -17,21 +16,14 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
-  // To be replaced with actual cards
-  // const bookmarkedActivities = [];
-  const [isMailingListVisible, setIsMailingListVisible] = useState(false);
-
   return (
-    <>
-      <ScrollView style={styles.container}>
-        <HomeHeaderSection />
-        <HomeBrowseCategorySection />
-        <HomeRecentBookmarksSection bookmarkedActivities={[]} />
-        <HomePopularSection />
-        <HomeRecommendedSection />
-        <HomeMailingListSection />
-      </ScrollView>
-
-    </>
+    <ScrollView style={styles.container}>
+      <HomeHeaderSection />
+      <HomeBrowseCategorySection />
+      <HomeRecentBookmarksSection bookmarkedActivities={[]} />
+      <HomePopularSection />
+      <HomeRecommendedSection />
+      <HomeMailingListSection />
+    </ScrollView>
   );
 }

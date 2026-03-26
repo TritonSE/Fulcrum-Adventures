@@ -1,11 +1,6 @@
-import { useRef } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-
 export function HomeMailingListSection() {
-  const inputRef = useRef<TextInput>(null);
-
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.card}>
@@ -15,7 +10,6 @@ export function HomeMailingListSection() {
         </Text>
 
         <TextInput
-          ref={inputRef}
           placeholder="Enter email here"
           placeholderTextColor="#B4B4B4"
           keyboardType="email-address"
@@ -78,7 +72,7 @@ const styles = StyleSheet.create({
     borderColor: "#B4B4B4",
     backgroundColor: "#FFFFFF",
     textAlign: "left",
-    color:"#484848",
+    color: "#484848",
     fontFamily: "Instrument Sans",
     fontSize: 14,
     paddingHorizontal: 12,
