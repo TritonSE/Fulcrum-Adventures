@@ -4,9 +4,9 @@ export const mockActivities: Activity[] = [
   {
     id: "1",
     title: "Bull Ring - Ice Cream Challenge",
-    gradeLevel: "K-12",
-    groupSize: "5-20",
-    duration: "5-15 min",
+    gradeLevel: { min: 0, max: 12 },
+    groupSize: { min: 5, max: 20 },
+    duration: { min: 5, max: 15 },
     category: "Team Challenge",
     description:
       "A team-based coordination activity that requires students to work together to transport an object using shared control.",
@@ -16,10 +16,7 @@ export const mockActivities: Activity[] = [
     hasTutorial: true,
     imageUrl: "https://via.placeholder.com/400x300",
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
-    materials: [
-      { name: "Bull Ring Set", isChecked: false },
-      { name: "Cone or small ball", isChecked: false },
-    ],
+    materials: ["Bull Ring Set", "Cone or small ball"],
     selTags: ["Collaboration", "Communication", "Patience"],
     facilitate: {
       prep: {
@@ -27,10 +24,7 @@ export const mockActivities: Activity[] = [
           "Set up Bull Ring so that all the strings are laid out.",
           "Place the cone in the center of the ring.",
         ],
-        materials: [
-          { name: "Bull Ring Set", isChecked: false },
-          { name: "Cone", isChecked: false },
-        ],
+        materials: ["Bull Ring Set", "Cone"],
       },
       play: {
         steps: [
@@ -44,19 +38,40 @@ export const mockActivities: Activity[] = [
           },
         ],
       },
+      debrief: {
+        questions: [
+          "What was the hardest part about working together?",
+          "How did you communicate without talking over each other?",
+        ],
+      },
+      safety: {
+        sections: [
+          {
+            content: "Be mindful of the playing field and how creative handshakes may get.",
+          },
+        ],
+      },
+      variations: {
+        sections: [
+          {
+            content:
+              'Rather than taking a knee, the students who have guess incorrectly may become the "biggest fan" of another student who is still "in". They do this by standing behind them and cheering them on. If the student they\'re cheering guesses incorrectly, the two of them may go be the biggest fan of someone else.',
+          },
+        ],
+      },
     },
   },
   {
     id: "2",
     title: "Rock, Paper, Scissors, Stretch!",
-    gradeLevel: "6-12",
-    groupSize: "10-50",
-    duration: "5-10 min",
+    gradeLevel: { min: 6, max: 12 },
+    groupSize: { min: 10, max: 50 },
+    duration: { min: 5, max: 10 },
     category: "Opener",
     description:
       "A high-energy tournament style game where students compete to become the ultimate champion.",
     energyLevel: "High",
-    environment: "Both",
+    environment: "Outdoor",
     isSaved: true,
     hasTutorial: false,
     imageUrl: "https://via.placeholder.com/400x300",
@@ -79,14 +94,17 @@ export const mockActivities: Activity[] = [
           },
         ],
       },
+      debrief: {
+        questions: ["How did it feel to cheer for someone else?"],
+      },
     },
   },
   {
     id: "3",
     title: "Two Truths and a Lie",
-    gradeLevel: "3-12",
-    groupSize: "5-15",
-    duration: "15-20 min",
+    gradeLevel: { min: 3, max: 12 },
+    groupSize: { min: 5, max: 15 },
+    duration: { min: 15, max: 20 },
     category: "Icebreaker",
     description: "A classic get-to-know-you game that encourages sharing and active listening.",
     energyLevel: "Low",
@@ -114,9 +132,9 @@ export const mockActivities: Activity[] = [
   {
     id: "4",
     title: "Capture the Flag",
-    gradeLevel: "4-12",
-    groupSize: "20+",
-    duration: "30-60 min",
+    gradeLevel: { min: 4, max: 12 },
+    groupSize: { min: 20, max: 100 },
+    duration: { min: 30, max: 60 },
     category: "Active",
     description:
       "Strategic outdoor game requiring speed, stealth, and teamwork to capture the opposing team's flag.",
@@ -125,15 +143,12 @@ export const mockActivities: Activity[] = [
     isSaved: false,
     hasTutorial: true,
     imageUrl: "https://via.placeholder.com/400x300",
-    materials: [
-      { name: "2 Flags", isChecked: false },
-      { name: "Cones for boundaries", isChecked: false },
-    ],
+    materials: ["2 Flags", "Cones for boundaries"],
     selTags: ["Teamwork", "Strategy", "Physical Activity"],
     facilitate: {
       prep: {
         setup: ["Mark large boundaries.", "Designate jail areas."],
-        materials: [{ name: "Flags", isChecked: false }],
+        materials: ["Flags"],
       },
       play: {
         steps: [
@@ -152,9 +167,9 @@ export const mockActivities: Activity[] = [
   {
     id: "5",
     title: "Circle of Appreciation",
-    gradeLevel: "K-12",
-    groupSize: "10-30",
-    duration: "10-15 min",
+    gradeLevel: { min: 0, max: 12 },
+    groupSize: { min: 10, max: 30 },
+    duration: { min: 10, max: 15 },
     category: "Connection",
     description: "A calming activity to build community and express gratitude towards peers.",
     energyLevel: "Low",
@@ -182,9 +197,9 @@ export const mockActivities: Activity[] = [
   {
     id: "6",
     title: "Stop, Start, Continue",
-    gradeLevel: "6-12",
-    groupSize: "5-50",
-    duration: "20 min",
+    gradeLevel: { min: 6, max: 12 },
+    groupSize: { min: 5, max: 50 },
+    duration: { min: 20, max: 20 },
     category: "Debrief",
     description:
       "A structured reflection tool for groups to analyze their performance and set goals.",
@@ -193,10 +208,7 @@ export const mockActivities: Activity[] = [
     isSaved: false,
     hasTutorial: false,
     imageUrl: "https://via.placeholder.com/400x300",
-    materials: [
-      { name: "Whiteboard or Flipchart", isChecked: false },
-      { name: "Markers", isChecked: false },
-    ],
+    materials: ["Whiteboard or Flipchart", "Markers"],
     selTags: ["Self-Reflection", "Goal Setting"],
     facilitate: {
       play: {
@@ -216,14 +228,14 @@ export const mockActivities: Activity[] = [
   {
     id: "7",
     title: "Human Knot",
-    gradeLevel: "3-12",
-    groupSize: "8-12",
-    duration: "10-20 min",
+    gradeLevel: { min: 3, max: 12 },
+    groupSize: { min: 8, max: 12 },
+    duration: { min: 10, max: 20 },
     category: "Team Challenge",
     description:
       "A physical puzzle where a group must untangle themselves without letting go of hands.",
     energyLevel: "Medium",
-    environment: "Both",
+    environment: "Indoor",
     isSaved: false,
     hasTutorial: true,
     imageUrl: "https://via.placeholder.com/400x300",
@@ -249,3 +261,7 @@ export const mockActivities: Activity[] = [
     },
   },
 ];
+
+export function getActivityById(id: string): Activity | undefined {
+  return mockActivities.find((a) => a.id === id);
+}
