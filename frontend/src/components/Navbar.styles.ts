@@ -22,6 +22,7 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   tab: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     minWidth: 50,
