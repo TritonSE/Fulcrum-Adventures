@@ -1,15 +1,11 @@
-// src/data/mockActivities.ts
 import type { Activity } from "../types/activity";
 
 export const mockActivities: Activity[] = [
   {
     id: "1",
     title: "Bull Ring - Ice Cream Challenge",
-    // Was "K-12"
     gradeLevel: { min: 0, max: 12 },
-    // Was "5-20"
     groupSize: { min: 5, max: 20 },
-    // Was "5-15 min"
     duration: { min: 5, max: 15 },
     category: "Team Challenge",
     description:
@@ -19,7 +15,6 @@ export const mockActivities: Activity[] = [
     isSaved: false,
     hasTutorial: true,
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
-    // Changed to simple strings
     materials: ["Bull Ring Set", "Cone or small ball"],
     selTags: ["Collaboration", "Communication", "Patience"],
     facilitate: {
@@ -28,7 +23,6 @@ export const mockActivities: Activity[] = [
           "Set up Bull Ring so that all the strings are laid out.",
           "Place the cone in the center of the ring.",
         ],
-        // Changed to simple strings
         materials: ["Bull Ring Set", "Cone"],
       },
       play: {
@@ -43,7 +37,6 @@ export const mockActivities: Activity[] = [
           },
         ],
       },
-      // Added example Debrief
       debrief: {
         questions: [
           "What was the hardest part about working together?",
@@ -70,11 +63,8 @@ export const mockActivities: Activity[] = [
   {
     id: "2",
     title: "Rock, Paper, Scissors, Stretch!",
-    // Was "6-12"
     gradeLevel: { min: 6, max: 12 },
-    // Was "10-50"
     groupSize: { min: 10, max: 50 },
-    // Was "5-10 min"
     duration: { min: 5, max: 10 },
     category: "Opener",
     description:
@@ -142,7 +132,6 @@ export const mockActivities: Activity[] = [
     id: "4",
     title: "Capture the Flag",
     gradeLevel: { min: 4, max: 12 },
-    // Was "20+" (represented as 20-100)
     groupSize: { min: 20, max: 100 },
     duration: { min: 30, max: 60 },
     category: "Active",
@@ -209,7 +198,7 @@ export const mockActivities: Activity[] = [
     title: "Stop, Start, Continue",
     gradeLevel: { min: 6, max: 12 },
     groupSize: { min: 5, max: 50 },
-    duration: { min: 20, max: 20 }, // Fixed duration represented as same min/max
+    duration: { min: 20, max: 20 },
     category: "Debrief",
     description:
       "A structured reflection tool for groups to analyze their performance and set goals.",

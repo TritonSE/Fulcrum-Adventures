@@ -5,7 +5,6 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
-import GraduationCapIcon from "../../assets/icons/graduation-cap.svg";
 import PeopleIcon from "../../assets/icons/people.svg";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
 import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
@@ -41,13 +40,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
           </Text>
 
           <View style={styles.metaContainer}>
-            <View style={styles.metaItem}>
-              <View style={styles.iconWrapper}>
-                <GraduationCapIcon />
-              </View>
-              <Text style={styles.metaText}>{formatGradeLevel(activity.gradeLevel)}</Text>
-            </View>
-
+            <Text style={styles.metaText}>{formatGradeLevel(activity.gradeLevel)}</Text>
             <Text style={styles.metaDivider}>•</Text>
 
             <View style={styles.metaItem}>

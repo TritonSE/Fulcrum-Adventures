@@ -9,4 +9,4 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   "Team Challenge": "#00BC7B",
 };
 
-export const DEFAULT_CATEGORY_COLOR = "#1322C6";
+export const DEFAULT_CATEGORY_COLOR = "#3C47BD";
