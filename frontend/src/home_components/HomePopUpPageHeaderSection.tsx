@@ -29,7 +29,6 @@ const styles = StyleSheet.create({
     display: "flex",
     width: "100%",
     height: 132,
-    // @ts-expect-error experimental_backgroundImage is not in RN types yet
     experimental_backgroundImage: "linear-gradient(90deg, #153A7A 0%, #276BE0 100%)",
     paddingTop: 76,
     paddingBottom: 16,
