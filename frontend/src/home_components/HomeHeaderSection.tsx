@@ -1,5 +1,5 @@
-import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, View } from "react-native";
 
 import Header from "../../assets/FulcrumLogo.svg";
 
@@ -23,9 +23,9 @@ export const HomeHeaderSection = () => {
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={styles.header}
-   >
+    >
       <View style={styles.logoWrapper}>
-        <Header height={39} width={130}/>
+        <Header height={39} width={130} />
       </View>
     </LinearGradient>
   );

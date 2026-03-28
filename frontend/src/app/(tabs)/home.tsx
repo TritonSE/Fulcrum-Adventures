@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
 
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
@@ -17,13 +17,19 @@ const styles = StyleSheet.create({
 
 export default function HomeScreen() {
   return (
-    <ScrollView style={styles.container}>
-      <HomeHeaderSection />
-      <HomeBrowseCategorySection />
-      <HomeRecentBookmarksSection bookmarkedActivities={[]} />
-      <HomePopularSection />
-      <HomeRecommendedSection />
-      <HomeMailingListSection />
-    </ScrollView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
+      <ScrollView style={styles.container}>
+        <HomeHeaderSection />
+        <HomeBrowseCategorySection />
+        <HomeRecentBookmarksSection bookmarkedActivities={[]} />
+        <HomePopularSection />
+        <HomeRecommendedSection />
+        <HomeMailingListSection />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
