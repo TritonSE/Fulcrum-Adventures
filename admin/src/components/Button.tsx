@@ -1,7 +1,9 @@
+// <Button variant="primary">Normal Button</Button>
+// <Button variant="secondary-left" disabled>Disabled Button</Button>
+
 import React from "react";
 import "./Button.css";
 
-// Assuming standard Vite image imports. Adjust path based on your folder structure.
 import UploadPrimaryIcon from "../../icons/upload-primary.svg";
 import UploadIcon from "../../icons/upload.svg";
 import UploadDisabledIcon from "../../icons/upload-disabled.svg";
@@ -33,7 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   ariaLabel,
 }) => {
-  // 1. Determine which SVG to use
+  // determine which SVG to use
   let currentIcon = UploadIcon;
   if (disabled) {
     currentIcon = UploadDisabledIcon;
@@ -41,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
     currentIcon = UploadPrimaryIcon;
   }
 
-  // 2. Determine icon placement
+  // determine icon placement
   const isLeft = variant === "primary" || variant === "secondary-left";
   const isRight = variant === "tertiary" || variant === "secondary-right";
 
