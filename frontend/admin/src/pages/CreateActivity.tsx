@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
+
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import { OverviewSection } from "../create_edit_page_components/OverviewSection";
 

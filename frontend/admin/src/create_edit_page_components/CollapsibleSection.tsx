@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
+  LayoutAnimation,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
-  LayoutAnimation,
-  View,
-  Platform,
   UIManager,
+  View,
 } from "react-native";
 
 const styles = StyleSheet.create({
