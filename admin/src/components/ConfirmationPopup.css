@@ -1,0 +1,50 @@
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-container {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 32px 32px 16px 32px;
+  width: 100%;
+  max-width: 482px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.popup-title {
+  color: #153a7a;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-align: left;
+}
+
+.popup-message {
+  color: #153a7a;
+  font-size: 16px;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.button--destructive {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.button--destructive:hover {
+  background-color: #153a7a !important;
+  border-color: #153a7a !important;
+}

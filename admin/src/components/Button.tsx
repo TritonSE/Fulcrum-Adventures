@@ -1,6 +1,3 @@
-// <Button variant="primary">Normal Button</Button>
-// <Button variant="secondary-left" disabled>Disabled Button</Button>
-
 import React from "react";
 import "./Button.css";
 
@@ -17,6 +14,7 @@ export type ButtonVariant =
 interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
+  icon?: boolean;
   onClick?: () => void;
   children: React.ReactNode;
   type?: "button" | "submit" | "reset";
@@ -28,6 +26,7 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   disabled = false,
+  icon = true,
   onClick,
   children,
   type = "button",
@@ -43,9 +42,11 @@ export const Button: React.FC<ButtonProps> = ({
     currentIcon = UploadPrimaryIcon;
   }
 
-  // determine icon placement
-  const isLeft = variant === "primary" || variant === "secondary-left";
-  const isRight = variant === "tertiary" || variant === "secondary-right";
+  // determine icon placement AND if it should be displayed at all
+  const showLeftIcon =
+    icon && (variant === "primary" || variant === "secondary-left");
+  const showRightIcon =
+    icon && (variant === "tertiary" || variant === "secondary-right");
 
   const buttonClasses = [
     "button",
@@ -65,7 +66,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       aria-label={ariaLabel}
     >
-      {isLeft && (
+      {showLeftIcon && (
         <span className="button__icon button__icon--left">
           <img src={currentIcon} alt="" aria-hidden="true" />
         </span>
@@ -73,7 +74,7 @@ export const Button: React.FC<ButtonProps> = ({
 
       <span className="button__text">{children}</span>
 
-      {isRight && (
+      {showRightIcon && (
         <span className="button__icon button__icon--right">
           <img src={currentIcon} alt="" aria-hidden="true" />
         </span>
