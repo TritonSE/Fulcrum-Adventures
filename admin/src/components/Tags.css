@@ -1,0 +1,114 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+/* Base Unselected State */
+.tag-category {
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.tag-category--opener {
+  color: #1322c6;
+}
+.tag-category--icebreaker {
+  color: #4272d1;
+}
+.tag-category--active {
+  color: #72cf1a;
+}
+.tag-category--debrief {
+  color: #ff6b6b;
+}
+.tag-category--connection {
+  color: #ecd528;
+}
+.tag-category--team-challenge {
+  color: #00bc7b;
+}
+
+/* Base Selected State */
+.tag-category.tag-category--selected {
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.tag-category--opener.tag-category--selected {
+  background-color: #1322c6;
+}
+.tag-category--icebreaker.tag-category--selected {
+  background-color: #4272d1;
+}
+.tag-category--active.tag-category--selected {
+  background-color: #72cf1a;
+}
+.tag-category--debrief.tag-category--selected {
+  background-color: #ff6b6b;
+}
+.tag-category--connection.tag-category--selected {
+  background-color: #ecd528;
+}
+.tag-category--team-challenge.tag-category--selected {
+  background-color: #00bc7b;
+}
+
+.tag-energy {
+  background-color: #ffffff;
+  border: 1px solid #d9d9d9;
+  color: #153a7a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  gap: 8px;
+}
+
+.tag-energy:hover:not(.tag-energy--selected) {
+  background-color: #f3f3f3;
+  border-color: #b4b4b4;
+}
+
+.tag-energy--selected,
+.tag-energy.tag-energy--selected {
+  background-color: #153a7a;
+  border-color: #153a7a;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.energy-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --- STATUS BADGES --- */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 5px 19.69px;
+  cursor: default;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.badge-status--published {
+  background-color: #22c55e;
+}
+
+.badge-status--draft {
+  background-color: #ef4444;
+}
