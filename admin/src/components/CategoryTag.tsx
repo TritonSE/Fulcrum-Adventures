@@ -1,5 +1,5 @@
 import React from "react";
-// Import your CSS file here, e.g., import "./Tags.css";
+import "./Tags.css";
 
 export type CategoryType =
   | "Opener"
