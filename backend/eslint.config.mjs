@@ -15,6 +15,7 @@ export default antfu({
     "**/next.config.js",
     "**/vite.config.ts",
     "**/vite-env.d.ts",
+    "docs/**",
   ],
 
   // Disables stylistic rules to avoid conflicts with Prettier
