@@ -1,7 +1,6 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
@@ -23,7 +22,6 @@ type ActivityCardProps = {
 export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      {/* Left Side: Image */}
       <View style={styles.imageContainer}>
         {activity.imageUrl ? (
           <Image source={{ uri: activity.imageUrl }} style={styles.image} resizeMode="cover" />
@@ -32,9 +30,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
         )}
       </View>
 
-      {/* Right Side: Content */}
       <View style={styles.content}>
-        {/* Title + Meta Wrapper (Gap 4px) */}
         <View style={styles.headerContent}>
           <Text style={styles.title} numberOfLines={2}>
             {activity.title}
@@ -68,7 +64,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
           </View>
         </View>
 
-        {/* Footer: Category Tag & Bookmark */}
         <View style={styles.footer}>
           <View
             style={[
@@ -81,7 +76,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
             <Text style={styles.categoryText}>{activity.category}</Text>
           </View>
 
-          {/* Bookmark Button */}
           <TouchableOpacity
             style={styles.bookmarkButton}
             onPress={(e) => {
