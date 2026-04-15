@@ -1,8 +1,9 @@
+// src/components/ActivityList.styles.ts
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-    marginVertical: 16,
+    display: "flex",
     flex: 1,
   },
   headerContainer: {
@@ -10,19 +11,19 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   headerText: {
-    color: "#153A7A",
+    color: "#153F7A",
     fontFamily: "League Spartan",
     fontSize: 26,
     fontWeight: "700",
     lineHeight: 26,
   },
   verticalList: {
-    paddingBottom: 16,
-    gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    gap: 8,
   },
   horizontalList: {
     paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 16,
+    gap: 6,
   },
 });

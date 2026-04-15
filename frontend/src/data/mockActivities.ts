@@ -1,15 +1,11 @@
-// src/data/mockActivities.ts
 import type { Activity } from "../types/activity";
 
 export const mockActivities: Activity[] = [
   {
     id: "1",
     title: "Bull Ring - Ice Cream Challenge",
-    // Was "K-12"
     gradeLevel: { min: 0, max: 12 },
-    // Was "5-20"
     groupSize: { min: 5, max: 20 },
-    // Was "5-15 min"
     duration: { min: 5, max: 15 },
     category: "Team Challenge",
     description:
@@ -18,9 +14,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
-    // Changed to simple strings
     materials: ["Bull Ring Set", "Cone or small ball"],
     selTags: ["Collaboration", "Communication", "Patience"],
     facilitate: {
@@ -29,7 +23,6 @@ export const mockActivities: Activity[] = [
           "Set up Bull Ring so that all the strings are laid out.",
           "Place the cone in the center of the ring.",
         ],
-        // Changed to simple strings
         materials: ["Bull Ring Set", "Cone"],
       },
       play: {
@@ -44,11 +37,25 @@ export const mockActivities: Activity[] = [
           },
         ],
       },
-      // Added example Debrief
       debrief: {
         questions: [
           "What was the hardest part about working together?",
           "How did you communicate without talking over each other?",
+        ],
+      },
+      safety: {
+        sections: [
+          {
+            content: "Be mindful of the playing field and how creative handshakes may get.",
+          },
+        ],
+      },
+      variations: {
+        sections: [
+          {
+            content:
+              'Rather than taking a knee, the students who have guess incorrectly may become the "biggest fan" of another student who is still "in". They do this by standing behind them and cheering them on. If the student they\'re cheering guesses incorrectly, the two of them may go be the biggest fan of someone else.',
+          },
         ],
       },
     },
@@ -56,11 +63,8 @@ export const mockActivities: Activity[] = [
   {
     id: "2",
     title: "Rock, Paper, Scissors, Stretch!",
-    // Was "6-12"
     gradeLevel: { min: 6, max: 12 },
-    // Was "10-50"
     groupSize: { min: 10, max: 50 },
-    // Was "5-10 min"
     duration: { min: 5, max: 10 },
     category: "Opener",
     description:
@@ -69,7 +73,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Resilience", "Social Awareness"],
     facilitate: {
@@ -106,7 +110,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Relationship Skills", "Self-Management"],
     facilitate: {
@@ -128,7 +132,6 @@ export const mockActivities: Activity[] = [
     id: "4",
     title: "Capture the Flag",
     gradeLevel: { min: 4, max: 12 },
-    // Was "20+" (represented as 20-100)
     groupSize: { min: 20, max: 100 },
     duration: { min: 30, max: 60 },
     category: "Active",
@@ -138,7 +141,7 @@ export const mockActivities: Activity[] = [
     environment: "Outdoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["2 Flags", "Cones for boundaries"],
     selTags: ["Teamwork", "Strategy", "Physical Activity"],
     facilitate: {
@@ -172,7 +175,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: true,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Social Awareness", "Gratitude"],
     facilitate: {
@@ -195,7 +198,7 @@ export const mockActivities: Activity[] = [
     title: "Stop, Start, Continue",
     gradeLevel: { min: 6, max: 12 },
     groupSize: { min: 5, max: 50 },
-    duration: { min: 20, max: 20 }, // Fixed duration represented as same min/max
+    duration: { min: 20, max: 20 },
     category: "Debrief",
     description:
       "A structured reflection tool for groups to analyze their performance and set goals.",
@@ -203,7 +206,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: false,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: ["Whiteboard or Flipchart", "Markers"],
     selTags: ["Self-Reflection", "Goal Setting"],
     facilitate: {
@@ -234,7 +237,7 @@ export const mockActivities: Activity[] = [
     environment: "Indoor",
     isSaved: false,
     hasTutorial: true,
-    imageUrl: "https://via.placeholder.com/400x300",
+
     materials: [],
     selTags: ["Problem Solving", "Communication", "Physical Contact"],
     facilitate: {
@@ -257,3 +260,7 @@ export const mockActivities: Activity[] = [
     },
   },
 ];
+
+export function getActivityById(id: string): Activity | undefined {
+  return mockActivities.find((a) => a.id === id);
+}
