@@ -10,12 +10,10 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    paddingBottom: 16,
-    overflow: "visible",
+    overflow: "hidden",
   },
   innerContainer: {
     borderRadius: 16,
-    overflow: "hidden",
     backgroundColor: "#FFFFFF",
   },
   imageContainer: {
@@ -76,6 +74,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   categoryTag: {
     paddingHorizontal: 12,

@@ -13,7 +13,8 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     display: "flex",
-    width: 342,
+    alignSelf: "stretch",
+    paddingHorizontal: 24,
     flexDirection: "column",
     alignItems: "flex-start",
     gap: 12,

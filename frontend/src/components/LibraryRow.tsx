@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 
 type LibraryRowProps = {
   icon: keyof typeof Ionicons.glyphMap;

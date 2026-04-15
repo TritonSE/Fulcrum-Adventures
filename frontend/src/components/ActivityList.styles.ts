@@ -18,7 +18,8 @@ export const styles = StyleSheet.create({
     lineHeight: 26,
   },
   verticalList: {
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
     gap: 8,
   },
   horizontalList: {

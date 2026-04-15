@@ -1,5 +1,5 @@
-import PlaceHolderScreen from "@/components/PlaceHolderScreen";
+import LibraryScreen from "../saved/LibraryScreen";
 
-export default function LibraryScreen() {
-  return <PlaceHolderScreen />;
+export default function LibraryTab() {
+  return <LibraryScreen />;
 }

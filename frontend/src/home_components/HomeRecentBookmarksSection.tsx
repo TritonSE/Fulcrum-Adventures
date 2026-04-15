@@ -1,8 +1,9 @@
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
-import { mockActivities } from "../data/mockActivities";
+import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
 
@@ -14,7 +15,7 @@ type HomeRecentBookmarksSectionProps = {
 };
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const LIST_HORIZONTAL_PADDING = 20;
+const LIST_HORIZONTAL_PADDING = 24;
 const CARD_HORIZONTAL_SPACING = 12;
 const CARD_ITEM_WIDTH = SCREEN_WIDTH - LIST_HORIZONTAL_PADDING * 2;
 
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 10,
@@ -84,11 +85,17 @@ const styles = StyleSheet.create({
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
-  // TODO: use actual bookmarked activities once wired up
+  const {
+    toggleSaved,
+    bookmarkedActivities: contextBookmarks,
+    activities: allActivities,
+  } = useActivities();
   const activities =
     bookmarkedActivities && bookmarkedActivities.length > 0
-      ? bookmarkedActivities.slice(0, 6)
-      : mockActivities.slice(0, 6);
+      ? bookmarkedActivities.slice(0, 4)
+      : contextBookmarks.length > 0
+        ? contextBookmarks.slice(0, 4)
+        : allActivities.slice(0, 4);
 
   const hasBookmarks = activities.length > 0;
   const indicatorCount = Math.min(6, activities.length);
@@ -116,7 +123,7 @@ export function HomeRecentBookmarksSection({
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.text}>Recent Bookmarks</Text>
-        {hasBookmarks && <SeeAll screen="/bookmarks" />}
+        {hasBookmarks && <SeeAll screen="/saved/BookmarksScreen" />}
       </View>
 
       {hasBookmarks ? (
@@ -125,7 +132,11 @@ export function HomeRecentBookmarksSection({
             data={activities}
             renderItem={({ item }) => (
               <View style={styles.cardItemWrapper}>
-                <ActivityCard activity={item} />
+                <ActivityCard
+                  activity={item}
+                  onPress={() => router.push(`/activity/${item.id}`)}
+                  onSaveToggle={toggleSaved}
+                />
               </View>
             )}
             keyExtractor={(item) => item.id}

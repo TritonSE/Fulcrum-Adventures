@@ -7,8 +7,7 @@ import { FiltersModal } from "../../components/FiltersModal";
 import { SearchHeader } from "../../components/SearchHeader";
 import { CATEGORIES as categories } from "../../constants/filterOptions";
 import { mockActivities } from "../../data/mockActivities";
-
-import { styles } from "./search.styles";
+import { styles } from "../../styles/search.styles";
 
 import type { FilterState } from "../../components/FiltersModal";
 import type { Activity } from "../../types/activity";

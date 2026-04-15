@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -14,7 +15,8 @@ import {
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
-
+import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
+import { useActivities } from "../Context/ActivityContext";
 import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
 
 import type { Activity, CustomTab } from "../types/activity";
@@ -41,7 +43,7 @@ const dividerStyles = StyleSheet.create({
     paddingVertical: 16,
   },
   line: {
-    width: 342,
+    width: "100%",
     height: 1,
     backgroundColor: "#D9D9D9",
   },
@@ -118,12 +120,16 @@ const DownloadIcon = () => (
   </Svg>
 );
 
-const BookmarkIcon = () => (
+const BookmarkIcon = ({ filled = false }: { filled?: boolean }) => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M17.6271 18.6861L12 16.5L6.5 18.6861V4.5H17.5L17.6271 18.6861ZM17 3H7C6.46957 3 5.96086 3.21071 5.58579 3.58579C5.21071 3.96086 5 4.46957 5 5V21L12 18L19 21V5C19 3.89 18.1 3 17 3Z"
-      fill="#153A7A"
-    />
+    {filled ? (
+      <Path d="M17 3H7C5.9 3 5 3.9 5 5V21L12 18L19 21V5C19 3.9 18.1 3 17 3Z" fill="#153A7A" />
+    ) : (
+      <Path
+        d="M17.6271 18.6861L12 16.5L6.5 18.6861V4.5H17.5L17.6271 18.6861ZM17 3H7C6.46957 3 5.96086 3.21071 5.58579 3.58579C5.21071 3.96086 5 4.46957 5 5V21L12 18L19 21V5C19 3.89 18.1 3 17 3Z"
+        fill="#153A7A"
+      />
+    )}
   </Svg>
 );
 
@@ -199,12 +205,8 @@ const styles = StyleSheet.create({
   },
   mediaSection: {
     display: "flex",
-    width: 448,
-    height: 336,
-    paddingTop: 258,
-    paddingRight: 54,
-    paddingBottom: 34,
-    paddingLeft: 261,
+    width: "100%",
+    aspectRatio: 390 / 336,
     justifyContent: "flex-end",
     alignItems: "center",
     overflow: "hidden",
@@ -213,15 +215,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    width: 448,
-    height: 336,
+    width: "100%",
+    height: "100%",
   },
   placeholderImage: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: 390,
-    height: 336,
+    width: "100%",
+    height: "100%",
   },
   backButton: {
     position: "absolute",
@@ -245,8 +247,7 @@ const styles = StyleSheet.create({
   tutorialButton: {
     position: "absolute",
     top: 258,
-    // Small but safe gap from the right edge
-    right: 56,
+    right: 24,
     display: "flex",
     flexDirection: "row",
     paddingVertical: 10,
@@ -460,18 +461,16 @@ const styles = StyleSheet.create({
   },
   tabsWrapper: {
     marginBottom: 8,
-    backgroundColor: "#FFFFFF",
-    // Align tab group with Facilitate label (24px from content edge)
-    marginLeft: 0,
-    marginRight: 0,
+    backgroundColor: "#F9F9F9",
+    marginLeft: -24,
+    marginRight: -24,
   },
   tabsScrollView: {
     flexGrow: 0,
   },
   tabsScrollContent: {
-    // No extra inset; left edge of first tab aligns with Facilitate text
-    paddingLeft: 0,
-    paddingRight: 0,
+    paddingLeft: 24,
+    paddingRight: 24,
   },
   tab: {
     display: "flex",
@@ -723,6 +722,8 @@ function getCustomTabs(activity: Activity): CustomTabData[] {
 }
 
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
+  const { activities } = useActivities();
+  const currentActivity = activities.find((a) => a.id === activity.id) ?? activity;
   const [activeTab, setActiveTab] = useState<string>("prep");
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
@@ -834,7 +835,14 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
           <View style={styles.contentPanel}>
             <View style={styles.overviewHeader}>
               {activity.category && (
-                <View style={styles.categoryTag}>
+                <View
+                  style={[
+                    styles.categoryTag,
+                    {
+                      backgroundColor: CATEGORY_COLORS[activity.category] ?? DEFAULT_CATEGORY_COLOR,
+                    },
+                  ]}
+                >
                   <Text style={styles.categoryTagText}>{activity.category}</Text>
                 </View>
               )}
@@ -857,11 +865,13 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionIconCircle}
-                  onPress={() => setNotification("bookmark")}
+                  onPress={() => {
+                    router.push(`/saved/LibraryPopupModalScreen?activityId=${activity.id}`);
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Save activity"
                 >
-                  <BookmarkIcon />
+                  <BookmarkIcon filled={currentActivity.isSaved} />
                 </TouchableOpacity>
               </View>
             </View>
