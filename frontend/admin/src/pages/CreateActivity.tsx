@@ -1,6 +1,7 @@
 import React from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
+import { ActivityContent } from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import { OverviewSection } from "../create_edit_page_components/OverviewSection";
 
@@ -14,7 +15,7 @@ export const CreateActivity: React.FC = () => {
       </CollapsibleSection>
 
       <CollapsibleSection title="Activity Content">
-        <Text>Activity Content placeholder content</Text>
+        <ActivityContent />
       </CollapsibleSection>
 
       <CollapsibleSection title="SEL Opportunity">
