@@ -36,7 +36,7 @@ const baseRemoveButton = {
 };
 
 const baseRemoveIcon = {
-  color: "#1F3B82",
+  color: "#153A7A",
   fontSize: 28,
   lineHeight: 28,
 };
@@ -273,7 +273,7 @@ export const ActivityContent: React.FC = () => {
         <View style={styles.detailsContainer}>
           {defaultSection && isPrepTab && (
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>{defaultSection.title || "Set-Up"}</Text>
+              <Text style={styles.sectionLabel}>{defaultSection.title || "Set-Up"}</Text>
               <TextInput
                 value={defaultSection.content}
                 onChangeText={(value) => {
@@ -293,7 +293,7 @@ export const ActivityContent: React.FC = () => {
 
           {defaultSection && (isPlayTab || isDebriefTab) && (
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>{defaultSection.title}</Text>
+              <Text style={styles.sectionLabel}>{defaultSection.title}</Text>
 
               {activeTab.guidedItems.map((item, index) => {
                 const isRemovable = canRemoveGuidedItem(index);
@@ -312,7 +312,7 @@ export const ActivityContent: React.FC = () => {
                             ? "Enter instructions here.."
                             : "Enter reflection or prompt here.."
                         }
-                        placeholderTextColor="#A6A6A6"
+                        placeholderTextColor="#B4B4B4"
                         style={styles.guidedItemInput}
                       />
                       {isRemovable ? (
@@ -346,7 +346,7 @@ export const ActivityContent: React.FC = () => {
 
           {isPrepTab && (
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Materials</Text>
+              <Text style={styles.sectionLabel}>Materials</Text>
 
               {activeTab.materials.length > 0 && (
                 <View style={styles.materialList}>
@@ -470,9 +470,15 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   label: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#153A7A",
+    marginBottom: 12,
+  },
+  sectionLabel: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
     marginBottom: 12,
   },
   input: {
@@ -505,15 +511,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   createTabButtonText: {
-    color: "#1F3B82",
-    fontSize: 16,
+    color: "#153A7A",
+    fontSize: 14,
     fontWeight: "500",
   },
   tabContainer: {
     width: "100%",
     flexDirection: "row",
     borderWidth: 1,
-    borderColor: "#D6D6D6",
+    borderColor: "#D9D9D9",
     borderRadius: 8,
     overflow: "hidden",
   },
@@ -524,7 +530,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRightWidth: 1,
-    borderRightColor: "#D6D6D6",
+    borderRightColor: "#D9D9D9",
   },
   activeTab: {
     backgroundColor: "#FFF",
@@ -535,8 +541,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   activeTabText: {
-    color: "#1F3B82",
-    fontWeight: "700",
+    color: "#153A7A",
+    fontWeight: "500",
   },
   detailsContainer: {
     width: "100%",
@@ -559,7 +565,7 @@ const styles = StyleSheet.create({
   deleteSectionText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F3B82",
+    color: "#153A7A",
   },
   sectionTitleInput: {
     width: "100%",
@@ -603,9 +609,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   guidedItemLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
     marginBottom: 10,
   },
   guidedItemInputRow: {
@@ -646,9 +652,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   guidedActionButtonText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "500",
-    color: "#1F3B82",
+    color: "#153A7A",
   },
   materialInputRow: {
     width: "100%",
@@ -676,7 +682,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   addMaterialButtonText: {
-    color: "#1F3B82",
+    color: "#153A7A",
     fontSize: 24,
     lineHeight: 24,
   },
@@ -697,8 +703,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   checkboxChecked: {
-    backgroundColor: "#1F3B82",
-    borderColor: "#1F3B82",
+    backgroundColor: "#153A7A",
+    borderColor: "#153A7A",
   },
   checkboxMark: {
     color: "#FFF",
@@ -706,7 +712,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   checkboxText: {
-    color: "#1F3B82",
+    color: "#153A7A",
     fontSize: 16,
   },
   materialList: {
@@ -727,7 +733,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   materialValueText: {
-    color: "#1F3B82",
+    color: "#153A7A",
     fontSize: 14,
   },
   removeMaterialButton: {
@@ -738,10 +744,10 @@ const styles = StyleSheet.create({
   },
   addSectionButton: {
     width: "100%",
-    height: 48,
+    height: 44,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#1F4AA5",
+    borderColor: "#153A7A",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFF",
@@ -751,8 +757,8 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   addSectionButtonText: {
-    color: "#1F3B82",
-    fontSize: 20,
+    color: "#153A7A",
+    fontSize: 14,
     fontWeight: "500",
   },
 });
