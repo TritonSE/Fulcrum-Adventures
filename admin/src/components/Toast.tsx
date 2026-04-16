@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import "./Toast.css";
 import CheckIcon from "../../icons/check.svg";
 
@@ -7,7 +7,7 @@ interface ToastProps {
   actionText?: string;
   onAction?: () => void;
   onClose: () => void;
-  duration?: number; // default 3000ms
+  duration?: number;
 }
 
 export const Toast: React.FC<ToastProps> = ({
@@ -17,12 +17,19 @@ export const Toast: React.FC<ToastProps> = ({
   onClose,
   duration = 3000,
 }) => {
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose();
+      onCloseRef.current();
     }, duration);
+
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [duration]);
 
   return (
     <div className="toast-overlay">
