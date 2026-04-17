@@ -56,10 +56,16 @@ const getRangeLabel = (range: Range, type: "duration" | "gradeLevel" | "groupSiz
   } else if (type === "gradeLevel") {
     return `${gradeNumberToLabel(range.min)}-${gradeNumberToLabel(range.max)}`;
   } else if (type === "groupSize") {
-    if (range.min === 3 && range.max === 15) return "Small (3-15)";
-    if (range.min === 15 && range.max === 30) return "Medium (15-30)";
-    if (range.min >= 30) return "Large (30+)";
-    return `${range.min}-${range.max}`;
+    switch (range.min) {
+      case 3:
+        return "Small (3-15)";
+      case 15:
+        return "Medium (15-30)";
+      case 30:
+        return "Large (30+)";
+      default:
+        return "Error";
+    }
   }
   return "";
 };
@@ -113,6 +119,8 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  // title: { fontSize: 24, fontWeight: "800", color: "#1F2C5C", fontFamily: "League Spartan" },
+  close: { fontSize: 20, color: "#1F2C5C" },
   scrollContainer: { flex: 1 },
   content: { paddingHorizontal: 24, paddingBottom: 16 },
   section: { marginBottom: 16 },
@@ -232,7 +240,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
 
   const energyLevel = filters.energyLevel;
 
-  let [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     LeagueSpartan_400Regular,
   });
 

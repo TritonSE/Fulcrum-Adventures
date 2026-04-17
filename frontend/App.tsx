@@ -1,4 +1,4 @@
-import { SearchPage } from "./src/pages/Search";
+import { SearchPage } from "./src/app/(tabs)/search";
 
 // const styles = StyleSheet.create({
 //   container: {

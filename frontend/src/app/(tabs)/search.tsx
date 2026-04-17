@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-import { ActivityList } from "../components/ActivityList";
-import { CategoryCardBig } from "../components/CategoryCardBig";
-import { FiltersModal } from "../components/FiltersModal";
-import { Navbar } from "../components/Navbar";
-import { SearchHeader } from "../components/SearchHeader";
-import { CATEGORIES as categories } from "../constants/filterOptions";
-import { mockActivities } from "../data/mockActivities";
+import { ActivityList } from "../../components/ActivityList";
+import { CategoryCardBig } from "../../components/CategoryCardBig";
+import { FiltersModal } from "../../components/FiltersModal";
+import { SearchHeader } from "../../components/SearchHeader";
+import { CATEGORIES as categories } from "../../constants/filterOptions";
+import { mockActivities } from "../../data/mockActivities";
 
-import { styles } from "./Search.styles";
+import { styles } from "./search.styles";
 
-import type { FilterState } from "../components/FiltersModal";
-import type { Activity, Environment, Range } from "../types/activity";
+import type { FilterState } from "../../components/FiltersModal";
+import type { Activity, Environment, Range } from "../../types/activity";
 
 const defaultFilters: FilterState = {
   category: undefined,
@@ -284,11 +283,24 @@ export function SearchPage() {
 
           {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
+            // Activity list (filtered)
             <View style={styles.activityListContainer}>
-              <Text style={styles.activityNumberText}>
-                {filteredActivities.length} activit
-                {filteredActivities.length === 1 ? "y" : "ies"} found
-              </Text>
+              <View style={styles.activityNumberAndClearAllContainer}>
+                <Text style={styles.activityNumberText}>
+                  {filteredActivities.length} activit
+                  {filteredActivities.length === 1 ? "y" : "ies"} found
+                </Text>
+                {!isFiltersEmpty(filters) && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFilters(defaultFilters);
+                    }}
+                  >
+                    <Text style={styles.clearAllText}>Clear all</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
               <ActivityList
                 activities={filteredActivities}
                 variant="card"
@@ -296,11 +308,12 @@ export function SearchPage() {
               />
             </View>
           ) : (
+            // Category cards
             <View>
               <Text style={styles.smallText}>Browse by category:</Text>
               <View style={styles.categoryCardsGrid}>
                 {categories.map((category) => (
-                  <View key={category} style={{ width: "48%" }}>
+                  <View key={category} style={styles.categoryCardWrapper}>
                     <CategoryCardBig
                       category={category}
                       onPress={() => {
@@ -321,18 +334,6 @@ export function SearchPage() {
           initial={filters}
           onApply={(newFilters) => setFilters(newFilters)}
           onClose={() => setShowFilterModal(false)}
-        />
-
-        <Navbar
-          currentTab="Search"
-          onSwitchTab={(tab) => {
-            if (tab === "Search") {
-              setSearchText("");
-              setFilters(defaultFilters);
-              setIsSearching(false);
-              Keyboard.dismiss();
-            }
-          }}
         />
       </View>
     </TouchableWithoutFeedback>

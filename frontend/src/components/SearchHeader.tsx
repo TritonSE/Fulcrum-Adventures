@@ -50,19 +50,22 @@ export function SearchHeader({
     <>
       {/* Search Bar */}
       <View style={styles.searchBar}>
-        {!isSearching && <SearchIcon width={24} height={24} color="#153A7A" />}
+        {(!isSearching || searchText === "") && (
+          <SearchIcon width={24} height={24} color="#153A7A" />
+        )}
         <TextInput
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchInput}
           placeholder="Search activities"
+          placeholderTextColor="#153A7A"
           onFocus={() => setIsSearching(true)}
           onBlur={handleSearchFinalize}
           onSubmitEditing={handleSearchFinalize}
         />
         <FilterIcon
-          width={24}
-          height={24}
+          width={18}
+          height={18}
           color="#153A7A"
           onPress={() => {
             setShowFilterModal(true);
@@ -70,7 +73,7 @@ export function SearchHeader({
         />
       </View>
       {/* Recent Searches */}
-      {isSearching && recentSearches.length !== 0 && (
+      {isSearching && recentSearches.length !== 0 && isFiltersEmpty(filters) && (
         <View style={styles.recentSearchesContainer}>
           <View style={styles.recentSearchesTextContainer}>
             <Text style={styles.smallText}>Recent Searches</Text>
@@ -79,7 +82,7 @@ export function SearchHeader({
                 setRecentSearches([]);
               }}
             >
-              <Text style={styles.clearAllText}>Clear All</Text>
+              <Text style={styles.clearAllText}>Clear all</Text>
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -92,6 +95,7 @@ export function SearchHeader({
               <Chip
                 key={search}
                 label={search}
+                borderWidth={1}
                 onPress={() => {
                   setSearchText(search);
                   setRecentSearches(addToRecentSearches(search, recentSearches));

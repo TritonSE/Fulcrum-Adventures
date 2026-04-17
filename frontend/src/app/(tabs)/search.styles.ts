@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     width: 342,
     flexDirection: "column",
     alignItems: "flex-start",
-    gap: 16,
+    gap: 12,
   },
   searchBar: {
     display: "flex",
@@ -64,17 +64,26 @@ export const styles = StyleSheet.create({
     fontWeight: 400,
     lineHeight: 21,
     letterSpacing: 0.28,
+    paddingBottom: 16,
   },
   clearAllText: {
     color: "#B4B4B4",
+    fontFamily: "Instrument Sans",
+    letterSpacing: 0.28,
     fontSize: 14,
     textDecorationLine: "underline",
     textDecorationStyle: "solid",
+  },
+  activityNumberAndClearAllContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   activityNumberText: {
     color: "#B4B4B4",
     fontSize: 14,
     paddingLeft: 2,
+    paddingBottom: 8,
   },
   filtersContainer: {
     display: "flex",
@@ -99,7 +108,12 @@ export const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
     alignSelf: "stretch",
+    justifyContent: "space-between",
+  },
+  categoryCardWrapper: {
+    flexBasis: "48%",
+    flexGrow: 0,
+    marginBottom: 16,
   },
 });
