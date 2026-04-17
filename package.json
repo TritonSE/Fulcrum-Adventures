@@ -1,5 +1,9 @@
 {
   "devDependencies": {
     "@tritonse/tse-constellation": "^0.0.21"
+  },
+  "dependencies": {
+    "@expo-google-fonts/instrument-sans": "^0.4.2",
+    "expo-font": "^55.0.4"
   }
 }

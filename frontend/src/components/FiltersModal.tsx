@@ -1,3 +1,4 @@
+import { LeagueSpartan_400Regular, useFonts } from "@expo-google-fonts/league-spartan";
 import { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     lineHeight: 32,
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     fontWeight: "700",
     color: PRIMARY_COLOR,
   },
@@ -118,10 +119,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
-    lineHeight: 28,
+    lineHeight: 24,
     marginBottom: 8,
     color: PRIMARY_COLOR,
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
   },
   row: { flexDirection: "row", flexWrap: "wrap" },
   energyRow: { flexDirection: "row", gap: 6 },
@@ -158,21 +159,21 @@ const styles = StyleSheet.create({
   resetText: {
     color: PRIMARY_COLOR,
     fontWeight: "700",
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     fontSize: 16,
     lineHeight: 24,
   },
   applyText: {
     color: PRIMARY_COLOR,
     fontWeight: "700",
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     fontSize: 16,
     lineHeight: 24,
   },
   iconWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 2,
+    paddingVertical: 8,
   },
 });
 
@@ -230,6 +231,14 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
     !!values?.includes(option);
 
   const energyLevel = filters.energyLevel;
+
+  let [fontsLoaded] = useFonts({
+    LeagueSpartan_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return <View></View>;
+  }
 
   return (
     <View style={styles.container}>
@@ -308,8 +317,8 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
                   <EnergyIcon
                     width={22}
                     height={22}
-                    fill={isActive ? PRIMARY_COLOR : "transparent"}
-                    stroke={PRIMARY_COLOR}
+                    fill={isActive ? "#ECD528" : "transparent"}
+                    stroke={isActive ? "#ECD528" : NATURAL_GRAPH_COLOR}
                   />
                 </Pressable>
               );
