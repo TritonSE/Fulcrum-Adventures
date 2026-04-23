@@ -1,20 +1,30 @@
 import React from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { FieldError } from "./FieldError";
+const MAX_TITLE_LENGTH = 40;
 
-export const ActivityTitleField: React.FC = () => {
+type ActivityTitleFieldProps = {
+  value: string;
+  onChangeText: (text: string) => void;
+};
+
+export const ActivityTitleField: React.FC<ActivityTitleFieldProps> = ({ value, onChangeText }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Activity Title</Text>
 
       <TextInput
+        value={value}
+        onChangeText={onChangeText}
         placeholder="Enter activity title"
-        placeholderTextColor="#999"
+        placeholderTextColor="#B4B4B4"
+        maxLength={MAX_TITLE_LENGTH}
         style={styles.input}
       />
 
-      <FieldError message="Please enter an activity title" />
+      <Text style={styles.characterCount}>
+        {value.length}/{MAX_TITLE_LENGTH} characters
+      </Text>
     </View>
   );
 };
@@ -31,13 +41,18 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    paddingVertical: 16,
-    paddingHorizontal: 14,
+    height: 48,
     borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#E55C4D",
-    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#D6D6D6",
     backgroundColor: "#FFF",
-    color: "#000",
+    paddingHorizontal: 14,
+    color: "#0F172A",
+    fontSize: 14,
+  },
+  characterCount: {
+    marginTop: 8,
+    color: "#999",
+    fontSize: 13,
   },
 });

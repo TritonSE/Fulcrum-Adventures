@@ -1,22 +1,35 @@
 import React from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { FieldError } from "./FieldError";
+const MAX_OVERVIEW_LENGTH = 200;
 
-export const ActivityOverviewField: React.FC = () => {
+type ActivityOverviewFieldProps = {
+  value: string;
+  onChangeText: (text: string) => void;
+};
+
+export const ActivityOverviewField: React.FC<ActivityOverviewFieldProps> = ({
+  value,
+  onChangeText,
+}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Activity Overview</Text>
 
       <TextInput
+        value={value}
+        onChangeText={onChangeText}
         placeholder="Brief description of the activity"
-        placeholderTextColor="#999"
+        placeholderTextColor="#B4B4B4"
+        maxLength={MAX_OVERVIEW_LENGTH}
         multiline
         numberOfLines={4}
-        style={styles.textArea}
+        style={styles.input}
       />
 
-      <FieldError message="Please enter an activity overview" />
+      <Text style={styles.characterCount}>
+        {value.length}/{MAX_OVERVIEW_LENGTH} characters
+      </Text>
     </View>
   );
 };
@@ -31,17 +44,22 @@ const styles = StyleSheet.create({
     color: "#1F3B82",
     marginBottom: 12,
   },
-  textArea: {
+  input: {
     width: "100%",
     minHeight: 96,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
     borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#E55C4D",
-    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#D6D6D6",
     backgroundColor: "#FFF",
-    color: "#000",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    color: "#0F172A",
+    fontSize: 14,
     textAlignVertical: "top",
+  },
+  characterCount: {
+    marginTop: 8,
+    color: "#999",
+    fontSize: 13,
   },
 });

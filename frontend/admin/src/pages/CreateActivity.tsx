@@ -1,27 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
-import { ActivityContent } from "../create_edit_page_components/ActivityContent";
+import {
+  ActivityContent,
+  ActivityTab,
+  createDefaultActivityTabs,
+} from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
-import { OverviewSection } from "../create_edit_page_components/OverviewSection";
+import {
+  createDefaultOverviewState,
+  OverviewFormState,
+  OverviewSection,
+} from "../create_edit_page_components/OverviewSection";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
 
 export const CreateActivity: React.FC = () => {
+  const [objective, setObjective] = useState("");
+  const [activityTabs, setActivityTabs] = useState<ActivityTab[]>(createDefaultActivityTabs());
+
+  const [overviewValue, setOverviewValue] = useState<OverviewFormState>(
+    createDefaultOverviewState(),
+  );
+
+  const [selTags, setSelTags] = useState<string[]>([]);
+
+  const handleOverviewChange = (patch: Partial<OverviewFormState>) => {
+    setOverviewValue((prev) => ({ ...prev, ...patch }));
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Create New Activity</Text>
 
       <CollapsibleSection title="Overview" defaultOpen>
-        <OverviewSection />
+        <OverviewSection
+          value={overviewValue}
+          onChange={handleOverviewChange}
+          onPickVideo={() => {
+            setOverviewValue((prev) => ({
+              ...prev,
+              thumbnailVideoName: "selected-video.mp4",
+              thumbnailImageName: null,
+            }));
+          }}
+          onPickImage={() => {
+            setOverviewValue((prev) => ({
+              ...prev,
+              thumbnailImageName: "selected-image.png",
+              thumbnailVideoName: null,
+            }));
+          }}
+        />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Activity Content">
-        <ActivityContent />
+      <CollapsibleSection title="Activity Content" defaultOpen>
+        <ActivityContent
+          objective={objective}
+          setObjective={setObjective}
+          tabs={activityTabs}
+          setTabs={setActivityTabs}
+        />
       </CollapsibleSection>
 
-      <CollapsibleSection title="SEL Opportunity">
-        <SEL_Opportunity />
+      <CollapsibleSection title="SEL Opportunity" defaultOpen>
+        <SEL_Opportunity tags={selTags} onTagsChange={setSelTags} />
       </CollapsibleSection>
+
+      <Text style={styles.debugText}>Objective: {objective}</Text>
+      <Text style={styles.debugText}>Activity tabs: {JSON.stringify(activityTabs)}</Text>
+      <Text style={styles.debugText}>Parent SEL tags: {JSON.stringify(selTags)}</Text>
+      <Text style={styles.debugText}>Overview state: {JSON.stringify(overviewValue)}</Text>
     </ScrollView>
   );
 };
@@ -40,5 +88,9 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     color: "#1F3B82",
+  },
+  debugText: {
+    fontSize: 14,
+    color: "#6C6C6C",
   },
 });

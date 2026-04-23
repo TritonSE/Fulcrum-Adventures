@@ -9,7 +9,7 @@ type ActivitySection = {
 
 type TabKind = "prep" | "play" | "debrief" | "custom";
 
-type ActivityTab = {
+export type ActivityTab = {
   id: string;
   name: string;
   kind: TabKind;
@@ -17,6 +17,13 @@ type ActivityTab = {
   guidedItems: string[];
   materials: string[];
   noMaterialsNeeded: boolean;
+};
+
+type ActivityContentProps = {
+  objective: string;
+  setObjective: React.Dispatch<React.SetStateAction<string>>;
+  tabs: ActivityTab[];
+  setTabs: React.Dispatch<React.SetStateAction<ActivityTab[]>>;
 };
 
 const MAX_SECTIONS = 6;
@@ -50,30 +57,15 @@ const createSection = (title = ""): ActivitySection => ({
 });
 
 const getMinimumGuidedItems = (kind: TabKind): number => {
-  if (kind === "play") {
-    return 2;
-  }
-
-  if (kind === "debrief") {
-    return 1;
-  }
-
+  if (kind === "play") return 2;
+  if (kind === "debrief") return 1;
   return 0;
 };
 
 const getDefaultSectionByKind = (kind: TabKind, sectionNumber: number): ActivitySection => {
-  if (kind === "prep") {
-    return createSection(sectionNumber === 1 ? "Set-Up" : "");
-  }
-
-  if (kind === "play") {
-    return createSection(sectionNumber === 1 ? "How to Play" : "");
-  }
-
-  if (kind === "debrief") {
-    return createSection(sectionNumber === 1 ? "Reflection Questions" : "");
-  }
-
+  if (kind === "prep") return createSection(sectionNumber === 1 ? "Set-Up" : "");
+  if (kind === "play") return createSection(sectionNumber === 1 ? "How to Play" : "");
+  if (kind === "debrief") return createSection(sectionNumber === 1 ? "Reflection Questions" : "");
   return createSection(sectionNumber === 1 ? "Section" : "");
 };
 
@@ -87,13 +79,18 @@ const createDefaultTab = (name: string, kind: TabKind): ActivityTab => ({
   noMaterialsNeeded: false,
 });
 
-export const ActivityContent: React.FC = () => {
-  const [objective, setObjective] = useState("");
-  const [tabs, setTabs] = useState<ActivityTab[]>([
-    createDefaultTab("Prep", "prep"),
-    createDefaultTab("Play", "play"),
-    createDefaultTab("Debrief", "debrief"),
-  ]);
+export const createDefaultActivityTabs = (): ActivityTab[] => [
+  createDefaultTab("Prep", "prep"),
+  createDefaultTab("Play", "play"),
+  createDefaultTab("Debrief", "debrief"),
+];
+
+export const ActivityContent: React.FC<ActivityContentProps> = ({
+  objective,
+  setObjective,
+  tabs,
+  setTabs,
+}) => {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [materialInput, setMaterialInput] = useState("");
 
@@ -101,7 +98,6 @@ export const ActivityContent: React.FC = () => {
     if (activeTabId && tabs.some((tab) => tab.id === activeTabId)) {
       return activeTabId;
     }
-
     return tabs[0]?.id ?? null;
   }, [activeTabId, tabs]);
 
@@ -115,6 +111,8 @@ export const ActivityContent: React.FC = () => {
     );
   };
 
+  // keep the rest of your file the same
+
   const handleCreateTab = () => {
     setTabs((prevTabs) => {
       const nextTab = createDefaultTab(`Tab ${prevTabs.length + 1}`, "custom");
@@ -122,6 +120,8 @@ export const ActivityContent: React.FC = () => {
       return [...prevTabs, nextTab];
     });
   };
+
+  // keep the rest of your existing handlers and JSX exactly the same
 
   const handleAddSection = () => {
     if (!activeTab || activeTab.sections.length >= MAX_SECTIONS) return;
