@@ -395,11 +395,24 @@ export const FiltersModal = ({ visible, initial, onClose, onApply, topOffset = 0
       slideAnim.setValue(screenHeight);
       fadeAnim.setValue(0);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          overshootClamping: true,
+          tension: 60,
+          friction: 12,
+        }),
       ]).start();
     }
   }, [visible]);
+
+  const handleClose = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: screenHeight, duration: 300, useNativeDriver: true }),
+    ]).start(() => onClose());
+  };
 
   // Changing this key forces a remount of the content, resetting local state without setState in an effect
   const initialKey = useMemo(() => JSON.stringify(initial), [initial]);
@@ -421,7 +434,7 @@ export const FiltersModal = ({ visible, initial, onClose, onApply, topOffset = 0
           }}
         />
         {/* Tapping above the sheet closes the modal */}
-        <Pressable style={{ flex: 1 }} onPress={onClose} />
+        <Pressable style={{ flex: 1 }} onPress={handleClose} />
         {/* Sheet slides up independently */}
         <Animated.View
           style={{
@@ -439,7 +452,7 @@ export const FiltersModal = ({ visible, initial, onClose, onApply, topOffset = 0
           <FiltersModalContent
             key={contentKey}
             initial={initial}
-            onClose={onClose}
+            onClose={handleClose}
             onApply={onApply}
           />
         </Animated.View>

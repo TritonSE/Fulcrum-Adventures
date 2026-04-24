@@ -242,7 +242,7 @@ export function SearchPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
-  const [searchBarBottom, setSearchBarBottom] = useState(0);
+  const [searchHeaderBottom, setSearchHeaderBottom] = useState(0);
   const searchHeaderRef = useRef<View>(null);
 
   const filteredActivities = activities.filter((activity) =>
@@ -272,7 +272,7 @@ export function SearchPage() {
             style={{ alignSelf: "stretch" }}
             onLayout={() => {
               searchHeaderRef.current?.measureInWindow((_x, y, _w, height) => {
-                setSearchBarBottom(y + height);
+                setSearchHeaderBottom(y + height);
               });
             }}
           >
@@ -346,7 +346,7 @@ export function SearchPage() {
           initial={filters}
           onApply={(newFilters) => setFilters(newFilters)}
           onClose={() => setShowFilterModal(false)}
-          topOffset={searchBarBottom}
+          topOffset={searchHeaderBottom}
         />
       </View>
     </TouchableWithoutFeedback>
