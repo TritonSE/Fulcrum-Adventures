@@ -60,9 +60,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      {/* Fixed NavBar, assuming it handles its own positioning */}
       <NavBar />
-
       <main className="dashboard-content">
         <div className="dashboard-header">
           <h1>Activities Dashboard</h1>
