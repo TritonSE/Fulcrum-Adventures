@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
 import { ActivityList } from "../../components/ActivityList";
@@ -242,6 +242,8 @@ export function SearchPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
+  const [searchBarBottom, setSearchBarBottom] = useState(0);
+  const searchHeaderRef = useRef<View>(null);
 
   const filteredActivities = activities.filter((activity) =>
     matchesActivityFilter(activity, filters, searchText),
@@ -265,21 +267,31 @@ export function SearchPage() {
     >
       <View style={styles.page}>
         <View style={styles.content}>
-          <SearchHeader
-            isSearching={isSearching}
-            setIsSearching={setIsSearching}
-            searchText={searchText}
-            setSearchText={setSearchText}
-            setShowFilterModal={setShowFilterModal}
-            recentSearches={recentSearches}
-            setRecentSearches={setRecentSearches}
-            filters={filters}
-            setFilters={setFilters}
-            isFiltersEmpty={isFiltersEmpty}
-            convertFiltersToArray={convertFiltersToArray}
-            removeFilter={removeFilter}
-            addToRecentSearches={addToRecentSearches}
-          />
+          <View
+            ref={searchHeaderRef}
+            style={{ alignSelf: "stretch" }}
+            onLayout={() => {
+              searchHeaderRef.current?.measureInWindow((_x, y, _w, height) => {
+                setSearchBarBottom(y + height);
+              });
+            }}
+          >
+            <SearchHeader
+              isSearching={isSearching}
+              setIsSearching={setIsSearching}
+              searchText={searchText}
+              setSearchText={setSearchText}
+              setShowFilterModal={setShowFilterModal}
+              recentSearches={recentSearches}
+              setRecentSearches={setRecentSearches}
+              filters={filters}
+              setFilters={setFilters}
+              isFiltersEmpty={isFiltersEmpty}
+              convertFiltersToArray={convertFiltersToArray}
+              removeFilter={removeFilter}
+              addToRecentSearches={addToRecentSearches}
+            />
+          </View>
 
           {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
@@ -334,6 +346,7 @@ export function SearchPage() {
           initial={filters}
           onApply={(newFilters) => setFilters(newFilters)}
           onClose={() => setShowFilterModal(false)}
+          topOffset={searchBarBottom}
         />
       </View>
     </TouchableWithoutFeedback>

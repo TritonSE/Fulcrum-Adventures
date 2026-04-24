@@ -1,6 +1,15 @@
 import { LeagueSpartan_400Regular, useFonts } from "@expo-google-fonts/league-spartan";
-import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import EnergyIcon from "../../assets/icons/energy_bolt.svg";
 import FilterIcon from "../../assets/icons/filter.svg";
@@ -26,6 +35,7 @@ type Props = {
   initial: FilterState;
   onClose: () => void;
   onApply: (filters: FilterState) => void;
+  topOffset?: number;
 };
 
 const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
@@ -127,7 +137,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
-    lineHeight: 24,
+    lineHeight: 24, // 120% of 20
     marginBottom: 8,
     color: PRIMARY_COLOR,
     fontFamily: "LeagueSpartan_700Bold",
@@ -256,7 +266,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
           <Text style={styles.title}>Filters</Text>
         </View>
         <Pressable onPress={onClose} style={styles.closeBtn}>
-          <XIcon width={13} height={13} stroke={PRIMARY_COLOR} fill={PRIMARY_COLOR} />
+          <XIcon width={20} height={20} stroke={PRIMARY_COLOR} fill={PRIMARY_COLOR} />
         </Pressable>
       </View>
 
@@ -375,14 +385,65 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
   );
 };
 
-export const FiltersModal = ({ visible, initial, onClose, onApply }: Props) => {
+export const FiltersModal = ({ visible, initial, onClose, onApply, topOffset = 0 }: Props) => {
+  const screenHeight = Dimensions.get("window").height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      slideAnim.setValue(screenHeight);
+      fadeAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [visible]);
+
   // Changing this key forces a remount of the content, resetting local state without setState in an effect
   const initialKey = useMemo(() => JSON.stringify(initial), [initial]);
   const contentKey = visible ? `open-${initialKey}` : "closed";
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <FiltersModalContent key={contentKey} initial={initial} onClose={onClose} onApply={onApply} />
+    <Modal visible={visible} animationType="none" transparent>
+      <View style={{ flex: 1 }}>
+        {/* Backdrop fades in place — does not slide */}
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.3)",
+            opacity: fadeAnim,
+          }}
+        />
+        {/* Tapping above the sheet closes the modal */}
+        <Pressable style={{ flex: 1 }} onPress={onClose} />
+        {/* Sheet slides up independently */}
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: topOffset,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            overflow: "hidden",
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          <FiltersModalContent
+            key={contentKey}
+            initial={initial}
+            onClose={onClose}
+            onApply={onApply}
+          />
+        </Animated.View>
+      </View>
     </Modal>
   );
 };
