@@ -1,0 +1,91 @@
+.dashboard-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Off-white page background */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 32px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 24px;
+  color: #111827; /* Dark grayish-blue text */
+  margin: 0;
+  font-weight: 600;
+}
+
+.category-summaries-placeholder {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  /* Future: grid or flex layout for the top statistic cards */
+}
+
+.dashboard-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.search-container {
+  width: 100%; /* For full width search bar */
+}
+
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-tabs-placeholder {
+  display: flex;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.status-tab {
+  padding: 8px 16px;
+  border: none;
+  background: white;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  border-right: 1px solid #e5e7eb;
+}
+
+.status-tab:last-child {
+  border-right: none;
+}
+
+.status-tab.active {
+  background-color: #172b4d; /* Selected color, likely dark blue */
+  color: #ffffff;
+}
+
+.sort-filter-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.table-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

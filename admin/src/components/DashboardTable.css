@@ -1,0 +1,79 @@
+.table-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb; /* Neutral/Gray 2 */
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dashboard-table thead {
+  background-color: #172b4d; /* Example dark blue background from the design */
+  color: #ffffff;
+}
+
+.dashboard-table th {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background-color: #f9fafb; /* Neutral/Gray 1 fallback for hover */
+}
+
+.dashboard-table td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #374151; /* Dark gray for text */
+}
+
+.col-title {
+  color: #2563eb; /* Blue link-like color from the design */
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.action-btn:hover {
+  background-color: #e5e7eb;
+}
+
+/* Base styling to be aligned directly from the existing components, but placeholders here */
+.col-grade,
+.col-group,
+.col-duration {
+  color: #2563eb; /* Light blue styling seen in mockup text */
+  font-weight: 500;
+}
