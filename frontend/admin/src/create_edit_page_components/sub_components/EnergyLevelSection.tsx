@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { EnergyLevelOption } from "../OverviewSection";
+
+import type { EnergyLevelOption } from "../OverviewSection";
 
 const OPTIONS: NonNullable<EnergyLevelOption>[] = ["Low", "Medium", "High"];
 

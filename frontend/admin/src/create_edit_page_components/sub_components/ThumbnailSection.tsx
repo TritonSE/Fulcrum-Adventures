@@ -32,7 +32,7 @@ const UploadCard: React.FC<UploadCardProps> = ({
         <Text style={styles.chooseButtonText}>Choose File</Text>
       </Pressable>
 
-      <Text style={styles.fileNameText}>{fileName ? fileName : "No file selected"}</Text>
+      <Text style={styles.fileNameText}>{fileName || "No file selected"}</Text>
     </View>
   );
 };

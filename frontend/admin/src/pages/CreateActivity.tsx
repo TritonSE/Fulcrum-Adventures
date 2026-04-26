@@ -3,16 +3,17 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 
 import {
   ActivityContent,
-  ActivityTab,
   createDefaultActivityTabs,
 } from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import {
   createDefaultOverviewState,
-  OverviewFormState,
   OverviewSection,
 } from "../create_edit_page_components/OverviewSection";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
+
+import type { ActivityTab } from "../create_edit_page_components/ActivityContent";
+import type { OverviewFormState } from "../create_edit_page_components/OverviewSection";
 
 export const CreateActivity: React.FC = () => {
   const [objective, setObjective] = useState("");

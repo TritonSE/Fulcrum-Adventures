@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { DurationOption } from "../OverviewSection";
+
+import type { DurationOption } from "../OverviewSection";
 
 const OPTIONS: NonNullable<DurationOption>[] = ["5-15 min", "15-30 min", "30+ min"];
 

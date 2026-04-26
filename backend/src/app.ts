@@ -5,6 +5,8 @@
 import cors from "cors";
 import express from "express";
 
+import emailRoutes from "./routers/email";
+
 import type { NextFunction, Request, Response } from "express";
 
 const app = express();
@@ -22,6 +24,8 @@ app.use(
     origin: process.env.FRONTEND_ORIGIN,
   }),
 );
+
+app.use("/api/email", emailRoutes);
 
 /**
  * Error handler; all errors thrown by server are handled here.

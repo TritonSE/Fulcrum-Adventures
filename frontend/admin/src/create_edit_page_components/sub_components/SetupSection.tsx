@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { SetupOption } from "../OverviewSection";
+
+import type { SetupOption } from "../OverviewSection";
 
 const OPTIONS: NonNullable<SetupOption>[] = ["Props", "No Props"];
 
