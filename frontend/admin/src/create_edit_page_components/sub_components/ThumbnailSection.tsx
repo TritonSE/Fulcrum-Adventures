@@ -1,9 +1,10 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 type ThumbnailSectionProps = {
   videoFileName: string | null;
   imageFileName: string | null;
+  imageUri?: string | null;
   onPickVideo?: () => void;
   onPickImage?: () => void;
 };
@@ -12,6 +13,7 @@ type UploadCardProps = {
   icon: string;
   title: string;
   fileName: string | null;
+  previewUri?: string | null;
   onPress?: () => void;
   fullWidth?: boolean;
 };
@@ -20,12 +22,17 @@ const UploadCard: React.FC<UploadCardProps> = ({
   icon,
   title,
   fileName,
+  previewUri,
   onPress,
   fullWidth = false,
 }) => {
   return (
     <View style={[styles.uploadCard, fullWidth && styles.uploadCardFull]}>
-      <Text style={styles.icon}>{icon}</Text>
+      {previewUri ? (
+        <Image source={{ uri: previewUri }} style={styles.previewImage} resizeMode="cover" />
+      ) : (
+        <Text style={styles.icon}>{icon}</Text>
+      )}
       <Text style={styles.cardTitle}>{title}</Text>
 
       <Pressable style={styles.chooseButton} onPress={onPress}>
@@ -40,6 +47,7 @@ const UploadCard: React.FC<UploadCardProps> = ({
 export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
   videoFileName,
   imageFileName,
+  imageUri,
   onPickVideo,
   onPickImage,
 }) => {
@@ -67,6 +75,7 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
           icon="🖼️"
           title="Upload Thumbnail Image"
           fileName={imageFileName}
+          previewUri={imageUri}
           onPress={onPickImage}
           fullWidth={isMobile}
         />
@@ -129,6 +138,13 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 38,
     marginBottom: 12,
+  },
+  previewImage: {
+    width: 136,
+    height: 102,
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: "#E8E8E8",
   },
   cardTitle: {
     fontSize: 16,

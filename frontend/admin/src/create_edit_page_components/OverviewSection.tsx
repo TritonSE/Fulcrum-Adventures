@@ -16,9 +16,20 @@ export type DurationOption = "5-15 min" | "15-30 min" | "30+ min" | null;
 export type EnergyLevelOption = "Low" | "Medium" | "High" | null;
 export type SetupOption = "Props" | "No Props" | null;
 
+export const THUMBNAIL_IMAGE_FORM_FIELD = "thumbnailImage";
+
+export type ThumbnailImageFile = {
+  fieldName: typeof THUMBNAIL_IMAGE_FORM_FIELD;
+  uri: string;
+  name: string;
+  type: string;
+  width: number;
+  height: number;
+};
+
 export type OverviewFormState = {
   thumbnailVideoName: string | null;
-  thumbnailImageName: string | null;
+  thumbnailImage: ThumbnailImageFile | null;
   title: string;
   overview: string;
   categories: string[];
@@ -36,7 +47,7 @@ export type OverviewFormState = {
 
 export const createDefaultOverviewState = (): OverviewFormState => ({
   thumbnailVideoName: null,
-  thumbnailImageName: null,
+  thumbnailImage: null,
   title: "",
   overview: "",
   categories: [],
@@ -72,7 +83,8 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
     <View style={styles.container}>
       <ThumbnailSection
         videoFileName={value.thumbnailVideoName}
-        imageFileName={value.thumbnailImageName}
+        imageFileName={value.thumbnailImage?.name ?? null}
+        imageUri={value.thumbnailImage?.uri ?? null}
         onPickVideo={onPickVideo}
         onPickImage={onPickImage}
       />
