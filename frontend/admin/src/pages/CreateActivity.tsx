@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import {
@@ -26,6 +26,15 @@ const getImageDimensions = async (uri: string) =>
   });
 
 type ActivityStatus = "idle" | "Draft" | "Published" | "Archived";
+
+type FormErrors = {
+  objective: string | null;
+  setupInstructions: string | null;
+  materials: string | null;
+  playGuidedItems: (string | null)[];
+  debriefGuidedItems: (string | null)[];
+  selTags: string | null;
+};
 
 type HeaderActionButtonProps = {
   label: string;
@@ -88,6 +97,7 @@ const CreateActivityHeader: React.FC<CreateActivityHeaderProps> = ({
 };
 
 export const CreateActivity: React.FC = () => {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [objective, setObjective] = useState("");
   const [activityTabs, setActivityTabs] = useState<ActivityTab[]>(() =>
     createDefaultActivityTabs(),
@@ -98,9 +108,84 @@ export const CreateActivity: React.FC = () => {
   const [selTags, setSelTags] = useState<string[]>([]);
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
   const [status, setStatus] = useState<ActivityStatus>("idle");
+  const [errors, setErrors] = useState<FormErrors>({
+    objective: null,
+    setupInstructions: null,
+    materials: null,
+    playGuidedItems: [],
+    debriefGuidedItems: [],
+    selTags: null,
+  });
+  const [forceOpenPrepTab, setForceOpenPrepTab] = useState(false);
 
   const handleOverviewChange = (patch: Partial<OverviewFormState>) => {
     setOverviewValue((prev) => ({ ...prev, ...patch }));
+  };
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {
+      objective: null,
+      setupInstructions: null,
+      materials: null,
+      playGuidedItems: [],
+      debriefGuidedItems: [],
+      selTags: null,
+    };
+
+    // Validate objective
+    if (!objective.trim()) {
+      newErrors.objective = "Please enter an activity objective";
+    }
+
+    // Validate setup instructions (Prep tab)
+    const prepTab = activityTabs.find((tab) => tab.kind === "prep");
+    if (prepTab) {
+      const setupSection = prepTab.sections[0];
+      if (!setupSection?.content.trim()) {
+        newErrors.setupInstructions = "Please enter set-up instructions";
+      }
+    }
+
+    // Validate materials (Prep tab)
+    if (prepTab) {
+      if (!prepTab.noMaterialsNeeded && prepTab.materials.length === 0) {
+        newErrors.materials = "Please enter items or select no materials";
+      }
+    }
+
+    // Validate Play tab guided items
+    const playTab = activityTabs.find((tab) => tab.kind === "play");
+    if (playTab) {
+      newErrors.playGuidedItems = playTab.guidedItems.map((item) =>
+        !item.trim() ? "Please enter how to play instructions" : null
+      );
+    }
+
+    // Validate Debrief tab guided items
+    const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
+    if (debriefTab) {
+      newErrors.debriefGuidedItems = debriefTab.guidedItems.map((item) =>
+        !item.trim() ? "Please enter a reflection question" : null
+      );
+    }
+
+    // Validate SEL tags
+    if (selTags.length === 0) {
+      newErrors.selTags = "Please enter at least one SEL tag";
+    }
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    const hasErrors =
+      newErrors.objective !== null ||
+      newErrors.setupInstructions !== null ||
+      newErrors.materials !== null ||
+      newErrors.playGuidedItems.some((e) => e !== null) ||
+      newErrors.debriefGuidedItems.some((e) => e !== null) ||
+      newErrors.selTags !== null;
+
+    return !hasErrors;
   };
 
   const handlePickImage = async () => {
@@ -146,11 +231,42 @@ export const CreateActivity: React.FC = () => {
   };
 
   const handlePublish = () => {
+    if (!validateForm()) {
+      // Scroll to first error
+      scrollToFirstError();
+      return;
+    }
     setStatus("Published");
+  };
+
+  const scrollToFirstError = () => {
+    // Priority order: objective -> setup -> materials -> play -> debrief -> selTags
+    if (errors.objective) {
+      scrollViewRef.current?.scrollTo({ y: 150, animated: true });
+    } else if (errors.setupInstructions || errors.materials) {
+      setForceOpenPrepTab(true);
+      scrollViewRef.current?.scrollTo({ y: 350, animated: true });
+    } else if (errors.playGuidedItems.some((e) => e !== null)) {
+      const playTab = activityTabs.find((tab) => tab.kind === "play");
+      if (playTab) {
+        // Open Play tab and scroll
+        // We'll pass this through to ActivityContent
+        scrollViewRef.current?.scrollTo({ y: 350, animated: true });
+      }
+    } else if (errors.debriefGuidedItems.some((e) => e !== null)) {
+      const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
+      if (debriefTab) {
+        // Open Debrief tab and scroll
+        scrollViewRef.current?.scrollTo({ y: 350, animated: true });
+      }
+    } else if (errors.selTags) {
+      scrollViewRef.current?.scrollTo({ y: 600, animated: true });
+    }
   };
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       style={styles.screen}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
@@ -198,11 +314,22 @@ export const CreateActivity: React.FC = () => {
           setObjective={setObjective}
           tabs={activityTabs}
           setTabs={setActivityTabs}
+          objectiveError={errors.objective}
+          setupError={errors.setupInstructions}
+          materialsError={errors.materials}
+          playGuidedItemErrors={errors.playGuidedItems}
+          debriefGuidedItemErrors={errors.debriefGuidedItems}
+          forceOpenPrepTab={forceOpenPrepTab}
+          onPrepTabOpened={() => setForceOpenPrepTab(false)}
         />
       </CollapsibleSection>
 
       <CollapsibleSection title="SEL Opportunity" defaultOpen>
-        <SEL_Opportunity tags={selTags} onTagsChange={setSelTags} />
+        <SEL_Opportunity 
+          tags={selTags} 
+          onTagsChange={setSelTags}
+          error={errors.selTags}
+        />
       </CollapsibleSection>
 
       <Text style={styles.debugText}>Objective: {objective}</Text>

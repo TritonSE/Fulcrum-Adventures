@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+import { FieldError } from "./sub_components/FieldError";
+
 const MAX_TAG_LENGTH = 30;
 
 const baseInputSurface = {
@@ -25,9 +27,10 @@ const baseRemoveIcon = {
 type SELOpportunityProps = {
   tags: string[];
   onTagsChange: (nextTags: string[]) => void;
+  error?: string | null;
 };
 
-export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsChange }) => {
+export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsChange, error }) => {
   const [tagInput, setTagInput] = useState("");
 
   const handleAddTag = () => {
@@ -72,7 +75,7 @@ export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsCha
           onChangeText={setTagInput}
           placeholder="Add SEL Tag.."
           placeholderTextColor="#B4B4B4"
-          style={styles.input}
+          style={[styles.input, error && styles.inputError]}
           maxLength={MAX_TAG_LENGTH}
           onSubmitEditing={handleAddTag}
         />
@@ -83,6 +86,7 @@ export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsCha
       </View>
 
       <Text style={styles.characterCount}>{tagInput.length}/30 characters</Text>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -111,6 +115,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     color: "#0F172A",
     fontSize: 14,
+  },
+  inputError: {
+    borderColor: "#EF4444",
+    borderWidth: 1,
   },
   addButton: {
     width: 40,

@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
+import { FieldError } from "./sub_components/FieldError";
 
 type ActivitySection = {
   id: string;
@@ -24,6 +26,13 @@ type ActivityContentProps = {
   setObjective: React.Dispatch<React.SetStateAction<string>>;
   tabs: ActivityTab[];
   setTabs: React.Dispatch<React.SetStateAction<ActivityTab[]>>;
+  objectiveError?: string | null;
+  setupError?: string | null;
+  materialsError?: string | null;
+  playGuidedItemErrors?: (string | null)[];
+  debriefGuidedItemErrors?: (string | null)[];
+  forceOpenPrepTab?: boolean;
+  onPrepTabOpened?: () => void;
 };
 
 const MAX_SECTIONS = 6;
@@ -90,9 +99,27 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
   setObjective,
   tabs,
   setTabs,
+  objectiveError,
+  setupError,
+  materialsError,
+  playGuidedItemErrors = [],
+  debriefGuidedItemErrors = [],
+  forceOpenPrepTab,
+  onPrepTabOpened,
 }) => {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [materialInput, setMaterialInput] = useState("");
+
+  // Auto-open Prep tab when there are setup or materials errors
+  useEffect(() => {
+    if (forceOpenPrepTab) {
+      const prepTab = tabs.find((tab) => tab.kind === "prep");
+      if (prepTab) {
+        setActiveTabId(prepTab.id);
+        onPrepTabOpened?.();
+      }
+    }
+  }, [forceOpenPrepTab, tabs, onPrepTabOpened]);
 
   const resolvedActiveTabId = useMemo(() => {
     if (activeTabId && tabs.some((tab) => tab.id === activeTabId)) {
@@ -237,9 +264,10 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
           placeholder="Enter activity objective"
           placeholderTextColor="#A6A6A6"
           maxLength={150}
-          style={styles.input}
+          style={[styles.input, objectiveError && styles.inputError]}
         />
         <Text style={styles.characterCount}>{objective.length}/150 characters</Text>
+        {objectiveError && <FieldError message={objectiveError} />}
       </View>
 
       <View style={styles.facilitateHeader}>
@@ -286,8 +314,9 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                 placeholderTextColor="#B3B3B3"
                 multiline
                 numberOfLines={3}
-                style={styles.defaultSectionInput}
+                style={[styles.defaultSectionInput, setupError && styles.inputError]}
               />
+              {setupError && <FieldError message={setupError} />}
             </View>
           )}
 
@@ -297,6 +326,8 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
 
               {activeTab.guidedItems.map((item, index) => {
                 const isRemovable = canRemoveGuidedItem(index);
+                const guidedItemErrors = isPlayTab ? playGuidedItemErrors : debriefGuidedItemErrors;
+                const itemError = guidedItemErrors?.[index];
 
                 return (
                   <View key={`${defaultSection.id}-${index}`} style={styles.guidedItemGroup}>
@@ -313,7 +344,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                             : "Enter reflection or prompt here.."
                         }
                         placeholderTextColor="#B4B4B4"
-                        style={styles.guidedItemInput}
+                        style={[styles.guidedItemInput, itemError && styles.inputError]}
                       />
                       {isRemovable ? (
                         <Pressable
@@ -326,6 +357,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                         <View style={styles.removeGuidedItemSpacer} />
                       )}
                     </View>
+                    {itemError && <FieldError message={itemError} />}
                   </View>
                 );
               })}
@@ -372,7 +404,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                   onChangeText={setMaterialInput}
                   placeholder="Add new material item..."
                   placeholderTextColor="#A6A6A6"
-                  style={styles.materialInput}
+                  style={[styles.materialInput, materialsError && styles.inputError]}
                   editable={!activeTab.noMaterialsNeeded}
                   onSubmitEditing={handleAddMaterial}
                 />
@@ -395,6 +427,8 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                 </View>
                 <Text style={styles.checkboxText}>No materials needed</Text>
               </Pressable>
+
+              {materialsError && <FieldError message={materialsError} />}
             </View>
           )}
 
@@ -489,6 +523,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     color: "#0F172A",
     fontSize: 14,
+  },
+  inputError: {
+    borderColor: "#EF4444",
+    borderWidth: 1,
   },
   characterCount: {
     marginTop: 8,
@@ -622,7 +660,7 @@ const styles = StyleSheet.create({
   },
   guidedItemInput: {
     flex: 1,
-    height: 58,
+    height: 48,
     borderRadius: 10,
     ...baseInputSurface,
     paddingHorizontal: 14,

@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import Vector from "../../../../assets/Vector.svg";
+
 type FieldErrorProps = {
   message: string;
 };
@@ -8,7 +10,7 @@ type FieldErrorProps = {
 export const FieldError: React.FC<FieldErrorProps> = ({ message }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>▲</Text>
+      <Vector width={17} height={16} style={styles.icon} />
       <Text style={styles.text}>{message}</Text>
     </View>
   );
@@ -21,12 +23,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   icon: {
-    fontSize: 14,
-    color: "#E55C4D",
     marginRight: 6,
   },
   text: {
     fontSize: 14,
-    color: "#E55C4D",
+    fontFamily: "Instrument Sans",
+    color: "#EF4444",
   },
 });
