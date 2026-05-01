@@ -1,7 +1,17 @@
-import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useRef, useState } from "react";
+import {
+  LayoutChangeEvent,
+  PanResponder,
+  PanResponderInstance,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const GRADE_OPTIONS = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+
+const HANDLE_SIZE = 22;
+const TRACK_HEIGHT = 6;
 
 type GradeSectionProps = {
   minValue: string;
@@ -11,90 +21,139 @@ type GradeSectionProps = {
 
 type HandleType = "min" | "max";
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+const getIndexFromLabel = (label: string) => {
+  const index = GRADE_OPTIONS.indexOf(label);
+  return index >= 0 ? index : 0;
+};
+
+const getLabelFromIndex = (index: number) => GRADE_OPTIONS[index] ?? "K";
+
 export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, onChange }) => {
-  const [activeHandle, setActiveHandle] = useState<HandleType>("max");
+  const [railWidth, setRailWidth] = useState(0);
+  const railRef = useRef<View | null>(null);
+  const railPageXRef = useRef(0);
 
-  const handleSelect = (nextValue: string) => {
-    const nextIndex = GRADE_OPTIONS.indexOf(nextValue);
-    const minIndex = GRADE_OPTIONS.indexOf(minValue);
-    const maxIndex = GRADE_OPTIONS.indexOf(maxValue);
+  const minIndex = getIndexFromLabel(minValue);
+  const maxIndex = getIndexFromLabel(maxValue);
 
-    if (activeHandle === "min") {
-      if (nextIndex <= maxIndex) {
-        onChange(nextValue, maxValue);
-      } else {
-        onChange(maxValue, nextValue);
-      }
-      setActiveHandle("max");
-      return;
-    }
+  const stepCount = GRADE_OPTIONS.length - 1;
+  const usableWidth = Math.max(railWidth - HANDLE_SIZE, 1);
 
-    if (nextIndex >= minIndex) {
-      onChange(minValue, nextValue);
-    } else {
-      onChange(nextValue, minValue);
-    }
-    setActiveHandle("min");
+  const getCenterXForIndex = (index: number) => {
+    if (stepCount === 0) return HANDLE_SIZE / 2;
+    return HANDLE_SIZE / 2 + (index / stepCount) * usableWidth;
   };
 
-  const minIndex = GRADE_OPTIONS.indexOf(minValue);
-  const maxIndex = GRADE_OPTIONS.indexOf(maxValue);
+  const minCenterX = getCenterXForIndex(minIndex);
+  const maxCenterX = getCenterXForIndex(maxIndex);
+
+  const measureRail = () => {
+    railRef.current?.measureInWindow((x) => {
+      railPageXRef.current = x;
+    });
+  };
+
+  const getIndexFromGestureX = (gestureMoveX: number) => {
+    const relativeX = clamp(
+      gestureMoveX - railPageXRef.current,
+      HANDLE_SIZE / 2,
+      railWidth - HANDLE_SIZE / 2,
+    );
+
+    const ratio = (relativeX - HANDLE_SIZE / 2) / usableWidth;
+    return clamp(Math.round(ratio * stepCount), 0, stepCount);
+  };
+
+  const createHandleResponder = (handleType: HandleType): PanResponderInstance =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        measureRail();
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (!railWidth) return;
+
+        const draggedIndex = getIndexFromGestureX(gestureState.moveX);
+
+        if (handleType === "min") {
+          const nextMinIndex = Math.min(draggedIndex, maxIndex);
+          onChange(getLabelFromIndex(nextMinIndex), getLabelFromIndex(maxIndex));
+          return;
+        }
+
+        const nextMaxIndex = Math.max(draggedIndex, minIndex);
+        onChange(getLabelFromIndex(minIndex), getLabelFromIndex(nextMaxIndex));
+      },
+      onPanResponderTerminationRequest: () => false,
+    });
+
+  const minResponder = useMemo(() => createHandleResponder("min"), [railWidth, minIndex, maxIndex]);
+
+  const maxResponder = useMemo(() => createHandleResponder("max"), [railWidth, minIndex, maxIndex]);
+
+  const handleRailLayout = (event: LayoutChangeEvent) => {
+    setRailWidth(event.nativeEvent.layout.width);
+    requestAnimationFrame(measureRail);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Grade</Text>
 
-      <View style={styles.handleRow}>
-        <Pressable
-          style={[styles.handleButton, activeHandle === "min" && styles.handleButtonActive]}
-          onPress={() => setActiveHandle("min")}
-        >
-          <Text
-            style={[
-              styles.handleButtonText,
-              activeHandle === "min" && styles.handleButtonTextActive,
-            ]}
-          >
-            Min: {minValue}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.handleButton, activeHandle === "max" && styles.handleButtonActive]}
-          onPress={() => setActiveHandle("max")}
-        >
-          <Text
-            style={[
-              styles.handleButtonText,
-              activeHandle === "max" && styles.handleButtonTextActive,
-            ]}
-          >
-            Max: {maxValue}
-          </Text>
-        </Pressable>
+      <View style={styles.valueRow}>
+        <Text style={styles.valueText}>
+          {minValue} - {maxValue}
+        </Text>
       </View>
 
-      <View style={styles.gradeRow}>
-        {GRADE_OPTIONS.map((grade, index) => {
-          const isInRange = index >= minIndex && index <= maxIndex;
-          const isEdge = grade === minValue || grade === maxValue;
+      <View
+        ref={railRef}
+        onLayout={handleRailLayout}
+        style={styles.railContainer}
+        collapsable={false}
+      >
+        <View style={styles.rail} />
 
-          return (
-            <Pressable
-              key={grade}
-              onPress={() => handleSelect(grade)}
-              style={[
-                styles.gradeChip,
-                isInRange && styles.gradeChipInRange,
-                isEdge && styles.gradeChipEdge,
-              ]}
-            >
-              <Text style={[styles.gradeChipText, isInRange && styles.gradeChipTextInRange]}>
-                {grade}
-              </Text>
-            </Pressable>
-          );
-        })}
+        <View
+          style={[
+            styles.selectedRail,
+            {
+              left: minCenterX,
+              width: Math.max(maxCenterX - minCenterX, 0),
+            },
+          ]}
+        />
+
+        <View
+          style={[
+            styles.handle,
+            {
+              left: minCenterX - HANDLE_SIZE / 2,
+            },
+          ]}
+          {...minResponder.panHandlers}
+        />
+
+        <View
+          style={[
+            styles.handle,
+            {
+              left: maxCenterX - HANDLE_SIZE / 2,
+            },
+          ]}
+          {...maxResponder.panHandlers}
+        />
+      </View>
+
+      <View style={styles.tickLabelRow}>
+        {GRADE_OPTIONS.map((grade) => (
+          <Text key={grade} style={styles.tickLabel}>
+            {grade}
+          </Text>
+        ))}
       </View>
     </View>
   );
@@ -108,65 +167,57 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#1F3B82",
+    marginBottom: 10,
+  },
+  valueRow: {
     marginBottom: 12,
   },
-  handleRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
-    flexWrap: "wrap",
-  },
-  handleButton: {
-    minHeight: 36,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#D7DDE8",
-    backgroundColor: "#FFF",
-    justifyContent: "center",
-  },
-  handleButtonActive: {
-    borderColor: "#1F3B82",
-    backgroundColor: "#EAF0FF",
-  },
-  handleButtonText: {
-    color: "#5B6B8B",
+  valueText: {
     fontSize: 14,
-    fontWeight: "500",
-  },
-  handleButtonTextActive: {
+    fontWeight: "600",
     color: "#1F3B82",
   },
-  gradeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  gradeChip: {
-    minWidth: 42,
-    minHeight: 36,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#D7DDE8",
-    backgroundColor: "#FFF",
-    alignItems: "center",
+  railContainer: {
+    width: "100%",
+    height: HANDLE_SIZE,
     justifyContent: "center",
   },
-  gradeChipInRange: {
-    backgroundColor: "#EAF0FF",
-    borderColor: "#AFC4F1",
+  rail: {
+    position: "absolute",
+    left: HANDLE_SIZE / 2,
+    right: HANDLE_SIZE / 2,
+    height: TRACK_HEIGHT,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#2E4A8A",
   },
-  gradeChipEdge: {
-    borderColor: "#1F3B82",
-    borderWidth: 1.5,
+  selectedRail: {
+    position: "absolute",
+    height: TRACK_HEIGHT,
+    borderRadius: 999,
+    backgroundColor: "#2E4A8A",
+    top: (HANDLE_SIZE - TRACK_HEIGHT) / 2,
   },
-  gradeChipText: {
+  handle: {
+    position: "absolute",
+    top: 0,
+    width: HANDLE_SIZE,
+    height: HANDLE_SIZE,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 3,
+    borderColor: "#2E4A8A",
+  },
+  tickLabelRow: {
+    marginTop: 10,
+    paddingHorizontal: HANDLE_SIZE / 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  tickLabel: {
     fontSize: 14,
-    color: "#5B6B8B",
     fontWeight: "500",
-  },
-  gradeChipTextInRange: {
-    color: "#1F3B82",
+    color: "#4B649D",
   },
 });

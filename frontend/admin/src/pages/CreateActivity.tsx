@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import {
   ActivityContent,
@@ -25,18 +25,79 @@ const getImageDimensions = async (uri: string) =>
     Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
   });
 
+type ActivityStatus = "idle" | "Draft" | "Published" | "Archived";
+
+type HeaderActionButtonProps = {
+  label: string;
+  onPress: () => void;
+  variant?: "secondary" | "primary";
+};
+
+const HeaderActionButton: React.FC<HeaderActionButtonProps> = ({
+  label,
+  onPress,
+  variant = "secondary",
+}) => {
+  const isPrimary = variant === "primary";
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.headerButton,
+        isPrimary ? styles.headerButtonPrimary : styles.headerButtonSecondary,
+      ]}
+      activeOpacity={0.85}
+    >
+      <Text
+        style={[
+          styles.headerButtonText,
+          isPrimary ? styles.headerButtonTextPrimary : styles.headerButtonTextSecondary,
+        ]}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+type CreateActivityHeaderProps = {
+  onCancel: () => void;
+  onSaveDraft: () => void;
+  onPublish: () => void;
+};
+
+const CreateActivityHeader: React.FC<CreateActivityHeaderProps> = ({
+  onCancel,
+  onSaveDraft,
+  onPublish,
+}) => {
+  return (
+    <View style={styles.pageHeader}>
+      <View style={styles.headerTitleContainer}>
+        <Text style={styles.pageTitle}>Create New Activity</Text>
+      </View>
+
+      <View style={styles.headerActions}>
+        <HeaderActionButton label="Cancel" onPress={onCancel} />
+        <HeaderActionButton label="Save as Draft" onPress={onSaveDraft} />
+        <HeaderActionButton label="Publish Activity" onPress={onPublish} variant="primary" />
+      </View>
+    </View>
+  );
+};
+
 export const CreateActivity: React.FC = () => {
   const [objective, setObjective] = useState("");
   const [activityTabs, setActivityTabs] = useState<ActivityTab[]>(() =>
     createDefaultActivityTabs(),
   );
-
   const [overviewValue, setOverviewValue] = useState<OverviewFormState>(() =>
     createDefaultOverviewState(),
   );
-
   const [selTags, setSelTags] = useState<string[]>([]);
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
+  const [status, setStatus] = useState<ActivityStatus>("idle");
 
   const handleOverviewChange = (patch: Partial<OverviewFormState>) => {
     setOverviewValue((prev) => ({ ...prev, ...patch }));
@@ -76,9 +137,29 @@ export const CreateActivity: React.FC = () => {
     });
   };
 
+  const handleCancel = () => {
+    console.log("cancel");
+  };
+
+  const handleSaveDraft = () => {
+    setStatus("Draft");
+  };
+
+  const handlePublish = () => {
+    setStatus("Published");
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Create New Activity</Text>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <CreateActivityHeader
+        onCancel={handleCancel}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
+      />
 
       <CollapsibleSection title="Overview" defaultOpen>
         <OverviewSection
@@ -125,6 +206,7 @@ export const CreateActivity: React.FC = () => {
       </CollapsibleSection>
 
       <Text style={styles.debugText}>Objective: {objective}</Text>
+      <Text style={styles.debugText}>Status: {status}</Text>
       <Text style={styles.debugText}>Activity tabs: {JSON.stringify(activityTabs)}</Text>
       <Text style={styles.debugText}>Parent SEL tags: {JSON.stringify(selTags)}</Text>
       <Text style={styles.debugText}>
@@ -149,20 +231,70 @@ export const CreateActivity: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 40,
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 40,
-    alignSelf: "stretch",
-    width: "100%",
+  screen: {
+    flex: 1,
     backgroundColor: "#F7F7F7",
   },
-  header: {
+
+  container: {
+    padding: 40,
+    gap: 40,
+    width: "100%",
+  },
+
+  pageHeader: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+  },
+
+  headerTitleContainer: {
+    flex: 1,
+    minWidth: 0,
+  },
+
+  pageTitle: {
     fontSize: 32,
     fontWeight: "700",
     color: "#1F3B82",
   },
+
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginLeft: "auto",
+  },
+
+  headerButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+
+  headerButtonSecondary: {
+    borderWidth: 1,
+    borderColor: "#1A2B5D",
+    backgroundColor: "#FFFFFF",
+  },
+
+  headerButtonPrimary: {
+    backgroundColor: "#1A2B5D",
+  },
+
+  headerButtonText: {
+    fontWeight: "600",
+  },
+
+  headerButtonTextSecondary: {
+    color: "#1A2B5D",
+  },
+
+  headerButtonTextPrimary: {
+    color: "#FFFFFF",
+  },
+
   debugText: {
     fontSize: 14,
     color: "#6C6C6C",
