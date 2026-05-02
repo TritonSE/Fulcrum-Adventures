@@ -1,6 +1,6 @@
 .dashboard-layout {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   /* display: flex;
   flex-direction: column; */
   width: 100%;
@@ -8,7 +8,7 @@
 
 .dashboard-content {
   flex: 1;
-  padding: 32px 24px;
+  padding: 8px 8px 24px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -86,7 +86,7 @@
 }
 
 .table-wrapper {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
