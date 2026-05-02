@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 12,
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
   },
   xButtonPressable: {
     height: 24,

@@ -1,4 +1,4 @@
-import { LeagueSpartan_400Regular, useFonts } from "@expo-google-fonts/league-spartan";
+// Fonts are loaded globally in App.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -250,13 +250,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
 
   const energyLevel = filters.energyLevel;
 
-  const [fontsLoaded] = useFonts({
-    LeagueSpartan_400Regular,
-  });
-
-  if (!fontsLoaded) {
-    return <View></View>;
-  }
+  
 
   return (
     <View style={styles.container}>

@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   label: {
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 11,
     fontWeight: "600",
     letterSpacing: 0.2,

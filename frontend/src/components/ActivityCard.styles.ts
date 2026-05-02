@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     fontSize: 20,
     fontWeight: "700",
     color: "#153A7A",
@@ -66,7 +66,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   metaText: {
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 10,
     fontWeight: "400",
     color: "#153A7A",
@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "500",
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
   },
   bookmarkButton: {
     width: 32,

@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   selectedCategory: { borderColor: "transparent", backgroundColor: PRIMARY_COLOR },
   text: {
     color: PRIMARY_COLOR,
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 14,
     fontWeight: "500",
     lineHeight: 20,

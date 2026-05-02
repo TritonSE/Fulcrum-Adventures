@@ -31,6 +31,7 @@
     "@antfu/eslint-config": "^6.7.3",
     "@eslint-react/eslint-plugin": "^2.5.0",
     "@types/react": "~19.1.0",
+    "@types/react-native": "^0.72.8",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",

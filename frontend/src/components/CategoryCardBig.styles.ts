@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     zIndex: 1, // Ensure text is above the image if they overlap
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     paddingTop: 16,
     paddingHorizontal: 16,
   },

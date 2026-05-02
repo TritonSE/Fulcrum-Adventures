@@ -1,20 +1,18 @@
 import { SearchPage } from "./src/app/(tabs)/search";
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });
+import { useFonts, LeagueSpartan_400Regular, LeagueSpartan_700Bold } from "@expo-google-fonts/league-spartan";
+import { InstrumentSans_400Regular } from "@expo-google-fonts/instrument-sans";
+import { View, Text } from "react-native";
 
 export default function App() {
-  return (
-    <SearchPage />
-    // <View style={styles.container}>
-    //   <Text>Open up App.tsx to start working on your app!</Text>
-    //   <StatusBar style="auto" />
-    // </View>
-  );
+  const [fontsLoaded] = useFonts({
+    LeagueSpartan_400Regular,
+    LeagueSpartan_700Bold,
+    InstrumentSans_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return <View />;
+  }
+
+  return <SearchPage />;
 }

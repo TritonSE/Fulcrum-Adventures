@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
   },
   headerText: {
     color: "#153A7A",
-    fontFamily: "League Spartan",
+    fontFamily: "LeagueSpartan_700Bold",
     fontSize: 26,
     fontWeight: "700",
     lineHeight: 26,

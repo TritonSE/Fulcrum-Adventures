@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
   },
   smallText: {
     color: "#153F7A",
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 14,
     fontStyle: "normal",
     fontWeight: "400",

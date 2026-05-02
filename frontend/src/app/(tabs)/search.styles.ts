@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
   },
   smallText: {
     color: "#153F7A",
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 14,
     fontStyle: "normal",
     fontWeight: 400,
@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
   },
   clearAllText: {
     color: "#B4B4B4",
-    fontFamily: "Instrument Sans",
+    fontFamily: "InstrumentSans_400Regular",
     letterSpacing: 0.28,
     fontSize: 14,
     textDecorationLine: "underline",
