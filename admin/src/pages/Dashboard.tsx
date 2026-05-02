@@ -28,7 +28,9 @@ export default function Dashboard() {
           <div className="headerContainer">
             <p className="headerText">Activities Dashboard</p>
             <div className="headerButtonsContainer">
-              <Button icon={MailingListIcon} variant="secondary-left">
+              <Button icon={MailingListIcon} variant="secondary-left" onClick={() => {
+                window.location.href = "/mailing-list";
+              }}>
                 Mailing List
               </Button>
               <Button icon={AddIcon}>Create New Activity</Button>
