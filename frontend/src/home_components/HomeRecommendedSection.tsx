@@ -5,19 +5,6 @@ import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
 
-export function HomeRecommendedSection() {
-  const { activities } = useActivities();
-  return (
-    <View style={styles.sectionContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.text}>Recommended</Text>
-        <SeeAll screen="/recommended" />
-      </View>
-      <ActivityList activities={activities} variant="condensed" horizontal={true} height={252} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
@@ -35,7 +22,22 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     lineHeight: 27.04,
   },
-  sectionContainer: {
-    gap: 8,
-  },
 });
+
+export function HomeRecommendedSection() {
+  const { activities } = useActivities();
+  return (
+    <View>
+      <View style={styles.headerContainer}>
+        <Text style={styles.text}>Recommended</Text>
+        <SeeAll screen="/recommended" />
+      </View>
+      <ActivityList
+        activities={activities}
+        variant="condensed"
+        horizontal={true}
+        showHeader={false}
+      />
+    </View>
+  );
+}

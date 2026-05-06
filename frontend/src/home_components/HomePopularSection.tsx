@@ -5,19 +5,6 @@ import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
 
-export function HomePopularSection() {
-  const { activities } = useActivities();
-  return (
-    <View style={styles.sectionContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.text}>Popular</Text>
-        <SeeAll screen="/popular" />
-      </View>
-      <ActivityList activities={activities} variant="condensed" horizontal={true} height={252} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
@@ -35,7 +22,22 @@ const styles = StyleSheet.create({
     lineHeight: 27,
     alignSelf: "flex-start",
   },
-  sectionContainer: {
-    gap: 8,
-  },
 });
+
+export function HomePopularSection() {
+  const { activities } = useActivities();
+  return (
+    <View>
+      <View style={styles.headerContainer}>
+        <Text style={styles.text}>Popular</Text>
+        <SeeAll screen="/popular" />
+      </View>
+      <ActivityList
+        activities={activities}
+        variant="condensed"
+        horizontal={true}
+        showHeader={false}
+      />
+    </View>
+  );
+}

@@ -1,35 +1,5 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-export function HomeMailingListSection() {
-  return (
-    <View style={styles.wrapper}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Join Our Mailing List!</Text>
-        <Text style={styles.subtitle}>
-          Get more activities, guides, and tips sent straight to your inbox!
-        </Text>
-
-        <TextInput
-          placeholder="Enter email here"
-          placeholderTextColor="#B4B4B4"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={styles.input}
-        />
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open mailing list signup"
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Sign up</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 20,
@@ -93,3 +63,33 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
 });
+
+export function HomeMailingListSection() {
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Join Our Mailing List!</Text>
+        <Text style={styles.subtitle}>
+          Get more activities, guides, and tips sent straight to your inbox!
+        </Text>
+
+        <TextInput
+          placeholder="Enter email here"
+          placeholderTextColor="#B4B4B4"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={styles.input}
+        />
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open mailing list signup"
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Sign up</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}

@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
     flexDirection: "row",
     alignItems: "stretch",
+    marginHorizontal: 8,
 
     // Elevation/Shadow
     shadowColor: "#000",
@@ -49,11 +50,12 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "League Spartan",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#153A7A",
-    lineHeight: 21,
+    lineHeight: 22,
     marginBottom: 0,
+    flexShrink: 1
   },
   metaContainer: {
     flexDirection: "row",

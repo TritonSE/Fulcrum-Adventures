@@ -10,16 +10,18 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    overflow: "hidden",
   },
   innerContainer: {
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
+    overflow: "hidden",
   },
   imageContainer: {
     width: "100%",
     height: 128,
     backgroundColor: "#E8E8E8",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   image: {
     width: "100%",

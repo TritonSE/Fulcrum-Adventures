@@ -3,8 +3,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    flex: 1,
+    width: "100%",
   },
   headerContainer: {
     paddingHorizontal: 24,
@@ -18,12 +17,13 @@ export const styles = StyleSheet.create({
     lineHeight: 26,
   },
   verticalList: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 8,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    gap: 16,
   },
   horizontalList: {
     paddingHorizontal: 24,
-    gap: 6,
+    paddingVertical: 12,
+    gap: 12,
   },
 });

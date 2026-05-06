@@ -3,27 +3,6 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import BackArrowIcon from "../../assets/BackArrowIcon.svg";
 
-export function HomePopUpPageHeaderSection({
-  sectionName,
-  rightPadding,
-}: {
-  sectionName: string;
-  rightPadding: number;
-}) {
-  return (
-    <View style={[styles.container, { paddingRight: rightPadding }]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={20}>
-          <View style={styles.arrowIcon}>
-            <BackArrowIcon width={24} height={24} />
-          </View>
-        </Pressable>
-        <Text style={styles.title}>{sectionName}</Text>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     display: "flex",
@@ -62,3 +41,25 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
 });
+
+
+export function HomePopUpPageHeaderSection({
+  sectionName,
+  rightPadding,
+}: {
+  sectionName: string;
+  rightPadding: number;
+}) {
+  return (
+    <View style={[styles.container, { paddingRight: rightPadding }]}>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={20}>
+          <View style={styles.arrowIcon}>
+            <BackArrowIcon width={24} height={24} />
+          </View>
+        </Pressable>
+        <Text style={styles.title}>{sectionName}</Text>
+      </View>
+    </View>
+  );
+}

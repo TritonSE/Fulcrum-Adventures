@@ -66,14 +66,13 @@ export const ActivityList: React.FC<ActivityListProps> = ({
 
   const renderCard = (item: Activity) => {
     const card = (
-      <View style={{ flex: 1 }}>
-        <CardComponent
-          activity={item}
-          onPress={() => handlePress(item)}
-          onSaveToggle={handleSaveToggle}
-        />
-      </View>
+      <CardComponent
+        activity={item}
+        onPress={() => handlePress(item)}
+        onSaveToggle={handleSaveToggle}
+      />
     );
+
     if (enableSwipeDelete && onDelete) {
       return (
         <SwipeToDelete key={item.id} onDelete={() => onDelete(item.id)}>
@@ -108,7 +107,10 @@ export const ActivityList: React.FC<ActivityListProps> = ({
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
-          style={horizontal && height ? { height, flexGrow: 0 } : { flex: 1 }}
+          style={[
+            horizontal ? { flexGrow: 0 } : { flex: 0 },
+            horizontal && height ? { height } : null,
+          ]}
         />
       )}
     </View>

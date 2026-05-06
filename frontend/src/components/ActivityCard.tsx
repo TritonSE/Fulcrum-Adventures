@@ -35,7 +35,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
       <View style={styles.content}>
         {/* Title + Meta Wrapper (Gap 4px) */}
         <View style={styles.headerContent}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
             {activity.title}
           </Text>
 
