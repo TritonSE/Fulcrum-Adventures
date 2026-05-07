@@ -88,7 +88,7 @@ export const styles = StyleSheet.create({
   categoryText: {
     fontFamily: "Instrument Sans",
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
   },
   bookmarkButton: {
@@ -104,5 +104,20 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  extraTag: {
+    height: 24,
+    width: 24,
+    borderRadius: 24,
+    backgroundColor: "#EBEBEB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 4,
+  },
+  extraTagText: {
+    fontFamily: "Instrument Sans",
+    color: "#909090",
+    fontWeight: "500",
+    fontSize: 12,
   },
 });

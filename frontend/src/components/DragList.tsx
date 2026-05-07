@@ -38,6 +38,14 @@ export function DragList<T extends { id: string }>({
   const itemHeightRef = useRef(90);
   const pendingResetRef = useRef(false);
 
+  // Per-item Y animated values — each slot owns its own value.
+  // Transform always reads itemYs[index], so it never depends on activeIndex state,
+  // meaning re-renders from setActiveIndex can't interrupt the running drag.
+  const itemYs = useRef<Animated.Value[]>([]);
+  while (itemYs.current.length < data.length) {
+    itemYs.current.push(new Animated.Value(0));
+  }
+
   // After a reorder, reset all Y values once the new data is committed,
   // before the frame is painted — avoids the "snap to origin then jump" artifact.
   useLayoutEffect(() => {
@@ -46,14 +54,6 @@ export function DragList<T extends { id: string }>({
       itemYs.current.forEach((v) => v.setValue(0));
     }
   });
-
-  // Per-item Y animated values — each slot owns its own value.
-  // Transform always reads itemYs[index], so it never depends on activeIndex state,
-  // meaning re-renders from setActiveIndex can't interrupt the running drag.
-  const itemYs = useRef<Animated.Value[]>([]);
-  while (itemYs.current.length < data.length) {
-    itemYs.current.push(new Animated.Value(0));
-  }
 
   // Stable pan responders — created once per slot, never recreated on re-render.
   // Uses refs for all dynamic values so closures never go stale.

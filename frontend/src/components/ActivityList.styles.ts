@@ -19,11 +19,11 @@ export const styles = StyleSheet.create({
   verticalList: {
     paddingHorizontal: 24,
     paddingBottom: 16,
-    gap: 16,
+    gap: 12,
   },
   horizontalList: {
     paddingHorizontal: 24,
     paddingVertical: 12,
-    gap: 12,
+    gap: 16,
   },
 });

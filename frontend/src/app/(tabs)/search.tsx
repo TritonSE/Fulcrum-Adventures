@@ -10,7 +10,7 @@ import { mockActivities } from "../../data/mockActivities";
 import { styles } from "../../styles/search.styles";
 
 import type { FilterState } from "../../components/FiltersModal";
-import type { Activity } from "../../types/activity";
+import type { Activity, Environment } from "../../types/activity";
 
 const defaultFilters: FilterState = {
   category: undefined,
@@ -109,12 +109,12 @@ function matchesActivityFilter(
     return false;
   }
 
-  if (
-    filters.environment &&
-    filters.environment.length > 0 &&
-    !filters.environment.includes(activity.environment)
-  ) {
-    return false;
+  if (filters.environment && filters.environment.length > 0) {
+    const isAnySelected = filters.environment.includes("Any Environment");
+
+    if (!isAnySelected && !filters.environment.includes(activity.environment)) {
+      return false;
+    }
   }
 
   if (filters.energyLevel && activity.energyLevel !== filters.energyLevel) {
@@ -157,7 +157,10 @@ function removeFilter(filters: FilterState, filterToRemove: string): FilterState
         (g) => !(g.min === Number.parseInt(match[1]) && g.max === Number.parseInt(match[2])),
       );
     }
-  } else if (["Indoor", "Outdoor", "Both"].includes(filterToRemove)) {
+  } else if (
+    filters.environment?.includes(filterToRemove as Environment) ||
+    filterToRemove === "Any Environment"
+  ) {
     newFilters.environment = (filters.environment ?? []).filter((e) => e !== filterToRemove);
   } else if (filterToRemove.startsWith("Energy Level: ")) {
     newFilters.energyLevel = null;
@@ -247,6 +250,7 @@ export function SearchPage() {
                 activities={filteredActivities}
                 variant="card"
                 onSaveToggle={handleSaveToggle}
+                contentContainerStyle={{ marginHorizontal: -12, width: "112%" }}
               />
             </View>
           ) : (

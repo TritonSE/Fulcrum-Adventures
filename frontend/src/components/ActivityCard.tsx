@@ -7,7 +7,12 @@ import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
 import PeopleIcon from "../../assets/icons/people.svg";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
-import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
+import {
+  formatDuration,
+  formatGradeLevel,
+  formatGroupSize,
+  getSortedCategories,
+} from "../utils/textUtils";
 
 import { styles } from "./ActivityCard.styles";
 
@@ -17,9 +22,22 @@ type ActivityCardProps = {
   activity: Activity;
   onPress?: () => void;
   onSaveToggle?: (id: string) => void;
+  contextCategory?: string;
 };
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({
+  activity,
+  onPress,
+  onSaveToggle,
+  contextCategory,
+}) => {
+  const displayCategories = getSortedCategories(
+    activity.categories || activity.category,
+    contextCategory,
+  );
+  const primaryCategory = displayCategories[0];
+  const extraCount = displayCategories.length - 1;
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       {/* Left Side: Image */}
@@ -63,18 +81,33 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
 
         {/* Footer: Category Tag & Bookmark */}
         <View style={styles.footer}>
-          <View
-            style={[
-              styles.categoryTag,
-              {
-                backgroundColor: CATEGORY_COLORS[activity.category] || DEFAULT_CATEGORY_COLOR,
-              },
-            ]}
-          >
-            <Text style={styles.categoryText}>{activity.category}</Text>
+          {/* THE TAGS CONTAINER */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {/* Tag 1: The Primary Category */}
+            {primaryCategory && (
+              <View
+                style={[
+                  styles.categoryTag,
+                  {
+                    backgroundColor:
+                      CATEGORY_COLORS[primaryCategory as keyof typeof CATEGORY_COLORS] ||
+                      DEFAULT_CATEGORY_COLOR,
+                  },
+                ]}
+              >
+                <Text style={styles.categoryText}>{primaryCategory}</Text>
+              </View>
+            )}
+
+            {/* Tag 2: The +1 / +2 Grey Bubble */}
+            {extraCount > 0 && (
+              <View style={styles.extraTag}>
+                <Text style={styles.extraTagText}>+{extraCount}</Text>
+              </View>
+            )}
           </View>
 
-          {/* Bookmark Button */}
+          {/* BOOKMARK BUTTON */}
           <TouchableOpacity
             style={styles.bookmarkButton}
             onPress={(e) => {

@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
 export function HomePopUpPageHeaderSection({
   sectionName,
   rightPadding,

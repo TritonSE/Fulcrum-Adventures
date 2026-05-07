@@ -1,8 +1,17 @@
 import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import EnergyIcon from "../../assets/icons/energy_bolt.svg";
-import { FILTER_OPTIONS as options } from "../constants/filterOptions";
+import { FILTER_OPTIONS as options, type RangeOption } from "../constants/filterOptions";
 
 import { FilterPill } from "./FilterPill";
 
@@ -10,7 +19,7 @@ import type { Category, EnergyLevel, Environment, Range } from "../types/activit
 
 export type FilterState = {
   category?: Category | null;
-  setupProps?: string | null; /* maybe change to boolean later */
+  setupProps?: string | null;
   duration?: Range[];
   gradeLevel?: Range[];
   groupSize?: Range[];
@@ -25,6 +34,39 @@ type Props = {
   onApply: (filters: FilterState) => void;
 };
 
+// --- Inline SVGs to match Figma ---
+const SlidersIcon = () => (
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M4 21V14M4 10V3M12 21V12M12 8V3M20 21V16M20 12V3"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M1 14H7M9 8H15M17 16H23"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const CloseIcon = () => (
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M18 6L6 18M6 6L18 18"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+// --- Constants ---
 const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
   None: 0,
   Low: 1,
@@ -33,103 +75,86 @@ const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
 };
 const numberToEnergyLevel: Record<number, EnergyLevel> = { 1: "Low", 2: "Medium", 3: "High" };
 
-// Helper function to convert grade level number to label
-const gradeNumberToLabel = (num: number): string => {
-  if (num === 0) return "K";
-  return `${num}`;
-};
-
-// Helper function to generate display labels for ranges
-const getRangeLabel = (range: Range, type: "duration" | "gradeLevel" | "groupSize"): string => {
-  if (type === "duration") {
-    return `${range.min}-${range.max} min`;
-  } else if (type === "gradeLevel") {
-    return `${gradeNumberToLabel(range.min)}-${gradeNumberToLabel(range.max)}`;
-  } else if (type === "groupSize") {
-    switch (range.min) {
-      case 3:
-        return "Small (3-15)";
-      case 15:
-        return "Medium (15-30)";
-      case 30:
-        return "Large (30+)";
-      default:
-        return "Error";
-    }
-  }
-  return "";
-};
-
-// Helper function to check if a range is selected in an array
-const isRangeSelected = (selected: Range[] | undefined, range: Range): boolean => {
-  if (!selected || selected.length === 0) return false;
-  return selected.some((r) => r.min === range.min && r.max === range.max);
-};
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 24,
   },
-  title: { fontSize: 24, fontWeight: "800", color: "#1F2C5C", fontFamily: "League Spartan" },
-  close: { fontSize: 20, color: "#1F2C5C" },
-  scrollContainer: { flex: 1 },
-  content: { paddingHorizontal: 16 },
-  section: { marginBottom: 16 },
-  sectionTitle: {
-    fontSize: 20,
+  headerTitleWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  title: {
+    fontSize: 26,
     fontWeight: "700",
-    marginBottom: 8,
-    color: "#1C1F2A",
+    color: "#153A7A",
+    fontFamily: "League Spartan",
+    lineHeight: 28,
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContainer: { flex: 1 },
+  content: { paddingHorizontal: 24 },
+  section: { marginBottom: 24 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+    color: "#153A7A",
     fontFamily: "League Spartan",
   },
-  row: { flexDirection: "row", flexWrap: "wrap" },
-  energyRow: { flexDirection: "row", gap: 12, paddingHorizontal: 4 },
-  energyIcon: { padding: 6 },
-  energyText: { fontSize: 24, color: "#CBD0DD" },
-  energyTextActive: { color: "#1F4ED6" },
+  row: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  energyRow: { flexDirection: "row", gap: 8 },
   footer: {
     flexDirection: "row",
-    padding: 16,
-    gap: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    gap: 16,
     borderTopWidth: 1,
-    borderColor: "#E6E9F0",
-    borderBottomWidth: 0,
+    borderColor: "#F3F3F3",
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 36, // Safe area for iOS
   },
   resetBtn: {
     flex: 1,
     height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#1F4ED6",
+    borderRadius: 24,
+    backgroundColor: "#F3F3F3",
     alignItems: "center",
     justifyContent: "center",
   },
+  resetText: { color: "#153A7A", fontWeight: "500", fontSize: 16, fontFamily: "Instrument Sans" },
   applyBtn: {
     flex: 1,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: "#1F4ED6",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#153A7A",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
-  resetText: { color: "#1F4ED6", fontWeight: "700" },
-  applyText: { color: "#fff", fontWeight: "700" },
-  iconWrapper: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  applyText: { color: "#153A7A", fontWeight: "500", fontSize: 16, fontFamily: "Instrument Sans" },
 });
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.row}>{children}</View>
-  </View>
-);
+// Helper function to check if a range is selected
+const isRangeSelected = (selected: Range[] | undefined, range: Range): boolean => {
+  if (!selected || selected.length === 0) return false;
+  return selected.some((r) => r.min === range.min && r.max === range.max);
+};
 
 const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible">) => {
   const [filters, setFilters] = useState<FilterState>(initial);
@@ -137,7 +162,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
   const toggleSingleFilter = (key: "category" | "setupProps", value: string | null) =>
     setFilters((prev) => ({ ...prev, [key]: prev[key] === value ? undefined : value }));
 
-  const toggleRangeFilter = (key: "duration" | "gradeLevel" | "groupSize", range: Range) =>
+  const toggleRangeFilter = (key: "duration" | "gradeLevel" | "groupSize", range: RangeOption) =>
     setFilters((prev) => {
       const current = prev[key] ?? [];
       const isSelected = current.some((r) => r.min === range.min && r.max === range.max);
@@ -145,7 +170,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         ...prev,
         [key]: isSelected
           ? current.filter((r) => !(r.min === range.min && r.max === range.max))
-          : [...current, range],
+          : [...current, { min: range.min, max: range.max }],
       };
     });
 
@@ -181,64 +206,81 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
 
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.title}>Filters</Text>
-        <Pressable onPress={onClose}>
-          <Text style={styles.close}>✕</Text>
-        </Pressable>
+        <View style={styles.headerTitleWrap}>
+          <SlidersIcon />
+          <Text style={styles.title}>Filters</Text>
+        </View>
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <CloseIcon />
+        </TouchableOpacity>
       </View>
 
+      {/* SCROLLABLE CONTENT */}
       <ScrollView
         style={styles.scrollContainer}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={true}
-        persistentScrollbar={true}
+        showsVerticalScrollIndicator={false}
       >
-        <Section title="Category">
-          {options.category.map((option) => (
-            <FilterPill
-              key={option}
-              label={option}
-              selected={filters.category === option || (option === "All" && !filters.category)}
-              onPress={() => toggleSingleFilter("category", option === "All" ? null : option)}
-            />
-          ))}
-        </Section>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Category</Text>
+          <View style={styles.row}>
+            {options.category.map((option) => (
+              <FilterPill
+                key={option}
+                label={option}
+                selected={filters.category === option || (option === "All" && !filters.category)}
+                onPress={() => toggleSingleFilter("category", option === "All" ? null : option)}
+              />
+            ))}
+          </View>
+        </View>
 
-        <Section title="Duration">
-          {options.duration.map((range) => (
-            <FilterPill
-              key={`${range.min}-${range.max}`}
-              label={getRangeLabel(range, "duration")}
-              selected={isRangeSelected(filters.duration, range)}
-              onPress={() => toggleRangeFilter("duration", range)}
-            />
-          ))}
-        </Section>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Duration</Text>
+          <View style={styles.row}>
+            {options.duration.map((range) => (
+              <FilterPill
+                key={range.label}
+                label={range.label}
+                selected={isRangeSelected(filters.duration, range)}
+                onPress={() => toggleRangeFilter("duration", range)}
+              />
+            ))}
+          </View>
+        </View>
 
-        <Section title="Grade Level">
-          {options.gradeLevel.map((range) => (
-            <FilterPill
-              key={`${range.min}-${range.max}`}
-              label={getRangeLabel(range, "gradeLevel")}
-              selected={isRangeSelected(filters.gradeLevel, range)}
-              onPress={() => toggleRangeFilter("gradeLevel", range)}
-            />
-          ))}
-        </Section>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Grade Level</Text>
+          <View style={styles.row}>
+            {options.gradeLevel.map((range) => (
+              <FilterPill
+                key={range.label}
+                label={range.label}
+                selected={isRangeSelected(filters.gradeLevel, range)}
+                onPress={() => toggleRangeFilter("gradeLevel", range)}
+              />
+            ))}
+          </View>
+        </View>
 
-        <Section title="Group Size">
-          {options.groupSize.map((range) => (
-            <FilterPill
-              key={`${range.min}-${range.max}`}
-              label={getRangeLabel(range, "groupSize")}
-              selected={isRangeSelected(filters.groupSize, range)}
-              onPress={() => toggleRangeFilter("groupSize", range)}
-            />
-          ))}
-        </Section>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Group Size</Text>
+          <View style={styles.row}>
+            {options.groupSize.map((range) => (
+              <FilterPill
+                key={range.label}
+                label={range.label}
+                selected={isRangeSelected(filters.groupSize, range)}
+                onPress={() => toggleRangeFilter("groupSize", range)}
+              />
+            ))}
+          </View>
+        </View>
 
-        <Section title="Energy Level">
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Energy Level</Text>
           <View style={styles.energyRow}>
             {[1, 2, 3].map((level) => {
               const isActive = energyLevelToNumber[energyLevel ?? "None"] >= level;
@@ -247,63 +289,68 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
                   key={level}
                   onPress={() => toggleEnergyLevel(numberToEnergyLevel[level])}
                   hitSlop={8}
-                  style={styles.iconWrapper}
                 >
                   <EnergyIcon
-                    width={32}
+                    width={24}
                     height={32}
-                    fill={isActive ? "#1F4ED6" : "transparent"}
-                    stroke={isActive ? "#1F4ED6" : "#CBD0DD"}
+                    fill={isActive ? "#ECD528" : "transparent"}
+                    stroke={isActive ? "#ECD528" : "#D9D9D9"}
                   />
                 </Pressable>
               );
             })}
           </View>
-        </Section>
+        </View>
 
-        <Section title="Environment">
-          {options.environment.map((option) => (
-            <FilterPill
-              key={option}
-              label={option}
-              selected={isFilterSelected(filters.environment, option)}
-              onPress={() => toggleMultiFilter("environment", option)}
-            />
-          ))}
-        </Section>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Environment</Text>
+          <View style={styles.row}>
+            {options.environment.map((option) => (
+              <FilterPill
+                key={option}
+                label={option}
+                selected={isFilterSelected(filters.environment, option)}
+                onPress={() => toggleMultiFilter("environment", option)}
+              />
+            ))}
+          </View>
+        </View>
 
-        <Section title="Set Up">
-          {options.setupProps.map((option) => (
-            <FilterPill
-              key={option}
-              label={option}
-              selected={filters.setupProps === option}
-              onPress={() => toggleSingleFilter("setupProps", option)}
-            />
-          ))}
-        </Section>
+        <View style={[styles.section, { marginBottom: 40 }]}>
+          <Text style={styles.sectionTitle}>Set Up</Text>
+          <View style={styles.row}>
+            {options.setupProps.map((option) => (
+              <FilterPill
+                key={option}
+                label={option}
+                selected={filters.setupProps === option}
+                onPress={() => toggleSingleFilter("setupProps", option)}
+              />
+            ))}
+          </View>
+        </View>
       </ScrollView>
 
+      {/* FOOTER */}
       <View style={styles.footer}>
-        <Pressable style={styles.resetBtn} onPress={resetFilters}>
+        <TouchableOpacity style={styles.resetBtn} onPress={resetFilters}>
           <Text style={styles.resetText}>Reset All</Text>
-        </Pressable>
-        <Pressable
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.applyBtn}
           onPress={() => {
             onApply(filters);
             onClose();
           }}
         >
-          <Text style={styles.applyText}>Apply Filters</Text>
-        </Pressable>
+          <Text style={styles.applyText}>Apply</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 export const FiltersModal = ({ visible, initial, onClose, onApply }: Props) => {
-  // Changing this key forces a remount of the content, resetting local state without setState in an effect
   const initialKey = useMemo(() => JSON.stringify(initial), [initial]);
   const contentKey = visible ? `open-${initialKey}` : "closed";
 

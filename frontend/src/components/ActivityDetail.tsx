@@ -17,7 +17,12 @@ import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 import NoteIcon from "../../assets/NoteIcon";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
 import { useActivities } from "../Context/ActivityContext";
-import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
+import {
+  formatDuration,
+  formatGradeLevel,
+  formatGroupSize,
+  getSortedCategories,
+} from "../utils/textUtils";
 
 import type { Activity, CustomTab } from "../types/activity";
 
@@ -288,9 +293,16 @@ const styles = StyleSheet.create({
   overviewHeader: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     marginBottom: 16,
+    gap: 16,
+  },
+  headerTagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    flex: 1,
   },
   categoryTag: {
     backgroundColor: "#3C47BD",
@@ -299,7 +311,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   categoryTagText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
     color: "#FFFFFF",
     fontFamily: "Instrument Sans",
@@ -312,6 +324,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
+    flex: 0,
   },
   actionIconCircle: {
     display: "flex",
@@ -724,6 +737,9 @@ function getCustomTabs(activity: Activity): CustomTabData[] {
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
   const { activities } = useActivities();
   const currentActivity = activities.find((a) => a.id === activity.id) ?? activity;
+
+  const displayCategories = getSortedCategories(activity.categories || activity.category);
+
   const [activeTab, setActiveTab] = useState<string>("prep");
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [notification, setNotification] = useState<"download" | "bookmark" | null>(null);
@@ -834,33 +850,32 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
 
           <View style={styles.contentPanel}>
             <View style={styles.overviewHeader}>
-              {activity.category && (
-                <View
-                  style={[
-                    styles.categoryTag,
-                    {
-                      backgroundColor: CATEGORY_COLORS[activity.category] ?? DEFAULT_CATEGORY_COLOR,
-                    },
-                  ]}
-                >
-                  <Text style={styles.categoryTagText}>{activity.category}</Text>
-                </View>
-              )}
+              <View style={styles.headerTagsContainer}>
+                {displayCategories.map((cat) => (
+                  <View
+                    key={`detail-tag-${cat}`}
+                    style={[
+                      styles.categoryTag,
+                      {
+                        backgroundColor:
+                          CATEGORY_COLORS[cat as keyof typeof CATEGORY_COLORS] ??
+                          DEFAULT_CATEGORY_COLOR,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.categoryTagText}>{cat}</Text>
+                  </View>
+                ))}
+              </View>
+
               <View style={styles.actionIcons}>
                 <TouchableOpacity
                   style={styles.actionIconCircle}
                   onPress={() => setNotification("download")}
-                  accessibilityRole="button"
-                  accessibilityLabel="Download"
                 >
                   <DownloadIcon />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionIconCircle}
-                  onPress={onOpenNotes}
-                  accessibilityRole="button"
-                  accessibilityLabel="Open notes"
-                >
+                <TouchableOpacity style={styles.actionIconCircle} onPress={onOpenNotes}>
                   <NoteIcon />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -868,8 +883,6 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                   onPress={() => {
                     router.push(`/saved/LibraryPopupModalScreen?activityId=${activity.id}`);
                   }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Save activity"
                 >
                   <BookmarkIcon filled={currentActivity.isSaved} />
                 </TouchableOpacity>

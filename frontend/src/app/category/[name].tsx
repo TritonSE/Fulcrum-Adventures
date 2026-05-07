@@ -137,84 +137,6 @@ function matchesFilters(activity: Activity, filters: FilterState): boolean {
   return true;
 }
 
-export default function CategoryScreen() {
-  const insets = useSafeAreaInsets();
-  const { name } = useLocalSearchParams<{ name: string }>();
-  const categoryName = decodeURIComponent(name ?? "") as Category;
-  const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
-  const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
-  const categoryActivities = mockActivities.filter((a) => a.category === categoryName);
-  const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [filtersVisible, setFiltersVisible] = useState(false);
-  const { toggleSaved } = useActivities();
-  const activities = categoryActivities.filter((a) => matchesFilters(a, filters));
-  const Graphic = CATEGORY_GRAPHICS[categoryName];
-
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: color, paddingTop: insets.top + 16 }]}>
-        {Graphic && (
-          <View style={[styles.graphicContainer, categoryName === "Icebreaker" && { bottom: -25 }]}>
-            <Graphic width={100} height={100} />
-          </View>
-        )}
-        <View style={styles.headerContent}>
-          <Pressable onPress={() => router.back()} hitSlop={20} style={styles.backButton}>
-            <BackArrowIcon width={24} height={24} />
-          </Pressable>
-          <Text style={styles.headerTitle}>{categoryName}</Text>
-        </View>
-      </View>
-
-      <FlatList
-        data={activities}
-        renderItem={({ item }) => (
-          <ActivityCard
-            activity={item}
-            onPress={() => router.push(`/activity/${item.id}`)}
-            onSaveToggle={toggleSaved}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View>
-            {/* Description */}
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>
-                What's {getArticle(categoryName)} {categoryName}?
-              </Text>
-              <Text style={styles.descriptionText}>{description}</Text>
-            </View>
-
-            {/* Divider */}
-            <View style={styles.divider} />
-
-            {/* Activity Count + Filter */}
-            <View style={styles.countRow}>
-              <Text style={styles.countText}>
-                {activities.length} {activities.length === 1 ? "activity" : "activities"}
-              </Text>
-              <Pressable onPress={() => setFiltersVisible(true)} hitSlop={10}>
-                <FilterIcon />
-              </Pressable>
-            </View>
-          </View>
-        }
-      />
-
-      <FiltersModal
-        visible={filtersVisible}
-        initial={filters}
-        onClose={() => setFiltersVisible(false)}
-        onApply={setFilters}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -300,3 +222,81 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 });
+
+export default function CategoryScreen() {
+  const insets = useSafeAreaInsets();
+  const { name } = useLocalSearchParams<{ name: string }>();
+  const categoryName = decodeURIComponent(name ?? "") as Category;
+  const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
+  const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
+  const categoryActivities = mockActivities.filter((a) => a.category === categoryName);
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const { toggleSaved } = useActivities();
+  const activities = categoryActivities.filter((a) => matchesFilters(a, filters));
+  const Graphic = CATEGORY_GRAPHICS[categoryName];
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: color, paddingTop: insets.top + 16 }]}>
+        {Graphic && (
+          <View style={[styles.graphicContainer, categoryName === "Icebreaker" && { bottom: -25 }]}>
+            <Graphic width={100} height={100} />
+          </View>
+        )}
+        <View style={styles.headerContent}>
+          <Pressable onPress={() => router.back()} hitSlop={20} style={styles.backButton}>
+            <BackArrowIcon width={24} height={24} />
+          </Pressable>
+          <Text style={styles.headerTitle}>{categoryName}</Text>
+        </View>
+      </View>
+
+      <FlatList
+        data={activities}
+        renderItem={({ item }) => (
+          <ActivityCard
+            activity={item}
+            onPress={() => router.push(`/activity/${item.id}`)}
+            onSaveToggle={toggleSaved}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View>
+            {/* Description */}
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.descriptionTitle}>
+                What's {getArticle(categoryName)} {categoryName}?
+              </Text>
+              <Text style={styles.descriptionText}>{description}</Text>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Activity Count + Filter */}
+            <View style={styles.countRow}>
+              <Text style={styles.countText}>
+                {activities.length} {activities.length === 1 ? "activity" : "activities"}
+              </Text>
+              <Pressable onPress={() => setFiltersVisible(true)} hitSlop={10}>
+                <FilterIcon />
+              </Pressable>
+            </View>
+          </View>
+        }
+      />
+
+      <FiltersModal
+        visible={filtersVisible}
+        initial={filters}
+        onClose={() => setFiltersVisible(false)}
+        onApply={setFilters}
+      />
+    </View>
+  );
+}

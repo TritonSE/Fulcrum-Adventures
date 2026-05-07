@@ -8,10 +8,11 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 5, max: 20 },
     duration: { min: 5, max: 15 },
     category: "Team Challenge",
+    categories: ["Team Challenge", "Connection", "Active"],
     description:
       "A team-based coordination activity that requires students to work together to transport an object using shared control.",
     energyLevel: "Medium",
-    environment: "Outdoor",
+    environment: "Field", // Updated from Outdoor
     isSaved: false,
     hasTutorial: true,
     objective: "Move the ice cream cone to 'the kid' without dropping it.",
@@ -67,13 +68,13 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 10, max: 50 },
     duration: { min: 5, max: 10 },
     category: "Opener",
+    categories: ["Opener", "Icebreaker"],
     description:
       "A high-energy tournament style game where students compete to become the ultimate champion.",
     energyLevel: "High",
-    environment: "Outdoor",
+    environment: "Blacktop", // Updated from Outdoor
     isSaved: true,
     hasTutorial: false,
-
     materials: [],
     selTags: ["Resilience", "Social Awareness"],
     facilitate: {
@@ -105,12 +106,12 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 5, max: 15 },
     duration: { min: 15, max: 20 },
     category: "Icebreaker",
+    categories: ["Icebreaker", "Connection"],
     description: "A classic get-to-know-you game that encourages sharing and active listening.",
     energyLevel: "Low",
-    environment: "Indoor",
+    environment: "Classroom", // Updated from Indoor
     isSaved: false,
     hasTutorial: false,
-
     materials: [],
     selTags: ["Relationship Skills", "Self-Management"],
     facilitate: {
@@ -135,13 +136,13 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 20, max: 100 },
     duration: { min: 30, max: 60 },
     category: "Active",
+    categories: ["Active", "Team Challenge"],
     description:
       "Strategic outdoor game requiring speed, stealth, and teamwork to capture the opposing team's flag.",
     energyLevel: "High",
-    environment: "Outdoor",
+    environment: "Field", // Updated from Outdoor
     isSaved: false,
     hasTutorial: true,
-
     materials: ["2 Flags", "Cones for boundaries"],
     selTags: ["Teamwork", "Strategy", "Physical Activity"],
     facilitate: {
@@ -170,12 +171,12 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 10, max: 30 },
     duration: { min: 10, max: 15 },
     category: "Connection",
+    categories: ["Connection", "Debrief"],
     description: "A calming activity to build community and express gratitude towards peers.",
     energyLevel: "Low",
-    environment: "Indoor",
+    environment: "Classroom", // Updated from Indoor
     isSaved: true,
     hasTutorial: false,
-
     materials: [],
     selTags: ["Social Awareness", "Gratitude"],
     facilitate: {
@@ -200,13 +201,13 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 5, max: 50 },
     duration: { min: 20, max: 20 },
     category: "Debrief",
+    categories: ["Debrief"],
     description:
       "A structured reflection tool for groups to analyze their performance and set goals.",
     energyLevel: "Low",
-    environment: "Indoor",
+    environment: "Classroom", // Updated from Indoor
     isSaved: false,
     hasTutorial: false,
-
     materials: ["Whiteboard or Flipchart", "Markers"],
     selTags: ["Self-Reflection", "Goal Setting"],
     facilitate: {
@@ -231,13 +232,13 @@ export const mockActivities: Activity[] = [
     groupSize: { min: 8, max: 12 },
     duration: { min: 10, max: 20 },
     category: "Team Challenge",
+    categories: ["Team Challenge", "Icebreaker", "Active"],
     description:
       "A physical puzzle where a group must untangle themselves without letting go of hands.",
     energyLevel: "Medium",
-    environment: "Indoor",
+    environment: "Gym/MPR", // Updated from Indoor
     isSaved: false,
     hasTutorial: true,
-
     materials: [],
     selTags: ["Problem Solving", "Communication", "Physical Contact"],
     facilitate: {

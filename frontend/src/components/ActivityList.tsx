@@ -11,6 +11,7 @@ import { DragList } from "./DragList";
 import SwipeToDelete from "./SwipeToDelete";
 
 import type { Activity } from "../types/activity";
+import type { StyleProp, ViewStyle } from "react-native";
 
 type ActivityListProps = {
   header?: string;
@@ -21,6 +22,7 @@ type ActivityListProps = {
   horizontal?: boolean;
   height?: number;
   fill?: boolean;
+  contentContainerStyle?: StyleProp<ViewStyle>;
 
   // reorder mode
   isEditing?: boolean;
@@ -42,6 +44,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   onSaveToggle,
   horizontal = false,
   height,
+  contentContainerStyle,
   isEditing = false,
   onReorder,
   showHeader = true,
@@ -106,7 +109,10 @@ export const ActivityList: React.FC<ActivityListProps> = ({
           horizontal={horizontal}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={horizontal ? styles.horizontalList : styles.verticalList}
+          contentContainerStyle={[
+            horizontal ? styles.horizontalList : styles.verticalList,
+            contentContainerStyle,
+          ]}
           style={[
             horizontal ? { flexGrow: 0 } : { flex: 0 },
             horizontal && height ? { height } : null,
