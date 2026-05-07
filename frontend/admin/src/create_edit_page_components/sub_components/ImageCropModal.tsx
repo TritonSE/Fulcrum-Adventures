@@ -12,7 +12,9 @@ import {
   View,
 } from "react-native";
 
-import { THUMBNAIL_IMAGE_FORM_FIELD, type ThumbnailImageFile } from "../OverviewSection";
+import { THUMBNAIL_IMAGE_FORM_FIELD } from "../mediaUploadConfig";
+
+import type { ThumbnailImageFile } from "../OverviewSection";
 
 export type CropDraftImage = {
   uri: string;
@@ -20,6 +22,10 @@ export type CropDraftImage = {
   type: string;
   width: number;
   height: number;
+  sourceKind: "image" | "video";
+  sourceName: string;
+  sourceSizeBytes: number | null;
+  sourceFrameTimeMs?: number | null;
 };
 
 type ImageCropModalProps = {
@@ -148,16 +154,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     const imageTop = cropHeight / 2 - metrics.scaledHeight / 2 + offset.y;
     const originX = clamp(Math.round((0 - imageLeft) / activeScale), 0, image.width - 1);
     const originY = clamp(Math.round((0 - imageTop) / activeScale), 0, image.height - 1);
-    const cropAreaWidth = clamp(
-      Math.round(cropWidth / activeScale),
-      1,
-      image.width - originX,
-    );
-    const cropAreaHeight = clamp(
-      Math.round(cropHeight / activeScale),
-      1,
-      image.height - originY,
-    );
+    const cropAreaWidth = clamp(Math.round(cropWidth / activeScale), 1, image.width - originX);
+    const cropAreaHeight = clamp(Math.round(cropHeight / activeScale), 1, image.height - originY);
 
     try {
       const result = await ImageManipulator.manipulateAsync(
@@ -198,7 +196,9 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
       <View style={styles.backdrop}>
         <View style={styles.modalCard}>
           <Text style={styles.title}>Crop Thumbnail Image</Text>
-          <Text style={styles.description}>Drag or zoom the image to choose the thumbnail crop.</Text>
+          <Text style={styles.description}>
+            Drag or zoom the image to choose the thumbnail crop.
+          </Text>
 
           <View
             style={[

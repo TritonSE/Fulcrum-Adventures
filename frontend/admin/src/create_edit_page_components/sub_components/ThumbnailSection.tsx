@@ -1,55 +1,72 @@
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
+import {
+  formatMegabytes,
+  MAX_IMAGE_UPLOAD_BYTES,
+  MAX_VIDEO_UPLOAD_BYTES,
+  SUPPORTED_MEDIA_FORMAT_LABEL,
+} from "../mediaUploadConfig";
+
 type ThumbnailSectionProps = {
-  videoFileName: string | null;
-  imageFileName: string | null;
-  imageUri?: string | null;
-  onPickVideo?: () => void;
-  onPickImage?: () => void;
+  mediaFileName: string | null;
+  mediaKind: "image" | "video" | null;
+  previewUri?: string | null;
+  onPickMedia?: () => void;
 };
 
 type UploadCardProps = {
-  icon: string;
-  title: string;
-  fileName: string | null;
+  mediaFileName: string | null;
+  mediaKind: "image" | "video" | null;
   previewUri?: string | null;
   onPress?: () => void;
   fullWidth?: boolean;
 };
 
 const UploadCard: React.FC<UploadCardProps> = ({
-  icon,
-  title,
-  fileName,
+  mediaFileName,
+  mediaKind,
   previewUri,
   onPress,
   fullWidth = false,
 }) => {
+  const selectedLabel = mediaKind
+    ? `${mediaKind === "video" ? "Video" : "Image"} selected`
+    : "No file selected";
+
   return (
     <View style={[styles.uploadCard, fullWidth && styles.uploadCardFull]}>
       {previewUri ? (
         <Image source={{ uri: previewUri }} style={styles.previewImage} resizeMode="cover" />
       ) : (
-        <Text style={styles.icon}>{icon}</Text>
+        <Text style={styles.icon}>+</Text>
       )}
-      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={styles.cardTitle}>Upload Thumbnail Media</Text>
+      <Text style={styles.cardDescription}>
+        Upload an image, or upload a video and select a frame to crop as the thumbnail.
+      </Text>
 
       <Pressable style={styles.chooseButton} onPress={onPress}>
-        <Text style={styles.chooseButtonText}>Choose File</Text>
+        <Text style={styles.chooseButtonText}>Choose Image or Video</Text>
       </Pressable>
 
-      <Text style={styles.fileNameText}>{fileName || "No file selected"}</Text>
+      <Text style={styles.fileNameText}>
+        {mediaFileName ? `${selectedLabel}: ${mediaFileName}` : selectedLabel}
+      </Text>
+      <Text style={styles.supportText}>Supported formats: {SUPPORTED_MEDIA_FORMAT_LABEL}</Text>
+      <Text style={styles.supportText}>
+        Max size: images {formatMegabytes(MAX_IMAGE_UPLOAD_BYTES)}, videos{" "}
+        {formatMegabytes(MAX_VIDEO_UPLOAD_BYTES)}
+      </Text>
     </View>
   );
 };
 
 export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
-  videoFileName,
-  imageFileName,
-  imageUri,
-  onPickVideo,
-  onPickImage,
+  mediaFileName,
+  mediaKind,
+  previewUri,
+  onPickMedia,
 }) => {
   const { width } = useWindowDimensions();
   const isMobile = width < 900;
@@ -60,23 +77,10 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
 
       <View style={[styles.row, isMobile && styles.rowMobile]}>
         <UploadCard
-          icon="🎥"
-          title="Upload Activity Video"
-          fileName={videoFileName}
-          onPress={onPickVideo}
-          fullWidth={isMobile}
-        />
-
-        <View style={[styles.orContainer, isMobile && styles.orContainerMobile]}>
-          <Text style={styles.orText}>Or</Text>
-        </View>
-
-        <UploadCard
-          icon="🖼️"
-          title="Upload Thumbnail Image"
-          fileName={imageFileName}
-          previewUri={imageUri}
-          onPress={onPickImage}
+          mediaFileName={mediaFileName}
+          mediaKind={mediaKind}
+          previewUri={previewUri}
+          onPress={onPickMedia}
           fullWidth={isMobile}
         />
       </View>
@@ -104,22 +108,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "stretch",
   },
-  orContainer: {
-    width: 48,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  orContainerMobile: {
-    width: "100%",
-    paddingVertical: 4,
-  },
-  orText: {
-    fontSize: 18,
-    color: "#6C6C6C",
-    fontWeight: "500",
-  },
   uploadCard: {
-    flex: 1,
+    width: "100%",
     minHeight: 210,
     borderRadius: 8,
     borderWidth: 1.5,
@@ -133,7 +123,6 @@ const styles = StyleSheet.create({
   },
   uploadCardFull: {
     width: "100%",
-    flex: 0,
   },
   icon: {
     fontSize: 38,
@@ -151,6 +140,14 @@ const styles = StyleSheet.create({
     color: "#6C6C6C",
     fontWeight: "500",
     marginBottom: 18,
+    textAlign: "center",
+  },
+  cardDescription: {
+    maxWidth: 420,
+    color: "#6C6C6C",
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 16,
     textAlign: "center",
   },
   chooseButton: {
@@ -171,6 +168,12 @@ const styles = StyleSheet.create({
   fileNameText: {
     marginTop: 12,
     fontSize: 13,
+    color: "#8B8B8B",
+    textAlign: "center",
+  },
+  supportText: {
+    marginTop: 6,
+    fontSize: 12,
     color: "#8B8B8B",
     textAlign: "center",
   },

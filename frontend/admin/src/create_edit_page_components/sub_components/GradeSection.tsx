@@ -1,12 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
-import {
-  LayoutChangeEvent,
-  PanResponder,
-  PanResponderInstance,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { PanResponder, StyleSheet, Text, View } from "react-native";
+
+import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
 
 const GRADE_OPTIONS = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 

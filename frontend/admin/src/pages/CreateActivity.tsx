@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -8,6 +9,17 @@ import {
 } from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import {
+  ACTIVITY_VIDEO_FORM_FIELD,
+  formatMegabytes,
+  MAX_IMAGE_UPLOAD_BYTES,
+  MAX_VIDEO_UPLOAD_BYTES,
+  SUPPORTED_IMAGE_EXTENSIONS,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  SUPPORTED_MEDIA_FORMAT_LABEL,
+  SUPPORTED_VIDEO_EXTENSIONS,
+  SUPPORTED_VIDEO_MIME_TYPES,
+} from "../create_edit_page_components/mediaUploadConfig";
+import {
   createDefaultOverviewState,
   OverviewSection,
 } from "../create_edit_page_components/OverviewSection";
@@ -16,14 +28,99 @@ import {
   type CropDraftImage,
   ImageCropModal,
 } from "../create_edit_page_components/sub_components/ImageCropModal";
+import {
+  getVideoFrameImageName,
+  VideoFramePickerModal,
+  type VideoFrameSource,
+} from "../create_edit_page_components/sub_components/VideoFramePickerModal";
 
 import type { ActivityTab } from "../create_edit_page_components/ActivityContent";
-import type { OverviewFormState } from "../create_edit_page_components/OverviewSection";
+import type {
+  OverviewFormState,
+  ThumbnailVideoFile,
+} from "../create_edit_page_components/OverviewSection";
 
 const getImageDimensions = async (uri: string) =>
   new Promise<{ width: number; height: number }>((resolve, reject) => {
     Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
   });
+
+const getExtension = (asset: ImagePicker.ImagePickerAsset) => {
+  const sourceName = asset.fileName ?? asset.uri;
+  const cleanSourceName = sourceName.split("?")[0]?.split("#")[0] ?? "";
+  const extension = cleanSourceName.split(".").pop();
+
+  return extension?.toLowerCase() ?? "";
+};
+
+const getAssetKind = (asset: ImagePicker.ImagePickerAsset): "image" | "video" | null => {
+  const mimeType = asset.mimeType?.toLowerCase();
+  const extension = getExtension(asset);
+
+  if (
+    asset.type === "image" ||
+    mimeType?.startsWith("image/") ||
+    SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
+  ) {
+    return "image";
+  }
+
+  if (
+    asset.type === "video" ||
+    mimeType?.startsWith("video/") ||
+    SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
+  ) {
+    return "video";
+  }
+
+  return null;
+};
+
+const isSupportedAsset = (asset: ImagePicker.ImagePickerAsset, kind: "image" | "video") => {
+  const mimeType = asset.mimeType?.toLowerCase();
+  const extension = getExtension(asset);
+
+  if (kind === "image") {
+    return (
+      (mimeType ? SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType) : false) ||
+      SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
+    );
+  }
+
+  return (
+    (mimeType ? SUPPORTED_VIDEO_MIME_TYPES.includes(mimeType) : false) ||
+    SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
+  );
+};
+
+const getFallbackMimeType = (asset: ImagePicker.ImagePickerAsset, kind: "image" | "video") => {
+  const extension = getExtension(asset);
+
+  if (kind === "video") {
+    if (extension === "mov") return "video/quicktime";
+    if (extension === "m4v") return "video/x-m4v";
+    return "video/mp4";
+  }
+
+  if (extension === "png") return "image/png";
+  if (extension === "heic") return "image/heic";
+  if (extension === "heif") return "image/heif";
+  if (extension === "webp") return "image/webp";
+  return "image/jpeg";
+};
+
+const getAssetSizeBytes = async (asset: ImagePicker.ImagePickerAsset) => {
+  if (typeof asset.fileSize === "number") return asset.fileSize;
+
+  try {
+    const file = new File(asset.uri);
+    const info = file.info();
+
+    return info.exists && typeof info.size === "number" ? info.size : null;
+  } catch {
+    return null;
+  }
+};
 
 type ActivityStatus = "idle" | "Draft" | "Published" | "Archived";
 
@@ -107,6 +204,7 @@ export const CreateActivity: React.FC = () => {
   );
   const [selTags, setSelTags] = useState<string[]>([]);
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
+  const [pendingVideo, setPendingVideo] = useState<VideoFrameSource | null>(null);
   const [status, setStatus] = useState<ActivityStatus>("idle");
   const [errors, setErrors] = useState<FormErrors>({
     objective: null,
@@ -157,7 +255,7 @@ export const CreateActivity: React.FC = () => {
     const playTab = activityTabs.find((tab) => tab.kind === "play");
     if (playTab) {
       newErrors.playGuidedItems = playTab.guidedItems.map((item) =>
-        !item.trim() ? "Please enter how to play instructions" : null
+        !item.trim() ? "Please enter how to play instructions" : null,
       );
     }
 
@@ -165,7 +263,7 @@ export const CreateActivity: React.FC = () => {
     const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
     if (debriefTab) {
       newErrors.debriefGuidedItems = debriefTab.guidedItems.map((item) =>
-        !item.trim() ? "Please enter a reflection question" : null
+        !item.trim() ? "Please enter a reflection question" : null,
       );
     }
 
@@ -188,19 +286,19 @@ export const CreateActivity: React.FC = () => {
     return !hasErrors;
   };
 
-  const handlePickImage = async () => {
+  const handlePickMedia = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
       Alert.alert(
-        "Photo access required",
-        "Allow photo library access to choose a thumbnail image.",
+        "Media access required",
+        "Allow media library access to choose a thumbnail image or activity video.",
       );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ["images", "videos"],
       allowsEditing: false,
       quality: 1,
     });
@@ -208,6 +306,63 @@ export const CreateActivity: React.FC = () => {
     if (result.canceled || !result.assets[0]) return;
 
     const asset = result.assets[0];
+    const assetKind = getAssetKind(asset);
+
+    if (!assetKind || !isSupportedAsset(asset, assetKind)) {
+      Alert.alert(
+        "Unsupported file format",
+        `Please choose one of these formats: ${SUPPORTED_MEDIA_FORMAT_LABEL}.`,
+      );
+      return;
+    }
+
+    const sizeBytes = await getAssetSizeBytes(asset);
+
+    if (sizeBytes === null) {
+      Alert.alert(
+        "Unable to verify file size",
+        "Please choose a different file so the app can enforce the upload size limit.",
+      );
+      return;
+    }
+
+    const maxSizeBytes = assetKind === "image" ? MAX_IMAGE_UPLOAD_BYTES : MAX_VIDEO_UPLOAD_BYTES;
+
+    if (sizeBytes > maxSizeBytes) {
+      Alert.alert(
+        "File is too large",
+        `${assetKind === "image" ? "Images" : "Videos"} must be ${formatMegabytes(
+          maxSizeBytes,
+        )} or smaller.`,
+      );
+      return;
+    }
+
+    const fileName =
+      asset.fileName ?? `thumbnail-${assetKind}.${assetKind === "image" ? "jpg" : "mp4"}`;
+    const mimeType = asset.mimeType ?? getFallbackMimeType(asset, assetKind);
+
+    if (assetKind === "video") {
+      if (!asset.duration) {
+        Alert.alert(
+          "Unable to read video duration",
+          "Please choose a different video so the app can select a thumbnail frame.",
+        );
+        return;
+      }
+
+      setPendingVideo({
+        uri: asset.uri,
+        name: fileName,
+        type: mimeType,
+        sizeBytes,
+        width: asset.width ?? 0,
+        height: asset.height ?? 0,
+        durationMs: asset.duration,
+      });
+      return;
+    }
+
     const dimensions =
       asset.width && asset.height
         ? { width: asset.width, height: asset.height }
@@ -215,10 +370,13 @@ export const CreateActivity: React.FC = () => {
 
     setCropDraftImage({
       uri: asset.uri,
-      name: asset.fileName ?? "thumbnail-image.jpg",
-      type: asset.mimeType ?? "image/jpeg",
+      name: fileName,
+      type: mimeType,
       width: dimensions.width,
       height: dimensions.height,
+      sourceKind: "image",
+      sourceName: fileName,
+      sourceSizeBytes: sizeBytes,
     });
   };
 
@@ -281,29 +439,58 @@ export const CreateActivity: React.FC = () => {
         <OverviewSection
           value={overviewValue}
           onChange={handleOverviewChange}
-          onPickVideo={() => {
-            setOverviewValue((prev) => ({
-              ...prev,
-              thumbnailVideoName: "selected-video.mp4",
-              thumbnailImage: null,
-            }));
-          }}
-          onPickImage={() => {
-            void handlePickImage();
+          onPickMedia={() => {
+            void handlePickMedia();
           }}
         />
       </CollapsibleSection>
 
+      <VideoFramePickerModal
+        visible={!!pendingVideo && !cropDraftImage}
+        video={pendingVideo}
+        onCancel={() => setPendingVideo(null)}
+        onSelectFrame={(frame) => {
+          if (!pendingVideo) return;
+
+          setCropDraftImage({
+            uri: frame.uri,
+            name: getVideoFrameImageName(pendingVideo.name, frame.timeMs),
+            type: "image/jpeg",
+            width: frame.width,
+            height: frame.height,
+            sourceKind: "video",
+            sourceName: pendingVideo.name,
+            sourceSizeBytes: pendingVideo.sizeBytes,
+            sourceFrameTimeMs: frame.timeMs,
+          });
+        }}
+      />
+
       <ImageCropModal
         visible={!!cropDraftImage}
         image={cropDraftImage}
-        onCancel={() => setCropDraftImage(null)}
-        onSave={(croppedImage) => {
+        onCancel={() => {
           setCropDraftImage(null);
+          setPendingVideo(null);
+        }}
+        onSave={(croppedImage) => {
+          const nextVideo: ThumbnailVideoFile | null = pendingVideo
+            ? {
+                ...pendingVideo,
+                fieldName: ACTIVITY_VIDEO_FORM_FIELD,
+                selectedFrameTimeMs: cropDraftImage?.sourceFrameTimeMs ?? 0,
+              }
+            : null;
+
+          setCropDraftImage(null);
+          setPendingVideo(null);
           setOverviewValue((prev) => ({
             ...prev,
             thumbnailImage: croppedImage,
-            thumbnailVideoName: null,
+            thumbnailVideo: nextVideo,
+            thumbnailMediaKind: nextVideo ? "video" : "image",
+            thumbnailSourceName: cropDraftImage?.sourceName ?? croppedImage.name,
+            thumbnailSourceSizeBytes: cropDraftImage?.sourceSizeBytes ?? null,
           }));
         }}
       />
@@ -325,11 +512,7 @@ export const CreateActivity: React.FC = () => {
       </CollapsibleSection>
 
       <CollapsibleSection title="SEL Opportunity" defaultOpen>
-        <SEL_Opportunity 
-          tags={selTags} 
-          onTagsChange={setSelTags}
-          error={errors.selTags}
-        />
+        <SEL_Opportunity tags={selTags} onTagsChange={setSelTags} error={errors.selTags} />
       </CollapsibleSection>
 
       <Text style={styles.debugText}>Objective: {objective}</Text>
@@ -337,7 +520,13 @@ export const CreateActivity: React.FC = () => {
       <Text style={styles.debugText}>Activity tabs: {JSON.stringify(activityTabs)}</Text>
       <Text style={styles.debugText}>Parent SEL tags: {JSON.stringify(selTags)}</Text>
       <Text style={styles.debugText}>
-        Thumbnail image URL: {overviewValue.thumbnailImage?.uri ?? "No image selected"}
+        Thumbnail source:{" "}
+        {overviewValue.thumbnailMediaKind
+          ? `${overviewValue.thumbnailMediaKind} - ${overviewValue.thumbnailSourceName}`
+          : "No media selected"}
+      </Text>
+      <Text style={styles.debugText}>
+        Thumbnail local preview URI: {overviewValue.thumbnailImage?.uri ?? "No image selected"}
       </Text>
       <Text style={styles.debugText}>
         Thumbnail image upload part:{" "}
@@ -351,6 +540,20 @@ export const CreateActivity: React.FC = () => {
               },
             })
           : "No image selected"}
+      </Text>
+      <Text style={styles.debugText}>
+        Activity video upload part:{" "}
+        {overviewValue.thumbnailVideo
+          ? JSON.stringify({
+              fieldName: overviewValue.thumbnailVideo.fieldName,
+              file: {
+                uri: overviewValue.thumbnailVideo.uri,
+                name: overviewValue.thumbnailVideo.name,
+                type: overviewValue.thumbnailVideo.type,
+              },
+              selectedFrameTimeMs: overviewValue.thumbnailVideo.selectedFrameTimeMs,
+            })
+          : "No video selected"}
       </Text>
       <Text style={styles.debugText}>Overview state: {JSON.stringify(overviewValue)}</Text>
     </ScrollView>

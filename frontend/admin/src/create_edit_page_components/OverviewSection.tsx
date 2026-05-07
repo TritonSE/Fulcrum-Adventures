@@ -12,11 +12,11 @@ import { GroupSizeSection } from "./sub_components/GroupSizeSection";
 import { SetupSection } from "./sub_components/SetupSection";
 import { ThumbnailSection } from "./sub_components/ThumbnailSection";
 
+import type { ACTIVITY_VIDEO_FORM_FIELD, THUMBNAIL_IMAGE_FORM_FIELD } from "./mediaUploadConfig";
+
 export type DurationOption = "5-15 min" | "15-30 min" | "30+ min" | null;
 export type EnergyLevelOption = "Low" | "Medium" | "High" | null;
 export type SetupOption = "Props" | "No Props" | null;
-
-export const THUMBNAIL_IMAGE_FORM_FIELD = "thumbnailImage";
 
 export type ThumbnailImageFile = {
   fieldName: typeof THUMBNAIL_IMAGE_FORM_FIELD;
@@ -27,8 +27,23 @@ export type ThumbnailImageFile = {
   height: number;
 };
 
+export type ThumbnailVideoFile = {
+  fieldName: typeof ACTIVITY_VIDEO_FORM_FIELD;
+  uri: string;
+  name: string;
+  type: string;
+  sizeBytes: number;
+  width: number;
+  height: number;
+  durationMs: number;
+  selectedFrameTimeMs: number;
+};
+
 export type OverviewFormState = {
-  thumbnailVideoName: string | null;
+  thumbnailMediaKind: "image" | "video" | null;
+  thumbnailSourceName: string | null;
+  thumbnailSourceSizeBytes: number | null;
+  thumbnailVideo: ThumbnailVideoFile | null;
   thumbnailImage: ThumbnailImageFile | null;
   title: string;
   overview: string;
@@ -46,7 +61,10 @@ export type OverviewFormState = {
 };
 
 export const createDefaultOverviewState = (): OverviewFormState => ({
-  thumbnailVideoName: null,
+  thumbnailMediaKind: null,
+  thumbnailSourceName: null,
+  thumbnailSourceSizeBytes: null,
+  thumbnailVideo: null,
   thumbnailImage: null,
   title: "",
   overview: "",
@@ -66,15 +84,13 @@ export const createDefaultOverviewState = (): OverviewFormState => ({
 type OverviewSectionProps = {
   value: OverviewFormState;
   onChange: (patch: Partial<OverviewFormState>) => void;
-  onPickVideo?: () => void;
-  onPickImage?: () => void;
+  onPickMedia?: () => void;
 };
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   value,
   onChange,
-  onPickVideo,
-  onPickImage,
+  onPickMedia,
 }) => {
   const { width } = useWindowDimensions();
   const isWide = width >= 1000;
@@ -82,11 +98,10 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   return (
     <View style={styles.container}>
       <ThumbnailSection
-        videoFileName={value.thumbnailVideoName}
-        imageFileName={value.thumbnailImage?.name ?? null}
-        imageUri={value.thumbnailImage?.uri ?? null}
-        onPickVideo={onPickVideo}
-        onPickImage={onPickImage}
+        mediaFileName={value.thumbnailSourceName}
+        mediaKind={value.thumbnailMediaKind}
+        previewUri={value.thumbnailImage?.uri ?? null}
+        onPickMedia={onPickMedia}
       />
 
       <ActivityTitleField value={value.title} onChangeText={(next) => onChange({ title: next })} />
