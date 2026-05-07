@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-
+import AddIcon from "../../../assets/AddIcon.svg";
 import { FieldError } from "./sub_components/FieldError";
 
 const MAX_TAG_LENGTH = 30;
@@ -81,7 +81,7 @@ export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsCha
         />
 
         <TouchableOpacity style={styles.addButton} onPress={handleAddTag} activeOpacity={0.8}>
-          <Text style={styles.addButtonText}>+</Text>
+          <AddIcon width={16} height={16} />
         </TouchableOpacity>
       </View>
 

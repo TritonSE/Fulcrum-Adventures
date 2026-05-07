@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+import AddIcon from "../../../assets/AddIcon.svg";
 import { FieldError } from "./sub_components/FieldError";
 
 type ActivitySection = {
@@ -277,7 +278,10 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
           onPress={handleCreateTab}
           activeOpacity={0.8}
         >
-          <Text style={styles.createTabButtonText}>+ Create New Tab</Text>
+          <View style={styles.createTabButtonContent}>
+            <AddIcon  />
+            <Text style={styles.createTabButtonText}>   Create New Tab</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -368,9 +372,12 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                   onPress={handleAddGuidedItem}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.guidedActionButtonText}>
-                    {isPlayTab ? "+ Add Step" : "+ Add Question"}
-                  </Text>
+                  <View style={styles.guidedActionButtonContent}>
+                    <AddIcon width={16} height={16} />
+                    <Text style={styles.guidedActionButtonText}>
+                      {isPlayTab ? "Add Step" : "Add Question"}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -415,7 +422,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                   activeOpacity={0.8}
                   disabled={activeTab.noMaterialsNeeded}
                 >
-                  <Text style={styles.addMaterialButtonText}>+</Text>
+                  <AddIcon width={16} height={16} />
                 </TouchableOpacity>
               </View>
 
@@ -441,7 +448,10 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
             activeOpacity={0.8}
             disabled={isAddSectionDisabled}
           >
-            <Text style={styles.addSectionButtonText}>+ Add Section</Text>
+            <View style={styles.addSectionButtonContent}>
+              <AddIcon width={16} height={16} />
+              <Text style={styles.addSectionButtonText}>Add Section</Text>
+            </View>
           </TouchableOpacity>
 
           {additionalSections.map((section) => (
@@ -508,12 +518,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#153A7A",
     marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   sectionLabel: {
     fontSize: 18,
     fontWeight: "700",
     color: "#153A7A",
     marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   input: {
     width: "100%",
@@ -542,16 +554,22 @@ const styles = StyleSheet.create({
   },
   createTabButton: {
     borderWidth: 1,
-    borderColor: "#1F4AA5",
+    borderColor: "#153A7A",
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     backgroundColor: "#FFF",
+  },
+  createTabButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   createTabButtonText: {
     color: "#153A7A",
     fontSize: 14,
     fontWeight: "500",
+    fontFamily: "Instrument Sans",
+    lineHeight: 24,
   },
   tabContainer: {
     width: "100%",
@@ -564,7 +582,7 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     backgroundColor: "#F3F3F3",
-    paddingVertical: 14,
+    paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",
     borderRightWidth: 1,
@@ -577,10 +595,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B7280",
     fontWeight: "500",
+    fontFamily: "Instrument Sans",
   },
   activeTabText: {
     color: "#153A7A",
     fontWeight: "500",
+    fontFamily: "Instrument Sans",
   },
   detailsContainer: {
     width: "100%",
@@ -602,8 +622,8 @@ const styles = StyleSheet.create({
   },
   deleteSectionText: {
     fontSize: 16,
-    fontWeight: "600",
     color: "#153A7A",
+    fontFamily: "Instrument Sans Medium",
   },
   sectionTitleInput: {
     width: "100%",
@@ -614,6 +634,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#3B3B3B",
+    fontFamily: "Instrument Sans Bold",
   },
   sectionCharacterCount: {
     marginTop: 10,
@@ -651,6 +672,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#153A7A",
     marginBottom: 10,
+    fontFamily: "Instrument Sans Bold",
   },
   guidedItemInputRow: {
     width: "100%",
@@ -683,15 +705,21 @@ const styles = StyleSheet.create({
   },
   guidedActionButton: {
     borderWidth: 1,
-    borderColor: "#1F4AA5",
+    borderColor: "#153A7A",
     borderRadius: 12,
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     backgroundColor: "#FFF",
+  },
+  guidedActionButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   guidedActionButtonText: {
     fontSize: 14,
     fontWeight: "500",
+    fontFamily: "Instrument Sans",
     color: "#153A7A",
   },
   materialInputRow: {
@@ -791,12 +819,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     marginTop: 8,
   },
+  addSectionButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   addSectionButtonDisabled: {
     opacity: 0.45,
   },
   addSectionButtonText: {
     color: "#153A7A",
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
+    fontFamily: "Instrument Sans",
+    lineHeight: 24,
   },
 });

@@ -33,9 +33,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerText: {
-    fontSize: 24,
+    fontFamily: "League Spartan",
+    fontSize: 30,
     fontWeight: "700",
     color: "#1F3B82",
+    lineHeight: 31.2,
+    flexShrink: 1,
   },
   arrow: {
     fontSize: 16,
@@ -75,7 +78,9 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   return (
     <View style={styles.card}>
       <TouchableOpacity activeOpacity={0.7} onPress={toggleOpen} style={styles.header}>
-        <Text style={styles.headerText}>{title}</Text>
+        <Text style={styles.headerText} numberOfLines={1} ellipsizeMode="tail">
+          {title}
+        </Text>
         <Text style={[styles.arrow, { transform: [{ rotate: isOpen ? "180deg" : "0deg" }] }]}>
           ▼
         </Text>
