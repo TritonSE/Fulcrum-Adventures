@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
+import { RECOMMENDED_TITLES } from "../constants/homeSections";
 import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
@@ -26,6 +27,12 @@ const styles = StyleSheet.create({
 
 export function HomeRecommendedSection() {
   const { activities } = useActivities();
+
+  // Filter based on admin-selected list and show only 4 for the preview
+  const recommendedActivities = activities
+    .filter((a) => RECOMMENDED_TITLES.includes(a.title))
+    .slice(0, 4);
+
   return (
     <View>
       <View style={styles.headerContainer}>
@@ -33,7 +40,7 @@ export function HomeRecommendedSection() {
         <SeeAll screen="/recommended" />
       </View>
       <ActivityList
-        activities={activities}
+        activities={recommendedActivities}
         variant="condensed"
         horizontal={true}
         showHeader={false}

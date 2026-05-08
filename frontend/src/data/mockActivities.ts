@@ -12,53 +12,13 @@ export const mockActivities: Activity[] = [
     description:
       "A team-based coordination activity that requires students to work together to transport an object using shared control.",
     energyLevel: "Medium",
-    environment: "Field", // Updated from Outdoor
+    environment: "Field",
     isSaved: false,
     hasTutorial: true,
-    objective: "Move the ice cream cone to 'the kid' without dropping it.",
-    materials: ["Bull Ring Set", "Cone or small ball"],
-    selTags: ["Collaboration", "Communication", "Patience"],
+    materials: ["Bull Ring Set", "Cone"],
+    selTags: ["Collaboration", "Communication"],
     facilitate: {
-      prep: {
-        setup: [
-          "Set up Bull Ring so that all the strings are laid out.",
-          "Place the cone in the center of the ring.",
-        ],
-        materials: ["Bull Ring Set", "Cone"],
-      },
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Students grab a string and pull tight to lift the ring.",
-          },
-          {
-            stepNumber: 2,
-            content: "Work together to transport the cone to the finish line.",
-          },
-        ],
-      },
-      debrief: {
-        questions: [
-          "What was the hardest part about working together?",
-          "How did you communicate without talking over each other?",
-        ],
-      },
-      safety: {
-        sections: [
-          {
-            content: "Be mindful of the playing field and how creative handshakes may get.",
-          },
-        ],
-      },
-      variations: {
-        sections: [
-          {
-            content:
-              'Rather than taking a knee, the students who have guess incorrectly may become the "biggest fan" of another student who is still "in". They do this by standing behind them and cheering them on. If the student they\'re cheering guesses incorrectly, the two of them may go be the biggest fan of someone else.',
-          },
-        ],
-      },
+      play: { steps: [{ stepNumber: 1, content: "Move the cone without dropping it." }] },
     },
   },
   {
@@ -72,32 +32,12 @@ export const mockActivities: Activity[] = [
     description:
       "A high-energy tournament style game where students compete to become the ultimate champion.",
     energyLevel: "High",
-    environment: "Blacktop", // Updated from Outdoor
+    environment: "Blacktop",
     isSaved: true,
     hasTutorial: false,
     materials: [],
-    selTags: ["Resilience", "Social Awareness"],
-    facilitate: {
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Pair up students to play Rock, Paper, Scissors.",
-          },
-          {
-            stepNumber: 2,
-            content: "The loser becomes the winner's biggest fan/cheerleader.",
-          },
-          {
-            stepNumber: 3,
-            content: "Winners find other winners to play until only two remain.",
-          },
-        ],
-      },
-      debrief: {
-        questions: ["How did it feel to cheer for someone else?"],
-      },
-    },
+    selTags: ["Resilience"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Play RPS tournament style." }] } },
   },
   {
     id: "3",
@@ -109,25 +49,12 @@ export const mockActivities: Activity[] = [
     categories: ["Icebreaker", "Connection"],
     description: "A classic get-to-know-you game that encourages sharing and active listening.",
     energyLevel: "Low",
-    environment: "Classroom", // Updated from Indoor
+    environment: "Classroom",
     isSaved: false,
     hasTutorial: false,
     materials: [],
-    selTags: ["Relationship Skills", "Self-Management"],
-    facilitate: {
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Students think of two true facts and one lie.",
-          },
-          {
-            stepNumber: 2,
-            content: "Group tries to guess which statement is the lie.",
-          },
-        ],
-      },
-    },
+    selTags: ["Relationship Skills"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Guess the lie." }] } },
   },
   {
     id: "4",
@@ -140,29 +67,12 @@ export const mockActivities: Activity[] = [
     description:
       "Strategic outdoor game requiring speed, stealth, and teamwork to capture the opposing team's flag.",
     energyLevel: "High",
-    environment: "Field", // Updated from Outdoor
+    environment: "Field",
     isSaved: false,
     hasTutorial: true,
-    materials: ["2 Flags", "Cones for boundaries"],
-    selTags: ["Teamwork", "Strategy", "Physical Activity"],
-    facilitate: {
-      prep: {
-        setup: ["Mark large boundaries.", "Designate jail areas."],
-        materials: ["Flags"],
-      },
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Teams try to steal the flag without getting tagged.",
-          },
-          {
-            stepNumber: 2,
-            content: "Tagged players go to jail until rescued.",
-          },
-        ],
-      },
-    },
+    materials: ["Flags"],
+    selTags: ["Teamwork"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Capture the flag." }] } },
   },
   {
     id: "5",
@@ -174,90 +84,201 @@ export const mockActivities: Activity[] = [
     categories: ["Connection", "Debrief"],
     description: "A calming activity to build community and express gratitude towards peers.",
     energyLevel: "Low",
-    environment: "Classroom", // Updated from Indoor
+    environment: "Classroom",
     isSaved: true,
     hasTutorial: false,
     materials: [],
-    selTags: ["Social Awareness", "Gratitude"],
-    facilitate: {
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Sit in a circle.",
-          },
-          {
-            stepNumber: 2,
-            content: "Pass a talking piece and share an appreciation for someone.",
-          },
-        ],
-      },
-    },
+    selTags: ["Gratitude"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Share appreciations." }] } },
   },
+  // --- NEW POPULAR ACTIVITIES ---
   {
-    id: "6",
-    title: "Stop, Start, Continue",
-    gradeLevel: { min: 6, max: 12 },
+    id: "8",
+    title: "Heads or Tails",
+    gradeLevel: { min: 0, max: 12 },
     groupSize: { min: 5, max: 50 },
-    duration: { min: 20, max: 20 },
-    category: "Debrief",
-    categories: ["Debrief"],
-    description:
-      "A structured reflection tool for groups to analyze their performance and set goals.",
-    energyLevel: "Low",
-    environment: "Classroom", // Updated from Indoor
+    duration: { min: 5, max: 10 },
+    category: "Opener",
+    categories: ["Opener", "Active"],
+    description: "A fast-paced elimination game based on the flip of a coin.",
+    energyLevel: "Medium",
+    environment: "Blacktop",
     isSaved: false,
     hasTutorial: false,
-    materials: ["Whiteboard or Flipchart", "Markers"],
-    selTags: ["Self-Reflection", "Goal Setting"],
+    materials: ["Coin"],
+    selTags: ["Decision Making"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Pick heads or tails." }] } },
+  },
+  {
+    id: "9",
+    title: "Rock, Paper, Scissors, Snake",
+    gradeLevel: { min: 0, max: 12 },
+    groupSize: { min: 10, max: 100 },
+    duration: { min: 5, max: 10 },
+    category: "Opener",
+    categories: ["Opener", "Active"],
+    description:
+      "A variation of RPS where losing players form a growing 'snake' behind the winner.",
+    energyLevel: "High",
+    environment: "Gym/MPR",
+    isSaved: false,
+    hasTutorial: false,
+    materials: [],
+    selTags: ["Community Building"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Win and lead the snake." }] } },
+  },
+  {
+    id: "10",
+    title: "Secret Handshake",
+    gradeLevel: { min: 4, max: 12 },
+    groupSize: { min: 2, max: 30 },
+    duration: { min: 10, max: 15 },
+    category: "Connection",
+    categories: ["Connection", "Icebreaker"],
+    description: "Pairs work together to create and memorize an elaborate unique handshake.",
+    energyLevel: "Low",
+    environment: "Classroom",
+    isSaved: false,
+    hasTutorial: false,
+    materials: [],
+    selTags: ["Creativity", "Collaboration"],
+    facilitate: { play: { steps: [{ stepNumber: 1, content: "Create a 5-part handshake." }] } },
+  },
+  {
+    id: "11",
+    title: "Everybody It Tag",
+    gradeLevel: { min: 2, max: 8 },
+    groupSize: { min: 10, max: 40 },
+    duration: { min: 5, max: 10 },
+    category: "Active",
+    categories: ["Active"],
+    description:
+      "A chaotic tag game where everyone is 'It' and trying to tag others simultaneously.",
+    energyLevel: "High",
+    environment: "Field",
+    isSaved: false,
+    hasTutorial: false,
+    materials: [],
+    selTags: ["Physical Activity"],
     facilitate: {
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Create three columns: Stop, Start, Continue.",
-          },
-          {
-            stepNumber: 2,
-            content: "Brainstorm items for each category based on recent activities.",
-          },
-        ],
-      },
+      play: { steps: [{ stepNumber: 1, content: "Tag others while avoiding being tagged." }] },
     },
   },
   {
-    id: "7",
-    title: "Human Knot",
-    gradeLevel: { min: 3, max: 12 },
-    groupSize: { min: 8, max: 12 },
-    duration: { min: 10, max: 20 },
+    id: "12",
+    title: "Pipeline - Meatball Madness",
+    gradeLevel: { min: 4, max: 12 },
+    groupSize: { min: 8, max: 20 },
+    duration: { min: 15, max: 25 },
     category: "Team Challenge",
-    categories: ["Team Challenge", "Icebreaker", "Active"],
+    categories: ["Team Challenge", "Active"],
     description:
-      "A physical puzzle where a group must untangle themselves without letting go of hands.",
+      "Teams use half-pipes to roll a ball across a distance without it stopping or falling.",
     energyLevel: "Medium",
-    environment: "Gym/MPR", // Updated from Indoor
+    environment: "Blacktop",
     isSaved: false,
     hasTutorial: true,
-    materials: [],
-    selTags: ["Problem Solving", "Communication", "Physical Contact"],
+    materials: ["Pipes", "Ping pong ball"],
+    selTags: ["Coordination"],
     facilitate: {
-      play: {
-        steps: [
-          {
-            stepNumber: 1,
-            content: "Stand in a tight circle.",
-          },
-          {
-            stepNumber: 2,
-            content: "Grab hands with two different people across the circle.",
-          },
-          {
-            stepNumber: 3,
-            content: "Untangle the knot without breaking the grip.",
-          },
-        ],
-      },
+      play: { steps: [{ stepNumber: 1, content: "Keep the ball moving through the pipes." }] },
+    },
+  },
+  {
+    id: "13",
+    title: "Buzz Ring Pass",
+    gradeLevel: { min: 6, max: 12 },
+    groupSize: { min: 10, max: 30 },
+    duration: { min: 10, max: 15 },
+    category: "Team Challenge",
+    categories: ["Team Challenge", "Connection"],
+    description: "Pass a hoop around a circle of joined hands without breaking the chain.",
+    energyLevel: "Medium",
+    environment: "Gym/MPR",
+    isSaved: false,
+    hasTutorial: false,
+    materials: ["Hula Hoop"],
+    selTags: ["Problem Solving"],
+    facilitate: {
+      play: { steps: [{ stepNumber: 1, content: "Pass the hoop without letting go." }] },
+    },
+  },
+  // --- NEW RECOMMENDED ACTIVITIES ---
+  {
+    id: "14",
+    title: "Ubuntu Unique Commonality",
+    gradeLevel: { min: 6, max: 12 },
+    groupSize: { min: 5, max: 15 },
+    duration: { min: 15, max: 25 },
+    category: "Connection",
+    categories: ["Connection", "Icebreaker"],
+    description:
+      "A deep-dive sharing activity to find rare things everyone in the group has in common.",
+    energyLevel: "Low",
+    environment: "Classroom",
+    isSaved: false,
+    hasTutorial: false,
+    materials: [],
+    selTags: ["Empathy", "Social Awareness"],
+    facilitate: {
+      play: { steps: [{ stepNumber: 1, content: "Find 3 unique things you all share." }] },
+    },
+  },
+  {
+    id: "15",
+    title: "Group Juggle",
+    gradeLevel: { min: 4, max: 12 },
+    groupSize: { min: 8, max: 20 },
+    duration: { min: 10, max: 20 },
+    category: "Icebreaker",
+    categories: ["Icebreaker", "Active"],
+    description: "A pattern-based throwing game that builds focus and name recognition.",
+    energyLevel: "Medium",
+    environment: "Classroom",
+    isSaved: false,
+    hasTutorial: false,
+    materials: ["3-5 soft balls"],
+    selTags: ["Focus"],
+    facilitate: {
+      play: { steps: [{ stepNumber: 1, content: "Establish the throwing pattern." }] },
+    },
+  },
+  {
+    id: "16",
+    title: "Ricochet Count-Up",
+    gradeLevel: { min: 5, max: 12 },
+    groupSize: { min: 10, max: 30 },
+    duration: { min: 5, max: 15 },
+    category: "Opener",
+    categories: ["Opener", "Active"],
+    description: "A rapid-fire counting game that requires group rhythm and reaction time.",
+    energyLevel: "Medium",
+    environment: "Classroom",
+    isSaved: false,
+    hasTutorial: false,
+    materials: [],
+    selTags: ["Rhythm"],
+    facilitate: {
+      play: { steps: [{ stepNumber: 1, content: "Count to 20 without overlapping." }] },
+    },
+  },
+  {
+    id: "17",
+    title: "Parachute-Fleas!",
+    gradeLevel: { min: 0, max: 5 },
+    groupSize: { min: 15, max: 40 },
+    duration: { min: 10, max: 15 },
+    category: "Active",
+    categories: ["Active"],
+    description: "Use a parachute to launch 'fleas' (balls) as high as possible into the air.",
+    energyLevel: "High",
+    environment: "Field",
+    isSaved: false,
+    hasTutorial: false,
+    materials: ["Parachute", "Small balls"],
+    selTags: ["Teamwork"],
+    facilitate: {
+      play: { steps: [{ stepNumber: 1, content: "Shake the parachute to bounce the balls." }] },
     },
   },
 ];

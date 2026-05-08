@@ -6,9 +6,22 @@ import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeade
 
 export default function RecommendedScreen() {
   return (
-    <View style={{ flex: 1 }}>
-      <HomePopUpPageHeaderSection sectionName="Recommended" rightPadding={91} />
-      <ActivityList header="" activities={mockActivities} variant="card" horizontal={false} />
+    <View style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
+      <HomePopUpPageHeaderSection sectionName="Recommended" />
+
+      <View style={{ flex: 1 }}>
+        <ActivityList
+          activities={mockActivities}
+          variant="card"
+          horizontal={false}
+          showHeader={false}
+          contentContainerStyle={{
+            paddingTop: 12,
+            paddingHorizontal: 16,
+            paddingBottom: 40,
+          }}
+        />
+      </View>
     </View>
   );
 }
