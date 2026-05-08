@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import AddIcon from "../../../assets/AddIcon.svg";
+import ButtonIcon from "../../../assets/Button.svg";
 import { FieldError } from "./sub_components/FieldError";
 
 const MAX_TAG_LENGTH = 30;
@@ -62,7 +63,7 @@ export const SEL_Opportunity: React.FC<SELOpportunityProps> = ({ tags, onTagsCha
               </View>
 
               <Pressable onPress={() => handleRemoveTag(tag)} style={styles.removeTagButton}>
-                <Text style={styles.removeTagIcon}>-</Text>
+                <ButtonIcon width={16} height={16} />
               </Pressable>
             </View>
           ))}

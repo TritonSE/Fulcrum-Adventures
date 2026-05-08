@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import AddIcon from "../../../assets/AddIcon.svg";
+import MinusIcon from "../../../assets/Button.svg";
+import DeleteIcon from "../../../assets/DeleteSectionButton.svg";
 import { FieldError } from "./sub_components/FieldError";
 
 type ActivitySection = {
@@ -398,7 +400,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                         onPress={() => handleRemoveMaterial(material)}
                         style={styles.removeMaterialButton}
                       >
-                        <Text style={styles.removeMaterialIcon}>-</Text>
+                        <MinusIcon width={16} height={16} />
                       </Pressable>
                     </View>
                   ))}
@@ -461,7 +463,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                   onPress={() => handleDeleteSection(section.id)}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.deleteSectionText}>Delete Section</Text>
+                 <DeleteIcon />
                 </TouchableOpacity>
               </View>
 
@@ -619,11 +621,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "flex-end",
     marginBottom: 14,
-  },
-  deleteSectionText: {
-    fontSize: 16,
-    color: "#153A7A",
-    fontFamily: "Instrument Sans Medium",
   },
   sectionTitleInput: {
     width: "100%",
