@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import BackArrowIcon from "../../assets/BackArrowIcon.svg";
+import BackArrowIconSimple from "../../assets/BackArrowIconSimple.svg";
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -77,7 +77,7 @@ export function HomePopUpPageHeaderSection({
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={20}>
             <View style={styles.arrowIcon}>
-              <BackArrowIcon />
+              <BackArrowIconSimple />
             </View>
           </Pressable>
 
