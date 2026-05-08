@@ -1,7 +1,6 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
 import HomeFilledIcon from "../../assets/icons/home-filled.svg";
 import HomeIcon from "../../assets/icons/home.svg";
 import LibraryFilledIcon from "../../assets/icons/library-filled.svg";

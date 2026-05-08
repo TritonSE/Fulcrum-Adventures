@@ -1,7 +1,6 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
@@ -28,7 +27,6 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.innerContainer}>
-        {/* Top Section: Image */}
         <View style={styles.imageContainer}>
           {activity.imageUrl ? (
             <Image source={{ uri: activity.imageUrl }} style={styles.image} resizeMode="cover" />
@@ -37,14 +35,11 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
           )}
         </View>
 
-        {/* Content Section */}
         <View style={styles.content}>
-          {/* Title - 1 Line Max */}
           <Text style={styles.title} numberOfLines={1}>
             {activity.title}
           </Text>
 
-          {/* Meta Info */}
           <View style={styles.metaContainer}>
             <View style={styles.metaItem}>
               <View style={styles.iconWrapper}>
@@ -73,7 +68,6 @@ export const ActivityCardCondensed: React.FC<ActivityCardCondensedProps> = ({
           </View>
         </View>
 
-        {/* Footer: Category & Bookmark */}
         <View style={styles.footer}>
           <View
             style={[
