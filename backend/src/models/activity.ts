@@ -28,6 +28,10 @@ const activitySchema = new Schema(
       type: [String],
       enum: ["Opener", "Icebreaker", "Active", "Connection", "Debrief", "Team Challenge"],
       required: true,
+      validate: {
+        validator: (v: string[]) => v.length >= 1 && v.length <= 3,
+        message: "category must have between 1 and 3 items.",
+      },
     },
     gradeRange: {
       min: { type: Number, required: true },

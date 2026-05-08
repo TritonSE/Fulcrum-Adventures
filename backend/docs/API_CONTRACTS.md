@@ -22,8 +22,8 @@ type Activity = {
   overview: string;
   thumbnailUrl?: string;
   additionalMedia?: { type: "image" | "video"; url: string }[];
-  category: Category[]; // up to 3
-  gradeRange: { min: number; max: number };
+  category: Category[]; // 1–3 items
+  gradeRange: { min: number; max: number }; // K = 0
   groupSize: { min: number; max: number; anySize: boolean };
   duration: Duration;
   energyLevel: EnergyLevel;
@@ -51,14 +51,17 @@ GET /api/activities
 
 **Query Parameters:**
 
-| Param      | Type   | Default      | Description                                           |
-| ---------- | ------ | ------------ | ----------------------------------------------------- |
-| `status`   | string | —            | Filter by status: `Draft`, `Published`, `Archived`    |
-| `search`   | string | —            | Case-insensitive search on `title` and `overview`     |
-| `category` | string | —            | Filter by category (exact match)                      |
-| `sort`     | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`) |
-| `page`     | number | `1`          | Page number (1-based)                                 |
-| `limit`    | number | `10`         | Items per page (max 100)                              |
+| Param         | Type   | Default      | Description                                                 |
+| ------------- | ------ | ------------ | ----------------------------------------------------------- |
+| `status`      | string | —            | Filter by status: `Draft`, `Published`, `Archived`          |
+| `search`      | string | —            | Case-insensitive search on `title` and `overview`           |
+| `category`    | string | —            | Filter by category (matches if array contains value)        |
+| `energyLevel` | string | —            | Filter by energy level: `Low`, `Medium`, `High`             |
+| `environment` | string | —            | Filter by environment (comma-separated, e.g. `Outdoor,Any`) |
+| `setup`       | string | —            | Filter by setup: `None`, `Required`                         |
+| `sort`        | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`)       |
+| `page`        | number | `1`          | Page number (1-based)                                       |
+| `limit`       | number | `10`         | Items per page (max 30)                                     |
 
 **Response `200`:**
 
@@ -107,7 +110,7 @@ Status is always forced to `"Draft"` on creation regardless of what is sent in t
 {
   "title": "Human Knot",
   "overview": "Teams untangle themselves from a human knot without letting go of hands.",
-  "category": "Team Challenge",
+  "category": ["Team Challenge"],
   "gradeRange": { "min": 3, "max": 12 },
   "groupSize": { "min": 6, "max": 30, "anySize": false },
   "duration": "15-30 min",
@@ -299,7 +302,7 @@ curl -X POST http://localhost:4000/api/activities \
   -d '{
     "title": "Human Knot",
     "overview": "Teams untangle themselves from a human knot.",
-    "category": "Team Challenge",
+    "category": ["Team Challenge"],
     "gradeRange": { "min": 3, "max": 12 },
     "groupSize": { "min": 6, "max": 30, "anySize": false },
     "duration": "15-30 min",
