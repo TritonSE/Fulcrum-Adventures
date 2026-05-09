@@ -34,6 +34,7 @@ type ActivityContentProps = {
   materialsError?: string | null;
   playGuidedItemErrors?: (string | null)[];
   debriefGuidedItemErrors?: (string | null)[];
+  sectionErrors?: Record<string, { title?: string | null; content?: string | null }>;
   forceOpenPrepTab?: boolean;
   onPrepTabOpened?: () => void;
 };
@@ -107,6 +108,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
   materialsError,
   playGuidedItemErrors = [],
   debriefGuidedItemErrors = [],
+  sectionErrors = {},
   forceOpenPrepTab,
   onPrepTabOpened,
 }) => {
@@ -357,7 +359,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                           onPress={() => handleRemoveGuidedItem(index)}
                           style={styles.removeGuidedItemButton}
                         >
-                          <Text style={styles.removeGuidedItemIcon}>-</Text>
+                         < MinusIcon width={16} height={16} />
                         </Pressable>
                       ) : (
                         <View style={styles.removeGuidedItemSpacer} />
@@ -478,27 +480,41 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                 placeholder="Section Title"
                 placeholderTextColor="#B3B3B3"
                 maxLength={MAX_SECTION_TITLE_LENGTH}
-                style={styles.sectionTitleInput}
+                  style={[
+                    styles.sectionTitleInput,
+                    sectionErrors?.[section.id]?.title && styles.inputError,
+                  ]}
               />
 
-              <Text style={styles.sectionCharacterCount}>
+                  <Text style={styles.sectionCharacterCount}>
                 {section.title.length}/{MAX_SECTION_TITLE_LENGTH} characters
               </Text>
+              {sectionErrors?.[section.id]?.title && (
+                <FieldError message={sectionErrors[section.id].title || ""} />
+              )}
 
-              <TextInput
-                value={section.content}
-                onChangeText={(value) => {
-                  handleUpdateSection(section.id, (existingSection) => ({
-                    ...existingSection,
-                    content: value,
-                  }));
-                }}
-                placeholder="Enter section contents.."
-                placeholderTextColor="#B3B3B3"
-                multiline
-                numberOfLines={7}
-                style={styles.sectionContentInput}
-              />
+
+                <TextInput
+                  value={section.content}
+                  onChangeText={(value) => {
+                    handleUpdateSection(section.id, (existingSection) => ({
+                      ...existingSection,
+                      content: value,
+                    }));
+                  }}
+                  placeholder="Enter section contents.."
+                  placeholderTextColor="#B3B3B3"
+                  multiline
+                  numberOfLines={7}
+                  style={[
+                    styles.sectionContentInput,
+                    sectionErrors?.[section.id]?.content && styles.inputError,
+                  ]}
+                />
+
+                {sectionErrors?.[section.id]?.content && (
+                  <FieldError message={sectionErrors[section.id].content || ""} />
+                )}
             </View>
           ))}
         </View>
@@ -635,7 +651,6 @@ const styles = StyleSheet.create({
   },
   sectionCharacterCount: {
     marginTop: 10,
-    marginBottom: 18,
     fontSize: 13,
     color: "#9E9E9E",
   },

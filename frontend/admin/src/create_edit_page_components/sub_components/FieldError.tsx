@@ -24,10 +24,12 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 6,
+    marginBottom: 10,
   },
   text: {
     fontSize: 14,
     fontFamily: "Instrument Sans",
     color: "#EF4444",
+    marginBottom: 10,
   },
 });

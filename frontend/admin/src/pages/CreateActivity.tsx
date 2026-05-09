@@ -214,6 +214,9 @@ export const CreateActivity: React.FC = () => {
     debriefGuidedItems: [],
     selTags: null,
   });
+  const [sectionErrors, setSectionErrors] = useState<
+    Record<string, { title?: string | null; content?: string | null }>
+  >({});
   const [forceOpenPrepTab, setForceOpenPrepTab] = useState(false);
 
   const handleOverviewChange = (patch: Partial<OverviewFormState>) => {
@@ -272,6 +275,26 @@ export const CreateActivity: React.FC = () => {
       newErrors.selTags = "Please enter at least one SEL tag";
     }
 
+    // Validate additional sections (only validate sections added after the first one)
+    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> = {};
+    activityTabs.forEach((tab) => {
+      tab.sections.forEach((section, index) => {
+        if (index === 0) return; // skip the default first section
+
+        const errs: { title?: string | null; content?: string | null } = {};
+        if (!section.title || !section.title.trim()) {
+          errs.title = "Please enter a section title";
+        }
+        if (!section.content || !section.content.trim()) {
+          errs.content = "Please enter section contents";
+        }
+
+        if (Object.keys(errs).length > 0) nextSectionErrors[section.id] = errs;
+      });
+    });
+
+    setSectionErrors(nextSectionErrors);
+
     setErrors(newErrors);
 
     // Check if there are any errors
@@ -281,7 +304,8 @@ export const CreateActivity: React.FC = () => {
       newErrors.materials !== null ||
       newErrors.playGuidedItems.some((e) => e !== null) ||
       newErrors.debriefGuidedItems.some((e) => e !== null) ||
-      newErrors.selTags !== null;
+      newErrors.selTags !== null ||
+      Object.keys(nextSectionErrors).length > 0;
 
     return !hasErrors;
   };
@@ -506,6 +530,7 @@ export const CreateActivity: React.FC = () => {
           materialsError={errors.materials}
           playGuidedItemErrors={errors.playGuidedItems}
           debriefGuidedItemErrors={errors.debriefGuidedItems}
+          sectionErrors={sectionErrors}
           forceOpenPrepTab={forceOpenPrepTab}
           onPrepTabOpened={() => setForceOpenPrepTab(false)}
         />
