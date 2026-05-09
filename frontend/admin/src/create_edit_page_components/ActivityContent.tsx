@@ -558,11 +558,6 @@ const styles = StyleSheet.create({
     borderColor: "#EF4444",
     borderWidth: 1,
   },
-  characterCount: {
-    marginTop: 8,
-    color: "#999",
-    fontSize: 13,
-  },
   facilitateHeader: {
     width: "100%",
     flexDirection: "row",
@@ -641,7 +636,7 @@ const styles = StyleSheet.create({
   sectionTitleInput: {
     width: "100%",
     height: 56,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 14,
     ...baseInputSurface,
     fontSize: 18,
@@ -650,15 +645,23 @@ const styles = StyleSheet.create({
     fontFamily: "Instrument Sans Bold",
   },
   sectionCharacterCount: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#9E9E9E",
+    fontSize: 14,
+    color: "#B4B4B4",
+    fontFamily: "Instrument Sans",
+    marginTop: 6,
+  },
+  characterCount: {
+    fontSize: 14,
+    color: "#B4B4B4",
+    fontFamily: "Instrument Sans",
+    marginTop: 6,
   },
   sectionContentInput: {
     width: "100%",
     minHeight: 160,
     paddingVertical: 16,
     paddingHorizontal: 20,
+    marginTop: 16,
     borderRadius: 14,
     ...baseInputSurface,
     fontSize: 14,

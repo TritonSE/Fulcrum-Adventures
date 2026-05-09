@@ -137,9 +137,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   characterCount: {
-    marginTop: 8,
-    color: "#999",
-    fontSize: 13,
+    fontSize: 14,
+    color: "#B4B4B4",
+    fontFamily: "Instrument Sans",
+    marginTop: 6,
   },
   tagList: {
     marginTop: 4,
