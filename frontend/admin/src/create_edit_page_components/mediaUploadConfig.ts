@@ -1,5 +1,8 @@
-export const THUMBNAIL_IMAGE_FORM_FIELD = "thumbnailImage";
-export const ACTIVITY_VIDEO_FORM_FIELD = "activityVideo";
+export const ACTIVITY_MEDIA_FORM_FIELD = "file";
+export const MEDIA_TARGET_FORM_FIELD = "mediaTarget";
+export const MEDIA_TYPE_FORM_FIELD = "mediaType";
+export const THUMBNAIL_IMAGE_FORM_FIELD = ACTIVITY_MEDIA_FORM_FIELD;
+export const ACTIVITY_VIDEO_FORM_FIELD = ACTIVITY_MEDIA_FORM_FIELD;
 
 export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
 export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;

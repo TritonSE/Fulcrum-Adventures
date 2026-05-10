@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import { THUMBNAIL_IMAGE_FORM_FIELD } from "../mediaUploadConfig";
+import { showToast } from "../../utils/showToast";
 
 import type { ThumbnailImageFile } from "../OverviewSection";
 
@@ -184,6 +185,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         width: result.width,
         height: result.height,
       });
+    } catch (error) {
+      showToast("error", error instanceof Error ? error.message : "Unable to crop image.");
     } finally {
       setIsSaving(false);
     }
@@ -197,7 +200,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         <View style={styles.modalCard}>
           <Text style={styles.title}>Crop Thumbnail Image</Text>
           <Text style={styles.description}>
-            Drag or zoom the image to choose the thumbnail crop.
+            Use + to zoom in first, then drag the image to choose the thumbnail crop.
           </Text>
 
           <View
@@ -223,6 +226,12 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                 },
               ]}
             />
+            <View pointerEvents="none" style={styles.cropGrid}>
+              <View style={[styles.gridLine, styles.gridLineVertical, { left: "33.3333%" }]} />
+              <View style={[styles.gridLine, styles.gridLineVertical, { left: "66.6667%" }]} />
+              <View style={[styles.gridLine, styles.gridLineHorizontal, { top: "33.3333%" }]} />
+              <View style={[styles.gridLine, styles.gridLineHorizontal, { top: "66.6667%" }]} />
+            </View>
             <View pointerEvents="none" style={styles.cropBorder} />
           </View>
 
@@ -308,6 +317,23 @@ const styles = StyleSheet.create({
   },
   cropImage: {
     position: "absolute",
+  },
+  cropGrid: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  gridLine: {
+    position: "absolute",
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+  },
+  gridLineVertical: {
+    top: 0,
+    bottom: 0,
+    width: 1,
+  },
+  gridLineHorizontal: {
+    left: 0,
+    right: 0,
+    height: 1,
   },
   cropBorder: {
     ...StyleSheet.absoluteFillObject,

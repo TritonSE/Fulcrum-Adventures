@@ -1,7 +1,7 @@
-import { File } from "expo-file-system";
+import { File as ExpoFile } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import {
   ActivityContent,
@@ -33,6 +33,7 @@ import {
   VideoFramePickerModal,
   type VideoFrameSource,
 } from "../create_edit_page_components/sub_components/VideoFramePickerModal";
+import { showToast } from "../utils/showToast";
 
 import type { ActivityTab } from "../create_edit_page_components/ActivityContent";
 import type {
@@ -45,8 +46,61 @@ const getImageDimensions = async (uri: string) =>
     Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
   });
 
+const getVideoMetadataOnWeb = async (uri: string) =>
+  new Promise<{ durationMs: number; width: number; height: number }>((resolve, reject) => {
+    if (typeof document === "undefined") {
+      reject(new Error("Browser video metadata APIs are unavailable."));
+      return;
+    }
+
+    const video = document.createElement("video");
+    let hasSettled = false;
+
+    const timeoutId = setTimeout(() => {
+      finish(() => reject(new Error("Timed out while reading video metadata.")));
+    }, 8000);
+
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      video.removeAttribute("src");
+      video.load();
+    };
+
+    const finish = (callback: () => void) => {
+      if (hasSettled) return;
+
+      hasSettled = true;
+      cleanup();
+      callback();
+    };
+
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+    video.onerror = () =>
+      finish(() => reject(new Error("Unable to read the selected video's metadata.")));
+    video.onloadedmetadata = () => {
+      const durationSeconds = Number.isFinite(video.duration) ? video.duration : 0;
+
+      if (!durationSeconds) {
+        finish(() => reject(new Error("Selected video does not expose a readable duration.")));
+        return;
+      }
+
+      finish(() =>
+        resolve({
+          durationMs: Math.round(durationSeconds * 1000),
+          width: video.videoWidth,
+          height: video.videoHeight,
+        }),
+      );
+    };
+    video.src = uri;
+    video.load();
+  });
+
 const getExtension = (asset: ImagePicker.ImagePickerAsset) => {
-  const sourceName = asset.fileName ?? asset.uri;
+  const sourceName = asset.fileName ?? asset.file?.name ?? asset.uri;
   const cleanSourceName = sourceName.split("?")[0]?.split("#")[0] ?? "";
   const extension = cleanSourceName.split(".").pop();
 
@@ -111,9 +165,21 @@ const getFallbackMimeType = (asset: ImagePicker.ImagePickerAsset, kind: "image" 
 
 const getAssetSizeBytes = async (asset: ImagePicker.ImagePickerAsset) => {
   if (typeof asset.fileSize === "number") return asset.fileSize;
+  if (typeof asset.file?.size === "number") return asset.file.size;
+
+  if (typeof fetch === "function") {
+    try {
+      const response = await fetch(asset.uri);
+      const blob = await response.blob();
+
+      return blob.size;
+    } catch {
+      // Fall back to Expo's file-system API for native file/content URIs.
+    }
+  }
 
   try {
-    const file = new File(asset.uri);
+    const file = new ExpoFile(asset.uri);
     const info = file.info();
 
     return info.exists && typeof info.size === "number" ? info.size : null;
@@ -314,10 +380,7 @@ export const CreateActivity: React.FC = () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert(
-        "Media access required",
-        "Allow media library access to choose a thumbnail image or activity video.",
-      );
+      showToast("error", "Allow media library access to choose a thumbnail image or activity video.");
       return;
     }
 
@@ -333,18 +396,15 @@ export const CreateActivity: React.FC = () => {
     const assetKind = getAssetKind(asset);
 
     if (!assetKind || !isSupportedAsset(asset, assetKind)) {
-      Alert.alert(
-        "Unsupported file format",
-        `Please choose one of these formats: ${SUPPORTED_MEDIA_FORMAT_LABEL}.`,
-      );
+      showToast("error", `Please choose one of these formats: ${SUPPORTED_MEDIA_FORMAT_LABEL}.`);
       return;
     }
 
     const sizeBytes = await getAssetSizeBytes(asset);
 
     if (sizeBytes === null) {
-      Alert.alert(
-        "Unable to verify file size",
+      showToast(
+        "error",
         "Please choose a different file so the app can enforce the upload size limit.",
       );
       return;
@@ -353,8 +413,8 @@ export const CreateActivity: React.FC = () => {
     const maxSizeBytes = assetKind === "image" ? MAX_IMAGE_UPLOAD_BYTES : MAX_VIDEO_UPLOAD_BYTES;
 
     if (sizeBytes > maxSizeBytes) {
-      Alert.alert(
-        "File is too large",
+      showToast(
+        "error",
         `${assetKind === "image" ? "Images" : "Videos"} must be ${formatMegabytes(
           maxSizeBytes,
         )} or smaller.`,
@@ -363,13 +423,21 @@ export const CreateActivity: React.FC = () => {
     }
 
     const fileName =
-      asset.fileName ?? `thumbnail-${assetKind}.${assetKind === "image" ? "jpg" : "mp4"}`;
-    const mimeType = asset.mimeType ?? getFallbackMimeType(asset, assetKind);
+      asset.fileName ??
+      asset.file?.name ??
+      `thumbnail-${assetKind}.${assetKind === "image" ? "jpg" : "mp4"}`;
+    const mimeType = asset.mimeType || asset.file?.type || getFallbackMimeType(asset, assetKind);
 
     if (assetKind === "video") {
-      if (!asset.duration) {
-        Alert.alert(
-          "Unable to read video duration",
+      const webMetadata =
+        !asset.duration || !asset.width || !asset.height
+          ? await getVideoMetadataOnWeb(asset.uri).catch(() => null)
+          : null;
+      const durationMs = asset.duration ?? webMetadata?.durationMs;
+
+      if (!durationMs) {
+        showToast(
+          "error",
           "Please choose a different video so the app can select a thumbnail frame.",
         );
         return;
@@ -380,9 +448,9 @@ export const CreateActivity: React.FC = () => {
         name: fileName,
         type: mimeType,
         sizeBytes,
-        width: asset.width ?? 0,
-        height: asset.height ?? 0,
-        durationMs: asset.duration,
+        width: asset.width || webMetadata?.width || 0,
+        height: asset.height || webMetadata?.height || 0,
+        durationMs,
       });
       return;
     }
@@ -410,15 +478,18 @@ export const CreateActivity: React.FC = () => {
 
   const handleSaveDraft = () => {
     setStatus("Draft");
+    showToast("success", "Activity marked as draft.");
   };
 
   const handlePublish = () => {
     if (!validateForm()) {
       // Scroll to first error
       scrollToFirstError();
+      showToast("error", "Please fix the highlighted fields before publishing.");
       return;
     }
     setStatus("Published");
+    showToast("success", "Activity marked as published.");
   };
 
   const scrollToFirstError = () => {
