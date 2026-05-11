@@ -1,11 +1,13 @@
 import path from "node:path";
 
 import cors from "cors";
+import dotenv from "dotenv"; // This loads the .env file into process.env
 import express from "express";
 
 import activityRoutes from "./routes/activity";
 
 import type { NextFunction, Request, Response } from "express";
+dotenv.config();
 
 const app = express();
 

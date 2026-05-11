@@ -261,6 +261,7 @@ const CreateActivityHeader: React.FC<CreateActivityHeaderProps> = ({
 
 export const CreateActivity: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
+  const [id, setId] = useState("");
   const [objective, setObjective] = useState("");
   const [activityTabs, setActivityTabs] = useState<ActivityTab[]>(() =>
     createDefaultActivityTabs(),
@@ -342,7 +343,8 @@ export const CreateActivity: React.FC = () => {
     }
 
     // Validate additional sections (only validate sections added after the first one)
-    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> = {};
+    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> =
+      {};
     activityTabs.forEach((tab) => {
       tab.sections.forEach((section, index) => {
         if (index === 0) return; // skip the default first section
@@ -380,7 +382,10 @@ export const CreateActivity: React.FC = () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      showToast("error", "Allow media library access to choose a thumbnail image or activity video.");
+      showToast(
+        "error",
+        "Allow media library access to choose a thumbnail image or activity video.",
+      );
       return;
     }
 
@@ -476,20 +481,124 @@ export const CreateActivity: React.FC = () => {
     console.log("cancel");
   };
 
-  const handleSaveDraft = () => {
-    setStatus("Draft");
-    showToast("success", "Activity marked as draft.");
+  const handleSaveDraft = async () => {
+    try {
+      const response_create = await fetch("http://localhost:4000/api/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: overviewValue.title,
+          overview: overviewValue.overview,
+          category: overviewValue.categories,
+          gradeRange: { min: overviewValue.gradeMin, max: overviewValue.gradeMax },
+          groupSize: {
+            min: overviewValue.groupSizeMin,
+            max: overviewValue.groupSizeMax,
+            anySize: overviewValue.anyGroupSize,
+          },
+          duration: overviewValue.duration,
+          energyLevel: overviewValue.energyLevel,
+
+          objective,
+
+          // TO CHANGE
+          environment: overviewValue.environments, // check conflicting enum restrictions, backend allow different things we allow
+          // backend allow:  "Large Open Space" | "Outdoor" | "Any" | "Small Space" | "Virtual";
+          // we allow: Blacktop | Field | Classroom | Gym/MPR
+          setup: overviewValue.setup, // only allow none or required?
+          // backend allow: None | Required
+          // frontend allow: Props | No Props
+          facilitateSections: [
+            { tabName: "Setup", content: "Form a circle with 6-12 people." },
+            { tabName: "Play", content: "Reach across and grab two different hands..." },
+            { tabName: "Debrief", content: "Ask: What strategies worked?" },
+          ],
+          materials: [],
+          selTags: ["teamwork", "communication"],
+          // END TO CHANGE
+
+          // facilitateSections: activityTabs.map((val) => ({
+          //   tabName: val?.kind || "",
+          //   content: val?.sections[0]?.content || "",
+          // })),
+          // materials: activityTabs.map((val) => val?.materials),
+        }),
+      });
+
+      if (!response_create.ok) {
+        console.log(
+          JSON.stringify({
+            title: overviewValue.title,
+            overview: overviewValue.overview,
+            category: overviewValue.categories,
+            gradeRange: { min: overviewValue.gradeMin, max: overviewValue.gradeMax },
+            groupSize: {
+              min: overviewValue.groupSizeMin,
+              max: overviewValue.groupSizeMax,
+              anySize: overviewValue.anyGroupSize,
+            },
+            duration: overviewValue.duration,
+            energyLevel: overviewValue.energyLevel,
+            setup: overviewValue.setup,
+            objective,
+
+            // TO CHANGE
+            environment: overviewValue.environments,
+            facilitateSections: [
+              { tabName: "Setup", content: "Form a circle with 6-12 people." },
+              { tabName: "Play", content: "Reach across and grab two different hands..." },
+              { tabName: "Debrief", content: "Ask: What strategies worked?" },
+            ],
+            materials: [],
+            selTags: ["teamwork", "communication"],
+            // END TO CHANGE
+
+            // facilitateSections: activityTabs.map((val) => ({
+            //   tabName: val?.kind || "",
+            //   content: val?.sections[0]?.content || "",
+            // })),
+            // materials: activityTabs.map((val) => val?.materials),
+          }),
+        );
+        throw new Error("create activity failed");
+      }
+      const { _id } = (await response_create.json()) as { _id: string };
+      if (_id) setId(_id);
+      else throw new Error("creation failed, id fault");
+      setStatus("Draft");
+      showToast("success", "Activity marked as draft.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "unknown error";
+      showToast("error", msg);
+      console.log(msg);
+    }
   };
 
-  const handlePublish = () => {
-    if (!validateForm()) {
-      // Scroll to first error
-      scrollToFirstError();
-      showToast("error", "Please fix the highlighted fields before publishing.");
-      return;
+  const handlePublish = async () => {
+    // if (!validateForm()) {
+    //   // Scroll to first error
+    //   scrollToFirstError();
+    //   showToast("error", "Please fix the highlighted fields before publishing.");
+    //   return;
+    // }
+    try {
+      await handleSaveDraft();
+
+      if (!id) throw new Error("activity creation failed");
+      const response_publish = await fetch(`http://localhost:4000/api/activities/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Published" }),
+      });
+
+      if (!response_publish.ok) throw new Error("Publish failed");
+      setStatus("Published");
+      showToast("success", "Activity marked as published.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "unkown error";
+      console.log(msg);
+      showToast("error", msg);
     }
-    setStatus("Published");
-    showToast("success", "Activity marked as published.");
   };
 
   const scrollToFirstError = () => {
@@ -526,8 +635,12 @@ export const CreateActivity: React.FC = () => {
     >
       <CreateActivityHeader
         onCancel={handleCancel}
-        onSaveDraft={handleSaveDraft}
-        onPublish={handlePublish}
+        onSaveDraft={() => {
+          void handleSaveDraft();
+        }}
+        onPublish={() => {
+          void handlePublish();
+        }}
       />
 
       <CollapsibleSection title="Overview" defaultOpen>
