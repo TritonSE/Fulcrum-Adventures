@@ -3,7 +3,6 @@ import path from "node:path";
 import cors from "cors";
 import express from "express";
 
-import emailRoutes from "./routers/email";
 import activityRoutes from "./routes/activity";
 
 import type { NextFunction, Request, Response } from "express";
@@ -18,15 +17,6 @@ app.use(
   }),
 );
 
-app.use("/api/email", emailRoutes);
-
-/**
- * Error handler; all errors thrown by server are handled here.
- * Explicit typings required here because TypeScript cannot infer the argument types.
- */
-app.use((error: unknown, req: Request, res: Response, _next: NextFunction) => {
-  // 500 is the "internal server error" error code, this will be our fallback
-  const statusCode = 500;
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/activities", activityRoutes);
