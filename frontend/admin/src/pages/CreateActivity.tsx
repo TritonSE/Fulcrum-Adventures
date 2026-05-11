@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import { uploadActivityMedia } from "../api/activityMediaApi";
 import {
   ActivityContent,
   createDefaultActivityTabs,
@@ -490,7 +491,10 @@ export const CreateActivity: React.FC = () => {
           title: overviewValue.title,
           overview: overviewValue.overview,
           category: overviewValue.categories,
-          gradeRange: { min: overviewValue.gradeMin, max: overviewValue.gradeMax },
+          gradeRange: {
+            min: overviewValue.gradeMin === "K" ? "0" : overviewValue.gradeMin,
+            max: overviewValue.gradeMax,
+          },
           groupSize: {
             min: overviewValue.groupSizeMin,
             max: overviewValue.groupSizeMax,
@@ -505,7 +509,7 @@ export const CreateActivity: React.FC = () => {
           environment: overviewValue.environments, // check conflicting enum restrictions, backend allow different things we allow
           // backend allow:  "Large Open Space" | "Outdoor" | "Any" | "Small Space" | "Virtual";
           // we allow: Blacktop | Field | Classroom | Gym/MPR
-          setup: overviewValue.setup, // only allow none or required?
+          setup: overviewValue.setup === "Props" ? "Required" : "None", // only allow none or required?
           // backend allow: None | Required
           // frontend allow: Props | No Props
           facilitateSections: [
@@ -526,45 +530,28 @@ export const CreateActivity: React.FC = () => {
       });
 
       if (!response_create.ok) {
-        console.log(
-          JSON.stringify({
-            title: overviewValue.title,
-            overview: overviewValue.overview,
-            category: overviewValue.categories,
-            gradeRange: { min: overviewValue.gradeMin, max: overviewValue.gradeMax },
-            groupSize: {
-              min: overviewValue.groupSizeMin,
-              max: overviewValue.groupSizeMax,
-              anySize: overviewValue.anyGroupSize,
-            },
-            duration: overviewValue.duration,
-            energyLevel: overviewValue.energyLevel,
-            setup: overviewValue.setup,
-            objective,
-
-            // TO CHANGE
-            environment: overviewValue.environments,
-            facilitateSections: [
-              { tabName: "Setup", content: "Form a circle with 6-12 people." },
-              { tabName: "Play", content: "Reach across and grab two different hands..." },
-              { tabName: "Debrief", content: "Ask: What strategies worked?" },
-            ],
-            materials: [],
-            selTags: ["teamwork", "communication"],
-            // END TO CHANGE
-
-            // facilitateSections: activityTabs.map((val) => ({
-            //   tabName: val?.kind || "",
-            //   content: val?.sections[0]?.content || "",
-            // })),
-            // materials: activityTabs.map((val) => val?.materials),
-          }),
-        );
+        console.log("ooops");
         throw new Error("create activity failed");
       }
+
       const { _id } = (await response_create.json()) as { _id: string };
       if (_id) setId(_id);
       else throw new Error("creation failed, id fault");
+
+      if (overviewValue.thumbnailImage?.uri) {
+        await uploadActivityMedia({
+          activityId: _id,
+          media: {
+            uri: overviewValue.thumbnailImage.uri,
+            name: "thumbnail.jpg",
+            type: "image/jpeg",
+          },
+          mediaTarget: "thumbnail",
+          mediaType: "image",
+          apiBaseUrl: "http://localhost:4000",
+        });
+      }
+
       setStatus("Draft");
       showToast("success", "Activity marked as draft.");
     } catch (error) {
