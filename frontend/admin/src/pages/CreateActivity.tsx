@@ -512,13 +512,17 @@ export const CreateActivity: React.FC = () => {
           setup: overviewValue.setup === "Props" ? "Required" : "None", // only allow none or required?
           // backend allow: None | Required
           // frontend allow: Props | No Props
-          facilitateSections: [
-            { tabName: "Setup", content: "Form a circle with 6-12 people." },
-            { tabName: "Play", content: "Reach across and grab two different hands..." },
-            { tabName: "Debrief", content: "Ask: What strategies worked?" },
-          ],
-          materials: [],
-          selTags: ["teamwork", "communication"],
+          facilitateSections: activityTabs
+          .filter((tab) => tab.kind === "prep" || tab.kind === "play" || tab.kind === "debrief")
+          .map((tab) => ({
+            tabName: tab.kind === "prep" ? "Setup" : tab.name,
+            content: tab.sections.map((s) => s.content.trim()).filter(Boolean).join("\n\n"),
+          })),
+        materials:
+          activityTabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
+            ? []
+            : (activityTabs.find((tab) => tab.kind === "prep")?.materials ?? []),
+        selTags,
           // END TO CHANGE
 
           // facilitateSections: activityTabs.map((val) => ({
@@ -530,8 +534,10 @@ export const CreateActivity: React.FC = () => {
       });
 
       if (!response_create.ok) {
-        console.log("ooops");
-        throw new Error("create activity failed");
+        const errorText = await response_create.text();
+        throw new Error(
+          errorText || `create activity failed with status ${response_create.status}`,
+        );
       }
 
       const { _id } = (await response_create.json()) as { _id: string };
