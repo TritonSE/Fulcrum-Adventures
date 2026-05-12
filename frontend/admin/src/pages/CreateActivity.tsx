@@ -513,16 +513,19 @@ export const CreateActivity: React.FC = () => {
           // backend allow: None | Required
           // frontend allow: Props | No Props
           facilitateSections: activityTabs
-          .filter((tab) => tab.kind === "prep" || tab.kind === "play" || tab.kind === "debrief")
-          .map((tab) => ({
-            tabName: tab.kind === "prep" ? "Setup" : tab.name,
-            content: tab.sections.map((s) => s.content.trim()).filter(Boolean).join("\n\n"),
-          })),
-        materials:
-          activityTabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
-            ? []
-            : (activityTabs.find((tab) => tab.kind === "prep")?.materials ?? []),
-        selTags,
+            .filter((tab) => tab.kind === "prep" || tab.kind === "play" || tab.kind === "debrief")
+            .map((tab) => ({
+              tabName: tab.kind === "prep" ? "Setup" : tab.name,
+              content: tab.sections
+                .map((section) => section.content.trim())
+                .filter(Boolean)
+                .join("\n\n"),
+            })),
+          materials:
+            activityTabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
+              ? []
+              : activityTabs.find((tab) => tab.kind === "prep")?.materials ?? [],
+          selTags,
           // END TO CHANGE
 
           // facilitateSections: activityTabs.map((val) => ({
