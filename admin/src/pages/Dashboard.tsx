@@ -6,7 +6,9 @@ import MailingListIcon from "../../icons/mailing_list.svg";
 import SearchIcon from "../../icons/search.svg";
 import type { Category } from "../components/CategoryCard";
 import { CategoryCard } from "../components/CategoryCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { listActivities } from "../api/activity";
+import type { Activity } from "../types/activity";
 
 const categories: Category[] = [
   "Opener",
@@ -18,7 +20,25 @@ const categories: Category[] = [
 ];
 
 export default function Dashboard() {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  function findNumActivitiesInCategory(category: Category): number {
+    //TODO: check if category should be singular or an array
+    return activities.filter((activity) => activity.category.find((c) => c === category)).length;
+  }
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      const result = await listActivities({});
+      if (result.success) {
+        setActivities(result.data);
+      } else {
+        console.error("Failed to fetch activities:", result.error);
+      }
+    };
+    fetchActivities();
+  }, []);
 
   return (
     <div style={{ background: "#F9F9F9" }}>
@@ -28,9 +48,13 @@ export default function Dashboard() {
           <div className="headerContainer">
             <p className="headerText">Activities Dashboard</p>
             <div className="headerButtonsContainer">
-              <Button icon={MailingListIcon} variant="secondary-left" onClick={() => {
-                window.location.href = "/mailing-list";
-              }}>
+              <Button
+                icon={MailingListIcon}
+                variant="secondary-left"
+                onClick={() => {
+                  window.location.href = "/mailing-list";
+                }}
+              >
                 Mailing List
               </Button>
               <Button icon={AddIcon}>Create New Activity</Button>
@@ -41,8 +65,8 @@ export default function Dashboard() {
               <CategoryCard
                 key={category}
                 category={category}
-                percentOfActivities={12}
-                numActivities={12}
+                numActivities={findNumActivitiesInCategory(category)}
+                totalActivities={activities.length}
               />
             ))}
           </div>
