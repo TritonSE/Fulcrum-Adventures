@@ -34,47 +34,7 @@ type Props = {
   onApply: (filters: FilterState) => void;
 };
 
-// --- Inline SVGs to match Figma ---
-const SlidersIcon = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M4 21V14M4 10V3M12 21V12M12 8V3M20 21V16M20 12V3"
-      stroke="#153A7A"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M1 14H7M9 8H15M17 16H23"
-      stroke="#153A7A"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
-const CloseIcon = () => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M18 6L6 18M6 6L18 18"
-      stroke="#153A7A"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
-// --- Constants ---
-const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
-  None: 0,
-  Low: 1,
-  Medium: 2,
-  High: 3,
-};
-const numberToEnergyLevel: Record<number, EnergyLevel> = { 1: "Low", 2: "Medium", 3: "High" };
-
+// --- STYLES (Moved to Top) ---
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
@@ -85,11 +45,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 24,
   },
-  headerTitleWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
+  headerTitleWrap: { flexDirection: "row", alignItems: "center", gap: 12 },
   title: {
     fontSize: 26,
     fontWeight: "700",
@@ -126,7 +82,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#F3F3F3",
     backgroundColor: "#FFFFFF",
-    paddingBottom: 36, // Safe area for iOS
+    paddingBottom: 36,
   },
   resetBtn: {
     flex: 1,
@@ -150,7 +106,47 @@ const styles = StyleSheet.create({
   applyText: { color: "#153A7A", fontWeight: "500", fontSize: 16, fontFamily: "Instrument Sans" },
 });
 
-// Helper function to check if a range is selected
+// --- ICONS ---
+const SlidersIcon = () => (
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M4 21V14M4 10V3M12 21V12M12 8V3M20 21V16M20 12V3"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M1 14H7M9 8H15M17 16H23"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const CloseIcon = () => (
+  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M18 6L6 18M6 6L18 18"
+      stroke="#153A7A"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+// --- HELPERS ---
+const energyLevelToNumber: Record<EnergyLevel | "None", number> = {
+  None: 0,
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+const numberToEnergyLevel: Record<number, EnergyLevel> = { 1: "Low", 2: "Medium", 3: "High" };
+
 const isRangeSelected = (selected: Range[] | undefined, range: Range): boolean => {
   if (!selected || selected.length === 0) return false;
   return selected.some((r) => r.min === range.min && r.max === range.max);
@@ -159,8 +155,13 @@ const isRangeSelected = (selected: Range[] | undefined, range: Range): boolean =
 const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible">) => {
   const [filters, setFilters] = useState<FilterState>(initial);
 
-  const toggleSingleFilter = (key: "category" | "setupProps", value: string | null) =>
-    setFilters((prev) => ({ ...prev, [key]: prev[key] === value ? undefined : value }));
+  const toggleSingleFilter = (key: "category" | "setupProps", value: string | null) => {
+    // If user clicks the same category, we clear it (set to null/undefined)
+    setFilters((prev) => ({
+      ...prev,
+      [key]: prev[key] === value ? null : (value as any),
+    }));
+  };
 
   const toggleRangeFilter = (key: "duration" | "gradeLevel" | "groupSize", range: RangeOption) =>
     setFilters((prev) => {
@@ -176,13 +177,14 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
 
   const toggleMultiFilter = (key: "environment", value: string) =>
     setFilters((prev) => {
-      const existing = new Set(prev[key] ?? []);
-      if (existing.has(value as Environment)) {
-        existing.delete(value as Environment);
-      } else {
-        existing.add(value as Environment);
-      }
-      return { ...prev, [key]: Array.from(existing) };
+      const current = prev[key] ?? [];
+      const isSelected = current.includes(value as Environment);
+      return {
+        ...prev,
+        [key]: isSelected
+          ? current.filter((item) => item !== value)
+          : [...current, value as Environment],
+      };
     });
 
   const toggleEnergyLevel = (level: EnergyLevel) =>
@@ -199,14 +201,8 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
       environment: [],
     });
 
-  const isFilterSelected = (values: string[] | undefined, option: string) =>
-    !!values?.includes(option);
-
-  const energyLevel = filters.energyLevel;
-
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.headerTitleWrap}>
           <SlidersIcon />
@@ -217,12 +213,12 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </TouchableOpacity>
       </View>
 
-      {/* SCROLLABLE CONTENT */}
       <ScrollView
         style={styles.scrollContainer}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Category Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Category</Text>
           <View style={styles.row}>
@@ -230,13 +226,15 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
               <FilterPill
                 key={option}
                 label={option}
-                selected={filters.category === option || (option === "All" && !filters.category)}
+                // If category is null/undefined, 'All' is selected
+                selected={option === "All" ? !filters.category : filters.category === option}
                 onPress={() => toggleSingleFilter("category", option === "All" ? null : option)}
               />
             ))}
           </View>
         </View>
 
+        {/* Duration Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Duration</Text>
           <View style={styles.row}>
@@ -251,6 +249,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
           </View>
         </View>
 
+        {/* Grade Level Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Grade Level</Text>
           <View style={styles.row}>
@@ -265,25 +264,12 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Group Size</Text>
-          <View style={styles.row}>
-            {options.groupSize.map((range) => (
-              <FilterPill
-                key={range.label}
-                label={range.label}
-                selected={isRangeSelected(filters.groupSize, range)}
-                onPress={() => toggleRangeFilter("groupSize", range)}
-              />
-            ))}
-          </View>
-        </View>
-
+        {/* Energy Level Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Energy Level</Text>
           <View style={styles.energyRow}>
             {[1, 2, 3].map((level) => {
-              const isActive = energyLevelToNumber[energyLevel ?? "None"] >= level;
+              const isActive = energyLevelToNumber[filters.energyLevel ?? "None"] >= level;
               return (
                 <Pressable
                   key={level}
@@ -302,6 +288,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
           </View>
         </View>
 
+        {/* Environment Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Environment</Text>
           <View style={styles.row}>
@@ -309,13 +296,14 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
               <FilterPill
                 key={option}
                 label={option}
-                selected={isFilterSelected(filters.environment, option)}
+                selected={filters.environment?.includes(option)}
                 onPress={() => toggleMultiFilter("environment", option)}
               />
             ))}
           </View>
         </View>
 
+        {/* Set Up Section */}
         <View style={[styles.section, { marginBottom: 40 }]}>
           <Text style={styles.sectionTitle}>Set Up</Text>
           <View style={styles.row}>
@@ -331,7 +319,6 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
         </View>
       </ScrollView>
 
-      {/* FOOTER */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.resetBtn} onPress={resetFilters}>
           <Text style={styles.resetText}>Reset All</Text>

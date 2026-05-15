@@ -6,7 +6,8 @@ import { CategoryCardBig } from "../../components/CategoryCardBig";
 import { FiltersModal } from "../../components/FiltersModal";
 import { SearchHeader } from "../../components/SearchHeader";
 import { CATEGORIES as categories } from "../../constants/filterOptions";
-import { mockActivities } from "../../data/mockActivities";
+// Pull from context instead of mock data
+import { useActivities } from "../../Context/ActivityContext";
 import { styles } from "../../styles/search.styles";
 
 import type { FilterState } from "../../components/FiltersModal";
@@ -66,8 +67,13 @@ function matchesActivityFilter(
   filters: FilterState,
   searchText: string,
 ): boolean {
-  if (filters.category && activity.category !== filters.category) {
-    return false;
+  // FIX: Support multi-category filtering
+  if (filters.category) {
+    const activityCategories =
+      activity.categories || (activity.category ? [activity.category] : []);
+    if (!activityCategories.includes(filters.category)) {
+      return false;
+    }
   }
 
   if (filters.setupProps) {
@@ -131,7 +137,6 @@ function removeFilter(filters: FilterState, filterToRemove: string): FilterState
   } else if (filters.setupProps === filterToRemove) {
     newFilters.setupProps = undefined;
   } else if (filterToRemove.includes(" min")) {
-    // Duration filter (e.g., "5-15 min")
     const match = /(\d+)-(\d+)/.exec(filterToRemove);
     if (match) {
       newFilters.duration = (filters.duration ?? []).filter(
@@ -139,8 +144,6 @@ function removeFilter(filters: FilterState, filterToRemove: string): FilterState
       );
     }
   } else if (filterToRemove.includes("Grade")) {
-    // Grade level filter (e.g., "Grade K-2")
-    // Extract grade range pattern
     const match = /Grade\s+([K\d]+)-([K\d]+)/.exec(filterToRemove);
     if (match) {
       const minGrade = match[1] === "K" ? 0 : Number.parseInt(match[1]);
@@ -150,7 +153,6 @@ function removeFilter(filters: FilterState, filterToRemove: string): FilterState
       );
     }
   } else if (filterToRemove.includes("people")) {
-    // Group size filter (e.g., "3-15 people")
     const match = /(\d+)-(\d+)/.exec(filterToRemove);
     if (match) {
       newFilters.groupSize = (filters.groupSize ?? []).filter(
@@ -172,11 +174,7 @@ function addToRecentSearches(searchQuery: string, recentSearches: string[]): str
   if (searchQuery.trim() === "") {
     return recentSearches;
   }
-
-  // Remove the search if it already exists to avoid duplicates
   const filtered = recentSearches.filter((s) => s !== searchQuery);
-
-  // Add to the beginning and limit to 10 recent searches
   return [searchQuery, ...filtered].slice(0, 3);
 }
 
@@ -186,19 +184,13 @@ export function SearchPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [activities, setActivities] = useState<Activity[]>(mockActivities);
+
+  // FIX: Use shared context state
+  const { activities, toggleSaved } = useActivities();
 
   const filteredActivities = activities.filter((activity) =>
     matchesActivityFilter(activity, filters, searchText),
   );
-
-  const handleSaveToggle = (id: string) => {
-    setActivities((prevList) =>
-      prevList.map((activity) =>
-        activity.id === id ? { ...activity, isSaved: !activity.isSaved } : activity,
-      ),
-    );
-  };
 
   return (
     <TouchableWithoutFeedback
@@ -226,9 +218,7 @@ export function SearchPage() {
             addToRecentSearches={addToRecentSearches}
           />
 
-          {/* Activity or Category cards depending on search state */}
           {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
-            // Activity list (filtered)
             <View style={styles.activityListContainer}>
               <View style={styles.activityNumberAndClearAllContainer}>
                 <Text style={styles.activityNumberText}>
@@ -236,11 +226,7 @@ export function SearchPage() {
                   {filteredActivities.length === 1 ? "y" : "ies"} found
                 </Text>
                 {!isFiltersEmpty(filters) && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setFilters(defaultFilters);
-                    }}
-                  >
+                  <TouchableOpacity onPress={() => setFilters(defaultFilters)}>
                     <Text style={styles.clearAllText}>Clear all</Text>
                   </TouchableOpacity>
                 )}
@@ -249,12 +235,12 @@ export function SearchPage() {
               <ActivityList
                 activities={filteredActivities}
                 variant="card"
-                onSaveToggle={handleSaveToggle}
+                // FIX: Use context toggle
+                onSaveToggle={(id) => toggleSaved(id)}
                 contentContainerStyle={{ marginHorizontal: -12, width: "112%" }}
               />
             </View>
           ) : (
-            // Category cards
             <View>
               <Text style={styles.smallText}>Browse by category:</Text>
               <View style={styles.categoryCardsGrid}>
@@ -274,7 +260,6 @@ export function SearchPage() {
           )}
         </View>
 
-        {/* Filter Modal */}
         <FiltersModal
           visible={showFilterModal}
           initial={filters}
