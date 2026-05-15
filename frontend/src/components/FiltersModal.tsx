@@ -159,7 +159,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
     // If user clicks the same category, we clear it (set to null/undefined)
     setFilters((prev) => ({
       ...prev,
-      [key]: prev[key] === value ? null : (value as any),
+      [key]: prev[key] === value ? null : (value as unknown as Category),
     }));
   };
 
