@@ -1,7 +1,6 @@
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-// SVG Imports
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
@@ -40,7 +39,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      {/* Left Side: Image */}
       <View style={styles.imageContainer}>
         {activity.imageUrl ? (
           <Image source={{ uri: activity.imageUrl }} style={styles.image} resizeMode="cover" />
@@ -49,9 +47,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
         )}
       </View>
 
-      {/* Right Side: Content */}
       <View style={styles.content}>
-        {/* Title + Meta Wrapper (Gap 4px) */}
         <View style={styles.headerContent}>
           <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
             {activity.title}
@@ -79,7 +75,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
           </View>
         </View>
 
-        {/* Footer: Category Tag & Bookmark */}
         <View style={styles.footer}>
           {/* THE TAGS CONTAINER */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>

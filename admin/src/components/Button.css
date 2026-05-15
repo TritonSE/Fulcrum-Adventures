@@ -1,0 +1,109 @@
+/* admin/src/components/Button.css */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5.65px;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+/* Primary Variant */
+.button--primary {
+  background-color: #153a7a;
+  color: #ffffff;
+  border: 1px solid #153a7a;
+}
+
+.button--primary:hover:not(:disabled) {
+  background-color: #0e2d63;
+  border-color: #0e2d63;
+}
+
+/* Secondary Variants (Left & Right) */
+.button--secondary-left,
+.button--secondary-right {
+  background-color: transparent;
+  color: #153a7a;
+  border: 1px solid #153a7a;
+}
+
+.button--secondary-left:hover:not(:disabled),
+.button--secondary-right:hover:not(:disabled) {
+  background-color: #ebebeb;
+}
+
+/* Tertiary Variant */
+.button--tertiary {
+  background-color: transparent;
+  color: #153a7a;
+  border: 1px solid transparent;
+}
+
+.button--tertiary:hover:not(:disabled) {
+  background-color: #ebebeb;
+}
+
+/* --- DISABLED STATES --- */
+.button:disabled,
+.button--disabled {
+  cursor: not-allowed;
+}
+
+.button--primary:disabled,
+.button--primary.button--disabled {
+  background-color: #f3f3f3;
+  color: #b4b4b4;
+  border-color: #f3f3f3;
+}
+
+/* Secondary Disabled */
+.button--secondary-left:disabled,
+.button--secondary-left.button--disabled,
+.button--secondary-right:disabled,
+.button--secondary-right.button--disabled {
+  background-color: transparent;
+  color: #b4b4b4;
+  border-color: #b4b4b4;
+}
+
+.button--tertiary:disabled,
+.button--tertiary.button--disabled {
+  background-color: transparent;
+  color: #b4b4b4;
+  border-color: transparent;
+}
+
+/* Icon Styles */
+.button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.button__icon--left {
+  margin-right: -4px;
+}
+
+.button__icon--right {
+  margin-left: -4px;
+}
+
+.button__text {
+  line-height: 1;
+}
+
+/* Full Width */
+.button--full-width {
+  width: 100%;
+}

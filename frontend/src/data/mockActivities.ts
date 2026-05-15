@@ -15,10 +15,39 @@ export const mockActivities: Activity[] = [
     environment: "Field",
     isSaved: false,
     hasTutorial: true,
-    materials: ["Bull Ring Set", "Cone"],
-    selTags: ["Collaboration", "Communication"],
+    imageUrl: "https://via.placeholder.com/400x300",
+    objective: "Move the ice cream cone to 'the kid' without dropping it.",
+    // Changed to simple strings
+    materials: ["Bull Ring Set", "Cone or small ball"],
+    selTags: ["Collaboration", "Communication", "Patience"],
     facilitate: {
-      play: { steps: [{ stepNumber: 1, content: "Move the cone without dropping it." }] },
+      prep: {
+        setup: [
+          "Set up Bull Ring so that all the strings are laid out.",
+          "Place the cone in the center of the ring.",
+        ],
+        // Changed to simple strings
+        materials: ["Bull Ring Set", "Cone"],
+      },
+      play: {
+        steps: [
+          {
+            stepNumber: 1,
+            content: "Students grab a string and pull tight to lift the ring.",
+          },
+          {
+            stepNumber: 2,
+            content: "Work together to transport the cone to the finish line.",
+          },
+        ],
+      },
+      // Added example Debrief
+      debrief: {
+        questions: [
+          "What was the hardest part about working together?",
+          "How did you communicate without talking over each other?",
+        ],
+      },
     },
   },
   {

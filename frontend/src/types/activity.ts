@@ -15,13 +15,11 @@ export type Range = {
   max: number;
 };
 
-// Structure for Prep tab content
 export type PrepTab = {
   setup?: string[];
   materials?: string[];
 };
 
-// Structure for Play tab content
 export type PlayTab = {
   steps: PlayStep[];
 };
@@ -48,6 +46,8 @@ export type CustomSection = {
 export type Activity = {
   id: string;
   title: string;
+
+  /** Range endpoints; 0 means Kindergarten ("K"). */
   gradeLevel: Range;
   groupSize: Range;
   duration: Range; // In minutes
@@ -63,7 +63,6 @@ export type Activity = {
 
   objective?: string;
 
-  // Facilitate tabs
   facilitate?: {
     prep?: PrepTab;
     play?: PlayTab;

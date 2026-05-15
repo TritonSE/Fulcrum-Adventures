@@ -3,7 +3,7 @@ import { Platform, StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-between", // Matches Figma "Auto" spacing
+    justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
 
@@ -14,7 +14,6 @@ export const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: Platform.OS === "ios" ? 30 : 16,
 
-    // Shadow for depth
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
