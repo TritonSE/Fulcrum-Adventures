@@ -1,17 +1,20 @@
 import { View } from "react-native";
 
 import { ActivityList } from "@/components/ActivityList";
-import { mockActivities } from "@/data/mockActivities";
+import { useActivities } from "@/Context/ActivityContext";
 import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeaderSection";
 
 export default function RecommendedScreen() {
+  const { activities, toggleSaved } = useActivities();
+
   return (
     <View style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
       <HomePopUpPageHeaderSection sectionName="Recommended" />
 
       <View style={{ flex: 1 }}>
         <ActivityList
-          activities={mockActivities}
+          activities={activities}
+          onSaveToggle={toggleSaved}
           variant="card"
           horizontal={false}
           showHeader={false}

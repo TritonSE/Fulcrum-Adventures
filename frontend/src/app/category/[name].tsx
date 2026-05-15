@@ -15,7 +15,6 @@ import { ActivityCard } from "../../components/ActivityCard";
 import { FiltersModal } from "../../components/FiltersModal";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../../constants/activityColors";
 import { useActivities } from "../../Context/ActivityContext";
-import { mockActivities } from "../../data/mockActivities";
 
 import type { FilterState } from "../../components/FiltersModal";
 import type { Activity, Category } from "../../types/activity";
@@ -229,11 +228,19 @@ export default function CategoryScreen() {
   const categoryName = decodeURIComponent(name ?? "") as Category;
   const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
   const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
-  const categoryActivities = mockActivities.filter((a) => a.category === categoryName);
+
+  const { activities: allActivities, toggleSaved } = useActivities();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const { toggleSaved } = useActivities();
+
+  const categoryActivities = allActivities.filter((activity) => {
+    const activityCategories =
+      activity.categories ?? (activity.category ? [activity.category] : []);
+    return activityCategories.includes(categoryName);
+  });
+
   const activities = categoryActivities.filter((a) => matchesFilters(a, filters));
+
   const Graphic = CATEGORY_GRAPHICS[categoryName];
 
   return (

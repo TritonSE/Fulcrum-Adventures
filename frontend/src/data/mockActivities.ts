@@ -67,6 +67,7 @@ export const mockActivities: Activity[] = [
     materials: [],
     selTags: ["Resilience"],
     facilitate: { play: { steps: [{ stepNumber: 1, content: "Play RPS tournament style." }] } },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   },
   {
     id: "3",

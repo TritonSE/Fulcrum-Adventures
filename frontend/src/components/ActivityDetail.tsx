@@ -6,6 +6,7 @@ import {
   Image,
   ImageBackground,
   type LayoutChangeEvent,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
+import YoutubePlayer from "react-native-youtube-iframe";
 
 import NoteIcon from "../../assets/NoteIcon";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
@@ -41,6 +43,14 @@ type ActivityDetailProps = {
   onOpenNotes?: () => void;
 };
 
+// --- Helper to handle YouTube URLs ---
+const getYouTubeId = (url: string) => {
+  // eslint-disable-next-line regexp/no-unused-capturing-group
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = regExp.exec(url);
+  return match && match[2].length === 11 ? match[2] : url;
+};
+
 const dividerStyles = StyleSheet.create({
   container: {
     width: "100%",
@@ -54,13 +64,11 @@ const dividerStyles = StyleSheet.create({
   },
 });
 
-const SectionDivider = () => {
-  return (
-    <View style={dividerStyles.container}>
-      <View style={dividerStyles.line} />
-    </View>
-  );
-};
+const SectionDivider = () => (
+  <View style={dividerStyles.container}>
+    <View style={dividerStyles.line} />
+  </View>
+);
 
 const BackArrowIcon = () => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -202,19 +210,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    // Combined with contentPanel paddingBottom (40) gives 104px space below content
     paddingBottom: 64,
   },
   contentWrapper: {
     flex: 1,
   },
   mediaSection: {
-    display: "flex",
     width: "100%",
-    aspectRatio: 390 / 336,
+    height: 336,
     justifyContent: "flex-end",
     alignItems: "center",
     overflow: "hidden",
+    backgroundColor: "#E0E0E0",
   },
   mediaSectionBackground: {
     position: "absolute",
@@ -275,7 +282,6 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     fontFamily: "Instrument Sans",
     lineHeight: 21,
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
   },
   contentPanel: {
@@ -315,9 +321,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#FFFFFF",
     fontFamily: "Instrument Sans",
-    // 150% line height for 12px
     lineHeight: 18,
-    // 2% letter spacing on 12px
     letterSpacing: 0.24,
   },
   actionIcons: {
@@ -354,7 +358,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "700",
     color: "#153A7A",
-    // 104% line height for 30px
     lineHeight: 31.2,
     fontFamily: "League Spartan",
   },
@@ -369,12 +372,7 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     fontFamily: "Instrument Sans",
     lineHeight: 21,
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
-  },
-  metadataIcon: {
-    fontSize: 14,
-    fontFamily: "Instrument Sans",
   },
   metadataDot: {
     marginHorizontal: 16,
@@ -388,7 +386,6 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     lineHeight: 21,
     fontFamily: "Instrument Sans",
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
     marginBottom: 16,
   },
@@ -430,27 +427,11 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#153A7A",
     fontFamily: "Instrument Sans",
-    // 150% line height for 12px
     lineHeight: 18,
-    // 2% letter spacing on 12px
     letterSpacing: 0.24,
-  },
-  dividerContainer: {
-    width: "100%",
-    backgroundColor: "#F9F9F9",
-    paddingHorizontal: 16,
-    paddingVertical: 0,
-  },
-  dividerLine: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#D9D9D9",
   },
   section: {
     width: "100%",
-  },
-  firstSection: {
-    paddingTop: 16,
   },
   lastSection: {
     paddingBottom: 0,
@@ -469,7 +450,6 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     lineHeight: 21,
     fontFamily: "Instrument Sans",
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
   },
   tabsWrapper: {
@@ -515,7 +495,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   tabText: {
-    // Neutral/Gray 5 for unselected tabs
     color: "#737373",
     fontFamily: "Instrument Sans Medium",
     fontSize: 16,
@@ -523,7 +502,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   tabTextActive: {
-    // Selected tab keeps medium weight, only color changes
     color: "#153A7A",
   },
   contentCard: {
@@ -605,7 +583,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     flex: 1,
     fontFamily: "Instrument Sans",
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
   },
   bulletItem: {
@@ -627,7 +604,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     flex: 1,
     fontFamily: "Instrument Sans",
-    // 2% letter spacing on 14px
     letterSpacing: 0.28,
   },
   selTagsContainer: {
@@ -646,9 +622,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#FFFFFF",
     fontFamily: "Instrument Sans",
-    // 150% line height for 12px
     lineHeight: 18,
-    // 2% letter spacing on 12px
     letterSpacing: 0.24,
   },
   notificationWrap: {
@@ -752,6 +726,15 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
   const prepSetup = activity.facilitate?.prep?.setup ?? [];
   const playSteps = activity.facilitate?.play?.steps ?? [];
   const debriefQuestions = activity.facilitate?.debrief?.questions ?? [];
+  const [showVideo, setShowVideo] = useState(false);
+  const ytId = getYouTubeId(activity.videoUrl ?? "");
+
+  const thumbnailUrl = ytId ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : null;
+  const imageSource = activity.imageUrl
+    ? { uri: activity.imageUrl }
+    : thumbnailUrl
+      ? { uri: thumbnailUrl }
+      : null;
 
   const hideNotification = useCallback(() => {
     Animated.timing(notificationAnim, {
@@ -818,9 +801,9 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
           style={[styles.contentWrapper, scrollViewHeight > 0 && { minHeight: scrollViewHeight }]}
         >
           <View style={styles.mediaSection}>
-            {activity.imageUrl != null && activity.imageUrl !== "" ? (
+            {imageSource ? (
               <ImageBackground
-                source={{ uri: activity.imageUrl }}
+                source={imageSource}
                 style={styles.mediaSectionBackground}
                 resizeMode="cover"
                 imageStyle={{ backgroundColor: "lightgray" }}
@@ -842,7 +825,12 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               <BackArrowIcon />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tutorialButton}>
+            <TouchableOpacity
+              style={styles.tutorialButton}
+              onPress={() => setShowVideo(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Watch tutorial"
+            >
               <PlayArrowIcon />
               <Text style={styles.tutorialText}>Tutorial</Text>
             </TouchableOpacity>
@@ -1081,6 +1069,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
         </View>
       </ScrollView>
 
+      {/* --- Notification Toast --- */}
       {notification && (
         <Animated.View
           style={[
@@ -1114,6 +1103,52 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
           </View>
         </Animated.View>
       )}
+
+      {/* --- YouTube Video Modal --- */}
+      <Modal
+        visible={showVideo}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowVideo(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "#000" }}>
+          {/* Header to close modal */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              paddingTop: 60,
+              paddingHorizontal: 20,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setShowVideo(false)}
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                backgroundColor: "rgba(255,255,255,0.2)",
+                borderRadius: 20,
+              }}
+            >
+              <Text style={{ color: "#FFF", fontWeight: "bold", fontFamily: "Instrument Sans" }}>
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* The YouTube Player */}
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <YoutubePlayer
+              height={300}
+              play={showVideo}
+              videoId={getYouTubeId(activity.videoUrl ?? "dQw4w9WgXcQ")}
+              onChangeState={(state: string) => {
+                if (state === "ended") setShowVideo(false);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

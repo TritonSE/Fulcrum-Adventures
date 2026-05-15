@@ -76,4 +76,5 @@ export type Activity = {
   isHistory?: boolean;
   isPlaylist?: boolean;
   lastViewedAt?: number;
+  videoUrl?: string;
 };
