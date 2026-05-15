@@ -296,7 +296,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
               <FilterPill
                 key={option}
                 label={option}
-                selected={filters.environment?.includes(option)}
+                selected={!!filters.environment?.includes(option)}
                 onPress={() => toggleMultiFilter("environment", option)}
               />
             ))}
