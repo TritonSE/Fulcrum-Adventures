@@ -14,22 +14,17 @@ export default antfu({
     "**/node_modules/**/",
   ],
 
-  // Disables stylistic rules to avoid conflicts with Prettier
   stylistic: false,
 
-  // Enables React support
   react: true,
 
-  // Enables type aware rules
   typescript: {
     tsconfigPath: "tsconfig.json",
     overrides: {
-      // Avoid bugs
       "ts/no-shadow": ["error", { ignoreTypeValueShadow: true }],
       "ts/no-unsafe-unary-minus": "error",
       "ts/no-unused-expressions": "error",
 
-      // Stylistic
       "ts/consistent-type-definitions": ["warn", "type"],
       "ts/no-use-before-define": "warn",
       "ts/prefer-readonly": "warn",
@@ -38,7 +33,6 @@ export default antfu({
   },
 
   rules: {
-    // Avoid bugs
     "unused-imports/no-unused-imports": [
       "warn",
       {
@@ -60,7 +54,6 @@ export default antfu({
     "no-self-compare": "error",
     "no-template-curly-in-string": "error",
 
-    // Stylistic
     "object-shorthand": ["warn", "properties"],
     "import/consistent-type-specifier-style": ["warn", "prefer-top-level"],
     "perfectionist/sort-imports": [
@@ -79,14 +72,12 @@ export default antfu({
     ],
     "no-case-declarations": "off",
 
-    // Disabled because of too many false positives
     "ts/strict-boolean-expressions": "off",
     "ts/no-unnecessary-condition": "off",
     "ts/switch-exhaustiveness-check": "off",
     "ts/return-await": "off",
     "jsdoc/check-param-names": "off",
 
-    // React Native specific
     "react/no-unknown-property": "off",
     "react/no-implicit-key": "off",
   },
