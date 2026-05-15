@@ -1,0 +1,88 @@
+.dashboardContainer {
+  overflow-x: auto;
+  padding: 48px 120px 80px 120px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 40px;
+}
+
+.headerAndCategoryCardsContainer {
+  width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.headerText {
+  color: var(--Primary, #153a7a);
+  font-family: "League Spartan";
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 104%; /* 37.44px */
+}
+
+.headerButtonsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.categoryCardsContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.searchInputContainer {
+  display: flex;
+  position: relative;
+  height: 43px;
+  width: 100%;
+  padding: 0 16px;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--Functional-Surface, #fff);
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.searchInputIcon {
+  position: absolute;
+  align-self: center;
+  left: 16px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 12px 12px 32px;
+  justify-self: center;
+  border: none;
+  outline: none;
+  background: #ffffff;
+  color: #153a7a;
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.32px;
+}
+
+.searchInput::placeholder {
+  color: var(--Primary, #153a7a);
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.32px;
+}

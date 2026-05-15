@@ -1,0 +1,167 @@
+.mailingListContainer {
+  overflow-x: auto;
+  padding: 48px 120px 80px 120px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+}
+
+.backContainer {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.backText {
+  color: var(--Primary, #153a7a);
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+}
+
+.mailingListHeaderContainer {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+  align-items: center;
+  gap: 12px;
+}
+
+.mailingListHeaderText {
+  color: var(--Primary, #153a7a);
+  font-family: "League Spartan";
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 104%; /* 37.44px */
+}
+
+.subscribersContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.subscribersText {
+  overflow: hidden;
+  color: var(--Primary, #153a7a);
+  text-overflow: ellipsis;
+
+  /* Body/Medium (reg) */
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.32px;
+}
+
+.mailingListPage {
+  min-height: 100svh;
+  text-align: left;
+}
+
+.mailingListContainer > a.backContainer {
+  text-decoration: none;
+}
+
+.mailingListActions {
+  display: flex;
+  width: 1200px;
+  justify-content: flex-end;
+}
+
+.mailingListTableCard {
+  width: 1200px;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mailingListTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.mailingListTable thead {
+  background: #f3f3f3;
+}
+
+.mailingListTable th,
+.mailingListTable td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid #ebebeb;
+  color: #484848;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 150%;
+}
+
+.mailingListTable th {
+  color: #153a7a;
+  font-weight: 600;
+}
+
+.mailingListTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mailingListTable__checkboxCol {
+  width: 48px;
+}
+
+.mailingListTable__email {
+  color: #153a7a;
+}
+
+.mailingListTable__date {
+  color: #6b6b6b;
+}
+
+.mailingListCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #153a7a;
+  cursor: pointer;
+}
+
+.mailingListMessage {
+  padding: 32px 20px;
+  color: #484848;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+}
+
+.mailingListMessage--error {
+  color: #b42318;
+}
+
+.mailingListPagination {
+  display: flex;
+  width: 1200px;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.mailingListPagination__info {
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
