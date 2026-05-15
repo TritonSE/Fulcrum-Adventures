@@ -25,7 +25,9 @@ export default function Dashboard() {
 
   function findNumActivitiesInCategory(category: Category): number {
     //TODO: check if category should be singular or an array
-    return activities.filter((activity) => activity.category.find((c) => c === category)).length;
+    return activities.filter((activity) =>
+      activity.category.find((c) => c === category),
+    ).length;
   }
 
   useEffect(() => {
