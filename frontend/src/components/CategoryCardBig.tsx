@@ -57,8 +57,7 @@ export const CategoryCardBig: React.FC<CategoryCardBigProps> = ({ category, onPr
           },
         ]}
       >
-        {/* Render the PNG at half the original width/height since it 
-        was exported at 2x to prevent it looking pixelated */}
+        {/* Render the PNG at half the original width/height since it was exported at 2x. */}
         <Image
           source={categoryGraphic}
           style={{ width: src.width / 2, height: src.height / 2, resizeMode: "contain" }}
