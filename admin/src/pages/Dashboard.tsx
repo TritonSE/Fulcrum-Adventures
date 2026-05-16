@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
@@ -11,6 +11,7 @@ import MailingListIcon from "../../icons/mailing_list.svg";
 import SearchIcon from "../../icons/search.svg";
 import type { Category } from "../components/CategoryCard";
 import { CategoryCard } from "../components/CategoryCard";
+import { listActivities } from "../api/activity";
 
 const categories: Category[] = [
   "Opener",
@@ -22,47 +23,26 @@ const categories: Category[] = [
 ];
 
 export default function Dashboard() {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Dummy data to populate the dashboard for now based on the image
-  const mockActivities: Activity[] = [
-    {
-      _id: "1",
-      title: "Rock Paper Scissors...",
-      overview: "Fun active game",
-      category: "Opener",
-      gradeRange: { min: 0, max: 12 },
-      groupSize: { min: 3, max: 15, anySize: false },
-      duration: "30+ min",
-      energyLevel: "Low",
-      environment: ["Any"],
-      setup: "None",
-      facilitateSections: [],
-      materials: [],
-      selTags: [],
-      status: "Published",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      _id: "2",
-      title: "Rock Paper Scissors...",
-      overview: "Fun active game",
-      category: "Opener",
-      gradeRange: { min: 0, max: 12 },
-      groupSize: { min: 3, max: 15, anySize: false },
-      duration: "30+ min",
-      energyLevel: "Low",
-      environment: ["Any"],
-      setup: "None",
-      facilitateSections: [],
-      materials: [],
-      selTags: [],
-      status: "Draft",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
+  function findNumActivitiesInCategory(category: Category): number {
+    return activities.filter((activity) =>
+      activity.category.find((c) => c === category),
+    ).length;
+  }
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      const result = await listActivities({});
+      if (result.success) {
+        setActivities(result.data);
+      } else {
+        console.error("Failed to fetch activities:", result.error);
+      }
+    };
+    fetchActivities();
+  }, []);
 
   const handleEditActivity = (id: string) => {
     console.log("Edit activity clicked:", id);
@@ -81,7 +61,7 @@ export default function Dashboard() {
                 icon={MailingListIcon}
                 variant="secondary-left"
                 onClick={() => {
-                  globalThis.location.href = "/mailing-list";
+                  window.location.href = "/mailing-list";
                 }}
               >
                 Mailing List
@@ -94,8 +74,8 @@ export default function Dashboard() {
               <CategoryCard
                 key={category}
                 category={category}
-                percentOfActivities={12}
-                numActivities={12}
+                numActivities={findNumActivitiesInCategory(category)}
+                totalActivities={activities.length}
               />
             ))}
           </div>
@@ -145,7 +125,7 @@ export default function Dashboard() {
           }}
         >
           <DashboardTable
-            activities={mockActivities}
+            activities={activities}
             onEditActivity={handleEditActivity}
           />
         </div>

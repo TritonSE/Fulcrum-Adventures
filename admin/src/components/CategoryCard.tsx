@@ -17,7 +17,7 @@ export type Category =
 
 interface CategoryCardProps {
   category: Category;
-  percentOfActivities: number;
+  totalActivities: number;
   numActivities: number;
 }
 
@@ -42,13 +42,13 @@ const CATEGORY_PADDING: Record<Category, number[]> = {
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({
   category,
-  percentOfActivities,
   numActivities,
+  totalActivities,
 }) => {
   const textColor = CATEGORY_COLORS[category];
   const categoryGraphic = CATEGORY_GRAPHICS[category];
   const categoryPadding = CATEGORY_PADDING[category];
-  
+
   return (
     <div className="categoryCard">
       <div
@@ -66,7 +66,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
             {category}
           </p>
           <p className="percentOfTotalActivitiesText">
-            {percentOfActivities}% of total
+            {totalActivities > 0
+              ? ((numActivities / totalActivities) * 100)
+                  .toFixed(2)
+                  .replace(/\.?0+$/, "")
+              : "0"}
+            % of total
           </p>
         </div>
         <div className="categoryCardActivityNumberCircle">
