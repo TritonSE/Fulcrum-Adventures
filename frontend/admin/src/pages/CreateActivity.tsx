@@ -24,6 +24,7 @@ import {
   createDefaultOverviewState,
   OverviewSection,
 } from "../create_edit_page_components/OverviewSection";
+import { PublishPreviewModal } from "../create_edit_page_components/sub_components/PublishPreviewModal";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
 import {
   type CropDraftImage,
@@ -274,6 +275,7 @@ export const CreateActivity: React.FC = () => {
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
   const [pendingVideo, setPendingVideo] = useState<VideoFrameSource | null>(null);
   const [status, setStatus] = useState<ActivityStatus>("idle");
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({
     objective: null,
     setupInstructions: null,
@@ -482,7 +484,7 @@ export const CreateActivity: React.FC = () => {
     console.log("cancel");
   };
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = async (options?: { showSuccessToast?: boolean }) => {
     try {
       const response_create = await fetch("http://localhost:4000/api/activities", {
         method: "POST",
@@ -562,33 +564,38 @@ export const CreateActivity: React.FC = () => {
       }
 
       setStatus("Draft");
-      showToast("success", "Activity marked as draft.");
+      if (options?.showSuccessToast ?? true) {
+        showToast("success", "Activity marked as draft.");
+      }
+
+      return _id;
     } catch (error) {
       const msg = error instanceof Error ? error.message : "unknown error";
       showToast("error", msg);
       console.log(msg);
+
+      return null;
     }
   };
 
   const handlePublish = async () => {
-    // if (!validateForm()) {
-    //   // Scroll to first error
-    //   scrollToFirstError();
-    //   showToast("error", "Please fix the highlighted fields before publishing.");
-    //   return;
-    // }
     try {
-      await handleSaveDraft();
+      const activityId = await handleSaveDraft({ showSuccessToast: false });
 
-      if (!id) throw new Error("activity creation failed");
-      const response_publish = await fetch(`http://localhost:4000/api/activities/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Published" }),
-      });
+      if (!activityId) throw new Error("activity creation failed");
+
+      const response_publish = await fetch(
+        `http://localhost:4000/api/activities/${activityId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Published" }),
+        },
+      );
 
       if (!response_publish.ok) throw new Error("Publish failed");
       setStatus("Published");
+      setIsPreviewVisible(false);
       showToast("success", "Activity marked as published.");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "unkown error";
@@ -635,7 +642,7 @@ export const CreateActivity: React.FC = () => {
           void handleSaveDraft();
         }}
         onPublish={() => {
-          void handlePublish();
+          setIsPreviewVisible(true);
         }}
       />
 
@@ -719,6 +726,24 @@ export const CreateActivity: React.FC = () => {
       <CollapsibleSection title="SEL Opportunity" defaultOpen>
         <SEL_Opportunity tags={selTags} onTagsChange={setSelTags} error={errors.selTags} />
       </CollapsibleSection>
+
+      <PublishPreviewModal
+        visible={isPreviewVisible}
+        onClose={() => setIsPreviewVisible(false)}
+        onSaveDraft={async () => {
+          const savedId = await handleSaveDraft();
+          if (savedId) {
+            setIsPreviewVisible(false);
+          }
+        }}
+        onPublish={() => {
+          void handlePublish();
+        }}
+        overview={overviewValue}
+        objective={objective}
+        tabs={activityTabs}
+        selTags={selTags}
+      />
 
       <Text style={styles.debugText}>Objective: {objective}</Text>
       <Text style={styles.debugText}>Status: {status}</Text>
