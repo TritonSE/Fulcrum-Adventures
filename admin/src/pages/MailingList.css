@@ -1,0 +1,69 @@
+.mailingListContainer {
+  overflow-x: auto;
+  padding: 48px 120px 80px 120px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+}
+
+.backContainer {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.backText {
+  color: var(--Primary, #153a7a);
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+}
+
+.mailingListHeaderContainer {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+  align-items: center;
+  gap: 12px;
+}
+
+.mailingListHeaderText {
+  color: var(--Primary, #153a7a);
+  font-family: "League Spartan";
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 104%; /* 37.44px */
+}
+
+.subscribersContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.subscribersText {
+  overflow: hidden;
+  color: var(--Primary, #153a7a);
+  text-overflow: ellipsis;
+
+  /* Body/Medium (reg) */
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.32px;
+}

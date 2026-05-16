@@ -1,4 +1,3 @@
-import React from "react";
 import type { Activity } from "../types/activity";
 
 // Import existing components that match the column data

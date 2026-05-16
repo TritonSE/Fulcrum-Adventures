@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import type { Activity } from "../types/activity";
-// Assuming these exist or will exist based on the layout
-// import CategorySummaryCard from '../components/CategorySummaryCard';
-// import FilterTabs from '../components/FilterTabs';
 
 import "./Dashboard.css";
+import AddIcon from "../../icons/add.svg";
+import MailingListIcon from "../../icons/mailing_list.svg";
+import SearchIcon from "../../icons/search.svg";
+import type { Category } from "../components/CategoryCard";
+import { CategoryCard } from "../components/CategoryCard";
+
+const categories: Category[] = [
+  "Opener",
+  "Icebreaker",
+  "Connection",
+  "Active",
+  "Debrief",
+  "Team Challenge",
+];
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,27 +70,34 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-layout">
+    <div style={{ background: "#F9F9F9", minHeight: "100vh" }}>
       <NavBar />
-      <main className="dashboard-content">
-        <div className="dashboard-header">
-          <h1>Activities Dashboard</h1>
-          <Button variant="primary">+ Create New Activity</Button>
-        </div>
-
-        {/* Top Summaries - to be implemented soon */}
-        <div className="category-summaries-placeholder">
-          {/* Placeholders for Opener, Icebreaker, etc. */}
-        </div>
-
-        {/* Searching and filtering */}
-        <div className="dashboard-controls">
-          <div className="search-container">
-            <SearchBar
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search activities"
-            />
+      <div className="dashboardContainer">
+        <div className="headerAndCategoryCardsContainer">
+          <div className="headerContainer">
+            <p className="headerText">Activities Dashboard</p>
+            <div className="headerButtonsContainer">
+              <Button
+                icon={MailingListIcon}
+                variant="secondary-left"
+                onClick={() => {
+                  globalThis.location.href = "/mailing-list";
+                }}
+              >
+                Mailing List
+              </Button>
+              <Button icon={AddIcon}>Create New Activity</Button>
+            </div>
+          </div>
+          <div className="categoryCardsContainer">
+            {categories.map((category) => (
+              <CategoryCard
+                key={category}
+                category={category}
+                percentOfActivities={12}
+                numActivities={12}
+              />
+            ))}
           </div>
 
           <div className="filter-row">
@@ -91,20 +109,47 @@ export default function Dashboard() {
             </div>
 
             <div className="sort-filter-actions">
-              <Button variant="secondary">Sort ▼</Button>
-              <Button variant="secondary">Filter</Button>
+              <Button variant="secondary-left">Sort ▼</Button>
+              <Button variant="secondary-left">Filter</Button>
             </div>
+          </div>
+
+          <div className="searchInputContainer" style={{ display: "none" }}>
+            {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
+            <img src={SearchIcon} className="searchInputIcon" alt="Search" />
+            <input
+              type="text"
+              className="searchInput"
+              placeholder="Search activities"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="search-container">
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search activities"
+            />
           </div>
         </div>
 
-        {/* The Table View */}
-        <div className="table-wrapper">
+        <div
+          className="table-wrapper"
+          style={{
+            maxWidth: "1200px",
+            margin: "0 auto",
+            marginTop: "24px",
+            width: "100%",
+          }}
+        >
           <DashboardTable
             activities={mockActivities}
             onEditActivity={handleEditActivity}
           />
         </div>
-      </main>
+      </div>
     </div>
   );
 }
