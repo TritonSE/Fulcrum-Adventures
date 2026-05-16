@@ -3,10 +3,9 @@
   max-width: none;
   margin: 0;
   border-radius: 8px;
-  border: 1px solid #dbe2ea;
-  box-shadow: none;
   overflow: hidden;
   background-color: #ffffff;
+  border: 1px solid #6c6c6c;
 }
 
 .dashboard-table {
@@ -16,42 +15,83 @@
 }
 
 .dashboard-table thead {
-  background-color: #172b4d; /* Example dark blue background from the design */
-  color: #ffffff;
+  background-color: #153a7a;
 }
 
 .dashboard-table th {
-  padding: 14px 16px;
-  font-weight: 600;
+  padding: 16px 24px;
+  font-family: "Instrument Sans";
+  font-weight: 700;
   font-size: 14px;
-  letter-spacing: 0;
+  color: #fcf6e5;
+  letter-spacing: 0.28px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.dashboard-table th:first-child {
+  width: 200px;
+  border-top-left-radius: 8px;
+}
+
+.dashboard-table th:nth-child(2) {
+  width: 204px;
+}
+
+.dashboard-table th:nth-child(4) {
+  width: 155px;
+}
+
+.dashboard-table th .th-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-table th .sort-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
 }
 
 .table-row {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #6c6c6c;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  height: 72px;
 }
 
 .table-row:last-child {
   border-bottom: none;
 }
 
+.table-row:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.table-row:nth-child(even) {
+  background-color: #ffffff;
+}
+
 .table-row:hover {
-  background-color: #f9fafb; /* Neutral/Gray 1 fallback for hover */
+  background-color: #f0f0f0;
 }
 
 .dashboard-table td {
-  padding: 14px 16px;
+  padding: 16px 24px;
   vertical-align: middle;
+  font-family: "Instrument Sans";
   font-size: 14px;
-  color: #374151; /* Dark gray for text */
+  color: #153a7a;
+  letter-spacing: 0.28px;
+  line-height: 1.5;
 }
 
 .col-title {
-  color: #111827;
-  font-weight: 500;
-  max-width: 220px;
+  color: #153a7a;
+  font-weight: 400;
+  width: 200px;
+  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -61,7 +101,7 @@
 .col-group,
 .col-duration {
   color: #153a7a;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .col-actions {

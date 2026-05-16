@@ -107,21 +107,26 @@
 
 .status-tabs-placeholder {
   display: flex;
-  background-color: #ffffff;
+  background-color: transparent;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
   overflow: hidden;
 }
 
 .status-tab {
-  padding: 8px 16px;
+  width: 145px;
+  padding: 8px 48px;
   border: none;
-  background: white;
-  color: #374151;
+  background: transparent;
+  color: #153a7a;
+  font-family: "League Spartan";
   font-weight: 500;
-  font-size: 14px;
+  font-size: 20px;
   cursor: pointer;
-  border-right: 1px solid #e5e7eb;
+  border-radius: 8px;
+  line-height: 1.04;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .status-tab:last-child {
@@ -129,13 +134,37 @@
 }
 
 .status-tab.active {
-  background-color: #172b4d; /* Selected color, likely dark blue */
-  color: #ffffff;
+  background-color: #153a7a;
+  color: #f9f9f9;
 }
 
 .sort-filter-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+}
+
+.sort-btn,
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid #153a7a;
+  background: white;
+  color: #153a7a;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.08));
+}
+
+.sort-btn:hover,
+.filter-btn:hover {
+  background-color: #f5f5f5;
 }
 
 .table-wrapper {

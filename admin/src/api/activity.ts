@@ -13,11 +13,36 @@ export type ListActivitiesRequest = {
   limit?: string;
 }
 
-export async function listActivities(request: ListActivitiesRequest): Promise<APIResult<Activity[]>> {
+export type ListActivitiesResponse = {
+  activities: Activity[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export async function listActivities(request: ListActivitiesRequest): Promise<APIResult<ListActivitiesResponse>> {
   try {
-    const response = await get("/api/activities", request);
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(request)) {
+      if (value !== undefined && value !== "") {
+        params.append(key, value);
+      }
+    }
+    const query = params.toString();
+    const url = `/api/activities${query ? `?${query}` : ""}`;
+    const response = await get(url);
     const data = await response.json();
-    return { success: true, data: data.activities };
+    return {
+      success: true,
+      data: {
+        activities: data.activities,
+        page: data.page,
+        limit: data.limit,
+        total: data.total,
+        totalPages: data.totalPages,
+      },
+    };
   } catch (error) {
     return handleAPIError(error);
   }

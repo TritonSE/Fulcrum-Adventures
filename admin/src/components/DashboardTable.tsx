@@ -8,6 +8,15 @@ import { StatusBadge } from "./StatusBadge";
 
 import "./DashboardTable.css";
 
+function SortColumnIcon() {
+  return (
+    <svg className="sort-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 3L11 6.5H5L8 3Z" fill="#fcf6e5"/>
+      <path d="M8 13L5 9.5H11L8 13Z" fill="#fcf6e5"/>
+    </svg>
+  );
+}
+
 interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
@@ -44,12 +53,42 @@ export default function DashboardTable({
       <table className="dashboard-table">
         <thead>
           <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Energy</th>
-            <th>Grade Level</th>
-            <th>Group Size</th>
-            <th>Duration</th>
+            <th>
+              <span className="th-content">
+                Title
+                <SortColumnIcon />
+              </span>
+            </th>
+            <th>
+              <span className="th-content">
+                Category
+                <SortColumnIcon />
+              </span>
+            </th>
+            <th>
+              <span className="th-content">
+                Energy
+                <SortColumnIcon />
+              </span>
+            </th>
+            <th>
+              <span className="th-content">
+                Grade Level
+                <SortColumnIcon />
+              </span>
+            </th>
+            <th>
+              <span className="th-content">
+                Group Size
+                <SortColumnIcon />
+              </span>
+            </th>
+            <th>
+              <span className="th-content">
+                Duration
+                <SortColumnIcon />
+              </span>
+            </th>
             <th>Status</th>
             <th>{/* Actions column (three dots) */}</th>
           </tr>
@@ -63,7 +102,9 @@ export default function DashboardTable({
             >
               <td className="col-title">{activity.title}</td>
               <td>
-                <CategoryTag category={activity.category} />
+                {activity.category.map((c) => (
+                  <CategoryTag key={c} category={c} selected />
+                ))}
               </td>
               <td>
                 <EnergyTag level={formatEnergyLevel(activity.energyLevel)} />
