@@ -51,17 +51,17 @@ GET /api/activities
 
 **Query Parameters:**
 
-| Param         | Type   | Default      | Description                                                 |
-| ------------- | ------ | ------------ | ----------------------------------------------------------- |
-| `status`      | string | —            | Filter by status: `Draft`, `Published`, `Archived`          |
-| `search`      | string | —            | Case-insensitive search on `title` and `overview`           |
-| `category`    | string | —            | Filter by category (matches if array contains value)        |
-| `energyLevel` | string | —            | Filter by energy level: `Low`, `Medium`, `High`             |
+| Param         | Type   | Default      | Description                                                                                           |
+| ------------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `status`      | string | —            | Filter by status: `Draft`, `Published`, `Archived`                                                    |
+| `search`      | string | —            | Case-insensitive search on `title` and `overview`                                                     |
+| `category`    | string | —            | Filter by category (matches if array contains value)                                                  |
+| `energyLevel` | string | —            | Filter by energy level: `Low`, `Medium`, `High`                                                       |
 | `environment` | string | —            | Filter by environment (comma-separated URI-encoded values, e.g. `Field,Gym%2FMPR`, `Any Environment`) |
-| `setup`       | string | —            | Filter by setup: `None`, `Required`                         |
-| `sort`        | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`)       |
-| `page`        | number | `1`          | Page number (1-based)                                       |
-| `limit`       | number | `10`         | Items per page (max 30)                                     |
+| `setup`       | string | —            | Filter by setup: `None`, `Required`                                                                   |
+| `sort`        | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`)                                                 |
+| `page`        | number | `1`          | Page number (1-based)                                                                                 |
+| `limit`       | number | `10`         | Items per page (max 30)                                                                               |
 
 **Response `200`:**
 
