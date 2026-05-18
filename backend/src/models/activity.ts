@@ -55,7 +55,7 @@ const activitySchema = new Schema(
     environment: [
       {
         type: String,
-        enum: ["Large Open Space", "Outdoor", "Any", "Small Space", "Virtual"],
+        enum: ["Blacktop", "Field", "Classroom", "Gym/MPR", "Any Environment"],
       },
     ],
     setup: {
