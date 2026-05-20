@@ -62,13 +62,21 @@ export default function MailingListTable({
                 <p>{subscriber.email}</p>
               </td>
               <td className="col-date">
-                <div className="copy-button" onClick={() => {
-                  navigator.clipboard.writeText(subscriber.email);
-                  const newCopiedRowIds = new Set<string>();
-                  newCopiedRowIds.add(subscriber._id);
-                  setCopiedRowIds(newCopiedRowIds);
-                }}>
-                  <img src={copiedRowIds.has(subscriber._id) ? CheckIcon : CopyIcon} className="copy-icon" />
+                <div
+                  className="copy-button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(subscriber.email);
+                    const newCopiedRowIds = new Set<string>();
+                    newCopiedRowIds.add(subscriber._id);
+                    setCopiedRowIds(newCopiedRowIds);
+                  }}
+                >
+                  <img
+                    src={
+                      copiedRowIds.has(subscriber._id) ? CheckIcon : CopyIcon
+                    }
+                    className="copy-icon"
+                  />
                 </div>
                 <p>{formatDate(subscriber.createdAt)}</p>
               </td>

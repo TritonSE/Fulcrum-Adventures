@@ -8,24 +8,29 @@ import CopyIcon from "../../icons/copy.svg";
 import { useEffect, useState } from "react";
 import type { Subscriber } from "../types/email";
 import { fetchEmails } from "../api/emails";
+import { Pagination } from "../components/Pagination";
 
 export default function MailingList() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [totalSubscribers, setTotalSubscribers] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchSubscribers = async () => {
-      const result = await fetchEmails(0, 10);
+      const result = await fetchEmails(currentPage, 10);
       const defaultSelected: Record<string, boolean> = {};
       result.emails.forEach((subscriber) => {
         defaultSelected[subscriber._id] = false;
       });
       setSubscribers(result.emails);
       setSelected(defaultSelected);
+      setTotalSubscribers(result.total);
+      setTotalPages(result.totalPages);
     };
     fetchSubscribers();
-  }, []);
+  }, [currentPage]);
 
   const toggleSubscriber = (id: string) => {
     setSelected((prev) => ({
@@ -62,7 +67,7 @@ export default function MailingList() {
           <p className="mailing-list-header-text">Mailing List</p>
           <div className="subscribers-container">
             <img src={PeopleIcon} className="icon" />
-            <p className="subscribers-text">{subscribers.length} subscribers</p>
+            <p className="subscribers-text">{totalSubscribers} subscribers</p>
           </div>
           {selectedCount > 0 && (
             <Button
@@ -79,6 +84,12 @@ export default function MailingList() {
           selected={selected}
           onToggleSubscriber={toggleSubscriber}
           onToggleSelectAll={toggleSelectAll}
+        />
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>
