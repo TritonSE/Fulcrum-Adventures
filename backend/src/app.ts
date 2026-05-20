@@ -4,6 +4,7 @@ import cors from "cors";
 import express from "express";
 
 import activityRoutes from "./routes/activity";
+import emailRoutes from "./routes/email";
 
 import type { NextFunction, Request, Response } from "express";
 
@@ -20,6 +21,7 @@ app.use(
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/activities", activityRoutes);
+app.use("/api/emails", emailRoutes);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   let statusCode = 500;
