@@ -18,6 +18,10 @@ export type RegisterResult =
   | { ok: true; token: string; user: User }
   | { ok: false; message: string; field?: "password" };
 
+export type ForgotPasswordResult = { ok: true } | { ok: false; message: string };
+
+export type ResetPasswordResult = { ok: true } | { ok: false; message: string };
+
 export async function loginAdmin(email: string, password: string): Promise<LoginResult> {
   try {
     const res = await fetch(`${AUTH_BASE}/login`, {
@@ -73,6 +77,52 @@ export async function registerAdmin(input: RegisterInput): Promise<RegisterResul
     return { ok: true, token: data.token, user: data.user };
   } catch {
     return { ok: false, message: "Unable to create account." };
+  }
+}
+
+export async function forgotPasswordAdmin(email: string): Promise<ForgotPasswordResult> {
+  try {
+    const res = await fetch(`${AUTH_BASE}/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim() }),
+    });
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      return {
+        ok: false,
+        message: data.error ?? "Unable to send reset email.",
+      };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, message: "Unable to send reset email." };
+  }
+}
+
+export async function resetPasswordAdmin(
+  token: string,
+  password: string,
+): Promise<ResetPasswordResult> {
+  try {
+    const res = await fetch(`${AUTH_BASE}/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      message?: string;
+    };
+    if (!res.ok) {
+      return {
+        ok: false,
+        message: data.error ?? "Unable to reset password.",
+      };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, message: "Unable to reset password." };
   }
 }
 

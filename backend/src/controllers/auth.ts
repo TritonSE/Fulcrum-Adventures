@@ -104,9 +104,6 @@ export async function forgotPassword(req: Request, res: Response): Promise<void>
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await user.save();
 
-    // Planned flow: email a link such as
-    // `${PASSWORD_RESET_URL}?token=${resetToken}` (admin reset-password page).
-    // Email delivery is not wired yet; log the link in non-production for testing.
     const resetBase = process.env.PASSWORD_RESET_URL ?? "http://localhost:5173/reset-password";
     const resetLink = `${resetBase}?token=${resetToken}`;
 

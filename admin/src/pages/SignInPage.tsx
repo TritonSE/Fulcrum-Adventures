@@ -105,9 +105,9 @@ export function SignInPage() {
             </div>
           ) : null}
 
-          <button type="button" className="sign-in__link">
+          <Link to="/forgot-password" className="sign-in__link">
             Forgot password?
-          </button>
+          </Link>
 
           <Button
             variant="primary"

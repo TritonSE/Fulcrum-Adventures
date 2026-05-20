@@ -1,0 +1,96 @@
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { forgotPasswordAdmin, isAdminAuthenticated } from "../api/auth";
+import { AuthShell } from "../components/AuthShell";
+import { Button } from "../components/Button";
+import { TextField } from "../components/TextField";
+
+import "./SignInPage.css";
+import "./ForgotPasswordPage.css";
+
+export function ForgotPasswordPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isAdminAuthenticated()) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
+  const emailFilled = email.trim().length > 0;
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!emailFilled || submitting || sent) {
+      return;
+    }
+
+    setSubmitting(true);
+    await forgotPasswordAdmin(email);
+    setSubmitting(false);
+    setSent(true);
+  }
+
+  return (
+    <AuthShell>
+      {sent ? (
+        <div className="sign-in__card forgot-password__card--sent">
+          <h1 className="sign-in__title">Forgot Password</h1>
+          <p className="forgot-password__message">
+            Email sent—check your inbox for a link to reset your password!
+          </p>
+          <Button
+            variant="primary"
+            icon={false}
+            type="button"
+            fullWidth
+            className="sign-in__submit"
+            onClick={() => navigate("/sign-in")}
+          >
+            Back to Sign-In
+          </Button>
+        </div>
+      ) : (
+        <form className="sign-in__card" onSubmit={onSubmit} noValidate>
+          <h1 className="sign-in__title">Forgot Password</h1>
+
+          <div className="sign-in__fields">
+            <div className="sign-in__field-block">
+              <label className="sign-in__label" htmlFor="forgot-email">
+                Email
+              </label>
+              <TextField
+                id="forgot-email"
+                className="sign-in__textfield"
+                value={email}
+                onChange={setEmail}
+                placeholder="example@gmail.com"
+                type="email"
+                autoComplete="email"
+              />
+            </div>
+          </div>
+
+          <Link to="/sign-in" className="sign-in__link forgot-password__back-link">
+            ← Back to Sign-In
+          </Link>
+
+          <Button
+            variant="primary"
+            icon={false}
+            type="submit"
+            fullWidth
+            className="sign-in__submit"
+            disabled={!emailFilled || submitting}
+          >
+            {submitting ? "Sending…" : "Send Email"}
+          </Button>
+        </form>
+      )}
+    </AuthShell>
+  );
+}

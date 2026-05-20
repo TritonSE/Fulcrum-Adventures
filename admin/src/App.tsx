@@ -4,6 +4,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { isAdminAuthenticated } from "./api/auth";
 import { AdminHome } from "./pages/AdminHome";
 import { CreateAccountPage } from "./pages/CreateAccountPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SignInPage } from "./pages/SignInPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -18,6 +20,8 @@ export default function App() {
     <Routes>
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<CreateAccountPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/"
         element={
