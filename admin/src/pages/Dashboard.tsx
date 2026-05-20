@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import { Pagination } from "../components/Pagination";
 import type { Activity } from "../types/activity";
-import { listActivities } from "../api/activity";
+import { fetchActivities } from "../api/activity";
 
 import "./Dashboard.css";
 import AddIcon from "../../icons/add.svg";
@@ -36,7 +36,7 @@ export default function Dashboard() {
   >("All");
 
   useEffect(() => {
-    const fetchActivities = async () => {
+    const getActivities = async () => {
       const request: Record<string, string> = {
         page: String(currentPage),
         limit: String(ITEMS_PER_PAGE),
@@ -48,7 +48,7 @@ export default function Dashboard() {
         request.search = searchQuery.trim();
       }
 
-      const result = await listActivities(request);
+      const result = await fetchActivities(request);
       if (result.success) {
         setActivities(result.data.activities);
         setTotalActivities(result.data.total);
@@ -57,7 +57,7 @@ export default function Dashboard() {
         console.error("Failed to fetch activities:", result.error);
       }
     };
-    fetchActivities();
+    getActivities();
   }, [currentPage, statusFilter, searchQuery]);
 
   function findNumActivitiesInCategory(category: Category): number {

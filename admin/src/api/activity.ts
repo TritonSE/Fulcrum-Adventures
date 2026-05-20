@@ -21,7 +21,7 @@ export type ListActivitiesResponse = {
   totalPages: number;
 };
 
-export async function listActivities(request: ListActivitiesRequest): Promise<APIResult<ListActivitiesResponse>> {
+export async function fetchActivities(request: ListActivitiesRequest): Promise<APIResult<ListActivitiesResponse>> {
   try {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(request)) {

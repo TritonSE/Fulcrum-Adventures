@@ -5,23 +5,33 @@ import "./MailingList.css";
 import MailingListTable from "../components/MailingListTable";
 import { Button } from "../components/Button";
 import CopyIcon from "../../icons/copy.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Subscriber } from "../types/email";
+import { fetchEmails } from "../api/emails";
 
 export default function MailingList() {
-  const subscribers = [
-    { email: "example1@example.com", dateSubscribed: new Date() },
-    { email: "example2@example.com", dateSubscribed: new Date() },
-  ];
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
 
-  const [selected, setSelected] = useState<Record<string, boolean>>({
-    "example1@example.com": false,
-    "example2@example.com": false,
-  });
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
 
-  const toggleSubscriber = (email: string) => {
+  useEffect(() => {
+    const fetchSubscribers = async () => {
+      const result = await fetchEmails(0, 10);
+      const defaultSelected: Record<string, boolean> = {};
+      result.emails.forEach((subscriber) => {
+        defaultSelected[subscriber._id] = false;
+      });
+      setSubscribers(result.emails);
+      setSelected(defaultSelected);
+    };
+    fetchSubscribers();
+
+  }, []);
+
+  const toggleSubscriber = (id: string) => {
     setSelected((prev) => ({
       ...prev,
-      [email]: !prev[email],
+      [id]: !prev[id],
     }));
   };
 
@@ -29,7 +39,7 @@ export default function MailingList() {
     const allSelected = Object.values(selected).every((v) => v);
     const newSelected: Record<string, boolean> = {};
     subscribers.forEach((subscriber) => {
-      newSelected[subscriber.email] = !allSelected;
+      newSelected[subscriber._id] = !allSelected;
     });
     setSelected(newSelected);
   };
