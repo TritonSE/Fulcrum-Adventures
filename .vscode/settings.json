@@ -34,5 +34,7 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+
+  "editor.tabSize": 2
 }

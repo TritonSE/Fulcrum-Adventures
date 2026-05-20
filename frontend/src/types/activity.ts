@@ -8,7 +8,7 @@ export type Category =
 
 export type EnergyLevel = "Low" | "Medium" | "High";
 
-export type Environment = "Indoor" | "Outdoor";
+export type Environment = "Any Environment" | "Classroom" | "Field" | "Gym/MPR" | "Blacktop";
 
 export type Range = {
   min: number;
@@ -33,6 +33,7 @@ export type DebriefTab = {
   questions: string[];
 };
 
+// Structure for additional custom tabs (Safety, Variations, Pro-Tip, etc.)
 export type CustomTab = {
   sections: CustomSection[];
 };
@@ -50,14 +51,12 @@ export type Activity = {
   gradeLevel: Range;
   groupSize: Range;
   duration: Range; // In minutes
-
-  category: Category;
+  category?: Category;
+  categories?: Category[];
   description: string;
   energyLevel: EnergyLevel;
   environment: Environment;
-
   materials: string[];
-
   isSaved?: boolean;
   imageUrl?: string;
   hasTutorial?: boolean;
@@ -74,4 +73,8 @@ export type Activity = {
   selTags?: string[];
   isCompleted?: boolean;
   isDownloaded?: boolean;
+  isHistory?: boolean;
+  isPlaylist?: boolean;
+  lastViewedAt?: number;
+  videoUrl?: string;
 };
