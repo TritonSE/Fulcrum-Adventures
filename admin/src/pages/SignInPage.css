@@ -181,10 +181,6 @@
 }
 
 .sign-in__signup-link {
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
@@ -192,6 +188,10 @@
   color: #153a7a;
   text-decoration: underline;
   text-underline-position: from-font;
+}
+
+.sign-in__signup-link:hover {
+  color: #0e2d63;
 }
 
 .sign-in__footer {

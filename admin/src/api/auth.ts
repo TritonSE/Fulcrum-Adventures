@@ -7,6 +7,17 @@ const AUTH_BASE = "/api/auth";
 
 export type LoginResult = { ok: true; token: string; user: User } | { ok: false; message: string };
 
+export type RegisterInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
+
+export type RegisterResult =
+  | { ok: true; token: string; user: User }
+  | { ok: false; message: string; field?: "password" };
+
 export async function loginAdmin(email: string, password: string): Promise<LoginResult> {
   try {
     const res = await fetch(`${AUTH_BASE}/login`, {
@@ -31,6 +42,37 @@ export async function loginAdmin(email: string, password: string): Promise<Login
       ok: false,
       message: "Incorrect email or password.",
     };
+  }
+}
+
+export async function registerAdmin(input: RegisterInput): Promise<RegisterResult> {
+  try {
+    const res = await fetch(`${AUTH_BASE}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        email: input.email.trim(),
+        password: input.password,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      token?: string;
+      user?: User;
+    };
+    if (!res.ok || !data.token || !data.user) {
+      const message = data.error ?? "Unable to create account.";
+      const field =
+        res.status === 400 && message.toLowerCase().includes("password")
+          ? "password"
+          : undefined;
+      return { ok: false, message, field };
+    }
+    return { ok: true, token: data.token, user: data.user };
+  } catch {
+    return { ok: false, message: "Unable to create account." };
   }
 }
 

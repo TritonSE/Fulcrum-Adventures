@@ -1,5 +1,5 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_LENGTH = 7;
 
 export function normalizeEmail(raw: unknown): string | null {
   if (typeof raw !== "string") return null;

@@ -58,7 +58,8 @@ export async function register(req: Request, res: Response): Promise<void> {
 
   if (!email || !password || !firstName || !lastName) {
     res.status(400).json({
-      error: "firstName, lastName, a valid email, and a password (min 8 characters) are required.",
+      error:
+        "firstName, lastName, a valid email, and a password (more than 6 characters) are required.",
     });
     return;
   }
@@ -125,7 +126,7 @@ export async function resetPassword(req: Request, res: Response): Promise<void> 
 
   if (!token || !password) {
     res.status(400).json({
-      error: "A valid reset token and password (min 8 characters) are required.",
+      error: "A valid reset token and password (more than 6 characters) are required.",
     });
     return;
   }
