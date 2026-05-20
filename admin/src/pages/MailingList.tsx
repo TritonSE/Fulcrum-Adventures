@@ -2,6 +2,7 @@ import { NavBar } from "../components/NavBar";
 import BackIcon from "../../icons/back.svg";
 import PeopleIcon from "../../icons/people.svg";
 import "./MailingList.css";
+import MailingListTable from "../components/MailingListTable";
 
 export default function MailingList() {
   const NUM_SUBSCRIBERS = 17;
@@ -26,6 +27,7 @@ export default function MailingList() {
             <p className="subscribersText">{NUM_SUBSCRIBERS} subscribers</p>
           </div>
         </div>
+        <MailingListTable subscribers={[{ email: "example1@example.com", dateSubscribed: new Date() }, { email: "example2@example.com", dateSubscribed: new Date() }]} />
       </div>
     </div>
   );

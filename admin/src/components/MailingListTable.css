@@ -1,0 +1,191 @@
+.table-container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #6c6c6c;
+}
+
+.mailing-list-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.mailing-list-table thead {
+  background-color: #153a7a;
+  display: flex;
+}
+
+.mailing-list-table thead tr {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.mailing-list-table tbody {
+  display: flex;
+  flex-direction: column;
+}
+
+.mailing-list-table th {
+  padding: 16px 24px;
+  font-family: "Instrument Sans";
+  font-weight: 700;
+  font-size: 14px;
+  color: #fcf6e5;
+  letter-spacing: 0.28px;
+  line-height: 1.5;
+  white-space: nowrap;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.mailing-list-table th .select-all-th-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  overflow: hidden;
+  color: var(--Cream-Primary, #FCF6E5);
+  text-overflow: ellipsis;
+
+  /* Body/Small (bold) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
+}
+
+.mailing-list-table th .date-th-content {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+
+  overflow: hidden;
+  color: var(--Cream-Primary, #FCF6E5);
+  text-overflow: ellipsis;
+
+  /* Body/Small (bold) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
+}
+
+.mailing-list-table th .sort-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+.table-row {
+  border-bottom: 1px solid #6c6c6c;
+  cursor: pointer;
+  height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.mailing-list-table td {
+  padding: 16px 24px;
+  vertical-align: middle;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  color: #153a7a;
+  letter-spacing: 0.28px;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.col-email {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.col-email p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  color: var(--Primary, #153a7a);
+  text-overflow: ellipsis;
+
+  /* Body/Small (reg) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
+}
+
+.col-date {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+  overflow: hidden;
+  gap: 10px;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--Neutral-Gray2, #d9d9d9);
+  background: #fff;
+
+  /* Button Elevation 2 */
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.mailing-list-table input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--Neutral-Gray2, #d9d9d9);
+  background-color: #ffffff;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.mailing-list-table input[type="checkbox"]:checked {
+  background-image: url("../../icons/mailing_list_check.svg");
+  background-color: #ffffff;
+}
+
+.copy-button {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 4px;
+  border: 1px solid var(--Neutral-Gray2, #D9D9D9);
+  background: #FFF;
+
+  /* Button Elevation 2 */
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+}

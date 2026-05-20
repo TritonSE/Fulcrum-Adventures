@@ -50,9 +50,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   const categoryPadding = CATEGORY_PADDING[category];
 
   return (
-    <div className="categoryCard">
+    <div className="category-card">
       <div
-        className="categoryCardImage"
+        className="category-card-image"
         style={{
           padding: `${categoryPadding[0]}px ${categoryPadding[1]}px ${categoryPadding[2]}px ${categoryPadding[3]}px`,
         }}
@@ -60,12 +60,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         <img height="100%" width="100%" src={categoryGraphic} alt={category} />
       </div>
 
-      <div className="categoryCardContent">
-        <div className="categoryCardTextContainer">
-          <p className="categoryText" style={{ color: textColor }}>
+      <div className="category-card-content">
+        <div className="category-card-text-container">
+          <p className="category-text" style={{ color: textColor }}>
             {category}
           </p>
-          <p className="percentOfTotalActivitiesText">
+          <p className="percent-of-total-activities-text">
             {totalActivities > 0
               ? ((numActivities / totalActivities) * 100)
                   .toFixed(2)
@@ -74,8 +74,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
             % of total
           </p>
         </div>
-        <div className="categoryCardActivityNumberCircle">
-          <p className="numActivitiesText">{numActivities}</p>
+        <div className="category-card-activity-number-circle">
+          <p className="num-activities-text">{numActivities}</p>
         </div>
       </div>
     </div>

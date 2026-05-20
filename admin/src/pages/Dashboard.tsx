@@ -31,7 +31,9 @@ export default function Dashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<"All" | "Draft" | "Published">("All");
+  const [statusFilter, setStatusFilter] = useState<
+    "All" | "Draft" | "Published"
+  >("All");
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -82,11 +84,11 @@ export default function Dashboard() {
   return (
     <div style={{ background: "#F9F9F9", minHeight: "100vh" }}>
       <NavBar />
-      <div className="dashboardContainer">
-        <div className="headerAndCategoryCardsContainer">
-          <div className="headerContainer">
-            <p className="headerText">Activities Dashboard</p>
-            <div className="headerButtonsContainer">
+      <div className="dashboard-container">
+        <div className="header-and-category-cards-container">
+          <div className="header-container">
+            <p className="header-text">Activities Dashboard</p>
+            <div className="header-buttons-container">
               <Button
                 icon={MailingListIcon}
                 variant="secondary-left"
@@ -99,7 +101,7 @@ export default function Dashboard() {
               <Button icon={AddIcon}>Create New Activity</Button>
             </div>
           </div>
-          <div className="categoryCardsContainer">
+          <div className="category-cards-container">
             {categories.map((category) => (
               <CategoryCard
                 key={category}
@@ -110,12 +112,12 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="searchInputContainer" style={{ display: "none" }}>
+          <div className="search-input-container" style={{ display: "none" }}>
             {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
-            <img src={SearchIcon} className="searchInputIcon" alt="Search" />
+            <img src={SearchIcon} className="search-input-icon" alt="Search" />
             <input
               type="text"
-              className="searchInput"
+              className="search-input"
               placeholder="Search activities"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,14 +149,38 @@ export default function Dashboard() {
             <div className="sort-filter-actions">
               <button className="sort-btn">
                 Sort
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#153a7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M1 1.5L6 6.5L11 1.5"
+                    stroke="#153a7a"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
               <button className="filter-btn">
                 Filter
-                <svg width="13" height="16" viewBox="0 0 13 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0.5 1H12.5L7.5 8.5V13.5L5.5 15V8.5L0.5 1Z" stroke="#153a7a" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="13"
+                  height="16"
+                  viewBox="0 0 13 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0.5 1H12.5L7.5 8.5V13.5L5.5 15V8.5L0.5 1Z"
+                    stroke="#153a7a"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             </div>

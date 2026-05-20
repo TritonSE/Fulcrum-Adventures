@@ -1,4 +1,4 @@
-.dashboardContainer {
+.dashboard-container {
   overflow-x: auto;
   padding: 144px 120px 80px 120px;
   box-sizing: border-box;
@@ -9,7 +9,7 @@
   gap: 40px;
 }
 
-.headerAndCategoryCardsContainer {
+.header-and-category-cards-container {
   width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -17,12 +17,12 @@
   gap: 24px;
 }
 
-.headerContainer {
+.header-container {
   display: flex;
   justify-content: space-between;
 }
 
-.headerText {
+.header-text {
   color: var(--Primary, #153a7a);
   font-family: "League Spartan";
   font-size: 36px;
@@ -32,19 +32,19 @@
   margin: 0;
 }
 
-.headerButtonsContainer {
+.header-buttons-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
 }
 
-.categoryCardsContainer {
+.category-cards-container {
   display: flex;
   justify-content: space-between;
 }
 
-.searchInputContainer {
+.search-input-container {
   display: flex;
   position: relative;
   height: 43px;
@@ -57,13 +57,13 @@
   box-sizing: border-box;
 }
 
-.searchInputIcon {
+.search-input-icon {
   position: absolute;
   align-self: center;
   left: 16px;
 }
 
-.searchInput {
+.search-input {
   width: 100%;
   padding: 12px 12px 12px 32px;
   justify-self: center;
@@ -78,7 +78,7 @@
   letter-spacing: 0.32px;
 }
 
-.searchInput::placeholder {
+.search-input::placeholder {
   color: var(--Primary, #153a7a);
   font-family: "Instrument Sans";
   font-size: 16px;
