@@ -24,6 +24,11 @@ interface TextFieldProps {
   fullWidth?: boolean;
   width?: number | string;
   height?: number | string;
+  type?: "text" | "password" | "email";
+  className?: string;
+  emphasized?: boolean;
+  id?: string;
+  autoComplete?: string;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -37,6 +42,11 @@ export const TextField: React.FC<TextFieldProps> = ({
   fullWidth = true,
   width,
   height,
+  type = "text",
+  className = "",
+  emphasized = false,
+  id,
+  autoComplete,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -45,6 +55,8 @@ export const TextField: React.FC<TextFieldProps> = ({
     fullWidth && !width && "textfield--full-width", // Only use fullWidth if no custom width is passed
     error && "textfield--error",
     isFocused && "textfield--focused",
+    emphasized && "textfield--emphasized",
+    className,
   ]
     .filter(Boolean)
     .join(" ");
@@ -73,13 +85,15 @@ export const TextField: React.FC<TextFieldProps> = ({
           />
         ) : (
           <input
-            type="text"
+            id={id}
+            type={type}
             className="textfield-input"
             value={value}
             onChange={handleChange}
             placeholder={placeholder}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            autoComplete={autoComplete}
           />
         )}
       </div>
