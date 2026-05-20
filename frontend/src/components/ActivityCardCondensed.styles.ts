@@ -4,28 +4,24 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    marginRight: 16,
     width: 240,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
-    paddingBottom: 16,
-    overflow: "visible",
+    elevation: 2,
   },
   innerContainer: {
     borderRadius: 16,
-    overflow: "visible",
     backgroundColor: "#FFFFFF",
+    overflow: "hidden",
   },
   imageContainer: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
     width: "100%",
     height: 128,
     backgroundColor: "#E8E8E8",
-    overflow: "hidden",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   image: {
     width: "100%",
@@ -80,6 +76,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   categoryTag: {
     paddingHorizontal: 12,
@@ -91,7 +88,7 @@ export const styles = StyleSheet.create({
   categoryText: {
     fontFamily: "Instrument Sans",
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
   },
   bookmarkButton: {
@@ -106,5 +103,20 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  extraTag: {
+    height: 24,
+    width: 24,
+    borderRadius: 24,
+    backgroundColor: "#EBEBEB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 4,
+  },
+  extraTagText: {
+    fontFamily: "Instrument Sans",
+    color: "#909090",
+    fontWeight: "500",
+    fontSize: 12,
   },
 });
