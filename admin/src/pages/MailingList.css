@@ -1,5 +1,5 @@
-.mailingListContainer {
-  overflow-x: auto;
+.mailing-list-container {
+  height: 100%;
   padding: 144px 120px 80px 120px;
   box-sizing: border-box;
   display: flex;
@@ -9,10 +9,9 @@
   gap: 24px;
 }
 
-.backContainer {
+.back-container {
   display: flex;
   flex-direction: row;
-  width: 1200px;
   gap: 10px;
   cursor: pointer;
 }
@@ -22,7 +21,7 @@
   height: 24px;
 }
 
-.backText {
+.back-text {
   color: var(--Primary, #153a7a);
   font-family: "Instrument Sans";
   font-size: 16px;
@@ -31,15 +30,15 @@
   line-height: 24px; /* 150% */
 }
 
-.mailingListHeaderContainer {
+.mailing-list-header-container {
+  height: 45px;
   display: flex;
   flex-direction: row;
-  width: 1200px;
   align-items: center;
   gap: 12px;
 }
 
-.mailingListHeaderText {
+.mailing-list-header-text {
   color: var(--Primary, #153a7a);
   font-family: "League Spartan";
   font-size: 36px;
@@ -48,13 +47,13 @@
   line-height: 104%; /* 37.44px */
 }
 
-.subscribersContainer {
+.subscribers-container {
   display: flex;
   flex-direction: row;
   gap: 10px;
 }
 
-.subscribersText {
+.subscribers-text {
   overflow: hidden;
   color: var(--Primary, #153a7a);
   text-overflow: ellipsis;
@@ -66,4 +65,8 @@
   font-weight: 400;
   line-height: 150%; /* 24px */
   letter-spacing: 0.32px;
+}
+
+.copy-emails-button {
+  margin-left: auto;
 }

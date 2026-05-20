@@ -98,6 +98,10 @@
   align-items: center;
 }
 
+.table-row:last-child {
+  border-bottom: none;
+}
+
 .mailing-list-table td {
   padding: 16px 24px;
   vertical-align: middle;

@@ -7,10 +7,16 @@ interface MailingListTableProps {
     email: string;
     dateSubscribed: Date;
   }[];
+  selected: Record<string, boolean>;
+  onToggleSubscriber: (email: string) => void;
+  onToggleSelectAll: () => void;
 }
 
 export default function MailingListTable({
   subscribers,
+  selected,
+  onToggleSubscriber,
+  onToggleSelectAll,
 }: MailingListTableProps) {
   return (
     <div className="table-container">
@@ -19,7 +25,7 @@ export default function MailingListTable({
           <tr>
             <th>
               <span className="select-all-th-content">
-                <input type="checkbox" />
+                <input type="checkbox" checked={Object.values(selected).every((v) => v)} onChange={() => onToggleSelectAll()} />
                 <p>Select All</p>
               </span>
             </th>
@@ -36,7 +42,7 @@ export default function MailingListTable({
           {subscribers.map((subscriber) => (
             <tr key={subscriber.email} className="table-row">
               <td className="col-email">
-                <input type="checkbox" />
+                <input type="checkbox" checked={selected[subscriber.email] || false} onChange={() => onToggleSubscriber(subscriber.email)} />
                 <p>{subscriber.email}</p>
               </td>
               <td className="col-date">

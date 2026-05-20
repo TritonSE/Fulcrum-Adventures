@@ -54,26 +54,27 @@
   opacity: 0.6;
 }
 
-.table-row {
+.dashboard-table .table-row {
+  display: table-row;
   border-bottom: 1px solid #6c6c6c;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 72px;
 }
 
-.table-row:last-child {
+.dashboard-table .table-row:last-child {
   border-bottom: none;
 }
 
-.table-row:nth-child(odd) {
+.dashboard-table .table-row:nth-child(odd) {
   background-color: #f9f9f9;
 }
 
-.table-row:nth-child(even) {
+.dashboard-table .table-row:nth-child(even) {
   background-color: #ffffff;
 }
 
-.table-row:hover {
+.dashboard-table .table-row:hover {
   background-color: #f0f0f0;
 }
 
