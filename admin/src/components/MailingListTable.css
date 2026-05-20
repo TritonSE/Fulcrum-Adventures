@@ -52,7 +52,7 @@
   gap: 10px;
 
   overflow: hidden;
-  color: var(--Cream-Primary, #FCF6E5);
+  color: var(--Cream-Primary, #fcf6e5);
   text-overflow: ellipsis;
 
   /* Body/Small (bold) */
@@ -72,7 +72,7 @@
   width: 100%;
 
   overflow: hidden;
-  color: var(--Cream-Primary, #FCF6E5);
+  color: var(--Cream-Primary, #fcf6e5);
   text-overflow: ellipsis;
 
   /* Body/Small (bold) */
@@ -146,15 +146,8 @@
   gap: 10px;
 }
 
-.checkbox {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  border: 1px solid var(--Neutral-Gray2, #d9d9d9);
-  background: #fff;
-
-  /* Button Elevation 2 */
-  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+.checkbox:hover {
+  background: #f0f0f0;
 }
 
 .mailing-list-table input[type="checkbox"] {
@@ -179,6 +172,10 @@
   background-color: #ffffff;
 }
 
+.mailing-list-table input[type="checkbox"]:hover {
+  background-color: #f0f0f0;
+}
+
 .copy-button {
   display: flex;
   width: 24px;
@@ -187,9 +184,13 @@
   align-items: center;
 
   border-radius: 4px;
-  border: 1px solid var(--Neutral-Gray2, #D9D9D9);
-  background: #FFF;
+  border: 1px solid var(--Neutral-Gray2, #d9d9d9);
+  background: #ffffff;
 
   /* Button Elevation 2 */
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.copy-button:hover {
+  background: #f0f0f0;
 }

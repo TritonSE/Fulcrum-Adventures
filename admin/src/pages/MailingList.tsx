@@ -25,7 +25,6 @@ export default function MailingList() {
       setSelected(defaultSelected);
     };
     fetchSubscribers();
-
   }, []);
 
   const toggleSubscriber = (id: string) => {
