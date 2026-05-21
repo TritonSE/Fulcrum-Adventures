@@ -241,6 +241,26 @@ type CreateActivityHeaderProps = {
   onPublish: () => void;
 };
 
+type CreateActivityActionsProps = {
+  onCancel: () => void;
+  onSaveDraft: () => void;
+  onPublish: () => void;
+};
+
+const CreateActivityActions: React.FC<CreateActivityActionsProps> = ({
+  onCancel,
+  onSaveDraft,
+  onPublish,
+}) => {
+  return (
+    <View style={styles.footerActions}>
+      <HeaderActionButton label="Cancel" onPress={onCancel} />
+      <HeaderActionButton label="Save as Draft" onPress={onSaveDraft} />
+      <HeaderActionButton label="Publish Activity" onPress={onPublish} variant="primary" />
+    </View>
+  );
+};
+
 const CreateActivityHeader: React.FC<CreateActivityHeaderProps> = ({
   onCancel,
   onSaveDraft,
@@ -745,6 +765,16 @@ export const CreateActivity: React.FC = () => {
         selTags={selTags}
       />
 
+      <CreateActivityActions
+        onCancel={handleCancel}
+        onSaveDraft={() => {
+          void handleSaveDraft();
+        }}
+        onPublish={() => {
+          setIsPreviewVisible(true);
+        }}
+      />
+
       <Text style={styles.debugText}>Objective: {objective}</Text>
       <Text style={styles.debugText}>Status: {status}</Text>
       <Text style={styles.debugText}>Activity tabs: {JSON.stringify(activityTabs)}</Text>
@@ -826,6 +856,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginLeft: "auto",
+  },
+  footerActions: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 10,
+    flexWrap: "wrap",
   },
 
   headerButton: {
