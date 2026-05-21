@@ -815,9 +815,10 @@ const styles = StyleSheet.create({
   },
 
   pageTitle: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
+    fontFamily: "League Spartan",
   },
 
   headerActions: {

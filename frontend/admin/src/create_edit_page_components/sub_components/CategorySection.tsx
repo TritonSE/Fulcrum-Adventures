@@ -76,8 +76,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F3B82",
-    marginBottom: 16,
+    color: "#153A7A",
+    marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   lightText: {
     fontWeight: "400",
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   chipSelected: {
-    borderColor: "#1F3B82",
+    borderColor: "#153A7A",
     backgroundColor: "#EAF0FF",
   },
   chipDisabled: {
@@ -111,9 +112,15 @@ const styles = StyleSheet.create({
     color: "#5B6B8B",
   },
   chipTextSelected: {
-    color: "#1F3B82",
+    color: "#153A7A",
+    fontSize: 14,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
   chipTextDisabled: {
     color: "#8E99B2",
+    fontSize: 14,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
 });

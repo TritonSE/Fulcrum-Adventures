@@ -15,8 +15,10 @@ import ActionIcon from "../../../../assets/icons/Action.svg";
 import BookmarkIcon from "../../../../assets/icons/BookMarkIcon.svg";
 import PageIcon from "../../../../assets/icons/PageIcon.svg";
 import ClockIcon from "../../../../assets/icons/clock.svg";
+import BlankEnergyStarIcon from "../../../../assets/icons/blankenergystar.svg";
 import GraduationCapIcon from "../../../../assets/icons/graduation-cap.svg";
 import PeopleIcon from "../../../../assets/icons/people.svg";
+import YellowEnergyStarIcon from "../../../../assets/icons/yellowenergystar.svg";
 
 import type { ActivityTab } from "../ActivityContent";
 import type { OverviewFormState } from "../OverviewSection";
@@ -63,6 +65,19 @@ const getEnvironmentLabel = (overview: OverviewFormState) =>
       : "No environment selected";
 
 const getDurationLabel = (overview: OverviewFormState) => overview.duration ?? "No duration set";
+
+const getEnergyLevelFilledStars = (overview: OverviewFormState) => {
+  switch (overview.energyLevel) {
+    case "High":
+      return 3;
+    case "Medium":
+      return 2;
+    case "Low":
+      return 1;
+    default:
+      return 0;
+  }
+};
 
 const toTabPreview = (tab: ActivityTab): TabPreview => ({
   id: tab.id,
@@ -120,7 +135,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const shellWidth = Math.min(Math.max(width - 8, 0), 1000);
-  const frameWidth = Math.min(360, Math.max(280, width * 0.22));
+  const frameWidth = Math.min(500, width * 0.22);
   const frameHeight = frameWidth * (550 / 300);
   const scale = frameWidth / 300;
   const screenInset = 5 * scale;
@@ -129,6 +144,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const previewTabs = useMemo(() => tabs.map(toTabPreview), [tabs]);
+  const energyLevelFilledStars = getEnergyLevelFilledStars(overview);
   const hasVideoTutorial =
     overview.thumbnailMediaKind === "video" && !!overview.thumbnailVideo?.uri;
 
@@ -261,11 +277,19 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                       <PreviewMetric value={getDurationLabel(overview)} Icon={ClockIcon} />
                     </View>
 
-                    <Text style={styles.descriptionText} numberOfLines={4}>
+   <Text style={styles.descriptionText} numberOfLines={4}>
                       {overview.overview || "No overview provided yet."}
                     </Text>
 
                     <View style={styles.tagRow}>
+                      <View style={styles.energyStarsRow}>
+                        {[0, 1, 2].map((index) => {
+                          const StarIcon = index < energyLevelFilledStars ? YellowEnergyStarIcon : BlankEnergyStarIcon;
+
+                          return <StarIcon key={`energy-star-${index}`} width={16} height={16} />;
+                        })}
+                      </View>
+
                       <PreviewChip label={getEnvironmentLabel(overview)} />
                       <PreviewChip label={overview.setup === "Props" ? "Props" : "No Props"} />
                     </View>
@@ -585,7 +609,11 @@ const styles = StyleSheet.create({
     color: "#153A7A",
     fontSize: 8.799,
     lineHeight: 21,
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+  energyStarsRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   tagRow: {
     flexDirection: "row",
@@ -647,14 +675,15 @@ const styles = StyleSheet.create({
   },
   listItemLabel: {
     color: "#153A7A",
-    fontSize: 12,
+    fontSize: 12.57,
     fontWeight: "900",
     marginBottom: 8,
-    fontFamily: "Instrument Sans",
+    fontFamily: "League Spartan",
   },
   listItemText: {
     color: "#153A7A",
-    fontSize: 10,
+    fontSize: 8.799,
+    fontWeight: "400",
     fontFamily: "Instrument Sans",
   },
   sectionBlock: {
@@ -663,13 +692,14 @@ const styles = StyleSheet.create({
   },
   sectionBlockTitle: {
     color: "#153A7A",
-    fontSize: 12,
+    fontSize: 12.57,
     fontWeight: "900",
-    fontFamily: "Instrument Sans",
+    fontFamily: "League Spartan",
   },
   sectionBlockText: {
     color: "#153A7A",
-    fontSize: 10,
+    fontSize: 8.799,
+    fontWeight: "400",
     fontFamily: "Instrument Sans",
   },
   materialBlock: {
@@ -678,13 +708,14 @@ const styles = StyleSheet.create({
   },
   materialTitle: {
     color: "#153A7A",
-    fontSize: 12,
+    fontSize: 12.57,
     fontWeight: "900",
-    fontFamily: "Instrument Sans",
+    fontFamily: "League Spartan",
   },
   materialText: {
     color: "#153A7A",
-    fontSize: 10,
+    fontSize: 8.799,
+    fontWeight: "400",
     fontFamily: "Instrument Sans",
   },
   materialItemRow: {
@@ -702,6 +733,8 @@ const styles = StyleSheet.create({
   materialItemText: {
     color: "#153A7A",
     fontSize: 8.799,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
   selTagWrap: {
     flexDirection: "row",
@@ -716,7 +749,7 @@ const styles = StyleSheet.create({
   },
   selTagChipText: {
     color: "#ffffff",
-    fontSize: 9,
+    fontSize: 7.54,
     fontWeight: "500",
     fontFamily: "Instrument Sans",
   },

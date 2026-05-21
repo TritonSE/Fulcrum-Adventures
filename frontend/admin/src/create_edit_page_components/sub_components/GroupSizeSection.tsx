@@ -63,8 +63,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
     marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   row: {
     flexDirection: "row",
@@ -87,9 +88,10 @@ const styles = StyleSheet.create({
     color: "#B4B4B4",
   },
   toText: {
-    fontSize: 16,
-    color: "#5B6B8B",
-    fontWeight: "500",
+    color: "#153A7A",
+    fontSize: 14,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
   checkboxRow: {
     marginTop: 14,
@@ -108,17 +110,19 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   checkboxChecked: {
-    borderColor: "#1F3B82",
+    borderColor: "#153A7A",
     backgroundColor: "#EAF0FF",
   },
   checkboxCheck: {
-    color: "#1F3B82",
-    fontSize: 12,
-    fontWeight: "700",
+    color: "#153A7A",
+    fontSize: 14,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
   checkboxLabel: {
-    color: "#5B6B8B",
+    color: "#153A7A",
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
 });

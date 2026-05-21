@@ -41,8 +41,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
     marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   row: {
     flexDirection: "row",
@@ -67,9 +68,13 @@ const styles = StyleSheet.create({
   chipText: {
     color: "#5B6B8B",
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
   chipTextSelected: {
-    color: "#1F3B82",
+    color: "#153A7A",
+    fontSize: 14,
+    fontWeight: "400",
+    fontFamily: "Instrument Sans",
   },
 });

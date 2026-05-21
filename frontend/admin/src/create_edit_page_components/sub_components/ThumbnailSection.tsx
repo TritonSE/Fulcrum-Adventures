@@ -95,8 +95,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F3B82",
+    color: "#153A7A",
     marginBottom: 12,
+    fontFamily: "Instrument Sans Bold",
   },
   row: {
     width: "100%",
