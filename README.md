@@ -8,7 +8,8 @@
 4. if you need to add react native libraries: do npx expo install to pick compatible versions
 
 # Backend:
-no backend needed for now, but cd backend and npm install
+cd backend and npm install
+firebase and mongodb needed
 
 # Linting: 
 run these commands in the backend or frontend directories for linting and formating, make sure to run before pushing
