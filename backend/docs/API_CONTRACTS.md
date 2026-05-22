@@ -20,8 +20,9 @@ type Activity = {
   _id: string;
   title: string;
   overview: string;
-  thumbnailUrl?: string;
-  additionalMedia?: { type: "image" | "video"; url: string }[];
+  thumbnailUrl?: string; // uploaded image, or YouTube thumbnail when only videoUrl is set
+  videoUrl?: string; // YouTube link for activity video
+  additionalMedia?: { type: "image"; url: string }[];
   category: Category[]; // 1–3 items
   gradeRange: { min: number; max: number }; // K = 0
   groupSize: { min: number; max: number; anySize: boolean };
@@ -224,9 +225,10 @@ Content-Type: multipart/form-data
 
 | Field         | Type   | Required | Description                                                               |
 | ------------- | ------ | -------- | ------------------------------------------------------------------------- |
-| `file`        | File   | Yes      | Image or video file (jpg, png, gif, webp, mp4, webm, mov)                 |
-| `mediaTarget` | string | Yes      | `"thumbnail"` or `"additional"`                                           |
-| `mediaType`   | string | No       | `"image"` or `"video"` (for additional media only, defaults to `"image"`) |
+| `file`        | File   | Yes      | Image file only (jpg, jpeg, png, gif, webp)                               |
+| `mediaTarget` | string | Yes      | `"thumbnail"` sets `thumbnailUrl`, or `"additional"` adds to `additionalMedia` |
+
+**Thumbnail behavior:** If `mediaTarget` is `"thumbnail"`, the uploaded image is stored as `thumbnailUrl`. On create/update, when `thumbnailUrl` is omitted but `videoUrl` is a YouTube link, the API sets `thumbnailUrl` to the YouTube preview image automatically.
 
 **Max file size:** 10 MB
 
