@@ -3,6 +3,7 @@ import path from "node:path";
 import cors from "cors";
 import express from "express";
 
+import { connectDb } from "./db";
 import activityRoutes from "./routes/activity";
 import emailRoutes from "./routes/email";
 
@@ -18,7 +19,18 @@ app.use(
   }),
 );
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+if (!process.env.VERCEL) {
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+}
+
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await connectDb();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use("/api/activities", activityRoutes);
 app.use("/api/emails", emailRoutes);
