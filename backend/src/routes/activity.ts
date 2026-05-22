@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import path from "node:path";
 
 import express from "express";
@@ -17,26 +16,15 @@ import {
 
 const router = express.Router();
 
-const uploadDir = path.join(process.cwd(), "uploads", "activities");
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const allowed = /\.(?:jpg|jpeg|png|gif|webp|mp4|webm|mov)$/i;
+    const allowed = /\.(?:jpg|jpeg|png|gif|webp)$/i;
     if (allowed.test(path.extname(file.originalname))) {
       cb(null, true);
     } else {
-      cb(new Error("Only image and video files are allowed"));
+      cb(new Error("Only image files are allowed (jpg, jpeg, png, gif, webp)"));
     }
   },
 });

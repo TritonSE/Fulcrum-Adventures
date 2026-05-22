@@ -4,7 +4,7 @@ import type { InferSchemaType } from "mongoose";
 
 const additionalMediaSchema = new Schema(
   {
-    type: { type: String, enum: ["image", "video"], required: true },
+    type: { type: String, enum: ["image"], required: true, default: "image" },
     url: { type: String, required: true },
   },
   { _id: false },
@@ -23,6 +23,7 @@ const activitySchema = new Schema(
     title: { type: String, required: true },
     overview: { type: String, required: true },
     thumbnailUrl: { type: String },
+    videoUrl: { type: String },
     additionalMedia: [additionalMediaSchema],
     category: {
       type: [String],
