@@ -5,15 +5,14 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    margin: 8,
     flexDirection: "row",
     alignItems: "stretch",
 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.14,
+    shadowRadius: 3,
     elevation: 2,
 
     height: 144,
@@ -48,11 +47,12 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "League Spartan",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#153A7A",
-    lineHeight: 21,
+    lineHeight: 22,
     marginBottom: 0,
+    flexShrink: 1,
   },
   metaContainer: {
     flexDirection: "row",
@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
   },
   categoryText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
     fontFamily: "Instrument Sans",
   },
@@ -114,5 +114,20 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  extraTag: {
+    height: 24,
+    width: 24,
+    borderRadius: 24,
+    backgroundColor: "#EBEBEB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 4,
+  },
+  extraTagText: {
+    fontFamily: "Instrument Sans",
+    color: "#909090",
+    fontSize: 12,
+    fontWeight: "500",
   },
 });

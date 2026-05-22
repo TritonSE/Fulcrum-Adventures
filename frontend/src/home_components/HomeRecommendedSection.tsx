@@ -1,32 +1,16 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
-import { mockActivities } from "../data/mockActivities";
+import { RECOMMENDED_TITLES } from "../constants/homeSections";
+import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
-
-export function HomeRecommendedSection() {
-  return (
-    <View style={styles.sectionContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.text}>Recommended</Text>
-        <SeeAll screen="/recommended" />
-      </View>
-      <ActivityList
-        activities={mockActivities}
-        variant="condensed"
-        horizontal={true}
-        height={252}
-      />
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 32,
@@ -39,7 +23,28 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     lineHeight: 27.04,
   },
-  sectionContainer: {
-    gap: 8,
-  },
 });
+
+export function HomeRecommendedSection() {
+  const { activities } = useActivities();
+
+  // Filter based on admin-selected list and show only 4 for the preview
+  const recommendedActivities = activities
+    .filter((a) => RECOMMENDED_TITLES.includes(a.title))
+    .slice(0, 4);
+
+  return (
+    <View>
+      <View style={styles.headerContainer}>
+        <Text style={styles.text}>Recommended</Text>
+        <SeeAll screen="/recommended" />
+      </View>
+      <ActivityList
+        activities={recommendedActivities}
+        variant="condensed"
+        horizontal={true}
+        showHeader={false}
+      />
+    </View>
+  );
+}

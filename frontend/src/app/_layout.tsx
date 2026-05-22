@@ -11,7 +11,12 @@ import {
 } from "@expo-google-fonts/league-spartan";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import Toast from "react-native-toast-message";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { ToastProvider } from "../components/ToastProvider";
+import { ActivityProvider } from "../Context/ActivityContext";
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     "Instrument Sans": InstrumentSans_400Regular,
@@ -21,6 +26,11 @@ export default function RootLayout() {
     "League Spartan Regular": LeagueSpartan_400Regular,
     "League Spartan Medium": LeagueSpartan_500Medium,
     "League Spartan SemiBold": LeagueSpartan_600SemiBold,
+    // Aliases for typo.ts (save page) naming convention
+    InstrumentSans_400Regular,
+    InstrumentSans_500Medium,
+    InstrumentSans_700Bold,
+    LeagueSpartan_700Bold,
   });
 
   if (!fontsLoaded) {
@@ -28,9 +38,32 @@ export default function RootLayout() {
   }
 
   return (
-    <>
-      <Stack />
-      <Toast />
-    </>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ActivityProvider>
+          <ToastProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="activity/[id]" />
+              <Stack.Screen name="category/[name]" />
+              <Stack.Screen
+                name="saved/LibraryPopupModalScreen"
+                options={{
+                  presentation: "transparentModal",
+                  animation: "slide_from_bottom",
+                }}
+              />
+              <Stack.Screen
+                name="saved/CreatePlaylistModalScreen"
+                options={{
+                  presentation: "transparentModal",
+                  animation: "slide_from_bottom",
+                }}
+              />
+            </Stack>
+          </ToastProvider>
+        </ActivityProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

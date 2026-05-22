@@ -11,7 +11,7 @@ All endpoints prefixed with `/api/activities`.
 ```typescript
 type Category = "Opener" | "Icebreaker" | "Active" | "Connection" | "Debrief" | "Team Challenge";
 type EnergyLevel = "Low" | "Medium" | "High";
-type Environment = "Large Open Space" | "Outdoor" | "Any" | "Small Space" | "Virtual";
+type Environment = "Blacktop" | "Field" | "Classroom" | "Gym/MPR" | "Any Environment";
 type Setup = "None" | "Required";
 type Duration = "5-15 min" | "15-30 min" | "30+ min";
 type Status = "Draft" | "Published" | "Archived";
@@ -51,17 +51,17 @@ GET /api/activities
 
 **Query Parameters:**
 
-| Param         | Type   | Default      | Description                                                 |
-| ------------- | ------ | ------------ | ----------------------------------------------------------- |
-| `status`      | string | —            | Filter by status: `Draft`, `Published`, `Archived`          |
-| `search`      | string | —            | Case-insensitive search on `title` and `overview`           |
-| `category`    | string | —            | Filter by category (matches if array contains value)        |
-| `energyLevel` | string | —            | Filter by energy level: `Low`, `Medium`, `High`             |
-| `environment` | string | —            | Filter by environment (comma-separated, e.g. `Outdoor,Any`) |
-| `setup`       | string | —            | Filter by setup: `None`, `Required`                         |
-| `sort`        | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`)       |
-| `page`        | number | `1`          | Page number (1-based)                                       |
-| `limit`       | number | `10`         | Items per page (max 30)                                     |
+| Param         | Type   | Default      | Description                                                                                           |
+| ------------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `status`      | string | —            | Filter by status: `Draft`, `Published`, `Archived`                                                    |
+| `search`      | string | —            | Case-insensitive search on `title` and `overview`                                                     |
+| `category`    | string | —            | Filter by category (matches if array contains value)                                                  |
+| `energyLevel` | string | —            | Filter by energy level: `Low`, `Medium`, `High`                                                       |
+| `environment` | string | —            | Filter by environment (comma-separated URI-encoded values, e.g. `Field,Gym%2FMPR`, `Any Environment`) |
+| `setup`       | string | —            | Filter by setup: `None`, `Required`                                                                   |
+| `sort`        | string | `-createdAt` | Sort field. Prefix `-` for descending (e.g. `-title`)                                                 |
+| `page`        | number | `1`          | Page number (1-based)                                                                                 |
+| `limit`       | number | `10`         | Items per page (max 30)                                                                               |
 
 **Response `200`:**
 
@@ -115,7 +115,7 @@ Status is always forced to `"Draft"` on creation regardless of what is sent in t
   "groupSize": { "min": 6, "max": 30, "anySize": false },
   "duration": "15-30 min",
   "energyLevel": "High",
-  "environment": ["Large Open Space", "Outdoor"],
+  "environment": ["Field", "Gym/MPR"],
   "setup": "None",
   "objective": "Develop communication and teamwork skills.",
   "facilitateSections": [
@@ -230,6 +230,18 @@ Content-Type: multipart/form-data
 
 **Max file size:** 10 MB
 
+Uploaded media is stored in Firebase Storage. The updated activity response includes the Firebase download URL in
+`thumbnailUrl` or `additionalMedia[].url`.
+
+Required backend environment variables for media upload:
+
+| Variable                  | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| `FIREBASE_PROJECT_ID`     | Firebase project ID                                    |
+| `FIREBASE_CLIENT_EMAIL`   | Service account client email                           |
+| `FIREBASE_PRIVATE_KEY`    | Service account private key                            |
+| `FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket name from the Firebase console |
+
 **Response `200`:** Updated `Activity` object
 
 **Response `400`:**
@@ -307,7 +319,7 @@ curl -X POST http://localhost:4000/api/activities \
     "groupSize": { "min": 6, "max": 30, "anySize": false },
     "duration": "15-30 min",
     "energyLevel": "High",
-    "environment": ["Large Open Space", "Outdoor"],
+    "environment": ["Field", "Gym/MPR"],
     "setup": "None",
     "facilitateSections": [
       { "tabName": "Setup", "content": "Form a circle." },

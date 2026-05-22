@@ -1,6 +1,7 @@
 import { isValidObjectId } from "mongoose";
 
 import Activity from "../models/activity";
+import { uploadActivityMedia } from "../services/firebaseStorage";
 
 import type { Request, Response } from "express";
 
@@ -125,21 +126,27 @@ export async function uploadMedia(req: Request, res: Response) {
     return;
   }
 
-  const activity = await Activity.findById(req.params.id);
+  const activityId = req.params.id;
+  if (Array.isArray(activityId)) {
+    res.status(400).json({ error: "Invalid activity id" });
+    return;
+  }
+
+  const activity = await Activity.findById(activityId);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }
 
-  const fileUrl = `/uploads/activities/${req.file.filename}`;
+  const fileUrl = await uploadActivityMedia(req.file, activityId);
   const body = (req.body ?? {}) as { mediaTarget?: string; mediaType?: string };
   const mediaTarget = body.mediaTarget;
 
   if (mediaTarget === "thumbnail") {
-    await Activity.findByIdAndUpdate(req.params.id, { thumbnailUrl: fileUrl });
+    await Activity.findByIdAndUpdate(activityId, { thumbnailUrl: fileUrl });
   } else if (mediaTarget === "additional") {
     const mediaType = body.mediaType === "video" ? "video" : "image";
-    await Activity.findByIdAndUpdate(req.params.id, {
+    await Activity.findByIdAndUpdate(activityId, {
       $push: { additionalMedia: { type: mediaType, url: fileUrl } },
     });
   } else {
@@ -147,7 +154,7 @@ export async function uploadMedia(req: Request, res: Response) {
     return;
   }
 
-  const updated = await Activity.findById(req.params.id);
+  const updated = await Activity.findById(activityId);
   res.json(updated);
 }
 

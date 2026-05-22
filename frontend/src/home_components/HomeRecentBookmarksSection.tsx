@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useState } from "react";
+import { router } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
-import { mockActivities } from "../data/mockActivities";
+import { useActivities } from "../Context/ActivityContext";
 
 import { SeeAll } from "./SeeAll";
 
@@ -14,8 +15,8 @@ type HomeRecentBookmarksSectionProps = {
 };
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const LIST_HORIZONTAL_PADDING = 20;
-const CARD_HORIZONTAL_SPACING = 12;
+const LIST_HORIZONTAL_PADDING = 24;
+const CARD_HORIZONTAL_SPACING = 24;
 const CARD_ITEM_WIDTH = SCREEN_WIDTH - LIST_HORIZONTAL_PADDING * 2;
 
 const styles = StyleSheet.create({
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: LIST_HORIZONTAL_PADDING,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 10,
@@ -48,9 +49,6 @@ const styles = StyleSheet.create({
   cardItemWrapper: {
     width: CARD_ITEM_WIDTH,
   },
-  cardSeparator: {
-    width: CARD_HORIZONTAL_SPACING,
-  },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -67,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#153F7A",
   },
   emptyContainer: {
-    width: 341,
+    width: CARD_ITEM_WIDTH,
     paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -84,20 +82,22 @@ const styles = StyleSheet.create({
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
-  // TODO: use actual bookmarked activities once wired up
+  const {
+    toggleSaved,
+    bookmarkedActivities: contextBookmarks,
+    activities: allActivities,
+  } = useActivities();
   const activities =
     bookmarkedActivities && bookmarkedActivities.length > 0
-      ? bookmarkedActivities.slice(0, 6)
-      : mockActivities.slice(0, 6);
+      ? bookmarkedActivities.slice(0, 4)
+      : contextBookmarks.length > 0
+        ? contextBookmarks.slice(0, 4)
+        : allActivities.slice(0, 4);
 
   const hasBookmarks = activities.length > 0;
   const indicatorCount = Math.min(6, activities.length);
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const snapOffsets = useMemo(
-    () => activities.map((_, index) => index * (CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING)),
-    [activities],
-  );
 
   const viewabilityConfig: ViewabilityConfig = {
     itemVisiblePercentThreshold: 60,
@@ -116,7 +116,7 @@ export function HomeRecentBookmarksSection({
     <View style={styles.sectionContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.text}>Recent Bookmarks</Text>
-        {hasBookmarks && <SeeAll screen="/bookmarks" />}
+        {hasBookmarks && <SeeAll screen="/saved/BookmarksScreen" />}
       </View>
 
       {hasBookmarks ? (
@@ -125,7 +125,11 @@ export function HomeRecentBookmarksSection({
             data={activities}
             renderItem={({ item }) => (
               <View style={styles.cardItemWrapper}>
-                <ActivityCard activity={item} />
+                <ActivityCard
+                  activity={item}
+                  onPress={() => router.push(`/activity/${item.id}`)}
+                  onSaveToggle={toggleSaved}
+                />
               </View>
             )}
             keyExtractor={(item) => item.id}
@@ -133,20 +137,20 @@ export function HomeRecentBookmarksSection({
             showsHorizontalScrollIndicator={false}
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
-            ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+            ItemSeparatorComponent={() => <View style={{ width: CARD_HORIZONTAL_SPACING }} />}
             decelerationRate="fast"
-            snapToOffsets={snapOffsets}
+            snapToInterval={CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING}
             snapToAlignment="start"
-            disableIntervalMomentum
+            disableIntervalMomentum={true}
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
           />
 
           {indicatorCount > 1 && (
             <View style={styles.dotsContainer}>
-              {Array.from({ length: indicatorCount }).map((_, index) => (
+              {activities.slice(0, indicatorCount).map((activity, index) => (
                 <View
-                  key={`bookmark-dot-${index}`}
+                  key={`bookmark-dot-${activity.id}`}
                   style={[styles.dot, index === activeIndex && styles.activeDot]}
                 />
               ))}

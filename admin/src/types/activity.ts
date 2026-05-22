@@ -9,11 +9,11 @@ export type Category =
 export type EnergyLevel = "Low" | "Medium" | "High";
 
 export type Environment =
-  | "Large Open Space"
-  | "Outdoor"
-  | "Any"
-  | "Small Space"
-  | "Virtual";
+  | "Blacktop"
+  | "Field"
+  | "Classroom"
+  | "Gym/MPR"
+  | "Any Environment";
 
 export type Setup = "None" | "Required";
 

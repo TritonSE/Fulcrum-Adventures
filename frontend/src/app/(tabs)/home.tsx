@@ -1,4 +1,4 @@
-import { CreateActivity } from "admin/src/pages/CreateActivity";
+import { CreateActivity } from "../../../admin/src/pages/CreateActivity";
 
 // const styles = StyleSheet.create({
 //   container: {

@@ -247,6 +247,39 @@ type CreateActivityActionsProps = {
   onPublish: () => void;
 };
 
+const buildFacilitateSectionContent = (tab: ActivityTab) => {
+  if (tab.kind === "play") {
+    return tab.guidedItems
+      .map((item, index) => {
+        const trimmed = item.trim();
+        return trimmed ? `Step ${index + 1}: ${trimmed}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (tab.kind === "debrief") {
+    return tab.guidedItems
+      .map((item, index) => {
+        const trimmed = item.trim();
+        return trimmed ? `Q${index + 1}: ${trimmed}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  return tab.sections
+    .map((section) => {
+      const title = section.title.trim();
+      const content = section.content.trim();
+
+      if (!content) return "";
+      return title ? `${title}\n${content}` : content;
+    })
+    .filter(Boolean)
+    .join("\n\n");
+};
+
 const CreateActivityActions: React.FC<CreateActivityActionsProps> = ({
   onCancel,
   onSaveDraft,
@@ -526,35 +559,21 @@ export const CreateActivity: React.FC = () => {
           energyLevel: overviewValue.energyLevel,
 
           objective,
-
-          // TO CHANGE
-          environment: overviewValue.environments, // check conflicting enum restrictions, backend allow different things we allow
-          // backend allow:  "Large Open Space" | "Outdoor" | "Any" | "Small Space" | "Virtual";
-          // we allow: Blacktop | Field | Classroom | Gym/MPR
+          environment: overviewValue.anyEnvironment
+            ? ["Any Environment"]
+            : overviewValue.environments,
           setup: overviewValue.setup === "Props" ? "Required" : "None", // only allow none or required?
-          // backend allow: None | Required
-          // frontend allow: Props | No Props
           facilitateSections: activityTabs
             .filter((tab) => tab.kind === "prep" || tab.kind === "play" || tab.kind === "debrief")
             .map((tab) => ({
               tabName: tab.kind === "prep" ? "Setup" : tab.name,
-              content: tab.sections
-                .map((section) => section.content.trim())
-                .filter(Boolean)
-                .join("\n\n"),
+              content: buildFacilitateSectionContent(tab),
             })),
           materials:
             activityTabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
               ? []
               : activityTabs.find((tab) => tab.kind === "prep")?.materials ?? [],
           selTags,
-          // END TO CHANGE
-
-          // facilitateSections: activityTabs.map((val) => ({
-          //   tabName: val?.kind || "",
-          //   content: val?.sections[0]?.content || "",
-          // })),
-          // materials: activityTabs.map((val) => val?.materials),
         }),
       });
 

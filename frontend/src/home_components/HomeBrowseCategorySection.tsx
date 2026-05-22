@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 
 import Active from "../../assets/Active.svg";
 import Connection from "../../assets/Connection.svg";
@@ -16,12 +17,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     lineHeight: 27,
     alignSelf: "flex-start",
-    marginLeft: 20,
+    marginLeft: 24,
   },
   scrollContainer: {
     width: "100%",
     marginTop: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     flexGrow: 0,
     height: 150,
   },
@@ -53,9 +54,13 @@ export const HomeBrowseCategorySection = () => {
         {categories.map((category) => {
           const IconComponent = category.icon;
           return (
-            <View key={category.name} style={styles.categoryItem}>
+            <Pressable
+              key={category.name}
+              style={styles.categoryItem}
+              onPress={() => router.push(`/category/${encodeURIComponent(category.name)}`)}
+            >
               <IconComponent width={123} height={123} />
-            </View>
+            </Pressable>
           );
         })}
       </ScrollView>
