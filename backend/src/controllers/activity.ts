@@ -137,7 +137,11 @@ export async function updateActivityStatus(req: Request, res: Response) {
   }
 
   const id = routeParam(req.params.id);
-  const activity = await Activity.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
+  const activity = await Activity.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true, runValidators: true },
+  );
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;

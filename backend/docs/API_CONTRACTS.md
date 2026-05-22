@@ -223,9 +223,9 @@ Content-Type: multipart/form-data
 
 **Form Fields:**
 
-| Field         | Type   | Required | Description                                                               |
-| ------------- | ------ | -------- | ------------------------------------------------------------------------- |
-| `file`        | File   | Yes      | Image file only (jpg, jpeg, png, gif, webp)                               |
+| Field         | Type   | Required | Description                                                                    |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------------ |
+| `file`        | File   | Yes      | Image file only (jpg, jpeg, png, gif, webp)                                    |
 | `mediaTarget` | string | Yes      | `"thumbnail"` sets `thumbnailUrl`, or `"additional"` adds to `additionalMedia` |
 
 **Thumbnail behavior:** If `mediaTarget` is `"thumbnail"`, the uploaded image is stored as `thumbnailUrl`. On create/update, when `thumbnailUrl` is omitted but `videoUrl` is a YouTube link, the API sets `thumbnailUrl` to the YouTube preview image automatically.
