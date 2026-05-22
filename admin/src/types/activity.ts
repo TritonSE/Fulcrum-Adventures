@@ -36,7 +36,8 @@ export type Activity = {
   title: string;
   overview: string;
   thumbnailUrl?: string;
-  additionalMedia?: { type: "image" | "video"; url: string }[];
+  videoUrl?: string;
+  additionalMedia?: { type: "image"; url: string }[];
   category: Category[];
   gradeRange: Range;
   groupSize: { min: number; max: number; anySize: boolean };
