@@ -21,3 +21,18 @@ export async function listEmails(req: Request, res: Response) {
     totalPages: Math.ceil(total / limit - 1e-10),
   });
 }
+
+export async function getAllEmails(req: Request, res: Response) {
+  const EMAILS_PER_PAGE = 10;
+
+  const [emails, total] = await Promise.all([
+    Email.find().sort("-createdAt"),
+    Email.countDocuments(),
+  ]);
+
+  res.json({
+    emails,
+    total,
+    totalPages: Math.ceil(total / EMAILS_PER_PAGE - 1e-10),
+  });
+}

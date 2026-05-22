@@ -1,9 +1,10 @@
 import express from "express";
 
-import { listEmails } from "../controllers/email";
+import { getAllEmails, listEmails } from "../controllers/email";
 
 const router = express.Router();
 
 router.get("/", listEmails);
+router.get("/all", getAllEmails);
 
 export default router;

@@ -7,6 +7,7 @@ import { useState } from "react";
 interface MailingListTableProps {
   subscribers: Subscriber[];
   selected: Record<string, boolean>;
+  currentPage: number;
   onToggleSubscriber: (email: string) => void;
   onToggleSelectAll: () => void;
 }
@@ -14,10 +15,16 @@ interface MailingListTableProps {
 export default function MailingListTable({
   subscribers,
   selected,
+  currentPage,
   onToggleSubscriber,
   onToggleSelectAll,
 }: MailingListTableProps) {
   const [copiedRowIds, setCopiedRowIds] = useState<Set<string>>(new Set());
+
+  const ITEMS_PER_PAGE = 10;
+  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIdx = startIdx + ITEMS_PER_PAGE;
+  const displayedSubscribers = subscribers.slice(startIdx, endIdx);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -51,7 +58,7 @@ export default function MailingListTable({
           </tr>
         </thead>
         <tbody>
-          {subscribers.map((subscriber) => (
+          {displayedSubscribers.map((subscriber) => (
             <tr key={subscriber._id} className="table-row">
               <td className="col-email">
                 <input

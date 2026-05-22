@@ -7,7 +7,7 @@ import { Button } from "../components/Button";
 import CopyIcon from "../../icons/copy.svg";
 import { useEffect, useState } from "react";
 import type { Subscriber } from "../types/email";
-import { fetchEmails } from "../api/emails";
+import { fetchAllEmails } from "../api/emails";
 import { Pagination } from "../components/Pagination";
 
 export default function MailingList() {
@@ -19,7 +19,7 @@ export default function MailingList() {
 
   useEffect(() => {
     const fetchSubscribers = async () => {
-      const result = await fetchEmails(currentPage, 10);
+      const result = await fetchAllEmails();
       const defaultSelected: Record<string, boolean> = {};
       result.emails.forEach((subscriber) => {
         defaultSelected[subscriber._id] = false;
@@ -30,7 +30,7 @@ export default function MailingList() {
       setTotalPages(result.totalPages);
     };
     fetchSubscribers();
-  }, [currentPage]);
+  }, []);
 
   const toggleSubscriber = (id: string) => {
     setSelected((prev) => ({
@@ -74,14 +74,23 @@ export default function MailingList() {
               icon={CopyIcon}
               variant="secondary-left"
               className="copy-emails-button"
+              onClick={() => {
+                const selectedEmails = subscribers
+                  .filter((subscriber) => selected[subscriber._id])
+                  .map((subscriber) => subscriber.email)
+                  .join(", ");
+                navigator.clipboard.writeText(selectedEmails);
+              }}
             >
               Copy {selectedCount} email{selectedCount > 1 ? "s" : ""}
             </Button>
           )}
         </div>
+
         <MailingListTable
           subscribers={subscribers}
           selected={selected}
+          currentPage={currentPage}
           onToggleSubscriber={toggleSubscriber}
           onToggleSelectAll={toggleSelectAll}
         />
