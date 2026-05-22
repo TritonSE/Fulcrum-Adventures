@@ -82,17 +82,11 @@ const styles = StyleSheet.create({
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
-  const {
-    toggleSaved,
-    bookmarkedActivities: contextBookmarks,
-    activities: allActivities,
-  } = useActivities();
+  const { toggleSaved, bookmarkedActivities: contextBookmarks } = useActivities();
   const activities =
     bookmarkedActivities && bookmarkedActivities.length > 0
       ? bookmarkedActivities.slice(0, 4)
-      : contextBookmarks.length > 0
-        ? contextBookmarks.slice(0, 4)
-        : allActivities.slice(0, 4);
+      : contextBookmarks.slice(0, 4);
 
   const hasBookmarks = activities.length > 0;
   const indicatorCount = Math.min(6, activities.length);

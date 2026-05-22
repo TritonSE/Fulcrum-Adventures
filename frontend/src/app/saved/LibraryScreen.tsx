@@ -326,7 +326,8 @@ export default function LibraryScreen() {
                     {playlist.name}
                   </Text>
                   <Text style={[Typography.caption, { color: "#EBEBEB", marginTop: 8 }]}>
-                    {playlist.activityIds.length} activities
+                    {playlist.activityIds.length}{" "}
+                    {playlist.activityIds.length === 1 ? "activity" : "activities"}
                   </Text>
                 </View>
 
@@ -888,7 +889,8 @@ export default function LibraryScreen() {
             <View style={{ flex: 1, gap: 8 }}>
               <Text style={[Typography.displayXSmBold, { color: "#153A7A" }]}>Bookmarked</Text>
               <Text style={[Typography.caption, { color: "#153A7A" }]}>
-                {activities.filter((a) => a.isSaved).length} activities
+                {activities.filter((a) => a.isSaved).length}{" "}
+                {activities.filter((a) => a.isSaved).length === 1 ? "activity" : "activities"}
               </Text>
             </View>
             <View style={{ borderRadius: 32, borderWidth: 1, borderColor: "#EBEBEB" }}>

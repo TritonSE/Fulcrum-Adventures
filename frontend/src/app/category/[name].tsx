@@ -229,7 +229,12 @@ export default function CategoryScreen() {
   const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
   const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
 
-  const { activities: allActivities, toggleSaved } = useActivities();
+  const {
+    activities: allActivities,
+    isLoadingActivities,
+    refreshActivities,
+    toggleSaved,
+  } = useActivities();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [filtersVisible, setFiltersVisible] = useState(false);
 
@@ -271,6 +276,8 @@ export default function CategoryScreen() {
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        refreshing={isLoadingActivities}
+        onRefresh={refreshActivities}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>

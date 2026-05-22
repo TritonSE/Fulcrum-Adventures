@@ -98,14 +98,14 @@ export default function BookmarksScreen() {
                 }
               />
             )}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24, gap: 8 }}
           />
         ) : (
           <FlatList
             data={bookmarkedActivities}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24, gap: 8 }}
             renderItem={({ item }) => (
               <SwipeToDelete onDelete={() => setSaved(item.id, false)}>
                 <ActivityCard
