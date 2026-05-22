@@ -36,12 +36,13 @@ export default function MailingListTable({
   };
 
   return (
-    <div className="table-container">
-      <table className="mailing-list-table">
-        <thead>
-          <tr>
-            <th>
-              <span className="select-all-th-content">
+    subscribers.length > 0 ? (
+      <div className="table-container">
+        <table className="mailing-list-table">
+          <thead>
+            <tr>
+              <th>
+                <span className="select-all-th-content">
                 <input
                   type="checkbox"
                   checked={Object.values(selected).every((v) => v)}
@@ -91,6 +92,10 @@ export default function MailingListTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </div>) : (
+      <div className="no-subscribers-container">
+        <p className="no-subscribers-text">No subscribers found.</p>
+      </div>
+    )
   );
 }

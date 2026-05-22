@@ -194,3 +194,28 @@
 .copy-button:hover {
   background: #f0f0f0;
 }
+
+.no-subscribers-container {
+  display: flex;
+  height: 176px;
+  padding: var(--Spacing-sm, 16px) 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.no-subscribers-text {
+  overflow: hidden;
+  color: var(--Primary, #153A7A);
+  text-align: center;
+  text-overflow: ellipsis;
+
+  /* Body/Small (reg) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
+}
