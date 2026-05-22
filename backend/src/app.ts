@@ -17,7 +17,9 @@ app.use(
   }),
 );
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+if (!process.env.VERCEL) {
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+}
 
 app.use("/api/activities", activityRoutes);
 

@@ -230,6 +230,18 @@ Content-Type: multipart/form-data
 
 **Max file size:** 10 MB
 
+Uploaded media is stored in Firebase Storage. The updated activity response includes the Firebase download URL in
+`thumbnailUrl` or `additionalMedia[].url`.
+
+Required backend environment variables for media upload:
+
+| Variable                  | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| `FIREBASE_PROJECT_ID`     | Firebase project ID                                    |
+| `FIREBASE_CLIENT_EMAIL`   | Service account client email                           |
+| `FIREBASE_PRIVATE_KEY`    | Service account private key                            |
+| `FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket name from the Firebase console |
+
 **Response `200`:** Updated `Activity` object
 
 **Response `400`:**
