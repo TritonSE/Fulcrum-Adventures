@@ -100,6 +100,12 @@ const defaultFilters: FilterState = {
 };
 
 function matchesFilters(activity: Activity, filters: FilterState): boolean {
+  if (filters.category) {
+    const activityCategories =
+      activity.categories ?? (activity.category ? [activity.category] : []);
+    if (!activityCategories.includes(filters.category)) return false;
+  }
+
   if (filters.setupProps) {
     if (filters.setupProps === "Props" && activity.materials.length === 0) return false;
     if (filters.setupProps === "No Props" && activity.materials.length > 0) return false;
