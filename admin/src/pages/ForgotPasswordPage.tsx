@@ -6,8 +6,9 @@ import { AuthShell } from "../components/AuthShell";
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
 
-import "./SignInPage.css";
+import "./AuthConfirmation.css";
 import "./ForgotPasswordPage.css";
+import "./SignInPage.css";
 
 export function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -38,9 +39,9 @@ export function ForgotPasswordPage() {
   return (
     <AuthShell>
       {sent ? (
-        <div className="sign-in__card forgot-password__card--sent">
+        <div className="sign-in__card auth-confirmation__card">
           <h1 className="sign-in__title">Forgot Password</h1>
-          <p className="forgot-password__message">
+          <p className="auth-confirmation__message">
             Email sent—check your inbox for a link to reset your password!
           </p>
           <Button

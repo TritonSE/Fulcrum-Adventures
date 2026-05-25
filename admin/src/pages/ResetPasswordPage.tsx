@@ -7,8 +7,9 @@ import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
 import WarningIcon from "../../icons/error.svg";
 
-import "./SignInPage.css";
+import "./AuthConfirmation.css";
 import "./ResetPasswordPage.css";
+import "./SignInPage.css";
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export function ResetPasswordPage() {
   const [mismatchError, setMismatchError] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (isAdminAuthenticated()) {
@@ -75,11 +77,30 @@ export function ResetPasswordPage() {
       return;
     }
 
-    navigate("/sign-in", { replace: true });
+    setSuccess(true);
   }
 
   return (
     <AuthShell>
+      {success ? (
+        <div className="sign-in__card auth-confirmation__card">
+          <h1 className="sign-in__title">Reset Password</h1>
+          <p className="auth-confirmation__message">
+            Your password has been successfully reset! Please use your new password to sign
+            in.
+          </p>
+          <Button
+            variant="primary"
+            icon={false}
+            type="button"
+            fullWidth
+            className="sign-in__submit"
+            onClick={() => navigate("/sign-in")}
+          >
+            Back to Sign-In
+          </Button>
+        </div>
+      ) : (
       <form className="sign-in__card" onSubmit={onSubmit} noValidate>
         <h1 className="sign-in__title">Reset Password</h1>
 
@@ -157,6 +178,7 @@ export function ResetPasswordPage() {
           {submitting ? "Resetting…" : "Reset Password"}
         </Button>
       </form>
+      )}
     </AuthShell>
   );
 }
