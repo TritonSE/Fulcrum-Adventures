@@ -1,4 +1,4 @@
-import type { ApiActivity, ActivityStatus, Setup } from "../types/activity";
+import type { ActivityStatus, ApiActivity, Setup } from "../types/activity";
 
 declare const process: {
   env?: {
@@ -6,7 +6,7 @@ declare const process: {
   };
 };
 
-const DEFAULT_API_BASE_URL = "http://172.20.88.215:4000";
+const DEFAULT_API_BASE_URL = "http://10.50.146.216:4000";
 
 export const API_BASE_URL =
   process.env?.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE_URL;
@@ -62,18 +62,20 @@ function buildUrl(path: string, query?: RequestOptions["query"]) {
   return url.toString();
 }
 
-async function parseResponse(response: Response) {
+async function parseResponse(response: Response): Promise<unknown> {
   const contentType = response.headers.get("content-type");
 
   if (contentType?.includes("application/json")) {
-    return response.json();
+    return (await response.json()) as unknown;
   }
 
   return response.text();
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function delay(ms: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function shouldRetryRequest(
@@ -93,6 +95,10 @@ function shouldRetryRequest(
   return response.status === 408 || response.status === 429 || response.status >= 500;
 }
 
+function isApiErrorResponse(data: unknown): data is { error: unknown } {
+  return typeof data === "object" && data !== null && "error" in data;
+}
+
 export async function apiRequest<TResponse>(
   path: string,
   {
@@ -107,65 +113,65 @@ export async function apiRequest<TResponse>(
 ): Promise<TResponse> {
   const requestMethod = method.toUpperCase();
   const maxRetries = retryCount ?? (requestMethod === "GET" ? 1 : 0);
-  let attempt = 0;
 
-  while (true) {
-    let response: Response | undefined;
-
-    try {
-      response = await fetch(buildUrl(path, query), {
-        ...options,
-        method: requestMethod,
-        headers: {
-          Accept: "application/json",
-          ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-          ...headers,
-        },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-      });
-    } catch (error) {
-      if (shouldRetryRequest(undefined, requestMethod, attempt, maxRetries)) {
-        attempt += 1;
-        await delay(retryDelayMs * attempt);
-        continue;
-      }
-
-      throw new ApiError(
-        error instanceof Error ? error.message : "Unable to reach the server.",
-        0,
-        error,
-      );
-    }
-
+  async function request(attempt: number): Promise<TResponse> {
+    const response = await fetch(buildUrl(path, query), {
+      ...options,
+      method: requestMethod,
+      headers: {
+        Accept: "application/json",
+        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...headers,
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
     const data = await parseResponse(response);
 
     if (!response.ok) {
       if (shouldRetryRequest(response, requestMethod, attempt, maxRetries)) {
-        attempt += 1;
-        await delay(retryDelayMs * attempt);
-        continue;
+        const nextAttempt = attempt + 1;
+        await delay(retryDelayMs * nextAttempt);
+        return request(nextAttempt);
       }
 
-      const message =
-        typeof data === "object" && data !== null && "error" in data
-          ? String(data.error)
-          : `Request failed with status ${response.status}`;
+      const message = isApiErrorResponse(data)
+        ? String(data.error)
+        : `Request failed with status ${response.status}`;
 
       throw new ApiError(message, response.status, data);
     }
 
     return data as TResponse;
   }
+
+  try {
+    return await request(0);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (shouldRetryRequest(undefined, requestMethod, 0, maxRetries)) {
+      await delay(retryDelayMs);
+      return request(1);
+    }
+
+    throw new ApiError(
+      error instanceof Error ? error.message : "Unable to reach the server.",
+      0,
+      error,
+    );
+  }
 }
 
 export const activitiesApi = {
-  list<TActivity = ApiActivity>(params: ListActivitiesParams = {}) {
+  async list<TActivity = ApiActivity>(params: ListActivitiesParams = {}) {
     return apiRequest<ListActivitiesResponse<TActivity>>("/api/activities", {
       query: params,
     });
   },
 
-  get<TActivity = ApiActivity>(id: string) {
+  async get<TActivity = ApiActivity>(id: string) {
     return apiRequest<TActivity>(`/api/activities/${id}`);
   },
 };

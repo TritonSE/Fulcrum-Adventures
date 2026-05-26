@@ -23,7 +23,12 @@ export default function HomeScreen() {
     <ScrollView
       style={styles.container}
       refreshControl={
-        <RefreshControl refreshing={isLoadingActivities} onRefresh={refreshActivities} />
+        <RefreshControl
+          refreshing={isLoadingActivities}
+          onRefresh={() => {
+            void refreshActivities();
+          }}
+        />
       }
     >
       <HomeHeaderSection />

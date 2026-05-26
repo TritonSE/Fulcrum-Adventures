@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Line, Path } from "react-native-svg";
@@ -15,6 +15,9 @@ import { ActivityCard } from "../../components/ActivityCard";
 import { FiltersModal } from "../../components/FiltersModal";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../../constants/activityColors";
 import { useActivities } from "../../Context/ActivityContext";
+import { mapApiActivityToActivity } from "../../services/activityMapper";
+import { activitiesApi } from "../../services/api";
+import { applyActivityState } from "../../utils/activityState";
 
 import type { FilterState } from "../../components/FiltersModal";
 import type { Activity, Category } from "../../types/activity";
@@ -235,24 +238,44 @@ export default function CategoryScreen() {
   const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
   const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
 
-  const {
-    activities: allActivities,
-    isLoadingActivities,
-    refreshActivities,
-    toggleSaved,
-  } = useActivities();
+  const { activities: stateActivities, refreshActivities, toggleSaved } = useActivities();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [apiCategoryActivities, setApiCategoryActivities] = useState<Activity[]>([]);
+  const [isLoadingCategoryActivities, setIsLoadingCategoryActivities] = useState(true);
 
-  const categoryActivities = allActivities.filter((activity) => {
+  const contextCategoryActivities = stateActivities.filter((activity) => {
     const activityCategories =
       activity.categories ?? (activity.category ? [activity.category] : []);
     return activityCategories.includes(categoryName);
   });
 
+  const categoryActivities =
+    apiCategoryActivities.length > 0
+      ? applyActivityState(apiCategoryActivities, stateActivities)
+      : contextCategoryActivities;
   const activities = categoryActivities.filter((a) => matchesFilters(a, filters));
 
   const Graphic = CATEGORY_GRAPHICS[categoryName];
+
+  const loadCategoryActivities = useCallback(async () => {
+    setIsLoadingCategoryActivities(true);
+
+    try {
+      const response = await activitiesApi.list({
+        status: "Published",
+        category: categoryName,
+        limit: 30,
+      });
+      setApiCategoryActivities(response.activities.map(mapApiActivityToActivity));
+    } finally {
+      setIsLoadingCategoryActivities(false);
+    }
+  }, [categoryName]);
+
+  useEffect(() => {
+    void loadCategoryActivities();
+  }, [loadCategoryActivities]);
 
   return (
     <View style={styles.container}>
@@ -282,8 +305,11 @@ export default function CategoryScreen() {
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        refreshing={isLoadingActivities}
-        onRefresh={refreshActivities}
+        refreshing={isLoadingCategoryActivities}
+        onRefresh={() => {
+          void refreshActivities();
+          void loadCategoryActivities();
+        }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>

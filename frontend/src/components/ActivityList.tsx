@@ -151,7 +151,13 @@ export const ActivityList: React.FC<ActivityListProps> = ({
           renderItem={({ item }) => renderCard(item)}
           horizontal={horizontal}
           refreshing={canPullToRefresh && isLoadingActivities}
-          onRefresh={canPullToRefresh ? refreshActivities : undefined}
+          onRefresh={
+            canPullToRefresh
+              ? () => {
+                  void refreshActivities();
+                }
+              : undefined
+          }
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyState}
