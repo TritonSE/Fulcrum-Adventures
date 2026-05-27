@@ -14,7 +14,7 @@ import TeamChallengeGraphic from "../../../assets/category-headers/TeamChallenge
 import { ActivityCard } from "../../components/ActivityCard";
 import { FiltersModal } from "../../components/FiltersModal";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../../constants/activityColors";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { mapApiActivityToActivity } from "../../services/activityMapper";
 import { activitiesApi } from "../../services/api";
 import { applyActivityState } from "../../utils/activityState";

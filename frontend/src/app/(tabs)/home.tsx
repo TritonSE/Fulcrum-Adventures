@@ -1,6 +1,6 @@
 import { RefreshControl, ScrollView, StyleSheet } from "react-native";
 
-import { useActivities } from "@/Context/ActivityContext";
+import { useActivities } from "@/Context/useActivities";
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
 import { HomeMailingListSection } from "@/home_components/HomeMailingListSection";

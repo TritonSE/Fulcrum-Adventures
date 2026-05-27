@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
 import { ActivityList } from "../../components/ActivityList";
@@ -7,14 +8,14 @@ import { FiltersModal } from "../../components/FiltersModal";
 import { SearchHeader } from "../../components/SearchHeader";
 import { CATEGORIES as categories } from "../../constants/filterOptions";
 // Pull from context instead of mock data
-import { useActivities } from "../../Context/ActivityContext";
-import { activitiesApi } from "../../services/api";
+import { useActivities } from "../../Context/useActivities";
 import { mapApiActivityToActivity } from "../../services/activityMapper";
+import { activitiesApi } from "../../services/api";
 import { styles } from "../../styles/search.styles";
 
 import type { FilterState } from "../../components/FiltersModal";
-import type { Activity, Environment } from "../../types/activity";
 import type { ListActivitiesParams } from "../../services/api";
+import type { Activity, Environment } from "../../types/activity";
 
 const defaultFilters: FilterState = {
   category: undefined,
@@ -213,11 +214,15 @@ export function SearchPage() {
     [filters, searchText],
   );
 
+  const resetSearchResults = useCallback(() => {
+    setApiResults([]);
+    setSearchError(null);
+    setIsSearchingApi(false);
+  }, []);
+
   useEffect(() => {
     if (!isSearchActive) {
-      setApiResults([]);
-      setSearchError(null);
-      setIsSearchingApi(false);
+      resetSearchResults();
       return;
     }
 
@@ -271,7 +276,7 @@ export function SearchPage() {
       isMounted = false;
       clearTimeout(timeout);
     };
-  }, [activities, filters, isSearchActive, queryKey, searchText]);
+  }, [activities, filters, isSearchActive, queryKey, resetSearchResults, searchText]);
 
   const searchSource = isSearchActive ? apiResults : activities;
   const filteredActivities = searchSource.filter((activity) =>

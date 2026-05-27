@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { RECOMMENDED_TITLES } from "../constants/homeSections";
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
 import { mockActivities } from "../data/mockActivities";
 import { applyActivityState } from "../utils/activityState";
 

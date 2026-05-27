@@ -1,43 +1,13 @@
-import React, { createContext, use, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getActivityById } from "../data/mockActivities";
-import { activitiesApi } from "../services/api";
 import { mapApiActivityToActivity } from "../services/activityMapper";
+import { activitiesApi } from "../services/api";
+
+import { ActivityContext } from "./activityContextValue";
 
 import type { Activity } from "../types/activity";
-
-type Playlist = {
-  id: string;
-  name: string;
-  color: string;
-  activityIds: string[];
-};
-
-type ActivityContextType = {
-  activities: Activity[];
-  bookmarkedActivities: Activity[];
-  isLoadingActivities: boolean;
-  activitiesError: string | null;
-  isUsingCachedActivities: boolean;
-  refreshActivities: () => Promise<void>;
-  toggleSaved: (id: string) => void;
-  toggleDownload: (id: string) => void;
-  toggleHistory: (id: string) => void;
-  togglePlaylist: (id: string) => void;
-  reorderBookmarks: (newOrder: Activity[]) => void;
-  playlists: Playlist[];
-  addToPlaylist: (playlistId: string, activityId: string) => void;
-  createPlaylist: (name: string, color: string) => string;
-  setSaved: (id: string, saved: boolean) => void;
-  reorderPlaylistActivities: (playlistId: string, newActivityIds: string[]) => void;
-  editPlaylist: (playlistId: string, name: string, color: string) => void;
-  deletePlaylist: (playlistId: string) => void;
-  markViewed: (id: string) => void;
-  restorePlaylist: (playlist: Playlist, index?: number) => void;
-  removeFromPlaylist: (playlistId: string, activityId: string) => void;
-};
-
-const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
+import type { Playlist } from "./activityContextValue";
 
 function mergeLocalActivityState(previous: Activity[], next: Activity[]) {
   const previousById = new Map(previous.map((activity) => [activity.id, activity]));
@@ -87,7 +57,12 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   const [activitiesError, setActivitiesError] = useState<string | null>(null);
   const [isUsingCachedActivities, setIsUsingCachedActivities] = useState(false);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const currentActivitiesRef = useRef<Activity[]>([]);
   const lastSuccessfulActivitiesRef = useRef<Activity[]>([]);
+
+  useEffect(() => {
+    currentActivitiesRef.current = activities;
+  }, [activities]);
 
   const refreshActivities = useCallback(async () => {
     setIsLoadingActivities(true);
@@ -104,21 +79,17 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to load activities.";
+      const currentActivities = currentActivitiesRef.current;
+      const fallbackActivities =
+        currentActivities.length > 0 ? currentActivities : lastSuccessfulActivitiesRef.current;
+
       setActivitiesError(message);
-      setActivities((previous) => {
-        if (previous.length > 0) {
-          lastSuccessfulActivitiesRef.current = previous;
-          setIsUsingCachedActivities(true);
-          return previous;
-        }
+      setIsUsingCachedActivities(fallbackActivities.length > 0);
 
-        if (lastSuccessfulActivitiesRef.current.length > 0) {
-          setIsUsingCachedActivities(true);
-          return lastSuccessfulActivitiesRef.current;
-        }
-
-        return previous;
-      });
+      if (fallbackActivities.length > 0) {
+        lastSuccessfulActivitiesRef.current = fallbackActivities;
+        setActivities(fallbackActivities);
+      }
     } finally {
       setIsLoadingActivities(false);
     }
@@ -274,9 +245,3 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     </ActivityContext>
   );
 }
-
-export const useActivities = (): ActivityContextType => {
-  const context = use(ActivityContext);
-  if (!context) throw new Error("useActivities must be used inside ActivityProvider");
-  return context;
-};

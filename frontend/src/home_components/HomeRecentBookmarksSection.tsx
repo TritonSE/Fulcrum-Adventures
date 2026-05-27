@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
 
 import { SeeAll } from "./SeeAll";
 

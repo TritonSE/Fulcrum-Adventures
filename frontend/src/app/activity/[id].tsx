@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import ActivityDetail from "../../components/ActivityDetail";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { getActivityById } from "../../data/mockActivities";
-import { activitiesApi } from "../../services/api";
 import { mapApiActivityToActivity } from "../../services/activityMapper";
+import { activitiesApi } from "../../services/api";
 
 import type { Activity } from "../../types/activity";
 
@@ -79,12 +79,6 @@ export default function ActivityDetailScreen() {
       isMounted = false;
     };
   }, [id, mockActivity]);
-
-  useEffect(() => {
-    if (initialActivity) {
-      setActivity(initialActivity);
-    }
-  }, [initialActivity]);
 
   if (isLoading && !activity) {
     return (

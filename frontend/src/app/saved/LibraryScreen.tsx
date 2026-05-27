@@ -23,7 +23,7 @@ import HistoryLibraryIcon from "../../../assets/icons/history-library.svg";
 import Plus from "../../../assets/icons/lucide_plus.svg";
 import Pencil from "../../../assets/icons/PencilIcon.svg";
 import TrashIcon from "../../../assets/icons/TrashIcon.svg";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 

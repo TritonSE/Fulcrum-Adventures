@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import React from "react";
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native";
 
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
 
 import { ActivityCard } from "./ActivityCard";
 import { ActivityCardCondensed } from "./ActivityCardCondensed";

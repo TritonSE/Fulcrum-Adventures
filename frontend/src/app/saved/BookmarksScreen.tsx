@@ -7,7 +7,7 @@ import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityCard } from "../../components/ActivityCard";
 import { DragList } from "../../components/DragList";
 import SwipeToDelete from "../../components/SwipeToDelete";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 
 export default function BookmarksScreen() {
   const { bookmarkedActivities, reorderBookmarks, setSaved, markViewed } = useActivities();

@@ -6,7 +6,7 @@ declare const process: {
   };
 };
 
-const DEFAULT_API_BASE_URL = "http://10.50.146.216:4000";
+const DEFAULT_API_BASE_URL = "http://10.48.234.215:4000";
 
 export const API_BASE_URL =
   process.env?.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE_URL;

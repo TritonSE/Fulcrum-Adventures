@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-use-before-define */
 import { Ionicons } from "@expo/vector-icons";
 import React, { useRef } from "react";
 import { Animated, Pressable, StyleSheet } from "react-native";
