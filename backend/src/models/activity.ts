@@ -18,6 +18,27 @@ const facilitateSectionSchema = new Schema(
   { _id: false },
 );
 
+type GroupSizeDoc = { anySize?: boolean };
+
+const groupSizeSchema = new Schema(
+  {
+    min: {
+      type: Number,
+      required: function groupSizeMinRequired(this: GroupSizeDoc) {
+        return !this.anySize;
+      },
+    },
+    max: {
+      type: Number,
+      required: function groupSizeMaxRequired(this: GroupSizeDoc) {
+        return !this.anySize;
+      },
+    },
+    anySize: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
 const activitySchema = new Schema(
   {
     title: { type: String, required: true },
@@ -38,11 +59,7 @@ const activitySchema = new Schema(
       min: { type: Number, required: true },
       max: { type: Number, required: true },
     },
-    groupSize: {
-      min: { type: Number, required: true },
-      max: { type: Number, required: true },
-      anySize: { type: Boolean, default: false },
-    },
+    groupSize: { type: groupSizeSchema, required: true },
     duration: {
       type: String,
       enum: ["5-15 min", "15-30 min", "30+ min"],
