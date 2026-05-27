@@ -26,6 +26,20 @@ export type Range = {
   max: number;
 };
 
+export type GroupSizeRange = {
+  anySize?: false;
+  min: number;
+  max: number;
+};
+
+export type GroupSizeAny = {
+  anySize: true;
+  min?: number;
+  max?: number;
+};
+
+export type GroupSize = GroupSizeRange | GroupSizeAny;
+
 export type FacilitateSection = {
   tabName: string;
   content: string;
@@ -40,7 +54,7 @@ export type Activity = {
   additionalMedia?: { type: "image"; url: string }[];
   category: Category[];
   gradeRange: Range;
-  groupSize: { min: number; max: number; anySize: boolean };
+  groupSize: GroupSize;
   duration: Duration;
   energyLevel: EnergyLevel;
   environment: Environment[];
