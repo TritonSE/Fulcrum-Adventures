@@ -26,6 +26,47 @@ function environmentItemsValidator(value: unknown): boolean {
   return value.every((item) => (ACTIVITY_ENVIRONMENTS as readonly string[]).includes(item));
 }
 
+function parsePositiveInt(value: unknown): number | null {
+  if (typeof value === "number" && Number.isInteger(value) && value >= 1) {
+    return value;
+  }
+  if (typeof value === "string" && /^\d+$/.test(value)) {
+    const parsed = Number(value);
+    if (parsed >= 1) return parsed;
+  }
+  return null;
+}
+
+function validateGroupSize(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("groupSize must be an object.");
+  }
+
+  const groupSize = value as { min?: unknown; max?: unknown; anySize?: unknown };
+
+  if (groupSize.anySize !== undefined && typeof groupSize.anySize !== "boolean") {
+    throw new Error("groupSize.anySize must be a boolean.");
+  }
+
+  if (groupSize.anySize === true) {
+    return true;
+  }
+
+  const min = parsePositiveInt(groupSize.min);
+  const max = parsePositiveInt(groupSize.max);
+  if (min === null) {
+    throw new Error("groupSize.min must be a positive integer.");
+  }
+  if (max === null) {
+    throw new Error("groupSize.max must be a positive integer.");
+  }
+  if (min > max) {
+    throw new Error("groupSize.min cannot be greater than groupSize.max.");
+  }
+
+  return true;
+}
+
 const optionalActivityBodyFields: ValidationChain[] = [
   body("thumbnailUrl").optional().isString(),
   body("videoUrl").optional().isString(),
@@ -45,16 +86,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
     .optional()
     .isInt({ min: 0, max: 12 })
     .withMessage("gradeRange.max must be between 0 and 12."),
-  body("groupSize").optional().isObject().withMessage("groupSize must be an object."),
-  body("groupSize.min")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("groupSize.min must be a positive integer."),
-  body("groupSize.max")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("groupSize.max must be a positive integer."),
-  body("groupSize.anySize").optional().isBoolean(),
+  body("groupSize").optional().custom(validateGroupSize),
   body("duration")
     .optional()
     .isString()
@@ -103,7 +135,6 @@ const optionalCreateOnlyFields: ValidationChain[] = [
   body("thumbnailUrl").optional().isString(),
   body("videoUrl").optional().isString(),
   body("objective").optional().isString(),
-  body("groupSize.anySize").optional().isBoolean(),
   body("environment")
     .optional()
     .isArray({ min: 1 })
@@ -206,9 +237,7 @@ export const createActivityBody: ValidationChain[] = [
   body("gradeRange.max")
     .isInt({ min: 0, max: 12 })
     .withMessage("gradeRange.max must be between 0 and 12."),
-  body("groupSize").isObject().withMessage("groupSize is required."),
-  body("groupSize.min").isInt({ min: 1 }).withMessage("groupSize.min must be a positive integer."),
-  body("groupSize.max").isInt({ min: 1 }).withMessage("groupSize.max must be a positive integer."),
+  body("groupSize").custom(validateGroupSize),
   body("duration")
     .isString()
     .isIn(ACTIVITY_DURATIONS)
