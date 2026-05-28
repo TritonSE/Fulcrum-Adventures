@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingHorizontal: 24,
-    paddingVertical: 12,
-    gap: 16,
+    paddingVertical: 16,
+    gap: 12,
   },
 });

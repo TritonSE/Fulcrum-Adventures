@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     position: "absolute",
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: "bold",
     zIndex: 1, // Ensure text is above the image if they overlap
     fontFamily: "League Spartan",

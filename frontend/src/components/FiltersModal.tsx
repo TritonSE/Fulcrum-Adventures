@@ -280,7 +280,7 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
                     width={24}
                     height={32}
                     fill={isActive ? "#ECD528" : "transparent"}
-                    stroke={isActive ? "#ECD528" : "#D9D9D9"}
+                    stroke={isActive ? "#ECD528" : "transparent"}
                   />
                 </Pressable>
               );
