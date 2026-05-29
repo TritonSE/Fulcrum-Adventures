@@ -1,6 +1,12 @@
 import { API_BASE_URL } from "./api";
 
-import type { Activity, ApiActivity, ApiDuration, ApiGroupSize, CustomTab } from "../types/activity";
+import type {
+  Activity,
+  ApiActivity,
+  ApiDuration,
+  ApiGroupSize,
+  CustomTab,
+} from "../types/activity";
 
 function mapDuration(duration: ApiDuration) {
   switch (duration) {
