@@ -1,5 +1,13 @@
 import React from "react";
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
 import {
   formatMegabytes,
@@ -12,6 +20,8 @@ type ThumbnailSectionProps = {
   mediaFileName: string | null;
   mediaKind: "image" | "video" | null;
   previewUri?: string | null;
+  videoUrl: string;
+  onVideoUrlChange: (value: string) => void;
   onPickMedia?: () => void;
 };
 
@@ -66,6 +76,8 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
   mediaFileName,
   mediaKind,
   previewUri,
+  videoUrl,
+  onVideoUrlChange,
   onPickMedia,
 }) => {
   const { width } = useWindowDimensions();
@@ -82,6 +94,20 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
           previewUri={previewUri}
           onPress={onPickMedia}
           fullWidth={isMobile}
+        />
+      </View>
+
+      <View style={styles.videoUrlGroup}>
+        <Text style={styles.videoUrlLabel}>YouTube Video URL</Text>
+        <TextInput
+          value={videoUrl}
+          onChangeText={onVideoUrlChange}
+          placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          placeholderTextColor="#A6A6A6"
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          style={styles.videoUrlInput}
         />
       </View>
     </View>
@@ -108,6 +134,27 @@ const styles = StyleSheet.create({
   rowMobile: {
     flexDirection: "column",
     alignItems: "stretch",
+  },
+  videoUrlGroup: {
+    width: "100%",
+    marginTop: 18,
+  },
+  videoUrlLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F3B82",
+    marginBottom: 8,
+  },
+  videoUrlInput: {
+    width: "100%",
+    minHeight: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#D6D6D6",
+    backgroundColor: "#FFF",
+    paddingHorizontal: 14,
+    color: "#0F172A",
+    fontSize: 14,
   },
   uploadCard: {
     width: "100%",

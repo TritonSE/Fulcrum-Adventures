@@ -4,12 +4,14 @@ import {
   MEDIA_TYPE_FORM_FIELD,
 } from "../create_edit_page_components/mediaUploadConfig";
 
+import { ACTIVITY_API_BASE_URL } from "./activityApi";
+
 import type {
   ThumbnailImageFile,
   ThumbnailVideoFile,
 } from "../create_edit_page_components/OverviewSection";
 
-export const DEFAULT_ACTIVITY_API_BASE_URL = "http://localhost:4000";
+export const DEFAULT_ACTIVITY_API_BASE_URL = ACTIVITY_API_BASE_URL;
 
 export type ActivityMediaTarget = "thumbnail" | "additional";
 export type ActivityMediaType = "image" | "video";

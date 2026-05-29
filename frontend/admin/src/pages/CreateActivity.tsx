@@ -3,7 +3,13 @@ import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { uploadActivityMedia } from "../api/activityMediaApi";
+import {
+  ACTIVITY_API_BASE_URL,
+  createActivity,
+  getActivityId,
+  updateActivityStatus,
+} from "../api/activityApi";
+import { uploadActivityMediaSelection } from "../api/activityMediaApi";
 import {
   ActivityContent,
   createDefaultActivityTabs,
@@ -24,12 +30,12 @@ import {
   createDefaultOverviewState,
   OverviewSection,
 } from "../create_edit_page_components/OverviewSection";
-import { PublishPreviewModal } from "../create_edit_page_components/sub_components/PublishPreviewModal";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
 import {
   type CropDraftImage,
   ImageCropModal,
 } from "../create_edit_page_components/sub_components/ImageCropModal";
+import { PublishPreviewModal } from "../create_edit_page_components/sub_components/PublishPreviewModal";
 import {
   getVideoFrameImageName,
   VideoFramePickerModal,
@@ -37,6 +43,10 @@ import {
 } from "../create_edit_page_components/sub_components/VideoFramePickerModal";
 import { showToast } from "../utils/showToast";
 
+import type {
+  ActivityStatus as ApiActivityStatus,
+  CreateActivityPayload,
+} from "../api/activityApi";
 import type { ActivityTab } from "../create_edit_page_components/ActivityContent";
 import type {
   OverviewFormState,
@@ -190,7 +200,7 @@ const getAssetSizeBytes = async (asset: ImagePicker.ImagePickerAsset) => {
   }
 };
 
-type ActivityStatus = "idle" | "Draft" | "Published" | "Archived";
+type SubmissionStatus = "idle" | ApiActivityStatus;
 
 type FormErrors = {
   objective: string | null;
@@ -199,6 +209,172 @@ type FormErrors = {
   playGuidedItems: (string | null)[];
   debriefGuidedItems: (string | null)[];
   selTags: string | null;
+};
+
+const toGradeNumber = (value: string) => (value === "K" ? 0 : Number(value));
+
+const toPositiveInteger = (value: string) => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
+};
+
+const getPrepTab = (activityTabs: ActivityTab[]) =>
+  activityTabs.find((tab) => tab.kind === "prep") ?? null;
+
+const getActivityTabsWithPendingMaterial = (
+  activityTabs: ActivityTab[],
+  pendingMaterialInput: string,
+) => {
+  const nextMaterial = pendingMaterialInput.trim();
+  if (!nextMaterial) return activityTabs;
+
+  return activityTabs.map((tab) => {
+    if (tab.kind !== "prep" || tab.noMaterialsNeeded) return tab;
+
+    if (tab.materials.some((item) => item.toLowerCase() === nextMaterial.toLowerCase())) {
+      return tab;
+    }
+
+    return {
+      ...tab,
+      materials: [...tab.materials, nextMaterial],
+      noMaterialsNeeded: false,
+    };
+  });
+};
+
+const getGuidedItemLabel = (tab: ActivityTab, index: number) => {
+  if (tab.kind === "play") return `Step ${index + 1}`;
+  if (tab.kind === "debrief") return `Q${index + 1}`;
+  return `Item ${index + 1}`;
+};
+
+const buildFacilitateSections = (activityTabs: ActivityTab[]) =>
+  activityTabs
+    .map((tab) => {
+      const sectionLines = tab.sections
+        .map((section) => {
+          const content = section.content.trim();
+          if (!content) return null;
+
+          const title = section.title.trim() || tab.name;
+          return `${title}\n${content}`;
+        })
+        .filter((line): line is string => Boolean(line));
+
+      const guidedLines = tab.guidedItems
+        .map((item, index) => {
+          const content = item.trim();
+          return content ? `${getGuidedItemLabel(tab, index)}: ${content}` : null;
+        })
+        .filter((line): line is string => Boolean(line));
+
+      return {
+        tabName: tab.name,
+        content: [...sectionLines, ...guidedLines].join("\n\n"),
+      };
+    })
+    .filter((section) => section.content.length > 0);
+
+const buildActivityPayload = ({
+  overviewValue,
+  objective,
+  activityTabs,
+  selTags,
+  status,
+}: {
+  overviewValue: OverviewFormState;
+  objective: string;
+  activityTabs: ActivityTab[];
+  selTags: string[];
+  status: ApiActivityStatus;
+}): CreateActivityPayload => {
+  const prepTab = getPrepTab(activityTabs);
+  const environment = overviewValue.anyEnvironment
+    ? ["Any"]
+    : overviewValue.environments;
+  const groupSizeMin = overviewValue.anyGroupSize
+    ? 0
+    : toPositiveInteger(overviewValue.groupSizeMin);
+  const groupSizeMax = overviewValue.anyGroupSize
+    ? 0
+    : toPositiveInteger(overviewValue.groupSizeMax);
+  const videoUrl = overviewValue.videoUrl.trim();
+
+  const payload: CreateActivityPayload = {
+    title: overviewValue.title.trim(),
+    overview: overviewValue.overview.trim(),
+    category: overviewValue.categories,
+    gradeRange: {
+      min: toGradeNumber(overviewValue.gradeMin),
+      max: toGradeNumber(overviewValue.gradeMax),
+    },
+    groupSize: {
+      min: groupSizeMin,
+      max: groupSizeMax,
+      anySize: overviewValue.anyGroupSize,
+    },
+    duration: overviewValue.duration ?? "",
+    energyLevel: overviewValue.energyLevel ?? "",
+    environment,
+    setup: overviewValue.setup === "Props" ? "Required" : "None",
+    objective: objective.trim(),
+    facilitateSections: buildFacilitateSections(activityTabs),
+    materials: prepTab?.noMaterialsNeeded ? [] : (prepTab?.materials ?? []),
+    selTags,
+    status,
+  };
+
+  if (videoUrl) {
+    payload.videoUrl = videoUrl;
+  }
+
+  return payload;
+};
+
+const getSubmissionValidationMessage = ({
+  overviewValue,
+  objective,
+  activityTabs,
+  selTags,
+}: {
+  overviewValue: OverviewFormState;
+  objective: string;
+  activityTabs: ActivityTab[];
+  selTags: string[];
+}) => {
+  if (!overviewValue.title.trim()) return "Please enter an activity title.";
+  if (!overviewValue.overview.trim()) return "Please enter an activity overview.";
+  if (overviewValue.categories.length === 0) return "Please select at least one category.";
+  if (!overviewValue.duration) return "Please select a duration.";
+  if (!overviewValue.energyLevel) return "Please select an energy level.";
+  if (!overviewValue.anyEnvironment && overviewValue.environments.length === 0) {
+    return "Please select an environment or Any Environment.";
+  }
+  if (!overviewValue.setup) return "Please select whether the activity needs props.";
+
+  if (!overviewValue.anyGroupSize) {
+    const groupSizeMin = toPositiveInteger(overviewValue.groupSizeMin);
+    const groupSizeMax = toPositiveInteger(overviewValue.groupSizeMax);
+
+    if (!Number.isFinite(groupSizeMin) || !Number.isFinite(groupSizeMax)) {
+      return "Please enter a minimum and maximum group size, or select Any Size.";
+    }
+
+    if (groupSizeMin < 1 || groupSizeMax < groupSizeMin) {
+      return "Please enter a valid group size range.";
+    }
+  }
+
+  const prepTab = getPrepTab(activityTabs);
+  if (prepTab && !prepTab.noMaterialsNeeded && prepTab.materials.length === 0) {
+    return "Please add materials or select No materials needed.";
+  }
+
+  if (!objective.trim()) return "Please enter an activity objective.";
+  if (selTags.length === 0) return "Please enter at least one SEL tag.";
+
+  return null;
 };
 
 type HeaderActionButtonProps = {
@@ -247,39 +423,6 @@ type CreateActivityActionsProps = {
   onPublish: () => void;
 };
 
-const buildFacilitateSectionContent = (tab: ActivityTab) => {
-  if (tab.kind === "play") {
-    return tab.guidedItems
-      .map((item, index) => {
-        const trimmed = item.trim();
-        return trimmed ? `Step ${index + 1}: ${trimmed}` : "";
-      })
-      .filter(Boolean)
-      .join("\n");
-  }
-
-  if (tab.kind === "debrief") {
-    return tab.guidedItems
-      .map((item, index) => {
-        const trimmed = item.trim();
-        return trimmed ? `Q${index + 1}: ${trimmed}` : "";
-      })
-      .filter(Boolean)
-      .join("\n");
-  }
-
-  return tab.sections
-    .map((section) => {
-      const title = section.title.trim();
-      const content = section.content.trim();
-
-      if (!content) return "";
-      return title ? `${title}\n${content}` : content;
-    })
-    .filter(Boolean)
-    .join("\n\n");
-};
-
 const CreateActivityActions: React.FC<CreateActivityActionsProps> = ({
   onCancel,
   onSaveDraft,
@@ -316,7 +459,6 @@ const CreateActivityHeader: React.FC<CreateActivityHeaderProps> = ({
 
 export const CreateActivity: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
-  const [id, setId] = useState("");
   const [objective, setObjective] = useState("");
   const [activityTabs, setActivityTabs] = useState<ActivityTab[]>(() =>
     createDefaultActivityTabs(),
@@ -324,10 +466,13 @@ export const CreateActivity: React.FC = () => {
   const [overviewValue, setOverviewValue] = useState<OverviewFormState>(() =>
     createDefaultOverviewState(),
   );
+  const [activeActivityTabId, setActiveActivityTabId] = useState<string | null>(null);
   const [selTags, setSelTags] = useState<string[]>([]);
+  const [materialInput, setMaterialInput] = useState("");
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
   const [pendingVideo, setPendingVideo] = useState<VideoFrameSource | null>(null);
-  const [status, setStatus] = useState<ActivityStatus>("idle");
+  const [status, setStatus] = useState<SubmissionStatus>("idle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({
     objective: null,
@@ -340,13 +485,12 @@ export const CreateActivity: React.FC = () => {
   const [sectionErrors, setSectionErrors] = useState<
     Record<string, { title?: string | null; content?: string | null }>
   >({});
-  const [forceOpenPrepTab, setForceOpenPrepTab] = useState(false);
 
   const handleOverviewChange = (patch: Partial<OverviewFormState>) => {
     setOverviewValue((prev) => ({ ...prev, ...patch }));
   };
 
-  const validateForm = () => {
+  const validateForm = (tabsToValidate = activityTabs) => {
     const newErrors: FormErrors = {
       objective: null,
       setupInstructions: null,
@@ -362,7 +506,7 @@ export const CreateActivity: React.FC = () => {
     }
 
     // Validate setup instructions (Prep tab)
-    const prepTab = activityTabs.find((tab) => tab.kind === "prep");
+    const prepTab = tabsToValidate.find((tab) => tab.kind === "prep");
     if (prepTab) {
       const setupSection = prepTab.sections[0];
       if (!setupSection?.content.trim()) {
@@ -378,7 +522,7 @@ export const CreateActivity: React.FC = () => {
     }
 
     // Validate Play tab guided items
-    const playTab = activityTabs.find((tab) => tab.kind === "play");
+    const playTab = tabsToValidate.find((tab) => tab.kind === "play");
     if (playTab) {
       newErrors.playGuidedItems = playTab.guidedItems.map((item) =>
         !item.trim() ? "Please enter how to play instructions" : null,
@@ -386,7 +530,7 @@ export const CreateActivity: React.FC = () => {
     }
 
     // Validate Debrief tab guided items
-    const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
+    const debriefTab = tabsToValidate.find((tab) => tab.kind === "debrief");
     if (debriefTab) {
       newErrors.debriefGuidedItems = debriefTab.guidedItems.map((item) =>
         !item.trim() ? "Please enter a reflection question" : null,
@@ -399,9 +543,8 @@ export const CreateActivity: React.FC = () => {
     }
 
     // Validate additional sections (only validate sections added after the first one)
-    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> =
-      {};
-    activityTabs.forEach((tab) => {
+    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> = {};
+    tabsToValidate.forEach((tab) => {
       tab.sections.forEach((section, index) => {
         if (index === 0) return; // skip the default first section
 
@@ -537,110 +680,109 @@ export const CreateActivity: React.FC = () => {
     console.log("cancel");
   };
 
-  const handleSaveDraft = async (options?: { showSuccessToast?: boolean }) => {
+  const submitActivity = async (targetStatus: ApiActivityStatus) => {
+    if (isSubmitting) return null;
+
+    const activityTabsForSubmission = getActivityTabsWithPendingMaterial(
+      activityTabs,
+      materialInput,
+    );
+    const hasPendingMaterialInput = materialInput.trim().length > 0;
+
+    if (hasPendingMaterialInput) {
+      setActivityTabs(activityTabsForSubmission);
+      setMaterialInput("");
+    }
+
+    const validationMessage = getSubmissionValidationMessage({
+      overviewValue,
+      objective,
+      activityTabs: activityTabsForSubmission,
+      selTags,
+    });
+
+    if (validationMessage) {
+      showToast("error", validationMessage);
+      return null;
+    }
+
+    if (!validateForm(activityTabsForSubmission)) {
+      // Scroll to first error
+      scrollToFirstError();
+      showToast("error", "Please fix the highlighted fields before submitting.");
+      return null;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const response_create = await fetch("http://localhost:4000/api/activities", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: overviewValue.title,
-          overview: overviewValue.overview,
-          category: overviewValue.categories,
-          gradeRange: {
-            min: overviewValue.gradeMin === "K" ? "0" : overviewValue.gradeMin,
-            max: overviewValue.gradeMax,
-          },
-          groupSize: {
-            min: overviewValue.groupSizeMin,
-            max: overviewValue.groupSizeMax,
-            anySize: overviewValue.anyGroupSize,
-          },
-          duration: overviewValue.duration,
-          energyLevel: overviewValue.energyLevel,
-
+      const createdActivity = await createActivity(
+        buildActivityPayload({
+          overviewValue,
           objective,
-          environment: overviewValue.anyEnvironment
-            ? ["Any Environment"]
-            : overviewValue.environments,
-          setup: overviewValue.setup === "Props" ? "Required" : "None", // only allow none or required?
-          facilitateSections: activityTabs
-            .filter((tab) => tab.kind === "prep" || tab.kind === "play" || tab.kind === "debrief")
-            .map((tab) => ({
-              tabName: tab.kind === "prep" ? "Setup" : tab.name,
-              content: buildFacilitateSectionContent(tab),
-            })),
-          materials:
-            activityTabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
-              ? []
-              : activityTabs.find((tab) => tab.kind === "prep")?.materials ?? [],
+          activityTabs: activityTabsForSubmission,
           selTags,
+          status: targetStatus,
         }),
-      });
+      );
+      const activityId = getActivityId(createdActivity);
+      const hasMediaSelection = Boolean(overviewValue.thumbnailImage || overviewValue.thumbnailVideo);
 
-      if (!response_create.ok) {
-        const errorText = await response_create.text();
-        throw new Error(
-          errorText || `create activity failed with status ${response_create.status}`,
-        );
+      if (!activityId && (hasMediaSelection || targetStatus === "Published")) {
+        throw new Error("Activity was created, but the response did not include an activity id.");
       }
 
-      const { _id } = (await response_create.json()) as { _id: string };
-      if (_id) setId(_id);
-      else throw new Error("creation failed, id fault");
-
-      if (overviewValue.thumbnailImage?.uri) {
-        await uploadActivityMedia({
-          activityId: _id,
-          media: {
-            uri: overviewValue.thumbnailImage.uri,
-            name: "thumbnail.jpg",
-            type: "image/jpeg",
-          },
-          mediaTarget: "thumbnail",
-          mediaType: "image",
-          apiBaseUrl: "http://localhost:4000",
+      if (activityId && hasMediaSelection) {
+        await uploadActivityMediaSelection({
+          activityId,
+          thumbnailImage: overviewValue.thumbnailImage,
+          thumbnailVideo: overviewValue.thumbnailVideo,
+          apiBaseUrl: ACTIVITY_API_BASE_URL,
         });
       }
 
-      setStatus("Draft");
-      if (options?.showSuccessToast ?? true) {
-        showToast("success", "Activity marked as draft.");
-      }
+      const savedActivity =
+        activityId && targetStatus === "Published"
+          ? await updateActivityStatus(activityId, "Published")
+          : createdActivity;
 
-      return _id;
+      setStatus(savedActivity.status ?? targetStatus);
+      showToast(
+        "success",
+        targetStatus === "Published" ? "Activity published." : "Activity saved as draft.",
+      );
+      return activityId;
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "unknown error";
-      showToast("error", msg);
-      console.log(msg);
-
+      showToast(
+        "error",
+        error instanceof Error ? error.message : "Unable to submit activity. Please try again.",
+      );
       return null;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleSaveDraft = async () => {
+    const activityId = await submitActivity("Draft");
+    return activityId;
+  };
+
   const handlePublish = async () => {
-    try {
-      const activityId = await handleSaveDraft({ showSuccessToast: false });
+    const activityId = await submitActivity("Published");
+    if (activityId) setIsPreviewVisible(false);
+    return activityId;
+  };
 
-      if (!activityId) throw new Error("activity creation failed");
+  const openPublishPreview = () => {
+    const activityTabsForPreview = getActivityTabsWithPendingMaterial(activityTabs, materialInput);
 
-      const response_publish = await fetch(
-        `http://localhost:4000/api/activities/${activityId}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Published" }),
-        },
-      );
-
-      if (!response_publish.ok) throw new Error("Publish failed");
-      setStatus("Published");
-      setIsPreviewVisible(false);
-      showToast("success", "Activity marked as published.");
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "unkown error";
-      console.log(msg);
-      showToast("error", msg);
+    if (materialInput.trim()) {
+      setActivityTabs(activityTabsForPreview);
+      setMaterialInput("");
     }
+
+    setIsPreviewVisible(true);
   };
 
   const scrollToFirstError = () => {
@@ -648,19 +790,19 @@ export const CreateActivity: React.FC = () => {
     if (errors.objective) {
       scrollViewRef.current?.scrollTo({ y: 150, animated: true });
     } else if (errors.setupInstructions || errors.materials) {
-      setForceOpenPrepTab(true);
+      const prepTab = activityTabs.find((tab) => tab.kind === "prep");
+      if (prepTab) setActiveActivityTabId(prepTab.id);
       scrollViewRef.current?.scrollTo({ y: 350, animated: true });
     } else if (errors.playGuidedItems.some((e) => e !== null)) {
       const playTab = activityTabs.find((tab) => tab.kind === "play");
       if (playTab) {
-        // Open Play tab and scroll
-        // We'll pass this through to ActivityContent
+        setActiveActivityTabId(playTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
     } else if (errors.debriefGuidedItems.some((e) => e !== null)) {
       const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
       if (debriefTab) {
-        // Open Debrief tab and scroll
+        setActiveActivityTabId(debriefTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
     } else if (errors.selTags) {
@@ -680,9 +822,7 @@ export const CreateActivity: React.FC = () => {
         onSaveDraft={() => {
           void handleSaveDraft();
         }}
-        onPublish={() => {
-          setIsPreviewVisible(true);
-        }}
+        onPublish={openPublishPreview}
       />
 
       <CollapsibleSection title="Overview" defaultOpen>
@@ -751,14 +891,16 @@ export const CreateActivity: React.FC = () => {
           setObjective={setObjective}
           tabs={activityTabs}
           setTabs={setActivityTabs}
+          activeTabId={activeActivityTabId}
+          onActiveTabChange={setActiveActivityTabId}
+          materialInput={materialInput}
+          onMaterialInputChange={setMaterialInput}
           objectiveError={errors.objective}
           setupError={errors.setupInstructions}
           materialsError={errors.materials}
           playGuidedItemErrors={errors.playGuidedItems}
           debriefGuidedItemErrors={errors.debriefGuidedItems}
           sectionErrors={sectionErrors}
-          forceOpenPrepTab={forceOpenPrepTab}
-          onPrepTabOpened={() => setForceOpenPrepTab(false)}
         />
       </CollapsibleSection>
 
@@ -769,11 +911,12 @@ export const CreateActivity: React.FC = () => {
       <PublishPreviewModal
         visible={isPreviewVisible}
         onClose={() => setIsPreviewVisible(false)}
-        onSaveDraft={async () => {
-          const savedId = await handleSaveDraft();
-          if (savedId) {
-            setIsPreviewVisible(false);
-          }
+        onSaveDraft={() => {
+          void handleSaveDraft().then((savedId) => {
+            if (savedId) {
+              setIsPreviewVisible(false);
+            }
+          });
         }}
         onPublish={() => {
           void handlePublish();
@@ -789,9 +932,7 @@ export const CreateActivity: React.FC = () => {
         onSaveDraft={() => {
           void handleSaveDraft();
         }}
-        onPublish={() => {
-          setIsPreviewVisible(true);
-        }}
+        onPublish={openPublishPreview}
       />
 
       <Text style={styles.debugText}>Objective: {objective}</Text>

@@ -45,6 +45,7 @@ export type OverviewFormState = {
   thumbnailSourceSizeBytes: number | null;
   thumbnailVideo: ThumbnailVideoFile | null;
   thumbnailImage: ThumbnailImageFile | null;
+  videoUrl: string;
   title: string;
   overview: string;
   categories: string[];
@@ -66,6 +67,7 @@ export const createDefaultOverviewState = (): OverviewFormState => ({
   thumbnailSourceSizeBytes: null,
   thumbnailVideo: null,
   thumbnailImage: null,
+  videoUrl: "",
   title: "",
   overview: "",
   categories: [],
@@ -101,6 +103,8 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         mediaFileName={value.thumbnailSourceName}
         mediaKind={value.thumbnailMediaKind}
         previewUri={value.thumbnailImage?.uri ?? null}
+        videoUrl={value.videoUrl}
+        onVideoUrlChange={(next) => onChange({ videoUrl: next })}
         onPickMedia={onPickMedia}
       />
 

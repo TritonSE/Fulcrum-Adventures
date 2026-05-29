@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import AddIcon from "../../../assets/AddIcon.svg";
 import MinusIcon from "../../../assets/Button.svg";
 import DeleteIcon from "../../../assets/DeleteSectionButton.svg";
+
 import { FieldError } from "./sub_components/FieldError";
 
 type ActivitySection = {
@@ -29,14 +30,16 @@ type ActivityContentProps = {
   setObjective: React.Dispatch<React.SetStateAction<string>>;
   tabs: ActivityTab[];
   setTabs: React.Dispatch<React.SetStateAction<ActivityTab[]>>;
+  activeTabId: string | null;
+  onActiveTabChange: (tabId: string) => void;
+  materialInput: string;
+  onMaterialInputChange: (value: string) => void;
   objectiveError?: string | null;
   setupError?: string | null;
   materialsError?: string | null;
   playGuidedItemErrors?: (string | null)[];
   debriefGuidedItemErrors?: (string | null)[];
   sectionErrors?: Record<string, { title?: string | null; content?: string | null }>;
-  forceOpenPrepTab?: boolean;
-  onPrepTabOpened?: () => void;
 };
 
 const MAX_SECTIONS = 6;
@@ -103,29 +106,17 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
   setObjective,
   tabs,
   setTabs,
+  activeTabId,
+  onActiveTabChange,
+  materialInput,
+  onMaterialInputChange,
   objectiveError,
   setupError,
   materialsError,
   playGuidedItemErrors = [],
   debriefGuidedItemErrors = [],
   sectionErrors = {},
-  forceOpenPrepTab,
-  onPrepTabOpened,
 }) => {
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [materialInput, setMaterialInput] = useState("");
-
-  // Auto-open Prep tab when there are setup or materials errors
-  useEffect(() => {
-    if (forceOpenPrepTab) {
-      const prepTab = tabs.find((tab) => tab.kind === "prep");
-      if (prepTab) {
-        setActiveTabId(prepTab.id);
-        onPrepTabOpened?.();
-      }
-    }
-  }, [forceOpenPrepTab, tabs, onPrepTabOpened]);
-
   const resolvedActiveTabId = useMemo(() => {
     if (activeTabId && tabs.some((tab) => tab.id === activeTabId)) {
       return activeTabId;
@@ -148,7 +139,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
   const handleCreateTab = () => {
     setTabs((prevTabs) => {
       const nextTab = createDefaultTab(`Tab ${prevTabs.length + 1}`, "custom");
-      setActiveTabId(nextTab.id);
+      onActiveTabChange(nextTab.id);
       return [...prevTabs, nextTab];
     });
   };
@@ -233,7 +224,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
       };
     });
 
-    setMaterialInput("");
+    onMaterialInputChange("");
   };
 
   const handleRemoveMaterial = (material: string) => {
@@ -244,6 +235,10 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
   };
 
   const handleToggleNoMaterialsNeeded = () => {
+    if (activeTab && !activeTab.noMaterialsNeeded) {
+      onMaterialInputChange("");
+    }
+
     updateActiveTab((tab) => ({
       ...tab,
       noMaterialsNeeded: !tab.noMaterialsNeeded,
@@ -297,7 +292,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
             <Pressable
               key={tab.id}
               style={[styles.tab, isActive && styles.activeTab]}
-              onPress={() => setActiveTabId(tab.id)}
+              onPress={() => onActiveTabChange(tab.id)}
             >
               <Text style={[styles.tabText, isActive && styles.activeTabText]}>{tab.name}</Text>
             </Pressable>
@@ -412,7 +407,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
               <View style={styles.materialInputRow}>
                 <TextInput
                   value={materialInput}
-                  onChangeText={setMaterialInput}
+                  onChangeText={onMaterialInputChange}
                   placeholder="Add new material item..."
                   placeholderTextColor="#A6A6A6"
                   style={[styles.materialInput, materialsError && styles.inputError]}
