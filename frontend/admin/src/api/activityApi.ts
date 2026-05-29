@@ -31,6 +31,37 @@ export type CreateActivityPayload = {
   videoUrl?: string;
 };
 
+export type ActivityDetail = ActivityResponse & {
+  title: string;
+  overview: string;
+  thumbnailUrl?: string;
+  additionalMedia?: Array<{
+    type: "image" | "video";
+    url: string;
+  }>;
+  category: string[];
+  gradeRange: {
+    min: number;
+    max: number;
+  };
+  groupSize: {
+    min: number;
+    max: number;
+    anySize: boolean;
+  };
+  duration: string;
+  energyLevel: string;
+  environment: string[];
+  setup: "None" | "Required";
+  objective?: string;
+  facilitateSections: Array<{
+    tabName: string;
+    content: string;
+  }>;
+  materials: string[];
+  selTags: string[];
+};
+
 export type ActivityResponse = {
   _id?: string;
   id?: string;
@@ -59,6 +90,32 @@ export const getActivityId = (activity: ActivityResponse) => {
 export const createActivity = async (payload: CreateActivityPayload) => {
   const response = await fetch(ACTIVITY_API_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readErrorBody(response));
+  }
+
+  return response.json() as Promise<ActivityResponse>;
+};
+
+export const getActivityById = async (activityId: string) => {
+  const response = await fetch(`${ACTIVITY_API_URL}/${activityId}`);
+
+  if (!response.ok) {
+    throw new Error(await readErrorBody(response));
+  }
+
+  return response.json() as Promise<ActivityDetail>;
+};
+
+export const updateActivity = async (activityId: string, payload: CreateActivityPayload) => {
+  const response = await fetch(`${ACTIVITY_API_URL}/${activityId}`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
