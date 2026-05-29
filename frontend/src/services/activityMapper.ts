@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./api";
 
-import type { Activity, ApiActivity, ApiDuration, CustomTab } from "../types/activity";
+import type { Activity, ApiActivity, ApiDuration, ApiGroupSize, CustomTab } from "../types/activity";
 
 function mapDuration(duration: ApiDuration) {
   switch (duration) {
@@ -18,6 +18,21 @@ function mapMediaUrl(url?: string) {
   if (/^https?:\/\//.test(url)) return url;
 
   return new URL(url, `${API_BASE_URL}/`).toString();
+}
+
+function mapGroupSize(groupSize: ApiGroupSize): Activity["groupSize"] {
+  if (groupSize.anySize) {
+    return {
+      min: groupSize.min ?? 1,
+      max: groupSize.max ?? 99,
+      anySize: true,
+    };
+  }
+
+  return {
+    min: groupSize.min,
+    max: groupSize.max,
+  };
 }
 
 function mapFacilitateSections(apiActivity: ApiActivity): Activity["facilitate"] {
@@ -55,10 +70,7 @@ export function mapApiActivityToActivity(apiActivity: ApiActivity): Activity {
     id: apiActivity._id,
     title: apiActivity.title,
     gradeLevel: apiActivity.gradeRange,
-    groupSize: {
-      min: apiActivity.groupSize.min,
-      max: apiActivity.groupSize.anySize ? 99 : apiActivity.groupSize.max,
-    },
+    groupSize: mapGroupSize(apiActivity.groupSize),
     duration: mapDuration(apiActivity.duration),
     category: primaryCategory,
     categories: apiActivity.category,
@@ -70,9 +82,7 @@ export function mapApiActivityToActivity(apiActivity: ApiActivity): Activity {
     objective: apiActivity.objective,
     facilitate: mapFacilitateSections(apiActivity),
     selTags: apiActivity.selTags,
-    hasTutorial: apiActivity.additionalMedia?.some((media) => media.type === "video") ?? false,
-    videoUrl: mapMediaUrl(
-      apiActivity.additionalMedia?.find((media) => media.type === "video")?.url,
-    ),
+    hasTutorial: Boolean(apiActivity.videoUrl),
+    videoUrl: mapMediaUrl(apiActivity.videoUrl),
   };
 }

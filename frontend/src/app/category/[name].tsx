@@ -225,6 +225,13 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     letterSpacing: 0.28,
   },
+  errorText: {
+    color: "#B42318",
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    lineHeight: 21,
+    paddingBottom: 14,
+  },
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
@@ -242,6 +249,7 @@ export default function CategoryScreen() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [apiCategoryActivities, setApiCategoryActivities] = useState<Activity[]>([]);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [isLoadingCategoryActivities, setIsLoadingCategoryActivities] = useState(true);
 
   const contextCategoryActivities = stateActivities.filter((activity) => {
@@ -260,14 +268,17 @@ export default function CategoryScreen() {
 
   const loadCategoryActivities = useCallback(async () => {
     setIsLoadingCategoryActivities(true);
+    setCategoryError(null);
 
     try {
-      const response = await activitiesApi.list({
+      const apiActivities = await activitiesApi.listAll({
         status: "Published",
         category: categoryName,
-        limit: 30,
       });
-      setApiCategoryActivities(response.activities.map(mapApiActivityToActivity));
+      setApiCategoryActivities(apiActivities.map(mapApiActivityToActivity));
+    } catch (error) {
+      setCategoryError(error instanceof Error ? error.message : "Unable to load activities.");
+      setApiCategoryActivities([]);
     } finally {
       setIsLoadingCategoryActivities(false);
     }
@@ -333,6 +344,7 @@ export default function CategoryScreen() {
                 <FilterIcon />
               </Pressable>
             </View>
+            {categoryError && <Text style={styles.errorText}>{categoryError}</Text>}
           </View>
         }
       />

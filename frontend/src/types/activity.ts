@@ -21,9 +21,17 @@ export type Range = {
   max: number;
 };
 
-export type ApiGroupSize = Range & {
-  anySize: boolean;
-};
+export type ApiGroupSize =
+  | {
+      anySize: true;
+      min?: number;
+      max?: number;
+    }
+  | {
+      anySize?: false;
+      min: number;
+      max: number;
+    };
 
 export type ApiAdditionalMedia = {
   type: "image" | "video";
@@ -40,6 +48,7 @@ export type ApiActivity = {
   title: string;
   overview: string;
   thumbnailUrl?: string;
+  videoUrl?: string;
   additionalMedia?: ApiAdditionalMedia[];
   category: Category[];
   gradeRange: Range;
@@ -91,7 +100,7 @@ export type Activity = {
 
   /** Range endpoints; 0 means Kindergarten ("K"). */
   gradeLevel: Range;
-  groupSize: Range;
+  groupSize: Range & { anySize?: boolean };
   duration: Range; // In minutes
   category?: Category;
   categories?: Category[];

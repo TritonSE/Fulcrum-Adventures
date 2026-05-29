@@ -70,8 +70,8 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     setIsUsingCachedActivities(false);
 
     try {
-      const response = await activitiesApi.list({ status: "Published", limit: 30 });
-      const nextActivities = response.activities.map(mapApiActivityToActivity);
+      const apiActivities = await activitiesApi.listAll({ status: "Published" });
+      const nextActivities = apiActivities.map(mapApiActivityToActivity);
       setActivities((previous) => {
         const mergedActivities = mergeLocalActivityState(previous, nextActivities);
         lastSuccessfulActivitiesRef.current = mergedActivities;

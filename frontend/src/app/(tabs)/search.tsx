@@ -58,7 +58,6 @@ function buildSearchParams(filters: FilterState, searchText: string): ListActivi
         ? filters.environment.join(",")
         : undefined,
     setup: mapSetupFilter(filters.setupProps),
-    limit: 30,
   };
 }
 
@@ -233,9 +232,9 @@ export function SearchPage() {
         setSearchError(null);
 
         try {
-          const response = await activitiesApi.list(buildSearchParams(filters, searchText));
+          const apiActivities = await activitiesApi.listAll(buildSearchParams(filters, searchText));
           const contextById = new Map(activities.map((activity) => [activity.id, activity]));
-          const nextResults = response.activities.map((apiActivity) => {
+          const nextResults = apiActivities.map((apiActivity) => {
             const mappedActivity = mapApiActivityToActivity(apiActivity);
             const contextActivity = contextById.get(mappedActivity.id);
 

@@ -6,7 +6,8 @@ declare const process: {
   };
 };
 
-const DEFAULT_API_BASE_URL = "http://10.48.234.215:4000";
+const DEFAULT_API_BASE_URL = "http://localhost:4000";
+const DEFAULT_ACTIVITIES_PAGE_SIZE = 30;
 
 export const API_BASE_URL =
   process.env?.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE_URL;
@@ -169,6 +170,23 @@ export const activitiesApi = {
     return apiRequest<ListActivitiesResponse<TActivity>>("/api/activities", {
       query: params,
     });
+  },
+
+  async listAll<TActivity = ApiActivity>(params: ListActivitiesParams = {}) {
+    const limit = params.limit ?? DEFAULT_ACTIVITIES_PAGE_SIZE;
+    const firstPage = await this.list<TActivity>({ ...params, page: 1, limit });
+    const remainingPages = Array.from(
+      { length: Math.max(firstPage.totalPages - firstPage.page, 0) },
+      (_, index) => firstPage.page + index + 1,
+    );
+    const remainingResponses = await Promise.all(
+      remainingPages.map(async (page) => this.list<TActivity>({ ...params, page, limit })),
+    );
+
+    return [
+      ...firstPage.activities,
+      ...remainingResponses.flatMap((response) => response.activities),
+    ];
   },
 
   async get<TActivity = ApiActivity>(id: string) {
