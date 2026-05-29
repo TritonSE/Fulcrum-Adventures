@@ -86,12 +86,23 @@ export const createDefaultOverviewState = (): OverviewFormState => ({
 type OverviewSectionProps = {
   value: OverviewFormState;
   onChange: (patch: Partial<OverviewFormState>) => void;
+  errors?: {
+    title?: string | null;
+    overview?: string | null;
+    categories?: string | null;
+    groupSize?: string | null;
+    duration?: string | null;
+    energyLevel?: string | null;
+    environment?: string | null;
+    setup?: string | null;
+  };
   onPickMedia?: () => void;
 };
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   value,
   onChange,
+  errors = {},
   onPickMedia,
 }) => {
   const { width } = useWindowDimensions();
@@ -108,16 +119,22 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         onPickMedia={onPickMedia}
       />
 
-      <ActivityTitleField value={value.title} onChangeText={(next) => onChange({ title: next })} />
+      <ActivityTitleField
+        value={value.title}
+        onChangeText={(next) => onChange({ title: next })}
+        error={errors.title}
+      />
 
       <ActivityOverviewField
         value={value.overview}
         onChangeText={(next) => onChange({ overview: next })}
+        error={errors.overview}
       />
 
       <CategorySection
         selected={value.categories}
         onChange={(next) => onChange({ categories: next })}
+        error={errors.categories}
       />
 
       <GradeSection
@@ -132,6 +149,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         anySize={value.anyGroupSize}
         onChangeMin={(next) => onChange({ groupSizeMin: next })}
         onChangeMax={(next) => onChange({ groupSizeMax: next })}
+        error={errors.groupSize}
         onChangeAnySize={(next) =>
           onChange({
             anyGroupSize: next,
@@ -140,11 +158,16 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         }
       />
 
-      <DurationSection value={value.duration} onChange={(next) => onChange({ duration: next })} />
+      <DurationSection
+        value={value.duration}
+        onChange={(next) => onChange({ duration: next })}
+        error={errors.duration}
+      />
 
       <EnergyLevelSection
         value={value.energyLevel}
         onChange={(next) => onChange({ energyLevel: next })}
+        error={errors.energyLevel}
       />
 
       <View style={[styles.bottomRow, !isWide && styles.bottomRowMobile]}>
@@ -153,6 +176,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
             selected={value.environments}
             anyEnvironment={value.anyEnvironment}
             onChangeSelected={(next) => onChange({ environments: next })}
+            error={errors.environment}
             onChangeAnyEnvironment={(next) =>
               onChange({
                 anyEnvironment: next,
@@ -163,7 +187,11 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         </View>
 
         <View style={styles.setupColumn}>
-          <SetupSection value={value.setup} onChange={(next) => onChange({ setup: next })} />
+          <SetupSection
+            value={value.setup}
+            onChange={(next) => onChange({ setup: next })}
+            error={errors.setup}
+          />
         </View>
       </View>
     </View>

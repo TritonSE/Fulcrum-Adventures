@@ -1,6 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 import type { SetupOption } from "../OverviewSection";
 
 const OPTIONS: NonNullable<SetupOption>[] = ["Props", "No Props"];
@@ -8,9 +10,10 @@ const OPTIONS: NonNullable<SetupOption>[] = ["Props", "No Props"];
 type SetupSectionProps = {
   value: SetupOption;
   onChange: (value: SetupOption) => void;
+  error?: string | null;
 };
 
-export const SetupSection: React.FC<SetupSectionProps> = ({ value, onChange }) => {
+export const SetupSection: React.FC<SetupSectionProps> = ({ value, onChange, error }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Set Up</Text>
@@ -23,13 +26,14 @@ export const SetupSection: React.FC<SetupSectionProps> = ({ value, onChange }) =
             <Pressable
               key={option}
               onPress={() => onChange(isSelected ? null : option)}
-              style={[styles.chip, isSelected && styles.chipSelected]}
+              style={[styles.chip, isSelected && styles.chipSelected, error && styles.chipError]}
             >
               <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{option}</Text>
             </Pressable>
           );
         })}
       </View>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -64,6 +68,9 @@ const styles = StyleSheet.create({
   chipSelected: {
     borderColor: "#153A7A",
     backgroundColor: "#EAF0FF",
+  },
+  chipError: {
+    borderColor: "#EF4444",
   },
   chipText: {
     color: "#5B6B8B",

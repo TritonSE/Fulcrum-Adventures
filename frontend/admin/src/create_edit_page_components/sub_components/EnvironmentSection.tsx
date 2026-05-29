@@ -1,6 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 const OPTIONS = ["Blacktop", "Field", "Classroom", "Gym/MPR"];
 
 type EnvironmentSectionProps = {
@@ -8,6 +10,7 @@ type EnvironmentSectionProps = {
   anyEnvironment: boolean;
   onChangeSelected: (selected: string[]) => void;
   onChangeAnyEnvironment: (value: boolean) => void;
+  error?: string | null;
 };
 
 export const EnvironmentSection: React.FC<EnvironmentSectionProps> = ({
@@ -15,6 +18,7 @@ export const EnvironmentSection: React.FC<EnvironmentSectionProps> = ({
   anyEnvironment,
   onChangeSelected,
   onChangeAnyEnvironment,
+  error,
 }) => {
   const toggleEnvironment = (option: string) => {
     if (anyEnvironment) return;
@@ -43,6 +47,7 @@ export const EnvironmentSection: React.FC<EnvironmentSectionProps> = ({
                 styles.chip,
                 isSelected && styles.chipSelected,
                 anyEnvironment && styles.chipDisabled,
+                error && styles.chipError,
               ]}
             >
               <Text
@@ -65,6 +70,7 @@ export const EnvironmentSection: React.FC<EnvironmentSectionProps> = ({
         </View>
         <Text style={styles.checkboxLabel}>Any Environment</Text>
       </Pressable>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -103,6 +109,9 @@ const styles = StyleSheet.create({
   },
   chipDisabled: {
     opacity: 0.45,
+  },
+  chipError: {
+    borderColor: "#EF4444",
   },
   chipText: {
     color: "#5B6B8B",

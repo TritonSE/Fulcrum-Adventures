@@ -1,6 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 type GroupSizeSectionProps = {
   minValue: string;
   maxValue: string;
@@ -8,6 +10,7 @@ type GroupSizeSectionProps = {
   onChangeMin: (value: string) => void;
   onChangeMax: (value: string) => void;
   onChangeAnySize: (value: boolean) => void;
+  error?: string | null;
 };
 
 export const GroupSizeSection: React.FC<GroupSizeSectionProps> = ({
@@ -17,6 +20,7 @@ export const GroupSizeSection: React.FC<GroupSizeSectionProps> = ({
   onChangeMin,
   onChangeMax,
   onChangeAnySize,
+  error,
 }) => {
   return (
     <View style={styles.container}>
@@ -30,7 +34,7 @@ export const GroupSizeSection: React.FC<GroupSizeSectionProps> = ({
           placeholder="Min"
           placeholderTextColor="#B4B4B4"
           keyboardType="number-pad"
-          style={[styles.input, anySize && styles.inputDisabled]}
+          style={[styles.input, anySize && styles.inputDisabled, error && styles.inputError]}
         />
 
         <Text style={styles.toText}>to</Text>
@@ -42,7 +46,7 @@ export const GroupSizeSection: React.FC<GroupSizeSectionProps> = ({
           placeholder="Max"
           placeholderTextColor="#B4B4B4"
           keyboardType="number-pad"
-          style={[styles.input, anySize && styles.inputDisabled]}
+          style={[styles.input, anySize && styles.inputDisabled, error && styles.inputError]}
         />
       </View>
 
@@ -52,6 +56,7 @@ export const GroupSizeSection: React.FC<GroupSizeSectionProps> = ({
         </View>
         <Text style={styles.checkboxLabel}>Any Size</Text>
       </Pressable>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -86,6 +91,9 @@ const styles = StyleSheet.create({
   inputDisabled: {
     backgroundColor: "#F6F6F6",
     color: "#B4B4B4",
+  },
+  inputError: {
+    borderColor: "#EF4444",
   },
   toText: {
     color: "#153A7A",

@@ -1,16 +1,20 @@
 import React from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 const MAX_OVERVIEW_LENGTH = 200;
 
 type ActivityOverviewFieldProps = {
   value: string;
   onChangeText: (text: string) => void;
+  error?: string | null;
 };
 
 export const ActivityOverviewField: React.FC<ActivityOverviewFieldProps> = ({
   value,
   onChangeText,
+  error,
 }) => {
   return (
     <View style={styles.container}>
@@ -24,12 +28,13 @@ export const ActivityOverviewField: React.FC<ActivityOverviewFieldProps> = ({
         maxLength={MAX_OVERVIEW_LENGTH}
         multiline
         numberOfLines={4}
-        style={styles.input}
+        style={[styles.input, error && styles.inputError]}
       />
 
       <Text style={styles.characterCount}>
         {value.length}/{MAX_OVERVIEW_LENGTH} characters
       </Text>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -57,6 +62,9 @@ const styles = StyleSheet.create({
     color: "#0F172A",
     fontSize: 14,
     textAlignVertical: "top",
+  },
+  inputError: {
+    borderColor: "#EF4444",
   },
   characterCount: {
     marginTop: 8,

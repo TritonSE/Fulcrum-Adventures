@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import YellowEnergyStarIcon from "../../../../assets/icons/yellowenergystar.svg";
+import { FieldError } from "./FieldError";
 
 import type { EnergyLevelOption } from "../OverviewSection";
 
@@ -16,9 +17,14 @@ const getStarCount = (value: NonNullable<EnergyLevelOption>) => {
 type EnergyLevelSectionProps = {
   value: EnergyLevelOption;
   onChange: (value: EnergyLevelOption) => void;
+  error?: string | null;
 };
 
-export const EnergyLevelSection: React.FC<EnergyLevelSectionProps> = ({ value, onChange }) => {
+export const EnergyLevelSection: React.FC<EnergyLevelSectionProps> = ({
+  value,
+  onChange,
+  error,
+}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Energy Level</Text>
@@ -31,7 +37,7 @@ export const EnergyLevelSection: React.FC<EnergyLevelSectionProps> = ({ value, o
             <Pressable
               key={option}
               onPress={() => onChange(isSelected ? null : option)}
-              style={[styles.chip, isSelected && styles.chipSelected]}
+              style={[styles.chip, isSelected && styles.chipSelected, error && styles.chipError]}
             >
               <View style={styles.starsRow}>
                 {Array.from({ length: getStarCount(option) }).map((_, index) => {
@@ -43,6 +49,7 @@ export const EnergyLevelSection: React.FC<EnergyLevelSectionProps> = ({ value, o
           );
         })}
       </View>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -79,6 +86,9 @@ const styles = StyleSheet.create({
   chipSelected: {
     borderColor: "#1F3B82",
     backgroundColor: "#EAF0FF",
+  },
+  chipError: {
+    borderColor: "#EF4444",
   },
   starsRow: {
     flexDirection: "row",

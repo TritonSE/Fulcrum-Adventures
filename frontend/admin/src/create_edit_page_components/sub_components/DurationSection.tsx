@@ -1,6 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 import type { DurationOption } from "../OverviewSection";
 
 const OPTIONS: NonNullable<DurationOption>[] = ["5-15 min", "15-30 min", "30+ min"];
@@ -8,9 +10,10 @@ const OPTIONS: NonNullable<DurationOption>[] = ["5-15 min", "15-30 min", "30+ mi
 type DurationSectionProps = {
   value: DurationOption;
   onChange: (value: DurationOption) => void;
+  error?: string | null;
 };
 
-export const DurationSection: React.FC<DurationSectionProps> = ({ value, onChange }) => {
+export const DurationSection: React.FC<DurationSectionProps> = ({ value, onChange, error }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Duration</Text>
@@ -23,13 +26,14 @@ export const DurationSection: React.FC<DurationSectionProps> = ({ value, onChang
             <Pressable
               key={option}
               onPress={() => onChange(isSelected ? null : option)}
-              style={[styles.chip, isSelected && styles.chipSelected]}
+              style={[styles.chip, isSelected && styles.chipSelected, error && styles.chipError]}
             >
               <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{option}</Text>
             </Pressable>
           );
         })}
       </View>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -64,6 +68,9 @@ const styles = StyleSheet.create({
   chipSelected: {
     borderColor: "#1F3B82",
     backgroundColor: "#EAF0FF",
+  },
+  chipError: {
+    borderColor: "#EF4444",
   },
   chipText: {
     color: "#5B6B8B",

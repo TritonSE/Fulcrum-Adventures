@@ -203,6 +203,14 @@ const getAssetSizeBytes = async (asset: ImagePicker.ImagePickerAsset) => {
 type SubmissionStatus = "idle" | ApiActivityStatus;
 
 type FormErrors = {
+  title: string | null;
+  overview: string | null;
+  categories: string | null;
+  groupSize: string | null;
+  duration: string | null;
+  energyLevel: string | null;
+  environment: string | null;
+  setup: string | null;
   objective: string | null;
   setupInstructions: string | null;
   materials: string | null;
@@ -210,6 +218,29 @@ type FormErrors = {
   debriefGuidedItems: (string | null)[];
   selTags: string | null;
 };
+
+type ValidationResult = {
+  isValid: boolean;
+  errors: FormErrors;
+  sectionErrors: Record<string, { title?: string | null; content?: string | null }>;
+};
+
+const createEmptyFormErrors = (): FormErrors => ({
+  title: null,
+  overview: null,
+  categories: null,
+  groupSize: null,
+  duration: null,
+  energyLevel: null,
+  environment: null,
+  setup: null,
+  objective: null,
+  setupInstructions: null,
+  materials: null,
+  playGuidedItems: [],
+  debriefGuidedItems: [],
+  selTags: null,
+});
 
 const toGradeNumber = (value: string) => (value === "K" ? 0 : Number(value));
 
@@ -474,14 +505,7 @@ export const CreateActivity: React.FC = () => {
   const [status, setStatus] = useState<SubmissionStatus>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({
-    objective: null,
-    setupInstructions: null,
-    materials: null,
-    playGuidedItems: [],
-    debriefGuidedItems: [],
-    selTags: null,
-  });
+  const [errors, setErrors] = useState<FormErrors>(() => createEmptyFormErrors());
   const [sectionErrors, setSectionErrors] = useState<
     Record<string, { title?: string | null; content?: string | null }>
   >({});
@@ -490,17 +514,53 @@ export const CreateActivity: React.FC = () => {
     setOverviewValue((prev) => ({ ...prev, ...patch }));
   };
 
-  const validateForm = (tabsToValidate = activityTabs) => {
-    const newErrors: FormErrors = {
-      objective: null,
-      setupInstructions: null,
-      materials: null,
-      playGuidedItems: [],
-      debriefGuidedItems: [],
-      selTags: null,
-    };
+  const clearValidationState = () => {
+    setErrors(createEmptyFormErrors());
+    setSectionErrors({});
+  };
 
-    // Validate objective
+  const validateForm = (tabsToValidate = activityTabs): ValidationResult => {
+    const newErrors: FormErrors = createEmptyFormErrors();
+
+    if (!overviewValue.title.trim()) {
+      newErrors.title = "Please enter an activity title";
+    }
+
+    if (!overviewValue.overview.trim()) {
+      newErrors.overview = "Please enter an activity overview";
+    }
+
+    if (overviewValue.categories.length === 0) {
+      newErrors.categories = "Please select at least one category";
+    }
+
+    if (!overviewValue.duration) {
+      newErrors.duration = "Please select a duration";
+    }
+
+    if (!overviewValue.energyLevel) {
+      newErrors.energyLevel = "Please select an energy level";
+    }
+
+    if (!overviewValue.anyEnvironment && overviewValue.environments.length === 0) {
+      newErrors.environment = "Please select an environment or Any Environment";
+    }
+
+    if (!overviewValue.setup) {
+      newErrors.setup = "Please select whether the activity needs props";
+    }
+
+    if (!overviewValue.anyGroupSize) {
+      const groupSizeMin = toPositiveInteger(overviewValue.groupSizeMin);
+      const groupSizeMax = toPositiveInteger(overviewValue.groupSizeMax);
+
+      if (!Number.isFinite(groupSizeMin) || !Number.isFinite(groupSizeMax)) {
+        newErrors.groupSize = "Please enter a minimum and maximum group size, or select Any Size";
+      } else if (groupSizeMin < 1 || groupSizeMax < groupSizeMin) {
+        newErrors.groupSize = "Please enter a valid group size range";
+      }
+    }
+
     if (!objective.trim()) {
       newErrors.objective = "Please enter an activity objective";
     }
@@ -566,6 +626,14 @@ export const CreateActivity: React.FC = () => {
 
     // Check if there are any errors
     const hasErrors =
+      newErrors.title !== null ||
+      newErrors.overview !== null ||
+      newErrors.categories !== null ||
+      newErrors.groupSize !== null ||
+      newErrors.duration !== null ||
+      newErrors.energyLevel !== null ||
+      newErrors.environment !== null ||
+      newErrors.setup !== null ||
       newErrors.objective !== null ||
       newErrors.setupInstructions !== null ||
       newErrors.materials !== null ||
@@ -574,7 +642,11 @@ export const CreateActivity: React.FC = () => {
       newErrors.selTags !== null ||
       Object.keys(nextSectionErrors).length > 0;
 
-    return !hasErrors;
+    return {
+      isValid: !hasErrors,
+      errors: newErrors,
+      sectionErrors: nextSectionErrors,
+    };
   };
 
   const handlePickMedia = async () => {
@@ -677,6 +749,7 @@ export const CreateActivity: React.FC = () => {
   };
 
   const handleCancel = () => {
+    clearValidationState();
     console.log("cancel");
   };
 
@@ -694,23 +767,30 @@ export const CreateActivity: React.FC = () => {
       setMaterialInput("");
     }
 
-    const validationMessage = getSubmissionValidationMessage({
-      overviewValue,
-      objective,
-      activityTabs: activityTabsForSubmission,
-      selTags,
-    });
-
-    if (validationMessage) {
-      showToast("error", validationMessage);
-      return null;
+    if (targetStatus !== "Published") {
+      clearValidationState();
     }
 
-    if (!validateForm(activityTabsForSubmission)) {
-      // Scroll to first error
-      scrollToFirstError();
-      showToast("error", "Please fix the highlighted fields before submitting.");
-      return null;
+    if (targetStatus === "Published") {
+      const validationResult = validateForm(activityTabsForSubmission);
+
+      if (!validationResult.isValid) {
+        scrollToFirstError(validationResult.errors);
+        const validationMessage = getSubmissionValidationMessage({
+          overviewValue,
+          objective,
+          activityTabs: activityTabsForSubmission,
+          selTags,
+        });
+
+        if (validationMessage) {
+          showToast("error", validationMessage);
+        } else {
+          showToast("error", "Please fix the highlighted fields before submitting.");
+        }
+
+        return null;
+      }
     }
 
     setIsSubmitting(true);
@@ -776,36 +856,67 @@ export const CreateActivity: React.FC = () => {
 
   const openPublishPreview = () => {
     const activityTabsForPreview = getActivityTabsWithPendingMaterial(activityTabs, materialInput);
+    const hasPendingMaterialInput = materialInput.trim().length > 0;
 
-    if (materialInput.trim()) {
+    if (hasPendingMaterialInput) {
       setActivityTabs(activityTabsForPreview);
       setMaterialInput("");
+    }
+
+    const validationResult = validateForm(activityTabsForPreview);
+
+    if (!validationResult.isValid) {
+      scrollToFirstError(validationResult.errors);
+      const validationMessage = getSubmissionValidationMessage({
+        overviewValue,
+        objective,
+        activityTabs: activityTabsForPreview,
+        selTags,
+      });
+
+      if (validationMessage) {
+        showToast("error", validationMessage);
+      } else {
+        showToast("error", "Please fix the highlighted fields before publishing.");
+      }
+
+      return;
     }
 
     setIsPreviewVisible(true);
   };
 
-  const scrollToFirstError = () => {
-    // Priority order: objective -> setup -> materials -> play -> debrief -> selTags
-    if (errors.objective) {
+  const scrollToFirstError = (nextErrors = errors) => {
+    if (
+      nextErrors.title ||
+      nextErrors.overview ||
+      nextErrors.categories ||
+      nextErrors.groupSize ||
+      nextErrors.duration ||
+      nextErrors.energyLevel ||
+      nextErrors.environment ||
+      nextErrors.setup
+    ) {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    } else if (nextErrors.objective) {
       scrollViewRef.current?.scrollTo({ y: 150, animated: true });
-    } else if (errors.setupInstructions || errors.materials) {
+    } else if (nextErrors.setupInstructions || nextErrors.materials) {
       const prepTab = activityTabs.find((tab) => tab.kind === "prep");
       if (prepTab) setActiveActivityTabId(prepTab.id);
       scrollViewRef.current?.scrollTo({ y: 350, animated: true });
-    } else if (errors.playGuidedItems.some((e) => e !== null)) {
+    } else if (nextErrors.playGuidedItems.some((e) => e !== null)) {
       const playTab = activityTabs.find((tab) => tab.kind === "play");
       if (playTab) {
         setActiveActivityTabId(playTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
-    } else if (errors.debriefGuidedItems.some((e) => e !== null)) {
+    } else if (nextErrors.debriefGuidedItems.some((e) => e !== null)) {
       const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
       if (debriefTab) {
         setActiveActivityTabId(debriefTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
-    } else if (errors.selTags) {
+    } else if (nextErrors.selTags) {
       scrollViewRef.current?.scrollTo({ y: 600, animated: true });
     }
   };
@@ -829,6 +940,16 @@ export const CreateActivity: React.FC = () => {
         <OverviewSection
           value={overviewValue}
           onChange={handleOverviewChange}
+          errors={{
+            title: errors.title,
+            overview: errors.overview,
+            categories: errors.categories,
+            groupSize: errors.groupSize,
+            duration: errors.duration,
+            energyLevel: errors.energyLevel,
+            environment: errors.environment,
+            setup: errors.setup,
+          }}
           onPickMedia={() => {
             void handlePickMedia();
           }}

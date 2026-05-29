@@ -208,6 +208,21 @@ type FormErrors = {
   selTags: string | null;
 };
 
+type ValidationResult = {
+  isValid: boolean;
+  errors: FormErrors;
+  sectionErrors: Record<string, { title?: string | null; content?: string | null }>;
+};
+
+const createEmptyFormErrors = (): FormErrors => ({
+  objective: null,
+  setupInstructions: null,
+  materials: null,
+  playGuidedItems: [],
+  debriefGuidedItems: [],
+  selTags: null,
+});
+
 const toGradeLabel = (value: number) => (value === 0 ? "K" : String(value));
 
 const toGradeNumber = (value: string) => (value === "K" ? 0 : Number(value));
@@ -617,14 +632,7 @@ export const EditActivity: React.FC<EditActivityProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [hasNewMediaSelection, setHasNewMediaSelection] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({
-    objective: null,
-    setupInstructions: null,
-    materials: null,
-    playGuidedItems: [],
-    debriefGuidedItems: [],
-    selTags: null,
-  });
+  const [errors, setErrors] = useState<FormErrors>(() => createEmptyFormErrors());
   const [sectionErrors, setSectionErrors] = useState<
     Record<string, { title?: string | null; content?: string | null }>
   >({});
@@ -677,15 +685,13 @@ export const EditActivity: React.FC<EditActivityProps> = ({
     setOverviewValue((prev) => ({ ...prev, ...patch }));
   };
 
-  const validateForm = (tabsToValidate = activityTabs) => {
-    const newErrors: FormErrors = {
-      objective: null,
-      setupInstructions: null,
-      materials: null,
-      playGuidedItems: [],
-      debriefGuidedItems: [],
-      selTags: null,
-    };
+  const clearValidationState = () => {
+    setErrors(createEmptyFormErrors());
+    setSectionErrors({});
+  };
+
+  const validateForm = (tabsToValidate = activityTabs): ValidationResult => {
+    const newErrors: FormErrors = createEmptyFormErrors();
 
     if (!objective.trim()) {
       newErrors.objective = "Please enter an activity objective";
@@ -752,7 +758,11 @@ export const EditActivity: React.FC<EditActivityProps> = ({
       newErrors.selTags !== null ||
       Object.keys(nextSectionErrors).length > 0;
 
-    return !hasErrors;
+    return {
+      isValid: !hasErrors,
+      errors: newErrors,
+      sectionErrors: nextSectionErrors,
+    };
   };
 
   const handlePickMedia = async () => {
@@ -855,6 +865,8 @@ export const EditActivity: React.FC<EditActivityProps> = ({
   };
 
   const handleCancel = () => {
+    clearValidationState();
+
     if (onCancel) {
       onCancel();
       return;
@@ -880,22 +892,30 @@ export const EditActivity: React.FC<EditActivityProps> = ({
       setMaterialInput("");
     }
 
-    const validationMessage = getSubmissionValidationMessage({
-      overviewValue,
-      objective,
-      activityTabs: activityTabsForSubmission,
-      selTags,
-    });
-
-    if (validationMessage) {
-      showToast("error", validationMessage);
-      return null;
+    if (targetStatus !== "Published") {
+      clearValidationState();
     }
 
-    if (!validateForm(activityTabsForSubmission)) {
-      scrollToFirstError();
-      showToast("error", "Please fix the highlighted fields before submitting.");
-      return null;
+    if (targetStatus === "Published") {
+      const validationResult = validateForm(activityTabsForSubmission);
+
+      if (!validationResult.isValid) {
+        scrollToFirstError(validationResult.errors);
+        const validationMessage = getSubmissionValidationMessage({
+          overviewValue,
+          objective,
+          activityTabs: activityTabsForSubmission,
+          selTags,
+        });
+
+        if (validationMessage) {
+          showToast("error", validationMessage);
+        } else {
+          showToast("error", "Please fix the highlighted fields before submitting.");
+        }
+
+        return null;
+      }
     }
 
     setIsSubmitting(true);
@@ -951,35 +971,56 @@ export const EditActivity: React.FC<EditActivityProps> = ({
 
   const openPublishPreview = () => {
     const activityTabsForPreview = getActivityTabsWithPendingMaterial(activityTabs, materialInput);
+    const hasPendingMaterialInput = materialInput.trim().length > 0;
 
-    if (materialInput.trim()) {
+    if (hasPendingMaterialInput) {
       setActivityTabs(activityTabsForPreview);
       setMaterialInput("");
+    }
+
+    const validationResult = validateForm(activityTabsForPreview);
+
+    if (!validationResult.isValid) {
+      scrollToFirstError(validationResult.errors);
+      const validationMessage = getSubmissionValidationMessage({
+        overviewValue,
+        objective,
+        activityTabs: activityTabsForPreview,
+        selTags,
+      });
+
+      if (validationMessage) {
+        showToast("error", validationMessage);
+      } else {
+        showToast("error", "Please fix the highlighted fields before publishing.");
+      }
+
+      return;
     }
 
     setIsPreviewVisible(true);
   };
 
-  const scrollToFirstError = () => {
-    if (errors.objective) {
+  const scrollToFirstError = (nextErrors = errors) => {
+    if (nextErrors.objective) {
       scrollViewRef.current?.scrollTo({ y: 150, animated: true });
-    } else if (errors.setupInstructions || errors.materials) {
+    } else if (nextErrors.setupInstructions || nextErrors.materials) {
       const prepTab = activityTabs.find((tab) => tab.kind === "prep");
       if (prepTab) setActiveActivityTabId(prepTab.id);
       scrollViewRef.current?.scrollTo({ y: 350, animated: true });
-    } else if (errors.playGuidedItems.some((e) => e !== null)) {
+    } else if (nextErrors.playGuidedItems.some((e) => e !== null)) {
       const playTab = activityTabs.find((tab) => tab.kind === "play");
       if (playTab) {
         setActiveActivityTabId(playTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
-    } else if (errors.debriefGuidedItems.some((e) => e !== null)) {
+    } else if (nextErrors.debriefGuidedItems.some((e) => e !== null)) {
       const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
       if (debriefTab) {
         setActiveActivityTabId(debriefTab.id);
         scrollViewRef.current?.scrollTo({ y: 350, animated: true });
       }
-    } else if (errors.selTags) {
+    } else if (nextErrors.selTags) {
       scrollViewRef.current?.scrollTo({ y: 600, animated: true });
     }
   };

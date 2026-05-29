@@ -1,6 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { FieldError } from "./FieldError";
+
 const CATEGORY_OPTIONS = [
   "Opener",
   "Icebreaker",
@@ -13,9 +15,14 @@ const CATEGORY_OPTIONS = [
 type CategorySectionProps = {
   selected: string[];
   onChange: (selected: string[]) => void;
+  error?: string | null;
 };
 
-export const CategorySection: React.FC<CategorySectionProps> = ({ selected, onChange }) => {
+export const CategorySection: React.FC<CategorySectionProps> = ({
+  selected,
+  onChange,
+  error,
+}) => {
   const canSelectMore = selected.length < 3;
 
   const toggleCategory = (category: string) => {
@@ -50,6 +57,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ selected, onCh
                 styles.chip,
                 isSelected && styles.chipSelected,
                 isDisabled && styles.chipDisabled,
+                error && styles.chipError,
               ]}
             >
               <Text
@@ -65,6 +73,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ selected, onCh
           );
         })}
       </View>
+      {error && <FieldError message={error} />}
     </View>
   );
 };
@@ -105,6 +114,9 @@ const styles = StyleSheet.create({
   },
   chipDisabled: {
     opacity: 0.45,
+  },
+  chipError: {
+    borderColor: "#EF4444",
   },
   chipText: {
     fontSize: 14,
