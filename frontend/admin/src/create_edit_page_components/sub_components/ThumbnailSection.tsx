@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { FieldError } from "./FieldError";
 import {
   formatMegabytes,
   MAX_IMAGE_UPLOAD_BYTES,
@@ -24,6 +25,7 @@ type ThumbnailSectionProps = {
   videoThumbnailUrl: string | null;
   videoThumbnailStatus: YoutubeThumbnailStatus;
   videoThumbnailError: string | null;
+  error?: string | null;
   onVideoUrlChange: (value: string) => void;
   onExtractVideoThumbnail: () => void;
   onDeleteVideoThumbnail: () => void;
@@ -75,6 +77,7 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
   videoThumbnailUrl,
   videoThumbnailStatus,
   videoThumbnailError,
+  error,
   onVideoUrlChange,
   onExtractVideoThumbnail,
   onDeleteVideoThumbnail,
@@ -100,6 +103,7 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
           fullWidth={isMobile}
         />
       </View>
+      {error ? <FieldError message={error} /> : null}
 
       <View style={styles.videoUrlGroup}>
         <Text style={styles.videoUrlLabel}>YouTube Video URL</Text>

@@ -30,6 +30,7 @@ type PublishPreviewModalProps = {
   onClose: () => void;
   onSaveDraft: () => void;
   onPublish: () => void;
+  publishLabel?: string;
   overview: OverviewFormState;
   objective: string;
   tabs: ActivityTab[];
@@ -128,6 +129,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
   onClose,
   onSaveDraft,
   onPublish,
+  publishLabel = "Publish Activity",
   overview,
   objective,
   tabs,
@@ -401,7 +403,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.primaryButton} onPress={onPublish} activeOpacity={0.85}>
-                <Text style={styles.primaryButtonText}>Publish Activity</Text>
+                <Text style={styles.primaryButtonText}>{publishLabel}</Text>
               </TouchableOpacity>
             </View>
           </View>

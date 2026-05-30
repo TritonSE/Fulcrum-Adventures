@@ -12,7 +12,9 @@ import { GroupSizeSection } from "./sub_components/GroupSizeSection";
 import { SetupSection } from "./sub_components/SetupSection";
 import { ThumbnailSection } from "./sub_components/ThumbnailSection";
 
-import type { ACTIVITY_VIDEO_FORM_FIELD, THUMBNAIL_IMAGE_FORM_FIELD } from "./mediaUploadConfig";
+import { THUMBNAIL_IMAGE_FORM_FIELD } from "./mediaUploadConfig";
+
+import type { ACTIVITY_VIDEO_FORM_FIELD } from "./mediaUploadConfig";
 
 export type DurationOption = "5-15 min" | "15-30 min" | "30+ min" | null;
 export type EnergyLevelOption = "Low" | "Medium" | "High" | null;
@@ -94,6 +96,7 @@ type OverviewSectionProps = {
   value: OverviewFormState;
   onChange: (patch: Partial<OverviewFormState>) => void;
   errors?: {
+    thumbnail?: string | null;
     title?: string | null;
     overview?: string | null;
     categories?: string | null;
@@ -170,6 +173,15 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
       videoThumbnailUrl: null,
       videoThumbnailStatus: "idle",
       videoThumbnailError: null,
+      ...(value.thumbnailMediaKind === "video"
+        ? {
+            thumbnailMediaKind: null,
+            thumbnailSourceName: null,
+            thumbnailSourceSizeBytes: null,
+            thumbnailVideo: null,
+            thumbnailImage: null,
+          }
+        : {}),
     });
   const handleExtractVideoThumbnail = () => {
     const nextVideoUrl = value.videoUrl.trim();
@@ -189,6 +201,18 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
       videoThumbnailUrl: getYoutubeThumbnailUrl(videoId),
       videoThumbnailStatus: "checking",
       videoThumbnailError: null,
+      thumbnailMediaKind: "video",
+      thumbnailSourceName: `${videoId}.jpg`,
+      thumbnailSourceSizeBytes: null,
+      thumbnailVideo: null,
+      thumbnailImage: {
+        fieldName: THUMBNAIL_IMAGE_FORM_FIELD,
+        uri: getYoutubeThumbnailUrl(videoId),
+        name: `${videoId}.jpg`,
+        type: "image/jpeg",
+        width: 0,
+        height: 0,
+      },
     });
   };
   const handleDeleteVideoThumbnail = () =>
@@ -196,6 +220,15 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
       videoThumbnailUrl: null,
       videoThumbnailStatus: "idle",
       videoThumbnailError: null,
+      ...(value.thumbnailMediaKind === "video"
+        ? {
+            thumbnailMediaKind: null,
+            thumbnailSourceName: null,
+            thumbnailSourceSizeBytes: null,
+            thumbnailVideo: null,
+            thumbnailImage: null,
+          }
+        : {}),
     });
   const handleVideoThumbnailLoad = (dimensions?: YoutubeThumbnailDimensions) => {
     if (value.videoThumbnailStatus === "ready") return;
@@ -213,6 +246,15 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         videoThumbnailUrl: null,
         videoThumbnailStatus: "error",
         videoThumbnailError: "Unable to find a usable thumbnail for this YouTube URL.",
+        ...(value.thumbnailMediaKind === "video"
+          ? {
+              thumbnailMediaKind: null,
+              thumbnailSourceName: null,
+              thumbnailSourceSizeBytes: null,
+              thumbnailVideo: null,
+              thumbnailImage: null,
+            }
+          : {}),
       });
       return;
     }
@@ -227,6 +269,15 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
       videoThumbnailUrl: null,
       videoThumbnailStatus: "error",
       videoThumbnailError: "Unable to load a thumbnail for this YouTube URL.",
+      ...(value.thumbnailMediaKind === "video"
+        ? {
+            thumbnailMediaKind: null,
+            thumbnailSourceName: null,
+            thumbnailSourceSizeBytes: null,
+            thumbnailVideo: null,
+            thumbnailImage: null,
+          }
+        : {}),
     });
 
   return (
@@ -238,6 +289,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         videoThumbnailUrl={value.videoThumbnailUrl}
         videoThumbnailStatus={value.videoThumbnailStatus}
         videoThumbnailError={value.videoThumbnailError}
+        error={errors.thumbnail}
         onVideoUrlChange={handleVideoUrlChange}
         onExtractVideoThumbnail={handleExtractVideoThumbnail}
         onDeleteVideoThumbnail={handleDeleteVideoThumbnail}
