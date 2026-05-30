@@ -12,22 +12,28 @@ import {
 import {
   formatMegabytes,
   MAX_IMAGE_UPLOAD_BYTES,
-  MAX_VIDEO_UPLOAD_BYTES,
-  SUPPORTED_MEDIA_FORMAT_LABEL,
+  SUPPORTED_IMAGE_FORMAT_LABEL,
 } from "../mediaUploadConfig";
+
+import type { YoutubeThumbnailStatus } from "../OverviewSection";
 
 type ThumbnailSectionProps = {
   mediaFileName: string | null;
-  mediaKind: "image" | "video" | null;
   previewUri?: string | null;
   videoUrl: string;
+  videoThumbnailUrl: string | null;
+  videoThumbnailStatus: YoutubeThumbnailStatus;
+  videoThumbnailError: string | null;
   onVideoUrlChange: (value: string) => void;
+  onExtractVideoThumbnail: () => void;
+  onDeleteVideoThumbnail: () => void;
+  onVideoThumbnailLoad: (dimensions?: { width?: number; height?: number }) => void;
+  onVideoThumbnailError: () => void;
   onPickMedia?: () => void;
 };
 
 type UploadCardProps = {
   mediaFileName: string | null;
-  mediaKind: "image" | "video" | null;
   previewUri?: string | null;
   onPress?: () => void;
   fullWidth?: boolean;
@@ -35,14 +41,11 @@ type UploadCardProps = {
 
 const UploadCard: React.FC<UploadCardProps> = ({
   mediaFileName,
-  mediaKind,
   previewUri,
   onPress,
   fullWidth = false,
 }) => {
-  const selectedLabel = mediaKind
-    ? `${mediaKind === "video" ? "Video" : "Image"} selected`
-    : "No file selected";
+  const selectedLabel = mediaFileName ? `Image selected: ${mediaFileName}` : "No image selected";
 
   return (
     <View style={[styles.uploadCard, fullWidth && styles.uploadCardFull]}>
@@ -51,37 +54,39 @@ const UploadCard: React.FC<UploadCardProps> = ({
       ) : (
         <Text style={styles.icon}>+</Text>
       )}
-      <Text style={styles.cardTitle}>Upload Thumbnail Media</Text>
-      <Text style={styles.cardDescription}>
-        Upload an image, or upload a video and select a frame to crop as the thumbnail.
-      </Text>
+      <Text style={styles.cardTitle}>Upload cover image</Text>
+      <Text style={styles.cardDescription}>Upload an image to use as the activity cover.</Text>
 
       <Pressable style={styles.chooseButton} onPress={onPress}>
-        <Text style={styles.chooseButtonText}>Choose Image or Video</Text>
+        <Text style={styles.chooseButtonText}>Choose Image</Text>
       </Pressable>
 
-      <Text style={styles.fileNameText}>
-        {mediaFileName ? `${selectedLabel}: ${mediaFileName}` : selectedLabel}
-      </Text>
-      <Text style={styles.supportText}>Supported formats: {SUPPORTED_MEDIA_FORMAT_LABEL}</Text>
-      <Text style={styles.supportText}>
-        Max size: images {formatMegabytes(MAX_IMAGE_UPLOAD_BYTES)}, videos{" "}
-        {formatMegabytes(MAX_VIDEO_UPLOAD_BYTES)}
-      </Text>
+      <Text style={styles.fileNameText}>{selectedLabel}</Text>
+      <Text style={styles.supportText}>Supported formats: {SUPPORTED_IMAGE_FORMAT_LABEL}</Text>
+      <Text style={styles.supportText}>Max size: {formatMegabytes(MAX_IMAGE_UPLOAD_BYTES)}</Text>
     </View>
   );
 };
 
 export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
   mediaFileName,
-  mediaKind,
   previewUri,
   videoUrl,
+  videoThumbnailUrl,
+  videoThumbnailStatus,
+  videoThumbnailError,
   onVideoUrlChange,
+  onExtractVideoThumbnail,
+  onDeleteVideoThumbnail,
+  onVideoThumbnailLoad,
+  onVideoThumbnailError,
   onPickMedia,
 }) => {
   const { width } = useWindowDimensions();
   const isMobile = width < 900;
+  const hasExtractedThumbnail = videoThumbnailStatus === "ready" && !!videoThumbnailUrl;
+  const isCheckingThumbnail = videoThumbnailStatus === "checking";
+  const isExtractDisabled = isCheckingThumbnail || (!videoUrl.trim() && !hasExtractedThumbnail);
 
   return (
     <View style={styles.container}>
@@ -90,7 +95,6 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
       <View style={[styles.row, isMobile && styles.rowMobile]}>
         <UploadCard
           mediaFileName={mediaFileName}
-          mediaKind={mediaKind}
           previewUri={previewUri}
           onPress={onPickMedia}
           fullWidth={isMobile}
@@ -99,16 +103,68 @@ export const ThumbnailSection: React.FC<ThumbnailSectionProps> = ({
 
       <View style={styles.videoUrlGroup}>
         <Text style={styles.videoUrlLabel}>YouTube Video URL</Text>
-        <TextInput
-          value={videoUrl}
-          onChangeText={onVideoUrlChange}
-          placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          placeholderTextColor="#A6A6A6"
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          style={styles.videoUrlInput}
-        />
+        <View style={[styles.videoUrlRow, isMobile && styles.videoUrlRowMobile]}>
+          <TextInput
+            value={videoUrl}
+            onChangeText={onVideoUrlChange}
+            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            placeholderTextColor="#A6A6A6"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            style={[styles.videoUrlInput, videoThumbnailError && styles.videoUrlInputError]}
+          />
+
+          <Pressable
+            style={[
+              styles.videoUrlButton,
+              hasExtractedThumbnail && styles.videoUrlButtonDanger,
+              isExtractDisabled && styles.videoUrlButtonDisabled,
+            ]}
+            onPress={hasExtractedThumbnail ? onDeleteVideoThumbnail : onExtractVideoThumbnail}
+            disabled={isExtractDisabled}
+          >
+            <Text
+              style={[
+                styles.videoUrlButtonText,
+                hasExtractedThumbnail && styles.videoUrlButtonDangerText,
+              ]}
+            >
+              {hasExtractedThumbnail
+                ? "Delete"
+                : isCheckingThumbnail
+                  ? "Checking..."
+                  : "Extract Thumbnail"}
+            </Text>
+          </Pressable>
+        </View>
+        {videoThumbnailError ? (
+          <Text style={styles.videoUrlErrorText}>{videoThumbnailError}</Text>
+        ) : null}
+
+        {videoThumbnailUrl ? (
+          <View style={styles.youtubeThumbnailPreview}>
+            <Image
+              source={{ uri: videoThumbnailUrl }}
+              style={styles.youtubeThumbnailImage}
+              resizeMode="cover"
+              onLoad={(event) => {
+                const source = event.nativeEvent.source as
+                  | { width?: number; height?: number }
+                  | undefined;
+
+                onVideoThumbnailLoad({
+                  width: source?.width,
+                  height: source?.height,
+                });
+              }}
+              onError={onVideoThumbnailError}
+            />
+            <Text style={styles.youtubeThumbnailLabel}>
+              {isCheckingThumbnail ? "Checking thumbnail..." : "Extracted thumbnail"}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -145,8 +201,17 @@ const styles = StyleSheet.create({
     color: "#1F3B82",
     marginBottom: 8,
   },
-  videoUrlInput: {
+  videoUrlRow: {
     width: "100%",
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 10,
+  },
+  videoUrlRowMobile: {
+    flexDirection: "column",
+  },
+  videoUrlInput: {
+    flex: 1,
     minHeight: 44,
     borderRadius: 8,
     borderWidth: 1,
@@ -155,6 +220,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     color: "#0F172A",
     fontSize: 14,
+  },
+  videoUrlInputError: {
+    borderColor: "#DC2626",
+  },
+  videoUrlButton: {
+    minHeight: 44,
+    minWidth: 148,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: "#153A7A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  videoUrlButtonDanger: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DC2626",
+  },
+  videoUrlButtonDisabled: {
+    opacity: 0.5,
+  },
+  videoUrlButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  videoUrlButtonDangerText: {
+    color: "#DC2626",
+  },
+  videoUrlErrorText: {
+    marginTop: 8,
+    color: "#DC2626",
+    fontSize: 13,
+  },
+  youtubeThumbnailPreview: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+  },
+  youtubeThumbnailImage: {
+    width: 220,
+    height: 124,
+    borderRadius: 8,
+    backgroundColor: "#E8E8E8",
+  },
+  youtubeThumbnailLabel: {
+    marginTop: 6,
+    color: "#6C6C6C",
+    fontSize: 13,
   },
   uploadCard: {
     width: "100%",

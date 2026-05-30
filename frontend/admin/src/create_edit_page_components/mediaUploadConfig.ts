@@ -9,6 +9,7 @@ export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
 
 export const SUPPORTED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "heic", "heif", "webp"];
 export const SUPPORTED_VIDEO_EXTENSIONS = ["mp4", "mov", "m4v"];
+export const SUPPORTED_IMAGE_FORMAT_LABEL = "JPG, JPEG, PNG, HEIC, HEIF, WEBP";
 export const SUPPORTED_MEDIA_FORMAT_LABEL = "JPG, JPEG, PNG, HEIC, HEIF, WEBP, MP4, MOV, M4V";
 
 export const SUPPORTED_IMAGE_MIME_TYPES = [

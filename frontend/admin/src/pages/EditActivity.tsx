@@ -20,22 +20,17 @@ import {
 } from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import {
-  ACTIVITY_VIDEO_FORM_FIELD,
   formatMegabytes,
   MAX_IMAGE_UPLOAD_BYTES,
-  MAX_VIDEO_UPLOAD_BYTES,
   SUPPORTED_IMAGE_EXTENSIONS,
+  SUPPORTED_IMAGE_FORMAT_LABEL,
   SUPPORTED_IMAGE_MIME_TYPES,
-  SUPPORTED_MEDIA_FORMAT_LABEL,
-  SUPPORTED_VIDEO_EXTENSIONS,
-  SUPPORTED_VIDEO_MIME_TYPES,
   THUMBNAIL_IMAGE_FORM_FIELD,
 } from "../create_edit_page_components/mediaUploadConfig";
 import {
   createDefaultOverviewState,
   OverviewSection,
   type OverviewFormState,
-  type ThumbnailVideoFile,
 } from "../create_edit_page_components/OverviewSection";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
 import {
@@ -43,69 +38,11 @@ import {
   ImageCropModal,
 } from "../create_edit_page_components/sub_components/ImageCropModal";
 import { PublishPreviewModal } from "../create_edit_page_components/sub_components/PublishPreviewModal";
-import {
-  getVideoFrameImageName,
-  type VideoFrameSource,
-  VideoFramePickerModal,
-} from "../create_edit_page_components/sub_components/VideoFramePickerModal";
 import { showToast } from "../utils/showToast";
 
 const getImageDimensions = async (uri: string) =>
   new Promise<{ width: number; height: number }>((resolve, reject) => {
     Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
-  });
-
-const getVideoMetadataOnWeb = async (uri: string) =>
-  new Promise<{ durationMs: number; width: number; height: number }>((resolve, reject) => {
-    if (typeof document === "undefined") {
-      reject(new Error("Browser video metadata APIs are unavailable."));
-      return;
-    }
-
-    const video = document.createElement("video");
-    let hasSettled = false;
-
-    const timeoutId = setTimeout(() => {
-      finish(() => reject(new Error("Timed out while reading video metadata.")));
-    }, 8000);
-
-    const cleanup = () => {
-      clearTimeout(timeoutId);
-      video.removeAttribute("src");
-      video.load();
-    };
-
-    const finish = (callback: () => void) => {
-      if (hasSettled) return;
-
-      hasSettled = true;
-      cleanup();
-      callback();
-    };
-
-    video.preload = "metadata";
-    video.muted = true;
-    video.playsInline = true;
-    video.onerror = () =>
-      finish(() => reject(new Error("Unable to read the selected video's metadata.")));
-    video.onloadedmetadata = () => {
-      const durationSeconds = Number.isFinite(video.duration) ? video.duration : 0;
-
-      if (!durationSeconds) {
-        finish(() => reject(new Error("Selected video does not expose a readable duration.")));
-        return;
-      }
-
-      finish(() =>
-        resolve({
-          durationMs: Math.round(durationSeconds * 1000),
-          width: video.videoWidth,
-          height: video.videoHeight,
-        }),
-      );
-    };
-    video.src = uri;
-    video.load();
   });
 
 const getExtension = (asset: ImagePicker.ImagePickerAsset) => {
@@ -116,7 +53,7 @@ const getExtension = (asset: ImagePicker.ImagePickerAsset) => {
   return extension?.toLowerCase() ?? "";
 };
 
-const getAssetKind = (asset: ImagePicker.ImagePickerAsset): "image" | "video" | null => {
+const getAssetKind = (asset: ImagePicker.ImagePickerAsset): "image" | null => {
   const mimeType = asset.mimeType?.toLowerCase();
   const extension = getExtension(asset);
 
@@ -128,42 +65,21 @@ const getAssetKind = (asset: ImagePicker.ImagePickerAsset): "image" | "video" | 
     return "image";
   }
 
-  if (
-    asset.type === "video" ||
-    mimeType?.startsWith("video/") ||
-    SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
-  ) {
-    return "video";
-  }
-
   return null;
 };
 
-const isSupportedAsset = (asset: ImagePicker.ImagePickerAsset, kind: "image" | "video") => {
+const isSupportedAsset = (asset: ImagePicker.ImagePickerAsset) => {
   const mimeType = asset.mimeType?.toLowerCase();
   const extension = getExtension(asset);
 
-  if (kind === "image") {
-    return (
-      (mimeType ? SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType) : false) ||
-      SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
-    );
-  }
-
   return (
-    (mimeType ? SUPPORTED_VIDEO_MIME_TYPES.includes(mimeType) : false) ||
-    SUPPORTED_VIDEO_EXTENSIONS.includes(extension)
+    (mimeType ? SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType) : false) ||
+    SUPPORTED_IMAGE_EXTENSIONS.includes(extension)
   );
 };
 
-const getFallbackMimeType = (asset: ImagePicker.ImagePickerAsset, kind: "image" | "video") => {
+const getFallbackMimeType = (asset: ImagePicker.ImagePickerAsset) => {
   const extension = getExtension(asset);
-
-  if (kind === "video") {
-    if (extension === "mov") return "video/quicktime";
-    if (extension === "m4v") return "video/x-m4v";
-    return "video/mp4";
-  }
 
   if (extension === "png") return "image/png";
   if (extension === "heic") return "image/heic";
@@ -196,8 +112,6 @@ const getAssetSizeBytes = async (asset: ImagePicker.ImagePickerAsset) => {
     return null;
   }
 };
-
-type SubmissionStatus = "idle" | ApiActivityStatus;
 
 type FormErrors = {
   objective: string | null;
@@ -304,7 +218,9 @@ const buildActivityPayload = ({
   status: ApiActivityStatus;
 }): CreateActivityPayload => {
   const prepTab = getPrepTab(activityTabs);
-  const environment = overviewValue.anyEnvironment ? ["Any Environment"] : overviewValue.environments;
+  const environment = overviewValue.anyEnvironment
+    ? ["Any Environment"]
+    : overviewValue.environments;
   const groupSizeMin = overviewValue.anyGroupSize
     ? 0
     : toPositiveInteger(overviewValue.groupSizeMin);
@@ -478,15 +394,16 @@ const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
     const blocks = parseSectionBlocks(source?.content ?? "");
 
     blocks.forEach((block) => {
-      const guidedMatch =
+      const guidedPrefixMatch =
         kind === "play"
-          ? block.match(/^Step\s+\d+:\s*([\s\S]+)$/i)
+          ? /^Step\s+\d+:/i.exec(block)
           : kind === "debrief"
-            ? block.match(/^Q\d+:\s*([\s\S]+)$/i)
+            ? /^Q\d+:/i.exec(block)
             : null;
+      const guidedText = guidedPrefixMatch ? block.slice(guidedPrefixMatch[0].length).trim() : "";
 
-      if (guidedMatch) {
-        tab.guidedItems.push(guidedMatch[1].trim());
+      if (guidedText) {
+        tab.guidedItems.push(guidedText);
         return;
       }
 
@@ -511,7 +428,10 @@ const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
     }
 
     if (kind === "play" && tab.guidedItems.length < 2) {
-      tab.guidedItems = [...tab.guidedItems, ...Array.from({ length: 2 - tab.guidedItems.length }, () => "")];
+      tab.guidedItems = [
+        ...tab.guidedItems,
+        ...Array.from({ length: 2 - tab.guidedItems.length }, () => ""),
+      ];
     }
 
     if (kind === "debrief" && tab.guidedItems.length < 1) {
@@ -534,7 +454,8 @@ const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
         blocks.length > 0
           ? blocks.map((block, index) => {
               const lines = block.split("\n");
-              const title = lines[0]?.trim() || (index === 0 ? section.tabName : `Section ${index + 1}`);
+              const title =
+                lines[0]?.trim() || (index === 0 ? section.tabName : `Section ${index + 1}`);
               const content = lines.slice(1).join("\n").trim();
 
               return {
@@ -625,8 +546,6 @@ export const EditActivity: React.FC<EditActivityProps> = ({
   const [selTags, setSelTags] = useState<string[]>([]);
   const [materialInput, setMaterialInput] = useState("");
   const [cropDraftImage, setCropDraftImage] = useState<CropDraftImage | null>(null);
-  const [pendingVideo, setPendingVideo] = useState<VideoFrameSource | null>(null);
-  const [status, setStatus] = useState<SubmissionStatus>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -659,7 +578,6 @@ export const EditActivity: React.FC<EditActivityProps> = ({
         setActivityTabs(parseActivityTabs(activity));
         setOverviewValue(createOverviewStateFromActivity(activity));
         setSelTags(activity.selTags ?? []);
-        setStatus(activity.status ?? "Draft");
       } catch (error) {
         if (!isMounted) return;
 
@@ -729,7 +647,8 @@ export const EditActivity: React.FC<EditActivityProps> = ({
       newErrors.selTags = "Please enter at least one SEL tag";
     }
 
-    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> = {};
+    const nextSectionErrors: Record<string, { title?: string | null; content?: string | null }> =
+      {};
     tabsToValidate.forEach((tab) => {
       tab.sections.forEach((section, index) => {
         if (index === 0) return;
@@ -769,15 +688,12 @@ export const EditActivity: React.FC<EditActivityProps> = ({
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      showToast(
-        "error",
-        "Allow media library access to choose a thumbnail image or activity video.",
-      );
+      showToast("error", "Allow media library access to choose a cover image.");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: ["images"],
       allowsEditing: false,
       quality: 1,
     });
@@ -787,8 +703,11 @@ export const EditActivity: React.FC<EditActivityProps> = ({
     const asset = result.assets[0];
     const assetKind = getAssetKind(asset);
 
-    if (!assetKind || !isSupportedAsset(asset, assetKind)) {
-      showToast("error", `Please choose one of these formats: ${SUPPORTED_MEDIA_FORMAT_LABEL}.`);
+    if (!assetKind || !isSupportedAsset(asset)) {
+      showToast(
+        "error",
+        `Please choose one of these image formats: ${SUPPORTED_IMAGE_FORMAT_LABEL}.`,
+      );
       return;
     }
 
@@ -802,50 +721,13 @@ export const EditActivity: React.FC<EditActivityProps> = ({
       return;
     }
 
-    const maxSizeBytes = assetKind === "image" ? MAX_IMAGE_UPLOAD_BYTES : MAX_VIDEO_UPLOAD_BYTES;
-
-    if (sizeBytes > maxSizeBytes) {
-      showToast(
-        "error",
-        `${assetKind === "image" ? "Images" : "Videos"} must be ${formatMegabytes(
-          maxSizeBytes,
-        )} or smaller.`,
-      );
+    if (sizeBytes > MAX_IMAGE_UPLOAD_BYTES) {
+      showToast("error", `Images must be ${formatMegabytes(MAX_IMAGE_UPLOAD_BYTES)} or smaller.`);
       return;
     }
 
-    const fileName =
-      asset.fileName ??
-      asset.file?.name ??
-      `thumbnail-${assetKind}.${assetKind === "image" ? "jpg" : "mp4"}`;
-    const mimeType = asset.mimeType || asset.file?.type || getFallbackMimeType(asset, assetKind);
-
-    if (assetKind === "video") {
-      const webMetadata =
-        !asset.duration || !asset.width || !asset.height
-          ? await getVideoMetadataOnWeb(asset.uri).catch(() => null)
-          : null;
-      const durationMs = asset.duration ?? webMetadata?.durationMs;
-
-      if (!durationMs) {
-        showToast(
-          "error",
-          "Please choose a different video so the app can select a thumbnail frame.",
-        );
-        return;
-      }
-
-      setPendingVideo({
-        uri: asset.uri,
-        name: fileName,
-        type: mimeType,
-        sizeBytes,
-        width: asset.width || webMetadata?.width || 0,
-        height: asset.height || webMetadata?.height || 0,
-        durationMs,
-      });
-      return;
-    }
+    const fileName = asset.fileName ?? asset.file?.name ?? "cover-image.jpg";
+    const mimeType = asset.mimeType || asset.file?.type || getFallbackMimeType(asset);
 
     const dimensions =
       asset.width && asset.height
@@ -938,16 +820,17 @@ export const EditActivity: React.FC<EditActivityProps> = ({
         await uploadActivityMediaSelection({
           activityId: resolvedActivityId,
           thumbnailImage: overviewValue.thumbnailImage,
-          thumbnailVideo: overviewValue.thumbnailVideo,
+          thumbnailVideo: null,
           apiBaseUrl: ACTIVITY_API_BASE_URL,
         });
         setHasNewMediaSelection(false);
       }
 
-      setStatus(updatedActivity.status ?? targetStatus);
       showToast(
         "success",
-        targetStatus === "Published" ? "Activity updated and published." : "Activity draft updated.",
+        targetStatus === "Published"
+          ? "Activity updated and published."
+          : "Activity draft updated.",
       );
       return resolvedActivityId;
     } catch (error) {
@@ -1083,51 +966,20 @@ export const EditActivity: React.FC<EditActivityProps> = ({
         />
       </CollapsibleSection>
 
-      <VideoFramePickerModal
-        visible={!!pendingVideo && !cropDraftImage}
-        video={pendingVideo}
-        onCancel={() => setPendingVideo(null)}
-        onSelectFrame={(frame) => {
-          if (!pendingVideo) return;
-
-          setCropDraftImage({
-            uri: frame.uri,
-            name: getVideoFrameImageName(pendingVideo.name, frame.timeMs),
-            type: "image/jpeg",
-            width: frame.width,
-            height: frame.height,
-            sourceKind: "video",
-            sourceName: pendingVideo.name,
-            sourceSizeBytes: pendingVideo.sizeBytes,
-            sourceFrameTimeMs: frame.timeMs,
-          });
-        }}
-      />
-
       <ImageCropModal
         visible={!!cropDraftImage}
         image={cropDraftImage}
         onCancel={() => {
           setCropDraftImage(null);
-          setPendingVideo(null);
         }}
         onSave={(croppedImage) => {
-          const nextVideo: ThumbnailVideoFile | null = pendingVideo
-            ? {
-                ...pendingVideo,
-                fieldName: ACTIVITY_VIDEO_FORM_FIELD,
-                selectedFrameTimeMs: cropDraftImage?.sourceFrameTimeMs ?? 0,
-              }
-            : null;
-
           setCropDraftImage(null);
-          setPendingVideo(null);
           setHasNewMediaSelection(true);
           setOverviewValue((prev) => ({
             ...prev,
             thumbnailImage: croppedImage,
-            thumbnailVideo: nextVideo,
-            thumbnailMediaKind: nextVideo ? "video" : "image",
+            thumbnailVideo: null,
+            thumbnailMediaKind: "image",
             thumbnailSourceName: cropDraftImage?.sourceName ?? croppedImage.name,
             thumbnailSourceSizeBytes: cropDraftImage?.sourceSizeBytes ?? null,
           }));

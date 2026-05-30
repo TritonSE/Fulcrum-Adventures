@@ -17,6 +17,7 @@ import type { ACTIVITY_VIDEO_FORM_FIELD, THUMBNAIL_IMAGE_FORM_FIELD } from "./me
 export type DurationOption = "5-15 min" | "15-30 min" | "30+ min" | null;
 export type EnergyLevelOption = "Low" | "Medium" | "High" | null;
 export type SetupOption = "Props" | "No Props" | null;
+export type YoutubeThumbnailStatus = "idle" | "checking" | "ready" | "error";
 
 export type ThumbnailImageFile = {
   fieldName: typeof THUMBNAIL_IMAGE_FORM_FIELD;
@@ -46,6 +47,9 @@ export type OverviewFormState = {
   thumbnailVideo: ThumbnailVideoFile | null;
   thumbnailImage: ThumbnailImageFile | null;
   videoUrl: string;
+  videoThumbnailUrl: string | null;
+  videoThumbnailStatus: YoutubeThumbnailStatus;
+  videoThumbnailError: string | null;
   title: string;
   overview: string;
   categories: string[];
@@ -68,6 +72,9 @@ export const createDefaultOverviewState = (): OverviewFormState => ({
   thumbnailVideo: null,
   thumbnailImage: null,
   videoUrl: "",
+  videoThumbnailUrl: null,
+  videoThumbnailStatus: "idle",
+  videoThumbnailError: null,
   title: "",
   overview: "",
   categories: [],
@@ -99,6 +106,56 @@ type OverviewSectionProps = {
   onPickMedia?: () => void;
 };
 
+type YoutubeThumbnailDimensions = {
+  width?: number;
+  height?: number;
+};
+
+const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/;
+
+const getYoutubeVideoId = (value: string) => {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) return null;
+
+  try {
+    const url = new URL(trimmedValue);
+    const hostname = url.hostname.replace(/^www\./, "");
+
+    if (hostname === "youtu.be") {
+      const id = url.pathname.split("/").filter(Boolean)[0];
+      return id && YOUTUBE_VIDEO_ID_PATTERN.test(id) ? id : null;
+    }
+
+    if (
+      hostname !== "youtube.com" &&
+      hostname !== "m.youtube.com" &&
+      hostname !== "youtube-nocookie.com"
+    ) {
+      return null;
+    }
+
+    const watchId = url.searchParams.get("v");
+    if (watchId && YOUTUBE_VIDEO_ID_PATTERN.test(watchId)) return watchId;
+
+    const [pathKind, pathId] = url.pathname.split("/").filter(Boolean);
+    if (
+      ["embed", "shorts", "live"].includes(pathKind) &&
+      pathId &&
+      YOUTUBE_VIDEO_ID_PATTERN.test(pathId)
+    ) {
+      return pathId;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const getYoutubeThumbnailUrl = (videoId: string) =>
+  `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   value,
   onChange,
@@ -107,15 +164,85 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isWide = width >= 1000;
+  const handleVideoUrlChange = (next: string) =>
+    onChange({
+      videoUrl: next,
+      videoThumbnailUrl: null,
+      videoThumbnailStatus: "idle",
+      videoThumbnailError: null,
+    });
+  const handleExtractVideoThumbnail = () => {
+    const nextVideoUrl = value.videoUrl.trim();
+    const videoId = getYoutubeVideoId(nextVideoUrl);
+
+    if (!videoId) {
+      onChange({
+        videoThumbnailUrl: null,
+        videoThumbnailStatus: "error",
+        videoThumbnailError: "Enter a valid YouTube URL.",
+      });
+      return;
+    }
+
+    onChange({
+      videoUrl: nextVideoUrl,
+      videoThumbnailUrl: getYoutubeThumbnailUrl(videoId),
+      videoThumbnailStatus: "checking",
+      videoThumbnailError: null,
+    });
+  };
+  const handleDeleteVideoThumbnail = () =>
+    onChange({
+      videoThumbnailUrl: null,
+      videoThumbnailStatus: "idle",
+      videoThumbnailError: null,
+    });
+  const handleVideoThumbnailLoad = (dimensions?: YoutubeThumbnailDimensions) => {
+    if (value.videoThumbnailStatus === "ready") return;
+
+    const thumbnailWidth = dimensions?.width ?? 0;
+    const thumbnailHeight = dimensions?.height ?? 0;
+
+    if (
+      thumbnailWidth > 0 &&
+      thumbnailHeight > 0 &&
+      thumbnailWidth <= 120 &&
+      thumbnailHeight <= 90
+    ) {
+      onChange({
+        videoThumbnailUrl: null,
+        videoThumbnailStatus: "error",
+        videoThumbnailError: "Unable to find a usable thumbnail for this YouTube URL.",
+      });
+      return;
+    }
+
+    onChange({
+      videoThumbnailStatus: "ready",
+      videoThumbnailError: null,
+    });
+  };
+  const handleVideoThumbnailError = () =>
+    onChange({
+      videoThumbnailUrl: null,
+      videoThumbnailStatus: "error",
+      videoThumbnailError: "Unable to load a thumbnail for this YouTube URL.",
+    });
 
   return (
     <View style={styles.container}>
       <ThumbnailSection
         mediaFileName={value.thumbnailSourceName}
-        mediaKind={value.thumbnailMediaKind}
         previewUri={value.thumbnailImage?.uri ?? null}
         videoUrl={value.videoUrl}
-        onVideoUrlChange={(next) => onChange({ videoUrl: next })}
+        videoThumbnailUrl={value.videoThumbnailUrl}
+        videoThumbnailStatus={value.videoThumbnailStatus}
+        videoThumbnailError={value.videoThumbnailError}
+        onVideoUrlChange={handleVideoUrlChange}
+        onExtractVideoThumbnail={handleExtractVideoThumbnail}
+        onDeleteVideoThumbnail={handleDeleteVideoThumbnail}
+        onVideoThumbnailLoad={handleVideoThumbnailLoad}
+        onVideoThumbnailError={handleVideoThumbnailError}
         onPickMedia={onPickMedia}
       />
 
