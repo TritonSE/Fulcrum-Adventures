@@ -6,7 +6,7 @@ import { Animated, FlatList, Pressable, StyleSheet, Text, View } from "react-nat
 import BookmarkFilledIcon from "../../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../../assets/icons/bookmark.svg";
 import CloseButton from "../../../assets/icons/CloseButton.svg";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 
 const styles = StyleSheet.create({
@@ -183,6 +183,16 @@ export default function LibraryPopupModalScreen() {
   const [toastAnim] = useState(() => new Animated.Value(0));
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const hideInlineToast = () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    Animated.timing(toastAnim, { toValue: 0, duration: 220, useNativeDriver: true }).start(() =>
+      setPopupToast(null),
+    );
+  };
+
   const showInlineToast = (toast: {
     message: string;
     actionLabel?: string;
@@ -193,16 +203,6 @@ export default function LibraryPopupModalScreen() {
     toastAnim.setValue(0);
     Animated.timing(toastAnim, { toValue: 1, duration: 280, useNativeDriver: true }).start();
     toastTimerRef.current = setTimeout(() => hideInlineToast(), 3500);
-  };
-
-  const hideInlineToast = () => {
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = null;
-    }
-    Animated.timing(toastAnim, { toValue: 0, duration: 220, useNativeDriver: true }).start(() =>
-      setPopupToast(null),
-    );
   };
 
   const toggleBookmark = () => {

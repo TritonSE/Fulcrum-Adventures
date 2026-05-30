@@ -18,7 +18,7 @@ import YoutubePlayer from "react-native-youtube-iframe";
 
 import NoteIcon from "../../assets/NoteIcon";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
 import {
   formatDuration,
   formatGradeLevel,

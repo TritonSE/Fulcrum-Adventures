@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
 import { ActivityList } from "../../components/ActivityList";
@@ -7,10 +8,13 @@ import { FiltersModal } from "../../components/FiltersModal";
 import { SearchHeader } from "../../components/SearchHeader";
 import { CATEGORIES as categories } from "../../constants/filterOptions";
 // Pull from context instead of mock data
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
+import { mapApiActivityToActivity } from "../../services/activityMapper";
+import { activitiesApi } from "../../services/api";
 import { styles } from "../../styles/search.styles";
 
 import type { FilterState } from "../../components/FiltersModal";
+import type { ListActivitiesParams } from "../../services/api";
 import type { Activity, Environment } from "../../types/activity";
 
 const defaultFilters: FilterState = {
@@ -33,6 +37,28 @@ function isFiltersEmpty(filters: FilterState): boolean {
     !filters.energyLevel &&
     (filters.environment ?? []).length === 0
   );
+}
+
+function mapSetupFilter(setupProps: FilterState["setupProps"]): ListActivitiesParams["setup"] {
+  if (setupProps === "Props") return "Required";
+  if (setupProps === "No Props") return "None";
+  return undefined;
+}
+
+function buildSearchParams(filters: FilterState, searchText: string): ListActivitiesParams {
+  const trimmedSearch = searchText.trim();
+
+  return {
+    status: "Published",
+    search: trimmedSearch.length > 0 ? trimmedSearch : undefined,
+    category: filters.category ?? undefined,
+    energyLevel: filters.energyLevel ?? undefined,
+    environment:
+      filters.environment && filters.environment.length > 0
+        ? filters.environment.join(",")
+        : undefined,
+    setup: mapSetupFilter(filters.setupProps),
+  };
 }
 
 function convertFiltersToArray(filters: FilterState): string[] {
@@ -67,24 +93,6 @@ function matchesActivityFilter(
   filters: FilterState,
   searchText: string,
 ): boolean {
-  // FIX: Support multi-category filtering
-  if (filters.category) {
-    const activityCategories =
-      activity.categories || (activity.category ? [activity.category] : []);
-    if (!activityCategories.includes(filters.category)) {
-      return false;
-    }
-  }
-
-  if (filters.setupProps) {
-    if (filters.setupProps === "Props" && activity.materials.length === 0) {
-      return false;
-    }
-    if (filters.setupProps === "No Props" && activity.materials.length > 0) {
-      return false;
-    }
-  }
-
   if (
     filters.duration &&
     filters.duration.length > 0 &&
@@ -127,7 +135,15 @@ function matchesActivityFilter(
     return false;
   }
 
-  return activity.title.toLowerCase().includes(searchText.toLowerCase());
+  if (searchText.trim().length > 0) {
+    const normalizedSearch = searchText.toLowerCase();
+    return (
+      activity.title.toLowerCase().includes(normalizedSearch) ||
+      activity.description.toLowerCase().includes(normalizedSearch)
+    );
+  }
+
+  return true;
 }
 
 function removeFilter(filters: FilterState, filterToRemove: string): FilterState {
@@ -184,11 +200,85 @@ export function SearchPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [apiResults, setApiResults] = useState<Activity[]>([]);
+  const [isSearchingApi, setIsSearchingApi] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   // FIX: Use shared context state
   const { activities, toggleSaved } = useActivities();
+  const isSearchActive = isSearching || searchText !== "" || !isFiltersEmpty(filters);
 
-  const filteredActivities = activities.filter((activity) =>
+  const queryKey = useMemo(
+    () => JSON.stringify(buildSearchParams(filters, searchText)),
+    [filters, searchText],
+  );
+
+  const resetSearchResults = useCallback(() => {
+    setApiResults([]);
+    setSearchError(null);
+    setIsSearchingApi(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isSearchActive) {
+      resetSearchResults();
+      return;
+    }
+
+    let isMounted = true;
+    const timeout = setTimeout(() => {
+      async function fetchSearchResults() {
+        setIsSearchingApi(true);
+        setSearchError(null);
+
+        try {
+          const apiActivities = await activitiesApi.listAll(buildSearchParams(filters, searchText));
+          const contextById = new Map(activities.map((activity) => [activity.id, activity]));
+          const nextResults = apiActivities.map((apiActivity) => {
+            const mappedActivity = mapApiActivityToActivity(apiActivity);
+            const contextActivity = contextById.get(mappedActivity.id);
+
+            return contextActivity
+              ? {
+                  ...mappedActivity,
+                  isSaved: contextActivity.isSaved,
+                  isCompleted: contextActivity.isCompleted,
+                  isDownloaded: contextActivity.isDownloaded,
+                  isHistory: contextActivity.isHistory,
+                  isPlaylist: contextActivity.isPlaylist,
+                  lastViewedAt: contextActivity.lastViewedAt,
+                }
+              : mappedActivity;
+          });
+
+          if (isMounted) {
+            setApiResults(nextResults);
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unable to search activities.";
+
+          if (isMounted) {
+            setSearchError(message);
+            setApiResults([]);
+          }
+        } finally {
+          if (isMounted) {
+            setIsSearchingApi(false);
+          }
+        }
+      }
+
+      void fetchSearchResults();
+    }, 250);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
+  }, [activities, filters, isSearchActive, queryKey, resetSearchResults, searchText]);
+
+  const searchSource = isSearchActive ? apiResults : activities;
+  const filteredActivities = searchSource.filter((activity) =>
     matchesActivityFilter(activity, filters, searchText),
   );
 
@@ -218,12 +308,15 @@ export function SearchPage() {
             addToRecentSearches={addToRecentSearches}
           />
 
-          {isSearching || searchText !== "" || !isFiltersEmpty(filters) ? (
+          {isSearchActive ? (
             <View style={styles.activityListContainer}>
               <View style={styles.activityNumberAndClearAllContainer}>
                 <Text style={styles.activityNumberText}>
-                  {filteredActivities.length} activit
-                  {filteredActivities.length === 1 ? "y" : "ies"} found
+                  {isSearchingApi
+                    ? "Searching..."
+                    : `${filteredActivities.length} activit${
+                        filteredActivities.length === 1 ? "y" : "ies"
+                      } found`}
                 </Text>
                 {!isFiltersEmpty(filters) && (
                   <TouchableOpacity onPress={() => setFilters(defaultFilters)}>
@@ -232,12 +325,15 @@ export function SearchPage() {
                 )}
               </View>
 
+              {searchError && <Text style={styles.errorText}>{searchError}</Text>}
+
               <ActivityList
                 activities={filteredActivities}
                 variant="card"
                 // FIX: Use context toggle
                 onSaveToggle={(id) => toggleSaved(id)}
-                contentContainerStyle={{ marginHorizontal: -12, width: "112%" }}
+                emptyMessage={isSearchingApi ? "Searching activities..." : "No activities found."}
+                contentContainerStyle={{ paddingHorizontal: 0 }}
               />
             </View>
           ) : (

@@ -1,11 +1,18 @@
 import { View } from "react-native";
 
 import { ActivityList } from "@/components/ActivityList";
-import { useActivities } from "@/Context/ActivityContext";
+import { RECOMMENDED_TITLES } from "@/constants/homeSections";
+import { useActivities } from "@/Context/useActivities";
+import { mockActivities } from "@/data/mockActivities";
 import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeaderSection";
+import { applyActivityState } from "@/utils/activityState";
 
 export default function RecommendedScreen() {
-  const { activities, toggleSaved } = useActivities();
+  const { activities: stateActivities, toggleSaved } = useActivities();
+  const activities = applyActivityState(
+    mockActivities.filter((activity) => RECOMMENDED_TITLES.includes(activity.title)),
+    stateActivities,
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
@@ -18,6 +25,7 @@ export default function RecommendedScreen() {
           variant="card"
           horizontal={false}
           showHeader={false}
+          showApiStatus={false}
           contentContainerStyle={{
             paddingTop: 12,
             paddingHorizontal: 16,

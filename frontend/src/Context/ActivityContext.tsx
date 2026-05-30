@@ -1,43 +1,104 @@
-import React, { createContext, use, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { mockActivities } from "../data/mockActivities";
+import { getActivityById } from "../data/mockActivities";
+import { mapApiActivityToActivity } from "../services/activityMapper";
+import { activitiesApi } from "../services/api";
+
+import { ActivityContext } from "./activityContextValue";
 
 import type { Activity } from "../types/activity";
+import type { Playlist } from "./activityContextValue";
 
-type Playlist = {
-  id: string;
-  name: string;
-  color: string;
-  activityIds: string[];
-};
+function mergeLocalActivityState(previous: Activity[], next: Activity[]) {
+  const previousById = new Map(previous.map((activity) => [activity.id, activity]));
+  const nextIds = new Set(next.map((activity) => activity.id));
 
-type ActivityContextType = {
-  activities: Activity[];
-  bookmarkedActivities: Activity[];
-  toggleSaved: (id: string) => void;
-  toggleDownload: (id: string) => void;
-  toggleHistory: (id: string) => void;
-  togglePlaylist: (id: string) => void;
-  reorderBookmarks: (newOrder: Activity[]) => void;
-  playlists: Playlist[];
-  addToPlaylist: (playlistId: string, activityId: string) => void;
-  createPlaylist: (name: string, color: string) => string;
-  setSaved: (id: string, saved: boolean) => void;
-  reorderPlaylistActivities: (playlistId: string, newActivityIds: string[]) => void;
-  editPlaylist: (playlistId: string, name: string, color: string) => void;
-  deletePlaylist: (playlistId: string) => void;
-  markViewed: (id: string) => void;
-  restorePlaylist: (playlist: Playlist, index?: number) => void;
-  removeFromPlaylist: (playlistId: string, activityId: string) => void;
-};
+  const mergedActivities = next.map((activity) => {
+    const previousActivity = previousById.get(activity.id);
 
-const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
+    if (!previousActivity) {
+      return activity;
+    }
 
-const initialActivities: Activity[] = mockActivities;
+    return {
+      ...activity,
+      isSaved: previousActivity.isSaved,
+      isCompleted: previousActivity.isCompleted,
+      isDownloaded: previousActivity.isDownloaded,
+      isHistory: previousActivity.isHistory,
+      isPlaylist: previousActivity.isPlaylist,
+      lastViewedAt: previousActivity.lastViewedAt,
+    };
+  });
+
+  const localOnlyActivities = previous.filter(
+    (activity) =>
+      !nextIds.has(activity.id) &&
+      (activity.isSaved ||
+        activity.isCompleted ||
+        activity.isDownloaded ||
+        activity.isHistory ||
+        activity.isPlaylist),
+  );
+
+  return [...mergedActivities, ...localOnlyActivities];
+}
+
+function addMockActivity(previous: Activity[], id: string, changes: Partial<Activity>) {
+  const mockActivity = getActivityById(id);
+  if (!mockActivity) return previous;
+
+  return [...previous, { ...mockActivity, ...changes }];
+}
 
 export function ActivityProvider({ children }: { children: React.ReactNode }) {
-  const [activities, setActivities] = useState<Activity[]>(initialActivities);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
+  const [activitiesError, setActivitiesError] = useState<string | null>(null);
+  const [isUsingCachedActivities, setIsUsingCachedActivities] = useState(false);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const currentActivitiesRef = useRef<Activity[]>([]);
+  const lastSuccessfulActivitiesRef = useRef<Activity[]>([]);
+
+  useEffect(() => {
+    currentActivitiesRef.current = activities;
+  }, [activities]);
+
+  const refreshActivities = useCallback(async () => {
+    setIsLoadingActivities(true);
+    setActivitiesError(null);
+    setIsUsingCachedActivities(false);
+
+    try {
+      const apiActivities = await activitiesApi.listAll({ status: "Published" });
+      const nextActivities = apiActivities.map(mapApiActivityToActivity);
+      setActivities((previous) => {
+        const mergedActivities = mergeLocalActivityState(previous, nextActivities);
+        lastSuccessfulActivitiesRef.current = mergedActivities;
+        return mergedActivities;
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to load activities.";
+      const currentActivities = currentActivitiesRef.current;
+      const fallbackActivities =
+        currentActivities.length > 0 ? currentActivities : lastSuccessfulActivitiesRef.current;
+
+      setActivitiesError(message);
+      setIsUsingCachedActivities(fallbackActivities.length > 0);
+
+      if (fallbackActivities.length > 0) {
+        lastSuccessfulActivitiesRef.current = fallbackActivities;
+        setActivities(fallbackActivities);
+      }
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshActivities();
+  }, [refreshActivities]);
+
   const markViewed = (id: string) => {
     const now = Date.now();
     setActivities((prev) =>
@@ -74,7 +135,13 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     });
   };
   const setSaved = (id: string, saved: boolean) => {
-    setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: saved } : a)));
+    setActivities((prev) => {
+      if (!prev.some((activity) => activity.id === id)) {
+        return saved ? addMockActivity(prev, id, { isSaved: true }) : prev;
+      }
+
+      return prev.map((a) => (a.id === id ? { ...a, isSaved: saved } : a));
+    });
   };
 
   const reorderPlaylistActivities = (playlistId: string, newActivityIds: string[]) => {
@@ -123,7 +190,13 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleSaved = (id: string) => {
-    setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, isSaved: !a.isSaved } : a)));
+    setActivities((prev) => {
+      if (!prev.some((activity) => activity.id === id)) {
+        return addMockActivity(prev, id, { isSaved: true });
+      }
+
+      return prev.map((a) => (a.id === id ? { ...a, isSaved: !a.isSaved } : a));
+    });
   };
 
   const toggleDownload = (id: string) => {
@@ -147,6 +220,10 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
       value={{
         activities,
         bookmarkedActivities,
+        isLoadingActivities,
+        activitiesError,
+        isUsingCachedActivities,
+        refreshActivities,
         toggleSaved,
         toggleDownload,
         toggleHistory,
@@ -168,9 +245,3 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
     </ActivityContext>
   );
 }
-
-export const useActivities = (): ActivityContextType => {
-  const context = use(ActivityContext);
-  if (!context) throw new Error("useActivities must be used inside ActivityProvider");
-  return context;
-};
