@@ -1,5 +1,5 @@
 import type { Activity } from "../types/activity";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DeleteIcon from "../../icons/delete.svg";
 import UnpublishIcon from "../../icons/unpublish.svg";
 
@@ -31,6 +31,7 @@ export default function DashboardTable({
   const [toastKey, setToastKey] = useState(0);
   const [showDeleteConfirmationPopup, setShowDeleteConfirmationPopup] = useState(false);
   const [activityToDeleteId, setActivityToDeleteId] = useState<string | null>(null);
+  const [prevActivities, setPrevActivities] = useState(activities);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -44,9 +45,11 @@ export default function DashboardTable({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  useEffect(() => {
+
+  if (prevActivities !== activities) {
+    setPrevActivities(activities);
     setOpenActionMenuId(null);
-  }, [activities]);
+  }
 
   // Helper to format the grade range from min and max numbers to "K-12", "3-5", etc.
   const formatGradeRange = (range: { min: number; max: number }) => {
