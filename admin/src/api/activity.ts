@@ -53,6 +53,31 @@ export async function fetchActivities(
   }
 }
 
+export type GetActivityStatsResponse = {
+  total: number;
+  categories: {
+    category: string;
+    count: number;
+    percentage: number;
+  }[];
+  statuses: {
+    [k: string]: number;
+  };
+};
+
+export async function getActivityStats(): Promise<APIResult<GetActivityStatsResponse>> {
+  try {
+    const response = await get("/api/activities/stats");
+    const data = await response.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    return handleAPIError(error);
+  }
+}
+
 export async function updateActivityStatus(
   activityId: string,
   status: string,

@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import { Pagination } from "../components/Pagination";
 import type { Activity } from "../types/activity";
-import { fetchActivities } from "../api/activity";
+import { fetchActivities, getActivityStats } from "../api/activity";
 
 import "./Dashboard.css";
 import AddIcon from "../../icons/add.svg";
@@ -121,6 +121,7 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [totalActivities, setTotalActivities] = useState(0);
+  const [categoryCounts, setCategoryCounts] = useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,7 +135,7 @@ export default function Dashboard() {
   >("All");
 
   useEffect(() => {
-    const getActivities = async () => {
+    const getActivityData = async () => {
       const request: Record<string, string> = {
         page: String(currentPage),
         limit: String(ITEMS_PER_PAGE),
@@ -170,23 +171,38 @@ export default function Dashboard() {
         request.setup = appliedFilters.setup;
       }
 
-      const result = await fetchActivities(request);
-      if (result.success) {
-        setActivities(result.data.activities);
-        setTotalActivities(result.data.total);
-        setTotalPages(result.data.totalPages);
+      const activitiesResult = await fetchActivities(request);
+      if (activitiesResult.success) {
+        setActivities(activitiesResult.data.activities);
+        setTotalActivities(activitiesResult.data.total);
+        setTotalPages(activitiesResult.data.totalPages);
       } else {
-        console.error("Failed to fetch activities:", result.error);
+        console.error("Failed to fetch activities:", activitiesResult.error);
       }
     };
-    getActivities();
+    getActivityData();
   }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
 
-  function findNumActivitiesInCategory(category: Category): number {
-    return activities.filter((activity) =>
-      activity.category.find((c) => c === category),
-    ).length;
-  }
+  useEffect(() => {
+    const getActivityStatsData = async () => {      
+      const activityStatsResult = await getActivityStats();
+      if (activityStatsResult.success) {
+        const counts: Record<Category, number> = {
+          Opener: 0,
+          Icebreaker: 0,
+          Connection: 0,
+          Active: 0,
+          Debrief: 0,
+          "Team Challenge": 0,
+        };
+        activityStatsResult.data.categories.forEach((categoryStat) => {
+          counts[categoryStat.category as Category] = categoryStat.count;
+        });
+        setCategoryCounts(counts);
+      }
+    };
+    getActivityStatsData();
+  }, []);
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -320,7 +336,7 @@ export default function Dashboard() {
               <CategoryCard
                 key={category}
                 category={category}
-                numActivities={findNumActivitiesInCategory(category)}
+                numActivities={categoryCounts ? categoryCounts[category] : 0}
                 totalActivities={totalActivities}
               />
             ))}
