@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
@@ -14,6 +14,8 @@ type GradeSectionProps = {
   onChange: (minValue: string, maxValue: string) => void;
 };
 
+type HandleType = "min" | "max";
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const getIndexFromLabel = (label: string) => {
@@ -25,6 +27,8 @@ const getLabelFromIndex = (index: number) => GRADE_OPTIONS[index] ?? "K";
 
 export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, onChange }) => {
   const [railWidth, setRailWidth] = useState(0);
+  const railRef = useRef<View | null>(null);
+  const railPageXRef = useRef(0);
 
   const minIndex = getIndexFromLabel(minValue);
   const maxIndex = getIndexFromLabel(maxValue);
@@ -40,45 +44,54 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
   const minCenterX = getCenterXForIndex(minIndex);
   const maxCenterX = getCenterXForIndex(maxIndex);
 
-  const getDraggedIndexOffset = (dx: number) => {
-    if (!usableWidth) return 0;
-    return Math.round((dx / usableWidth) * stepCount);
+  const measureRail = () => {
+    railRef.current?.measureInWindow((x) => {
+      railPageXRef.current = x;
+    });
   };
 
-  const minResponder = useMemo(
-    (): PanResponderInstance =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: (_, gestureState) => {
-          const indexOffset = getDraggedIndexOffset(gestureState.dx);
-          const nextMinIndex = clamp(minIndex + indexOffset, 0, maxIndex);
+  const getIndexFromGestureX = (gestureMoveX: number) => {
+    const relativeX = clamp(
+      gestureMoveX - railPageXRef.current,
+      HANDLE_SIZE / 2,
+      railWidth - HANDLE_SIZE / 2,
+    );
 
+    const ratio = (relativeX - HANDLE_SIZE / 2) / usableWidth;
+    return clamp(Math.round(ratio * stepCount), 0, stepCount);
+  };
+
+  const createHandleResponder = (handleType: HandleType): PanResponderInstance =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        measureRail();
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (!railWidth) return;
+
+        const draggedIndex = getIndexFromGestureX(gestureState.moveX);
+
+        if (handleType === "min") {
+          const nextMinIndex = Math.min(draggedIndex, maxIndex);
           onChange(getLabelFromIndex(nextMinIndex), getLabelFromIndex(maxIndex));
-        },
-        onPanResponderTerminationRequest: () => false,
-      }),
-    [getDraggedIndexOffset, maxIndex, minIndex, onChange, stepCount],
-  );
+          return;
+        }
 
-  const maxResponder = useMemo(
-    (): PanResponderInstance =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: (_, gestureState) => {
-          const indexOffset = getDraggedIndexOffset(gestureState.dx);
-          const nextMaxIndex = clamp(maxIndex + indexOffset, minIndex, stepCount);
+        const nextMaxIndex = Math.max(draggedIndex, minIndex);
+        onChange(getLabelFromIndex(minIndex), getLabelFromIndex(nextMaxIndex));
+      },
+      onPanResponderTerminationRequest: () => false,
+    });
 
-          onChange(getLabelFromIndex(minIndex), getLabelFromIndex(nextMaxIndex));
-        },
-        onPanResponderTerminationRequest: () => false,
-      }),
-    [getDraggedIndexOffset, maxIndex, minIndex, onChange, stepCount],
-  );
+  const minResponder = useMemo(() => createHandleResponder("min"), [railWidth, minIndex, maxIndex]);
+
+  const maxResponder = useMemo(() => createHandleResponder("max"), [railWidth, minIndex, maxIndex]);
 
   const handleRailLayout = (event: LayoutChangeEvent) => {
     setRailWidth(event.nativeEvent.layout.width);
+    requestAnimationFrame(measureRail);
   };
 
   return (
@@ -91,7 +104,12 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
         </Text>
       </View>
 
-      <View onLayout={handleRailLayout} style={styles.railContainer}>
+      <View
+        ref={railRef}
+        onLayout={handleRailLayout}
+        style={styles.railContainer}
+        collapsable={false}
+      >
         <View style={styles.rail} />
 
         <View
