@@ -7,7 +7,7 @@ import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityCard } from "../../components/ActivityCard";
 import { DragList } from "../../components/DragList";
 import SwipeToDelete from "../../components/SwipeToDelete";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 
 export default function BookmarksScreen() {
   const { bookmarkedActivities, reorderBookmarks, setSaved, markViewed } = useActivities();
@@ -98,14 +98,14 @@ export default function BookmarksScreen() {
                 }
               />
             )}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24, gap: 8 }}
           />
         ) : (
           <FlatList
             data={bookmarkedActivities}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 24, gap: 8 }}
             renderItem={({ item }) => (
               <SwipeToDelete onDelete={() => setSaved(item.id, false)}>
                 <ActivityCard

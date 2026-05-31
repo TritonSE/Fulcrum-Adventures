@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ActivityList } from "../../components/ActivityList";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 

@@ -23,7 +23,7 @@ import HistoryLibraryIcon from "../../../assets/icons/history-library.svg";
 import Plus from "../../../assets/icons/lucide_plus.svg";
 import Pencil from "../../../assets/icons/PencilIcon.svg";
 import TrashIcon from "../../../assets/icons/TrashIcon.svg";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 
@@ -326,7 +326,8 @@ export default function LibraryScreen() {
                     {playlist.name}
                   </Text>
                   <Text style={[Typography.caption, { color: "#EBEBEB", marginTop: 8 }]}>
-                    {playlist.activityIds.length} activities
+                    {playlist.activityIds.length}{" "}
+                    {playlist.activityIds.length === 1 ? "activity" : "activities"}
                   </Text>
                 </View>
 
@@ -888,7 +889,8 @@ export default function LibraryScreen() {
             <View style={{ flex: 1, gap: 8 }}>
               <Text style={[Typography.displayXSmBold, { color: "#153A7A" }]}>Bookmarked</Text>
               <Text style={[Typography.caption, { color: "#153A7A" }]}>
-                {activities.filter((a) => a.isSaved).length} activities
+                {activities.filter((a) => a.isSaved).length}{" "}
+                {activities.filter((a) => a.isSaved).length === 1 ? "activity" : "activities"}
               </Text>
             </View>
             <View style={{ borderRadius: 32, borderWidth: 1, borderColor: "#EBEBEB" }}>
