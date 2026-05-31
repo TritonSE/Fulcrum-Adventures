@@ -176,6 +176,26 @@ const toPositiveInteger = (value: string) => {
 const getPrepTab = (activityTabs: ActivityTab[]) =>
   activityTabs.find((tab) => tab.kind === "prep") ?? null;
 
+const areStringArraysEqual = (left: (string | null)[], right: (string | null)[]) =>
+  left.length === right.length && left.every((value, index) => value === right[index]);
+
+const areSectionErrorsEqual = (
+  left: Record<string, { title?: string | null; content?: string | null }>,
+  right: Record<string, { title?: string | null; content?: string | null }>,
+) => {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+
+  if (leftKeys.length !== rightKeys.length) return false;
+
+  return leftKeys.every((key) => {
+    const leftEntry = left[key];
+    const rightEntry = right[key];
+
+    return leftEntry?.title === rightEntry?.title && leftEntry?.content === rightEntry?.content;
+  });
+};
+
 const getActivityTabsWithPendingMaterial = (
   activityTabs: ActivityTab[],
   pendingMaterialInput: string,
@@ -649,6 +669,101 @@ export const ActivityEditor: React.FC<ActivityEditorProps> = ({
     setErrors(createEmptyFormErrors());
     setSectionErrors({});
   };
+
+  useEffect(() => {
+    const prepTab = getPrepTab(activityTabs);
+    const playTab = activityTabs.find((tab) => tab.kind === "play");
+    const debriefTab = activityTabs.find((tab) => tab.kind === "debrief");
+
+    setErrors((prev) => {
+      const next = {
+        ...prev,
+        thumbnail: overviewValue.thumbnailImage ? null : prev.thumbnail,
+        title: overviewValue.title.trim() ? null : prev.title,
+        overview: overviewValue.overview.trim() ? null : prev.overview,
+        categories: overviewValue.categories.length > 0 ? null : prev.categories,
+        groupSize:
+          overviewValue.anyGroupSize ||
+          (() => {
+            const groupSizeMin = toPositiveInteger(overviewValue.groupSizeMin);
+            const groupSizeMax = toPositiveInteger(overviewValue.groupSizeMax);
+
+            return (
+              Number.isFinite(groupSizeMin) &&
+              Number.isFinite(groupSizeMax) &&
+              groupSizeMin >= 1 &&
+              groupSizeMax >= groupSizeMin
+            );
+          })()
+            ? null
+            : prev.groupSize,
+        duration: overviewValue.duration ? null : prev.duration,
+        energyLevel: overviewValue.energyLevel ? null : prev.energyLevel,
+        environment:
+          overviewValue.anyEnvironment || overviewValue.environments.length > 0
+            ? null
+            : prev.environment,
+        setup: overviewValue.setup ? null : prev.setup,
+        objective: objective.trim() ? null : prev.objective,
+        setupInstructions: prepTab?.sections[0]?.content.trim() ? null : prev.setupInstructions,
+        materials:
+          prepTab && (prepTab.noMaterialsNeeded || prepTab.materials.length > 0 || materialInput.trim())
+            ? null
+            : prev.materials,
+        playGuidedItems:
+          playTab
+            ? prev.playGuidedItems.map((error, index) =>
+                playTab.guidedItems[index]?.trim() ? null : error,
+              )
+            : prev.playGuidedItems,
+        debriefGuidedItems:
+          debriefTab
+            ? prev.debriefGuidedItems.map((error, index) =>
+                debriefTab.guidedItems[index]?.trim() ? null : error,
+              )
+            : prev.debriefGuidedItems,
+        selTags: selTags.length > 0 ? null : prev.selTags,
+      };
+
+      const hasChanged =
+        next.thumbnail !== prev.thumbnail ||
+        next.title !== prev.title ||
+        next.overview !== prev.overview ||
+        next.categories !== prev.categories ||
+        next.groupSize !== prev.groupSize ||
+        next.duration !== prev.duration ||
+        next.energyLevel !== prev.energyLevel ||
+        next.environment !== prev.environment ||
+        next.setup !== prev.setup ||
+        next.objective !== prev.objective ||
+        next.setupInstructions !== prev.setupInstructions ||
+        next.materials !== prev.materials ||
+        next.selTags !== prev.selTags ||
+        !areStringArraysEqual(next.playGuidedItems, prev.playGuidedItems) ||
+        !areStringArraysEqual(next.debriefGuidedItems, prev.debriefGuidedItems);
+
+      return hasChanged ? next : prev;
+    });
+
+    setSectionErrors((prev) => {
+      const next: Record<string, { title?: string | null; content?: string | null }> = {};
+
+      Object.entries(prev).forEach(([sectionId, entry]) => {
+        const section = activityTabs
+          .flatMap((tab) => tab.sections)
+          .find((currentSection) => currentSection.id === sectionId);
+
+        if (!section) return;
+
+        const nextEntry: { title?: string | null; content?: string | null } = {};
+        if (entry.title && !section.title.trim()) nextEntry.title = entry.title;
+        if (entry.content && !section.content.trim()) nextEntry.content = entry.content;
+        if (nextEntry.title || nextEntry.content) next[sectionId] = nextEntry;
+      });
+
+      return areSectionErrorsEqual(prev, next) ? prev : next;
+    });
+  }, [activityTabs, materialInput, objective, overviewValue, selTags]);
 
   const validateForm = (tabsToValidate = activityTabs): ValidationResult => {
     const newErrors = createEmptyFormErrors();
