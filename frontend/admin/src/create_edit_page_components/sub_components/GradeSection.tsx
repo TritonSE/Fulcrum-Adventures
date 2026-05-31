@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
@@ -25,12 +25,6 @@ const getLabelFromIndex = (index: number) => GRADE_OPTIONS[index] ?? "K";
 
 export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, onChange }) => {
   const [railWidth, setRailWidth] = useState(0);
-  const railRef = useRef<View | null>(null);
-  const railPageXRef = useRef(0);
-  const railWidthRef = useRef(railWidth);
-  const minIndexRef = useRef(0);
-  const maxIndexRef = useRef(0);
-  const onChangeRef = useRef(onChange);
 
   const minIndex = getIndexFromLabel(minValue);
   const maxIndex = getIndexFromLabel(maxValue);
@@ -46,30 +40,9 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
   const minCenterX = getCenterXForIndex(minIndex);
   const maxCenterX = getCenterXForIndex(maxIndex);
 
-  useEffect(() => {
-    railWidthRef.current = railWidth;
-    minIndexRef.current = minIndex;
-    maxIndexRef.current = maxIndex;
-    onChangeRef.current = onChange;
-  }, [railWidth, minIndex, maxIndex, onChange]);
-
-  const measureRail = () => {
-    railRef.current?.measureInWindow((x) => {
-      railPageXRef.current = x;
-    });
-  };
-
-  const getIndexFromGestureX = (gestureMoveX: number) => {
-    const currentRailWidth = railWidthRef.current;
-    const currentUsableWidth = Math.max(currentRailWidth - HANDLE_SIZE, 1);
-    const relativeX = clamp(
-      gestureMoveX - railPageXRef.current,
-      HANDLE_SIZE / 2,
-      currentRailWidth - HANDLE_SIZE / 2,
-    );
-
-    const ratio = (relativeX - HANDLE_SIZE / 2) / currentUsableWidth;
-    return clamp(Math.round(ratio * stepCount), 0, stepCount);
+  const getDraggedIndexOffset = (dx: number) => {
+    if (!usableWidth) return 0;
+    return Math.round((dx / usableWidth) * stepCount);
   };
 
   const minResponder = useMemo(
@@ -77,24 +50,15 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {
-          measureRail();
-        },
         onPanResponderMove: (_, gestureState) => {
-          const currentRailWidth = railWidthRef.current;
-          const currentMinIndex = minIndexRef.current;
-          const currentMaxIndex = maxIndexRef.current;
+          const indexOffset = getDraggedIndexOffset(gestureState.dx);
+          const nextMinIndex = clamp(minIndex + indexOffset, 0, maxIndex);
 
-          if (!currentRailWidth) return;
-
-          const draggedIndex = getIndexFromGestureX(gestureState.moveX);
-          const nextMinIndex = Math.min(draggedIndex, currentMaxIndex);
-
-          onChangeRef.current(getLabelFromIndex(nextMinIndex), getLabelFromIndex(currentMaxIndex));
+          onChange(getLabelFromIndex(nextMinIndex), getLabelFromIndex(maxIndex));
         },
         onPanResponderTerminationRequest: () => false,
       }),
-    [],
+    [getDraggedIndexOffset, maxIndex, minIndex, onChange, stepCount],
   );
 
   const maxResponder = useMemo(
@@ -102,28 +66,19 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {
-          measureRail();
-        },
         onPanResponderMove: (_, gestureState) => {
-          const currentRailWidth = railWidthRef.current;
-          const currentMinIndex = minIndexRef.current;
+          const indexOffset = getDraggedIndexOffset(gestureState.dx);
+          const nextMaxIndex = clamp(maxIndex + indexOffset, minIndex, stepCount);
 
-          if (!currentRailWidth) return;
-
-          const draggedIndex = getIndexFromGestureX(gestureState.moveX);
-          const nextMaxIndex = Math.max(draggedIndex, currentMinIndex);
-
-          onChangeRef.current(getLabelFromIndex(currentMinIndex), getLabelFromIndex(nextMaxIndex));
+          onChange(getLabelFromIndex(minIndex), getLabelFromIndex(nextMaxIndex));
         },
         onPanResponderTerminationRequest: () => false,
       }),
-    [],
+    [getDraggedIndexOffset, maxIndex, minIndex, onChange, stepCount],
   );
 
   const handleRailLayout = (event: LayoutChangeEvent) => {
     setRailWidth(event.nativeEvent.layout.width);
-    requestAnimationFrame(measureRail);
   };
 
   return (
@@ -136,12 +91,7 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
         </Text>
       </View>
 
-      <View
-        ref={railRef}
-        onLayout={handleRailLayout}
-        style={styles.railContainer}
-        collapsable={false}
-      >
+      <View onLayout={handleRailLayout} style={styles.railContainer}>
         <View style={styles.rail} />
 
         <View

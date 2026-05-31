@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
+  type ImageSourcePropType,
   Modal,
   Platform,
   ScrollView,
@@ -144,23 +145,11 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
     useState<Exclude<ActivityTab["kind"], "custom">>("prep");
   const [isTutorialPlaying, setIsTutorialPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
   const previewTabs = useMemo(() => tabs.map(toTabPreview), [tabs]);
   const energyLevelFilledStars = getEnergyLevelFilledStars(overview);
   const hasVideoTutorial =
     overview.thumbnailMediaKind === "video" && !!overview.thumbnailVideo?.uri;
-
-  useEffect(() => {
-    if (visible) {
-      setActiveFacilitateTab("prep");
-    }
-  }, [visible]);
-
-  useEffect(() => {
-    if (!visible || !hasVideoTutorial) {
-      setIsTutorialPlaying(false);
-    }
-  }, [hasVideoTutorial, visible]);
+  const effectiveIsTutorialPlaying = isTutorialPlaying && visible && hasVideoTutorial;
 
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -168,7 +157,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    if (isTutorialPlaying) {
+    if (effectiveIsTutorialPlaying) {
       void videoElement.play().catch(() => {
         setIsTutorialPlaying(false);
       });
@@ -177,13 +166,22 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
 
     videoElement.pause();
     videoElement.currentTime = 0;
-  }, [isTutorialPlaying]);
+  }, [effectiveIsTutorialPlaying]);
 
   const activePreviewTab =
     previewTabs.find((tab) => tab.kind === activeFacilitateTab) ?? previewTabs[0] ?? null;
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+      onShow={() => {
+        setActiveFacilitateTab("prep");
+        setIsTutorialPlaying(false);
+      }}
+    >
       <View style={styles.backdrop}>
         <ScrollView contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
           <View style={[styles.previewShell, { width: shellWidth }]}>
@@ -240,7 +238,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                         >
                           <ActionIcon width={12.57} height={12.57} />
                           <Text style={styles.tutorialPillText}>
-                            {isTutorialPlaying ? "Pause Tutorial" : "Tutorial"}
+                            {effectiveIsTutorialPlaying ? "Pause Tutorial" : "Tutorial"}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -421,7 +419,7 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
 
               <View pointerEvents="none" style={styles.phoneFrameWrap}>
                 <Image
-                  source={PhoneFrameImage}
+                  source={PhoneFrameImage as ImageSourcePropType}
                   style={styles.phoneFrameImage}
                   resizeMode="stretch"
                 />
