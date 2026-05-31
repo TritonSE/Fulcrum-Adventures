@@ -132,7 +132,7 @@
   justify-content: center;
   align-items: center;
   border-radius: 100px;
-  background: var(--Neutral-Gray1, #EBEBEB);
+  background: var(--Neutral-Gray1, #ebebeb);
   color: var(--Neutral-Gray4, #909090);
   /* Body/Small (reg) */
   font-family: "Instrument Sans";
@@ -281,7 +281,7 @@
 }
 
 .no-activities-text {
-  color: var(--Primary, #153A7A);
+  color: var(--Primary, #153a7a);
   text-align: center;
   text-overflow: ellipsis;
 

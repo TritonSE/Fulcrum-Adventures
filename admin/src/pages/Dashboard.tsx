@@ -121,7 +121,8 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [totalActivities, setTotalActivities] = useState(0);
-  const [categoryCounts, setCategoryCounts] = useState<Record<Category, number>>();
+  const [categoryCounts, setCategoryCounts] =
+    useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -184,7 +185,7 @@ export default function Dashboard() {
   }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
 
   useEffect(() => {
-    const getActivityStatsData = async () => {      
+    const getActivityStatsData = async () => {
       const activityStatsResult = await getActivityStats();
       if (activityStatsResult.success) {
         const counts: Record<Category, number> = {
@@ -235,10 +236,7 @@ export default function Dashboard() {
     setIsSortDropdownOpen(false);
   };
 
-  const handleFilterChange = (
-    key: keyof DashboardFilters,
-    option: string,
-  ) => {
+  const handleFilterChange = (key: keyof DashboardFilters, option: string) => {
     setDraftFilters((filters) => {
       const nextFilters = { ...filters };
       if (key === "category" && option === "All") {
@@ -262,11 +260,7 @@ export default function Dashboard() {
       }
 
       const value =
-        key === "setup"
-          ? option === "Props"
-            ? "Required"
-            : "None"
-          : option;
+        key === "setup" ? (option === "Props" ? "Required" : "None") : option;
 
       if (nextFilters[key] === value) {
         delete nextFilters[key];
@@ -464,7 +458,9 @@ export default function Dashboard() {
                                   key={level}
                                   type="button"
                                   className={`energy-filter-icon-btn ${
-                                    selectedEnergyLevel >= level ? "selected" : ""
+                                    selectedEnergyLevel >= level
+                                      ? "selected"
+                                      : ""
                                   }`}
                                   onClick={() =>
                                     handleFilterChange(
@@ -539,9 +535,9 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-          </div>   
+          </div>
         </div>
-          
+
         <div
           className="table-wrapper"
           style={{

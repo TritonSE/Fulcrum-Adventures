@@ -91,7 +91,7 @@ export default function MailingList() {
                 showCopyToast(
                   `${selectedCount} email${
                     selectedCount > 1 ? "s" : ""
-                  } copied to clipboard`
+                  } copied to clipboard`,
                 );
               }}
             >

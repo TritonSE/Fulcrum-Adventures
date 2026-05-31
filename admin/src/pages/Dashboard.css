@@ -114,10 +114,10 @@
   align-items: center;
   gap: 12px;
   border-radius: 8px;
-  background: var(--Functional-Surface, #FFF);
+  background: var(--Functional-Surface, #fff);
 
   /* Button Elevation */
-  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.20);
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 .status-tab {
@@ -135,7 +135,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
 }
 
 .status-tab:last-child {

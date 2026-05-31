@@ -14,7 +14,6 @@ import { Toast } from "./Toast";
 import { deleteActivity, updateActivityStatus } from "../api/activity";
 import { ConfirmationPopup } from "./ConfirmationPopup";
 
-
 interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
@@ -29,8 +28,11 @@ export default function DashboardTable({
   const [toastActionText, setToastActionText] = useState("");
   const [toastAction, setToastAction] = useState<(() => void) | null>(null);
   const [toastKey, setToastKey] = useState(0);
-  const [showDeleteConfirmationPopup, setShowDeleteConfirmationPopup] = useState(false);
-  const [activityToDeleteId, setActivityToDeleteId] = useState<string | null>(null);
+  const [showDeleteConfirmationPopup, setShowDeleteConfirmationPopup] =
+    useState(false);
+  const [activityToDeleteId, setActivityToDeleteId] = useState<string | null>(
+    null,
+  );
   const [prevActivities, setPrevActivities] = useState(activities);
 
   useEffect(() => {
@@ -76,7 +78,8 @@ export default function DashboardTable({
   const handleUnpublishActivity = async (activityId: string) => {
     const result = await updateActivityStatus(activityId, "Draft");
     if (result.success) {
-      activities.filter((activity) => activity._id === activityId)[0].status = "Draft";
+      activities.filter((activity) => activity._id === activityId)[0].status =
+        "Draft";
       showUnpublishedToast(activityId);
     } else {
       console.error("Failed to unpublish activity: ", result.error);
@@ -88,7 +91,8 @@ export default function DashboardTable({
     if (!result.success) {
       console.error("Failed to republish activity: ", result.error);
     } else {
-      activities.filter((activity) => activity._id === activityId)[0].status = "Published";
+      activities.filter((activity) => activity._id === activityId)[0].status =
+        "Published";
       setToastMessage("");
     }
   };
@@ -134,34 +138,22 @@ export default function DashboardTable({
         <thead>
           <tr>
             <th>
-              <span className="th-content">
-                Title
-              </span>
+              <span className="th-content">Title</span>
             </th>
             <th>
-              <span className="th-content">
-                Category
-              </span>
+              <span className="th-content">Category</span>
             </th>
             <th>
-              <span className="th-content">
-                Energy
-              </span>
+              <span className="th-content">Energy</span>
             </th>
             <th>
-              <span className="th-content">
-                Grade Level
-              </span>
+              <span className="th-content">Grade Level</span>
             </th>
             <th>
-              <span className="th-content">
-                Group Size
-              </span>
+              <span className="th-content">Group Size</span>
             </th>
             <th>
-              <span className="th-content">
-                Duration
-              </span>
+              <span className="th-content">Duration</span>
             </th>
             <th>Status</th>
             <th>{/* Actions column (three dots) */}</th>
@@ -233,7 +225,7 @@ export default function DashboardTable({
                           role="menuitem"
                           onClick={() => {
                             setOpenActionMenuId(null);
-                            handleUnpublishActivity(activity._id)
+                            handleUnpublishActivity(activity._id);
                           }}
                         >
                           <img

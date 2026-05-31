@@ -65,7 +65,9 @@ export type GetActivityStatsResponse = {
   };
 };
 
-export async function getActivityStats(): Promise<APIResult<GetActivityStatsResponse>> {
+export async function getActivityStats(): Promise<
+  APIResult<GetActivityStatsResponse>
+> {
   try {
     const response = await get("/api/activities/stats");
     const data = await response.json();
