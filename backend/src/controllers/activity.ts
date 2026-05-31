@@ -46,38 +46,92 @@ function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function parseQueryList(value: string | string[] | undefined): string[] {
+  if (value === undefined) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return values
+    .flatMap((item) => item.split(","))
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseBucketRange(value: string | undefined): { min: number; max?: number } | undefined {
+  if (!value) return undefined;
+  if (value === "K-2") return { min: 0, max: 2 };
+  if (value === "3-5") return { min: 3, max: 5 };
+  if (value === "6-8") return { min: 6, max: 8 };
+  if (value === "9-12") return { min: 9, max: 12 };
+  if (value === "Small (3-15)") return { min: 3, max: 15 };
+  if (value === "Medium (15-30)") return { min: 15, max: 30 };
+  if (value === "Large (30+)") return { min: 30 };
+  return undefined;
+}
+
+function parseActivitySort(value: string | undefined): string {
+  if (value === "title" || value === "-title" || value === "-updatedAt") return value;
+  return "-createdAt";
+}
+
 export async function listActivities(req: Request, res: Response) {
   const status = req.query.status as string | undefined;
   const search = req.query.search as string | undefined;
-  const category = req.query.category as string | undefined;
+  const categories = parseQueryList(req.query.category as string | string[] | undefined);
+  const durations = parseQueryList(req.query.duration as string | string[] | undefined);
+  const gradeLevels = parseQueryList(req.query.gradeLevel as string | string[] | undefined);
+  const groupSizes = parseQueryList(req.query.groupSize as string | string[] | undefined);
   const energyLevel = req.query.energyLevel as string | undefined;
-  const environment = req.query.environment as string | undefined;
+  const environments = parseQueryList(req.query.environment as string | string[] | undefined);
   const setup = req.query.setup as string | undefined;
-  const sort = (req.query.sort as string) || "-createdAt";
+  const sort = parseActivitySort(req.query.sort as string | undefined);
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.max(1, Math.min(30, Number(req.query.limit) || 10));
   const skip = (page - 1) * limit;
 
   const filter: Record<string, unknown> = {};
+  const andFilters: Record<string, unknown>[] = [];
   if (status) filter.status = status;
-  if (category) filter.category = category;
+  if (categories.length > 0) filter.category = { $in: categories };
+  if (durations.length > 0) filter.duration = { $in: durations };
   if (energyLevel) filter.energyLevel = energyLevel;
   if (setup) filter.setup = setup;
-  if (environment) {
-    const environments = environment
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    if (environments.length > 0) {
-      filter.environment = { $in: environments };
-    }
+  const gradeRangeFilters = gradeLevels
+    .map((gradeLevel) => parseBucketRange(gradeLevel))
+    .filter((range): range is { min: number; max?: number } => range !== undefined)
+    .map((range) =>
+      range.max === undefined
+        ? { "gradeRange.min": { $gte: range.min } }
+        : { "gradeRange.min": { $lte: range.max }, "gradeRange.max": { $gte: range.min } },
+    );
+  if (gradeRangeFilters.length > 0) {
+    andFilters.push({ $or: gradeRangeFilters });
+  }
+  const groupSizeRangeFilters = groupSizes
+    .map((groupSize) => parseBucketRange(groupSize))
+    .filter((range): range is { min: number; max?: number } => range !== undefined)
+    .map((range) =>
+      range.max === undefined
+        ? { "groupSize.max": { $gte: range.min } }
+        : {
+            "groupSize.min": { $lte: range.max },
+            "groupSize.max": { $gte: range.min },
+          },
+    );
+  if (groupSizeRangeFilters.length > 0) {
+    andFilters.push({ $or: [{ "groupSize.anySize": true }, ...groupSizeRangeFilters] });
+  }
+  if (environments.length > 0) {
+    filter.environment = { $in: environments };
   }
   if (search) {
     const escapedSearch = escapeRegex(search);
-    filter.$or = [
+    const searchFilter = [
       { title: { $regex: escapedSearch, $options: "i" } },
       { overview: { $regex: escapedSearch, $options: "i" } },
     ];
+    andFilters.push({ $or: searchFilter });
+  }
+  if (andFilters.length > 0) {
+    filter.$and = andFilters;
   }
 
   const [activities, total] = await Promise.all([
@@ -119,7 +173,7 @@ export async function updateActivity(req: Request, res: Response) {
   const id = routeParam(req.params.id);
   const body = await applyThumbnailFieldsForUpdate(id, req.body as Record<string, unknown>);
   const activity = await Activity.findByIdAndUpdate(id, body, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
   if (!activity) {
@@ -140,7 +194,7 @@ export async function updateActivityStatus(req: Request, res: Response) {
   const activity = await Activity.findByIdAndUpdate(
     id,
     { status },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });

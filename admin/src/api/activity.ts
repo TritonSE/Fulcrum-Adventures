@@ -1,17 +1,20 @@
 import type { Activity } from "../types/activity";
-import { get, handleAPIError, type APIResult } from "./requests";
+import { del, get, handleAPIError, patch, type APIResult } from "./requests";
 
 export type ListActivitiesRequest = {
   status?: string;
   search?: string;
   category?: string;
+  duration?: string;
+  gradeLevel?: string;
+  groupSize?: string;
   energyLevel?: string;
   environment?: string;
   setup?: string;
   sort?: string;
   page?: string;
   limit?: string;
-}
+};
 
 export type ListActivitiesResponse = {
   activities: Activity[];
@@ -21,7 +24,9 @@ export type ListActivitiesResponse = {
   totalPages: number;
 };
 
-export async function fetchActivities(request: ListActivitiesRequest): Promise<APIResult<ListActivitiesResponse>> {
+export async function fetchActivities(
+  request: ListActivitiesRequest,
+): Promise<APIResult<ListActivitiesResponse>> {
   try {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(request)) {
@@ -43,6 +48,29 @@ export async function fetchActivities(request: ListActivitiesRequest): Promise<A
         totalPages: data.totalPages,
       },
     };
+  } catch (error) {
+    return handleAPIError(error);
+  }
+}
+
+export async function updateActivityStatus(
+  activityId: string,
+  status: string,
+): Promise<APIResult<null>> {
+  try {
+    await patch(`/api/activities/${activityId}/status`, { status });
+    return { success: true, data: null };
+  } catch (error) {
+    return handleAPIError(error);
+  }
+}
+
+export async function deleteActivity(
+  activityId: string,
+): Promise<APIResult<null>> {
+  try {
+    await del(`/api/activities/${activityId}`);
+    return { success: true, data: null };
   } catch (error) {
     return handleAPIError(error);
   }

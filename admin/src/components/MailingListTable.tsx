@@ -10,6 +10,7 @@ interface MailingListTableProps {
   currentPage: number;
   onToggleSubscriber: (email: string) => void;
   onToggleSelectAll: () => void;
+  onCopyEmail: () => void;
 }
 
 export default function MailingListTable({
@@ -18,6 +19,7 @@ export default function MailingListTable({
   currentPage,
   onToggleSubscriber,
   onToggleSelectAll,
+  onCopyEmail,
 }: MailingListTableProps) {
   const [copiedRowIds, setCopiedRowIds] = useState<Set<string>>(new Set());
 
@@ -72,11 +74,12 @@ export default function MailingListTable({
               <td className="col-date">
                 <div
                   className="copy-button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(subscriber.email);
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(subscriber.email);
                     const newCopiedRowIds = new Set<string>();
                     newCopiedRowIds.add(subscriber._id);
                     setCopiedRowIds(newCopiedRowIds);
+                    onCopyEmail();
                   }}
                 >
                   <img

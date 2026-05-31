@@ -1,17 +1,50 @@
 .table-container {
   width: 100%;
+  overflow: visible;
   max-width: none;
   margin: 0;
   border-radius: 8px;
-  overflow: hidden;
   background-color: #ffffff;
   border: 1px solid #6c6c6c;
 }
 
 .dashboard-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
+}
+
+.dashboard-table .title-col {
+  width: 200px;
+}
+
+.dashboard-table .category-col {
+  width: 230px;
+}
+
+.dashboard-table .energy-col {
+  width: 96px;
+}
+
+.dashboard-table .grade-col {
+  width: 134px;
+}
+
+.dashboard-table .group-col {
+  width: 128px;
+}
+
+.dashboard-table .duration-col {
+  width: 130px;
+}
+
+.dashboard-table .status-col {
+  width: 138px;
+}
+
+.dashboard-table .actions-col {
+  width: 64px;
 }
 
 .dashboard-table thead {
@@ -30,16 +63,7 @@
 }
 
 .dashboard-table th:first-child {
-  width: 200px;
   border-top-left-radius: 8px;
-}
-
-.dashboard-table th:nth-child(2) {
-  width: 204px;
-}
-
-.dashboard-table th:nth-child(4) {
-  width: 155px;
 }
 
 .dashboard-table th .th-content {
@@ -91,11 +115,32 @@
 .col-title {
   color: #153a7a;
   font-weight: 400;
-  width: 200px;
-  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.category-tag-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.plus-categories-tag {
+  display: flex;
+  padding: 8px 12px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100px;
+  background: var(--Neutral-Gray1, #EBEBEB);
+  color: var(--Neutral-Gray4, #909090);
+  /* Body/Small (reg) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
 }
 
 .col-grade,
@@ -106,12 +151,22 @@
 }
 
 .col-actions {
-  width: 40px;
   text-align: center;
+  position: relative;
+  padding: 16px 12px;
+}
+
+.action-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
 }
 
 .action-btn {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   border: none;
   color: #153a7a;
   font-size: 20px;
@@ -121,8 +176,120 @@
   width: 24px;
   height: 24px;
   line-height: 1;
+  flex: 0 0 24px;
+}
+
+.action-btn-dots {
+  display: block;
+  width: 24px;
+  height: 24px;
+  color: #153a7a;
+  font-size: 20px;
+  line-height: 22px;
+  text-align: center;
 }
 
 .action-btn:hover {
   background-color: #e5e7eb;
+}
+
+.action-btn.active {
+  background-color: #ebebeb;
+}
+
+.activity-action-menu {
+  position: absolute;
+  right: 0;
+  z-index: 8;
+  width: 194px;
+  height: 96px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.activity-action-menu.delete-only {
+  width: 178px;
+  height: 56px;
+}
+
+.activity-action-menu-item {
+  width: 100%;
+  height: 48px;
+  padding: 16px 20px 8px;
+  border: none;
+  background: transparent;
+  color: #153a7a;
+  cursor: pointer;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  letter-spacing: 0.28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.activity-action-menu.delete-only .activity-action-menu-item {
+  height: 56px;
+  padding: 16px 20px;
+}
+
+.activity-action-menu-item + .activity-action-menu-item {
+  padding: 8px 20px 16px;
+}
+
+.activity-action-menu-item:hover {
+  background: #ebebeb;
+}
+
+.activity-action-menu-item.danger {
+  color: #dc2626;
+}
+
+.activity-action-menu-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.activity-action-menu.open-upward {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.dashboard-table .table-row:last-child .activity-action-menu {
+  top: auto;
+  bottom: 0;
+}
+
+.no-activities-container {
+  display: flex;
+  height: 176px;
+  padding: var(--Spacing-sm, 16px) 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.no-activities-text {
+  color: var(--Primary, #153A7A);
+  text-align: center;
+  text-overflow: ellipsis;
+
+  /* Body/Small (reg) */
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  letter-spacing: 0.28px;
 }

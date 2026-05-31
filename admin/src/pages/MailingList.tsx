@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import type { Subscriber } from "../types/email";
 import { fetchAllEmails } from "../api/emails";
 import { Pagination } from "../components/Pagination";
+import { Toast } from "../components/Toast";
 
 export default function MailingList() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -16,6 +17,8 @@ export default function MailingList() {
   const [totalSubscribers, setTotalSubscribers] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastKey, setToastKey] = useState(0);
 
   useEffect(() => {
     const fetchSubscribers = async () => {
@@ -50,6 +53,11 @@ export default function MailingList() {
 
   const selectedCount = Object.values(selected).filter((v) => v).length;
 
+  const showCopyToast = (message: string) => {
+    setToastMessage(message);
+    setToastKey((prev) => prev + 1);
+  };
+
   return (
     <div style={{ background: "#F9F9F9" }}>
       <NavBar />
@@ -74,12 +82,17 @@ export default function MailingList() {
               icon={CopyIcon}
               variant="secondary-left"
               className="copy-emails-button"
-              onClick={() => {
+              onClick={async () => {
                 const selectedEmails = subscribers
                   .filter((subscriber) => selected[subscriber._id])
                   .map((subscriber) => subscriber.email)
                   .join(", ");
-                navigator.clipboard.writeText(selectedEmails);
+                await navigator.clipboard.writeText(selectedEmails);
+                showCopyToast(
+                  `${selectedCount} email${
+                    selectedCount > 1 ? "s" : ""
+                  } copied to clipboard`
+                );
               }}
             >
               Copy {selectedCount} email{selectedCount > 1 ? "s" : ""}
@@ -93,6 +106,7 @@ export default function MailingList() {
           currentPage={currentPage}
           onToggleSubscriber={toggleSubscriber}
           onToggleSelectAll={toggleSelectAll}
+          onCopyEmail={() => showCopyToast("Email copied to clipboard")}
         />
 
         <Pagination
@@ -101,6 +115,13 @@ export default function MailingList() {
           onPageChange={setCurrentPage}
         />
       </div>
+      {toastMessage && (
+        <Toast
+          key={toastKey}
+          message={toastMessage}
+          onClose={() => setToastMessage("")}
+        />
+      )}
     </div>
   );
 }
