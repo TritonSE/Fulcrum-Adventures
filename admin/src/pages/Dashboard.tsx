@@ -120,7 +120,7 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [totalActivities, setTotalActivities] = useState(0);
+  const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts and to determine if there are any activities at all)
   const [categoryCounts, setCategoryCounts] =
     useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
@@ -175,7 +175,6 @@ export default function Dashboard() {
       const activitiesResult = await fetchActivities(request);
       if (activitiesResult.success) {
         setActivities(activitiesResult.data.activities);
-        setTotalActivities(activitiesResult.data.total);
         setTotalPages(activitiesResult.data.totalPages);
       } else {
         console.error("Failed to fetch activities:", activitiesResult.error);
@@ -199,6 +198,7 @@ export default function Dashboard() {
         activityStatsResult.data.categories.forEach((categoryStat) => {
           counts[categoryStat.category as Category] = categoryStat.count;
         });
+        setTrueTotalActivities(activityStatsResult.data.total);
         setCategoryCounts(counts);
       }
     };
@@ -303,7 +303,6 @@ export default function Dashboard() {
           ? 3
           : 0;
   const hasAppliedFilters = Object.keys(appliedFilters).length > 0;
-  const hasNoActivities = activities.length === 0;
 
   return (
     <div style={{ background: "#F9F9F9", minHeight: "100vh" }}>
@@ -331,7 +330,7 @@ export default function Dashboard() {
                 key={category}
                 category={category}
                 numActivities={categoryCounts ? categoryCounts[category] : 0}
-                totalActivities={totalActivities}
+                totalActivities={trueTotalActivities}
               />
             ))}
           </div>
@@ -375,10 +374,11 @@ export default function Dashboard() {
                 <button
                   className={`sort-btn ${
                     isSortDropdownOpen || sort !== "-createdAt" ? "active" : ""
-                  } ${hasNoActivities ? "empty" : ""}`}
+                  } ${activities.length === 0 ? "empty" : ""}`}
                   onClick={toggleSortDropdown}
                   aria-expanded={isSortDropdownOpen}
                   aria-haspopup="menu"
+                  disabled={activities.length === 0}
                 >
                   Sort
                   <svg
@@ -417,10 +417,11 @@ export default function Dashboard() {
                 <button
                   className={`filter-btn ${
                     isFilterDropdownOpen || hasAppliedFilters ? "active" : ""
-                  } ${hasNoActivities ? "empty" : ""}`}
+                  } ${activities.length === 0 && !hasAppliedFilters ? "empty" : ""}`}
                   onClick={toggleFilterDropdown}
                   aria-expanded={isFilterDropdownOpen}
                   aria-haspopup="dialog"
+                  disabled={activities.length === 0 && !hasAppliedFilters}
                 >
                   Filter
                   <svg
