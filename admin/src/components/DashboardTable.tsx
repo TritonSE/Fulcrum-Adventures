@@ -1,5 +1,5 @@
 import type { Activity } from "../types/activity";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteIcon from "../../icons/delete.svg";
 import UnpublishIcon from "../../icons/unpublish.svg";
 
@@ -61,9 +61,9 @@ export default function DashboardTable({
 
   // Helper to format group size
   const formatGroupSize = (size: {
-    min: number;
-    max: number;
-    anySize: boolean;
+    min?: number;
+    max?: number;
+    anySize?: boolean;
   }) => {
     if (size.anySize) return "Any";
     return `${size.min}-${size.max}`;
