@@ -1,4 +1,4 @@
-﻿import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { POPULAR_TITLES } from "../constants/homeSections";

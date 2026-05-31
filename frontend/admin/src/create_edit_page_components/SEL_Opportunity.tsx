@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
 import AddIcon from "../../../assets/AddIcon.svg";
 import ButtonIcon from "../../../assets/Button.svg";
+
 import { FieldError } from "./sub_components/FieldError";
 
 const MAX_TAG_LENGTH = 30;

@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   chipSelected: {
     borderColor: "#153A7A",
-    
+
     backgroundColor: "#EAF0FF",
   },
   chipDisabled: {

@@ -290,10 +290,7 @@ const WebVideoFramePickerModal: React.FC<VideoFramePickerModalProps> = ({
 
     try {
       videoElement.pause();
-      const frame = await captureWebVideoElementFrameAsync(
-        videoElement,
-        selectedTimeRef.current,
-      );
+      const frame = await captureWebVideoElementFrameAsync(videoElement, selectedTimeRef.current);
 
       onSelectFrame(frame);
     } catch (error) {
@@ -409,7 +406,10 @@ const WebVideoFramePickerModal: React.FC<VideoFramePickerModalProps> = ({
               <Text style={styles.secondaryButtonText}>Cancel</Text>
             </Pressable>
             <Pressable
-              style={[styles.primaryButton, (!isVideoReady || isCapturing) && styles.buttonDisabled]}
+              style={[
+                styles.primaryButton,
+                (!isVideoReady || isCapturing) && styles.buttonDisabled,
+              ]}
               onPress={() => {
                 void handleUseSelectedFrame();
               }}
@@ -554,7 +554,10 @@ const NativeVideoFramePickerModal: React.FC<VideoFramePickerModalProps> = ({
               <Text style={styles.secondaryButtonText}>Cancel</Text>
             </Pressable>
             <Pressable
-              style={[styles.primaryButton, (!selectedFrame || isGenerating) && styles.buttonDisabled]}
+              style={[
+                styles.primaryButton,
+                (!selectedFrame || isGenerating) && styles.buttonDisabled,
+              ]}
               onPress={() => {
                 if (selectedFrame) onSelectFrame(selectedFrame);
               }}

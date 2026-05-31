@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import YellowEnergyStarIcon from "../../../../assets/icons/yellowenergystar.svg";
+
 import { FieldError } from "./FieldError";
 
 import type { EnergyLevelOption } from "../OverviewSection";
@@ -41,7 +42,9 @@ export const EnergyLevelSection: React.FC<EnergyLevelSectionProps> = ({
             >
               <View style={styles.starsRow}>
                 {Array.from({ length: getStarCount(option) }).map((_, index) => {
-                  return <YellowEnergyStarIcon key={`${option}-star-${index}`} width={16} height={16} />;
+                  return (
+                    <YellowEnergyStarIcon key={`${option}-star-${index}`} width={16} height={16} />
+                  );
                 })}
               </View>
               <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{option}</Text>

@@ -278,8 +278,8 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
           activeOpacity={0.8}
         >
           <View style={styles.createTabButtonContent}>
-            <AddIcon  />
-            <Text style={styles.createTabButtonText}>   Create New Tab</Text>
+            <AddIcon />
+            <Text style={styles.createTabButtonText}> Create New Tab</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -354,7 +354,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                           onPress={() => handleRemoveGuidedItem(index)}
                           style={styles.removeGuidedItemButton}
                         >
-                         < MinusIcon width={16} height={16} />
+                          <MinusIcon width={16} height={16} />
                         </Pressable>
                       ) : (
                         <View style={styles.removeGuidedItemSpacer} />
@@ -460,7 +460,7 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                   onPress={() => handleDeleteSection(section.id)}
                   activeOpacity={0.8}
                 >
-                 <DeleteIcon />
+                  <DeleteIcon />
                 </TouchableOpacity>
               </View>
 
@@ -475,41 +475,40 @@ export const ActivityContent: React.FC<ActivityContentProps> = ({
                 placeholder="Section Title"
                 placeholderTextColor="#B3B3B3"
                 maxLength={MAX_SECTION_TITLE_LENGTH}
-                  style={[
-                    styles.sectionTitleInput,
-                    sectionErrors?.[section.id]?.title && styles.inputError,
-                  ]}
+                style={[
+                  styles.sectionTitleInput,
+                  sectionErrors?.[section.id]?.title && styles.inputError,
+                ]}
               />
 
-                  <Text style={styles.sectionCharacterCount}>
+              <Text style={styles.sectionCharacterCount}>
                 {section.title.length}/{MAX_SECTION_TITLE_LENGTH} characters
               </Text>
               {sectionErrors?.[section.id]?.title && (
                 <FieldError message={sectionErrors[section.id].title || ""} />
               )}
 
+              <TextInput
+                value={section.content}
+                onChangeText={(value) => {
+                  handleUpdateSection(section.id, (existingSection) => ({
+                    ...existingSection,
+                    content: value,
+                  }));
+                }}
+                placeholder="Enter section contents.."
+                placeholderTextColor="#B3B3B3"
+                multiline
+                numberOfLines={7}
+                style={[
+                  styles.sectionContentInput,
+                  sectionErrors?.[section.id]?.content && styles.inputError,
+                ]}
+              />
 
-                <TextInput
-                  value={section.content}
-                  onChangeText={(value) => {
-                    handleUpdateSection(section.id, (existingSection) => ({
-                      ...existingSection,
-                      content: value,
-                    }));
-                  }}
-                  placeholder="Enter section contents.."
-                  placeholderTextColor="#B3B3B3"
-                  multiline
-                  numberOfLines={7}
-                  style={[
-                    styles.sectionContentInput,
-                    sectionErrors?.[section.id]?.content && styles.inputError,
-                  ]}
-                />
-
-                {sectionErrors?.[section.id]?.content && (
-                  <FieldError message={sectionErrors[section.id].content || ""} />
-                )}
+              {sectionErrors?.[section.id]?.content && (
+                <FieldError message={sectionErrors[section.id].content || ""} />
+              )}
             </View>
           ))}
         </View>

@@ -5,20 +5,20 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 
 import {
   ACTIVITY_API_BASE_URL,
-  createActivity,
-  getActivityById,
-  getActivityId,
   type ActivityDetail,
   type ActivityStatus as ApiActivityStatus,
+  createActivity,
   type CreateActivityPayload,
+  getActivityById,
+  getActivityId,
   updateActivity,
   updateActivityStatus,
 } from "../api/activityApi";
 import { uploadActivityMediaSelection } from "../api/activityMediaApi";
 import {
   ActivityContent,
-  createDefaultActivityTabs,
   type ActivityTab,
+  createDefaultActivityTabs,
 } from "../create_edit_page_components/ActivityContent";
 import { CollapsibleSection } from "../create_edit_page_components/CollapsibleSection";
 import {
@@ -31,8 +31,8 @@ import {
 } from "../create_edit_page_components/mediaUploadConfig";
 import {
   createDefaultOverviewState,
-  OverviewSection,
   type OverviewFormState,
+  OverviewSection,
 } from "../create_edit_page_components/OverviewSection";
 import { SEL_Opportunity } from "../create_edit_page_components/SEL_Opportunity";
 import {
@@ -245,7 +245,9 @@ const buildActivityPayload = ({
   status: ApiActivityStatus;
 }): CreateActivityPayload => {
   const prepTab = getPrepTab(activityTabs);
-  const environment = overviewValue.anyEnvironment ? ["Any Environment"] : overviewValue.environments;
+  const environment = overviewValue.anyEnvironment
+    ? ["Any Environment"]
+    : overviewValue.environments;
   const groupSizeMin = overviewValue.anyGroupSize
     ? 0
     : toPositiveInteger(overviewValue.groupSizeMin);
@@ -390,6 +392,13 @@ const parseSectionBlocks = (content: string) =>
     .map((block) => block.trim())
     .filter(Boolean);
 
+const getDefaultBuiltInSectionTitle = (kind: ActivityTab["kind"]) => {
+  if (kind === "prep") return "Set-Up";
+  if (kind === "play") return "How to Play";
+  if (kind === "debrief") return "Reflection Questions";
+  return "Section";
+};
+
 const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
   const facilitateSections = activity.facilitateSections ?? [];
   const materials = activity.materials ?? [];
@@ -451,6 +460,13 @@ const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
       if (defaultTab) {
         tab.sections = defaultTab.sections.map((section) => ({ ...section, id: createId() }));
       }
+    }
+
+    if (tab.sections[0] && ["prep", "play", "debrief"].includes(kind)) {
+      tab.sections[0] = {
+        ...tab.sections[0],
+        title: getDefaultBuiltInSectionTitle(kind),
+      };
     }
 
     if (kind === "play" && tab.guidedItems.length < 2) {
@@ -556,7 +572,7 @@ export const ActivityEditor: React.FC<ActivityEditorProps> = ({
   activityId: activityIdProp,
   onCancel,
 }) => {
-  const activityIdParam = mode === "edit" ? activityIdProp ?? getActivityIdFromPath() : undefined;
+  const activityIdParam = mode === "edit" ? (activityIdProp ?? getActivityIdFromPath()) : undefined;
   const pageTitle = mode === "edit" ? "Edit Activity" : "Create New Activity";
   const publishLabel = mode === "edit" ? "Publish Changes" : "Publish Activity";
 

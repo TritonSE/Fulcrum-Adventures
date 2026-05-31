@@ -18,11 +18,7 @@ type CategorySectionProps = {
   error?: string | null;
 };
 
-export const CategorySection: React.FC<CategorySectionProps> = ({
-  selected,
-  onChange,
-  error,
-}) => {
+export const CategorySection: React.FC<CategorySectionProps> = ({ selected, onChange, error }) => {
   const canSelectMore = selected.length < 3;
 
   const toggleCategory = (category: string) => {

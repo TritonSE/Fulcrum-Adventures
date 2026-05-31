@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import type { LayoutChangeEvent, PanResponderInstance } from "react-native";
@@ -14,8 +14,6 @@ type GradeSectionProps = {
   onChange: (minValue: string, maxValue: string) => void;
 };
 
-type HandleType = "min" | "max";
-
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const getIndexFromLabel = (label: string) => {
@@ -29,6 +27,10 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
   const [railWidth, setRailWidth] = useState(0);
   const railRef = useRef<View | null>(null);
   const railPageXRef = useRef(0);
+  const railWidthRef = useRef(railWidth);
+  const minIndexRef = useRef(0);
+  const maxIndexRef = useRef(0);
+  const onChangeRef = useRef(onChange);
 
   const minIndex = getIndexFromLabel(minValue);
   const maxIndex = getIndexFromLabel(maxValue);
@@ -44,6 +46,13 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
   const minCenterX = getCenterXForIndex(minIndex);
   const maxCenterX = getCenterXForIndex(maxIndex);
 
+  useEffect(() => {
+    railWidthRef.current = railWidth;
+    minIndexRef.current = minIndex;
+    maxIndexRef.current = maxIndex;
+    onChangeRef.current = onChange;
+  }, [railWidth, minIndex, maxIndex, onChange]);
+
   const measureRail = () => {
     railRef.current?.measureInWindow((x) => {
       railPageXRef.current = x;
@@ -51,43 +60,66 @@ export const GradeSection: React.FC<GradeSectionProps> = ({ minValue, maxValue, 
   };
 
   const getIndexFromGestureX = (gestureMoveX: number) => {
+    const currentRailWidth = railWidthRef.current;
+    const currentUsableWidth = Math.max(currentRailWidth - HANDLE_SIZE, 1);
     const relativeX = clamp(
       gestureMoveX - railPageXRef.current,
       HANDLE_SIZE / 2,
-      railWidth - HANDLE_SIZE / 2,
+      currentRailWidth - HANDLE_SIZE / 2,
     );
 
-    const ratio = (relativeX - HANDLE_SIZE / 2) / usableWidth;
+    const ratio = (relativeX - HANDLE_SIZE / 2) / currentUsableWidth;
     return clamp(Math.round(ratio * stepCount), 0, stepCount);
   };
 
-  const createHandleResponder = (handleType: HandleType): PanResponderInstance =>
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        measureRail();
-      },
-      onPanResponderMove: (_, gestureState) => {
-        if (!railWidth) return;
+  const minResponder = useMemo(
+    (): PanResponderInstance =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          measureRail();
+        },
+        onPanResponderMove: (_, gestureState) => {
+          const currentRailWidth = railWidthRef.current;
+          const currentMinIndex = minIndexRef.current;
+          const currentMaxIndex = maxIndexRef.current;
 
-        const draggedIndex = getIndexFromGestureX(gestureState.moveX);
+          if (!currentRailWidth) return;
 
-        if (handleType === "min") {
-          const nextMinIndex = Math.min(draggedIndex, maxIndex);
-          onChange(getLabelFromIndex(nextMinIndex), getLabelFromIndex(maxIndex));
-          return;
-        }
+          const draggedIndex = getIndexFromGestureX(gestureState.moveX);
+          const nextMinIndex = Math.min(draggedIndex, currentMaxIndex);
 
-        const nextMaxIndex = Math.max(draggedIndex, minIndex);
-        onChange(getLabelFromIndex(minIndex), getLabelFromIndex(nextMaxIndex));
-      },
-      onPanResponderTerminationRequest: () => false,
-    });
+          onChangeRef.current(getLabelFromIndex(nextMinIndex), getLabelFromIndex(currentMaxIndex));
+        },
+        onPanResponderTerminationRequest: () => false,
+      }),
+    [],
+  );
 
-  const minResponder = useMemo(() => createHandleResponder("min"), [railWidth, minIndex, maxIndex]);
+  const maxResponder = useMemo(
+    (): PanResponderInstance =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          measureRail();
+        },
+        onPanResponderMove: (_, gestureState) => {
+          const currentRailWidth = railWidthRef.current;
+          const currentMinIndex = minIndexRef.current;
 
-  const maxResponder = useMemo(() => createHandleResponder("max"), [railWidth, minIndex, maxIndex]);
+          if (!currentRailWidth) return;
+
+          const draggedIndex = getIndexFromGestureX(gestureState.moveX);
+          const nextMaxIndex = Math.max(draggedIndex, currentMinIndex);
+
+          onChangeRef.current(getLabelFromIndex(currentMinIndex), getLabelFromIndex(nextMaxIndex));
+        },
+        onPanResponderTerminationRequest: () => false,
+      }),
+    [],
+  );
 
   const handleRailLayout = (event: LayoutChangeEvent) => {
     setRailWidth(event.nativeEvent.layout.width);

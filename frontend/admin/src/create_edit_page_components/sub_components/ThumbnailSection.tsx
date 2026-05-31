@@ -9,12 +9,13 @@ import {
   View,
 } from "react-native";
 
-import { FieldError } from "./FieldError";
 import {
   formatMegabytes,
   MAX_IMAGE_UPLOAD_BYTES,
   SUPPORTED_IMAGE_FORMAT_LABEL,
 } from "../mediaUploadConfig";
+
+import { FieldError } from "./FieldError";
 
 import type { YoutubeThumbnailStatus } from "../OverviewSection";
 

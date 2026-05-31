@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 
+import { THUMBNAIL_IMAGE_FORM_FIELD } from "./mediaUploadConfig";
 import { ActivityOverviewField } from "./sub_components/ActivityOverviewField";
 import { ActivityTitleField } from "./sub_components/ActivityTitleField";
 import { CategorySection } from "./sub_components/CategorySection";
@@ -11,8 +12,6 @@ import { GradeSection } from "./sub_components/GradeSection";
 import { GroupSizeSection } from "./sub_components/GroupSizeSection";
 import { SetupSection } from "./sub_components/SetupSection";
 import { ThumbnailSection } from "./sub_components/ThumbnailSection";
-
-import { THUMBNAIL_IMAGE_FORM_FIELD } from "./mediaUploadConfig";
 
 import type { ACTIVITY_VIDEO_FORM_FIELD } from "./mediaUploadConfig";
 

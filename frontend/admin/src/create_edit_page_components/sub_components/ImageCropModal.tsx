@@ -12,8 +12,8 @@ import {
   View,
 } from "react-native";
 
-import { THUMBNAIL_IMAGE_FORM_FIELD } from "../mediaUploadConfig";
 import { showToast } from "../../utils/showToast";
+import { THUMBNAIL_IMAGE_FORM_FIELD } from "../mediaUploadConfig";
 
 import type { ThumbnailImageFile } from "../OverviewSection";
 

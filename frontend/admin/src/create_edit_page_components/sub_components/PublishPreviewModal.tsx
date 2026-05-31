@@ -11,19 +11,18 @@ import {
   View,
 } from "react-native";
 
+import PhoneFrameImage from "../../../../assets/378_rectangle_extracted.png";
 import ActionIcon from "../../../../assets/icons/Action.svg";
-import BookmarkIcon from "../../../../assets/icons/BookMarkIcon.svg";
-import PageIcon from "../../../../assets/icons/PageIcon.svg";
-import ClockIcon from "../../../../assets/icons/clock.svg";
 import BlankEnergyStarIcon from "../../../../assets/icons/blankenergystar.svg";
+import BookmarkIcon from "../../../../assets/icons/BookMarkIcon.svg";
+import ClockIcon from "../../../../assets/icons/clock.svg";
 import GraduationCapIcon from "../../../../assets/icons/graduation-cap.svg";
+import PageIcon from "../../../../assets/icons/PageIcon.svg";
 import PeopleIcon from "../../../../assets/icons/people.svg";
 import YellowEnergyStarIcon from "../../../../assets/icons/yellowenergystar.svg";
 
 import type { ActivityTab } from "../ActivityContent";
 import type { OverviewFormState } from "../OverviewSection";
-
-const PHONE_FRAME_IMAGE = require("../../../../assets/378_rectangle_extracted.png");
 
 type PublishPreviewModalProps = {
   visible: boolean;
@@ -141,7 +140,8 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
   const frameHeight = frameWidth * (550 / 300);
   const scale = frameWidth / 300;
   const screenInset = 5 * scale;
-  const [activeFacilitateTab, setActiveFacilitateTab] = useState<Exclude<ActivityTab["kind"], "custom">>("prep");
+  const [activeFacilitateTab, setActiveFacilitateTab] =
+    useState<Exclude<ActivityTab["kind"], "custom">>("prep");
   const [isTutorialPlaying, setIsTutorialPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -179,29 +179,8 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
     videoElement.currentTime = 0;
   }, [isTutorialPlaying]);
 
-  const activePreviewTab = previewTabs.find((tab) => tab.kind === activeFacilitateTab) ?? previewTabs[0] ?? null;
-  const tutorialVideoElement =
-    Platform.OS === "web" && overview.thumbnailVideo?.uri
-      ? React.createElement("video", {
-          ref: (node: HTMLVideoElement | null) => {
-            videoRef.current = node;
-          },
-          src: overview.thumbnailVideo.uri,
-          poster: overview.thumbnailImage?.uri ?? undefined,
-          playsInline: true,
-          muted: true,
-          controls: false,
-          loop: false,
-          preload: "metadata",
-          onEnded: () => setIsTutorialPlaying(false),
-          style: {
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-          },
-        })
-      : null;
+  const activePreviewTab =
+    previewTabs.find((tab) => tab.kind === activeFacilitateTab) ?? previewTabs[0] ?? null;
 
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
@@ -223,12 +202,31 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                   },
                 ]}
               >
-                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={styles.phoneScrollContent}>
+                <ScrollView
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.phoneScrollContent}
+                >
                   <View style={styles.heroCard}>
-                    {hasVideoTutorial && tutorialVideoElement ? (
-                      tutorialVideoElement
+                    {hasVideoTutorial && Platform.OS === "web" && overview.thumbnailVideo?.uri ? (
+                      <video
+                        ref={videoRef}
+                        src={overview.thumbnailVideo.uri}
+                        poster={overview.thumbnailImage?.uri ?? undefined}
+                        playsInline
+                        muted
+                        controls={false}
+                        loop={false}
+                        preload="metadata"
+                        onEnded={() => setIsTutorialPlaying(false)}
+                        style={styles.webVideo}
+                      />
                     ) : overview.thumbnailImage?.uri ? (
-                      <Image source={{ uri: overview.thumbnailImage.uri }} style={styles.heroImage} resizeMode="cover" />
+                      <Image
+                        source={{ uri: overview.thumbnailImage.uri }}
+                        style={styles.heroImage}
+                        resizeMode="cover"
+                      />
                     ) : (
                       <View style={styles.heroPlaceholder} />
                     )}
@@ -269,24 +267,32 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                       </View>
                     </View>
 
-                    <Text style={styles.activityTitle}>{overview.title || "Untitled activity"}</Text>
+                    <Text style={styles.activityTitle}>
+                      {overview.title || "Untitled activity"}
+                    </Text>
 
                     <View style={styles.metricRow}>
-                      <PreviewMetric value={getGradeRangeLabel(overview)} Icon={GraduationCapIcon} />
+                      <PreviewMetric
+                        value={getGradeRangeLabel(overview)}
+                        Icon={GraduationCapIcon}
+                      />
                       <Text style={styles.metricDot}>•</Text>
                       <PreviewMetric value={getGroupSizeLabel(overview)} Icon={PeopleIcon} />
                       <Text style={styles.metricDot}>•</Text>
                       <PreviewMetric value={getDurationLabel(overview)} Icon={ClockIcon} />
                     </View>
 
-   <Text style={styles.descriptionText} numberOfLines={4}>
+                    <Text style={styles.descriptionText} numberOfLines={4}>
                       {overview.overview || "No overview provided yet."}
                     </Text>
 
                     <View style={styles.tagRow}>
                       <View style={styles.energyStarsRow}>
                         {[0, 1, 2].map((index) => {
-                          const StarIcon = index < energyLevelFilledStars ? YellowEnergyStarIcon : BlankEnergyStarIcon;
+                          const StarIcon =
+                            index < energyLevelFilledStars
+                              ? YellowEnergyStarIcon
+                              : BlankEnergyStarIcon;
 
                           return <StarIcon key={`energy-star-${index}`} width={16} height={16} />;
                         })}
@@ -298,7 +304,9 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
 
                     <View style={styles.bodySection}>
                       <Text style={styles.bodySectionTitle}>Objective</Text>
-                      <Text style={styles.bodySectionText}>{objective || "No objective added yet."}</Text>
+                      <Text style={styles.bodySectionText}>
+                        {objective || "No objective added yet."}
+                      </Text>
                     </View>
 
                     <View style={[styles.bodySection, styles.bodySectionNoBorder]}>
@@ -311,12 +319,24 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                           return (
                             <React.Fragment key={tabKind}>
                               <TouchableOpacity
-                                style={[styles.facilitateTab, isActive && styles.facilitateTabActive]}
+                                style={[
+                                  styles.facilitateTab,
+                                  isActive && styles.facilitateTabActive,
+                                ]}
                                 onPress={() => setActiveFacilitateTab(tabKind)}
                                 activeOpacity={0.85}
                               >
-                                <Text style={[styles.facilitateTabText, isActive && styles.facilitateTabTextActive]}>
-                                  {tabKind === "prep" ? "Prep" : tabKind === "play" ? "Play" : "Debrief"}
+                                <Text
+                                  style={[
+                                    styles.facilitateTabText,
+                                    isActive && styles.facilitateTabTextActive,
+                                  ]}
+                                >
+                                  {tabKind === "prep"
+                                    ? "Prep"
+                                    : tabKind === "play"
+                                      ? "Play"
+                                      : "Debrief"}
                                 </Text>
                               </TouchableOpacity>
                               {index < FACILITATE_TABS.length - 1 ? (
@@ -329,14 +349,22 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
 
                       {activePreviewTab ? (
                         <View style={styles.tabCard}>
-                          {activePreviewTab.kind === "play" || activePreviewTab.kind === "debrief" ? (
+                          {activePreviewTab.kind === "play" ||
+                          activePreviewTab.kind === "debrief" ? (
                             <View style={styles.listGroup}>
                               {activePreviewTab.guidedItems.map((item, index) => (
-                                <View key={`${activePreviewTab.id}-guided-${index}`} style={styles.listItem}>
+                                <View
+                                  key={`${activePreviewTab.id}-guided-${index}`}
+                                  style={styles.listItem}
+                                >
                                   <Text style={styles.listItemLabel}>
-                                    {activePreviewTab.kind === "play" ? `Step ${index + 1}` : `Q${index + 1}`}
+                                    {activePreviewTab.kind === "play"
+                                      ? `Step ${index + 1}`
+                                      : `Q${index + 1}`}
                                   </Text>
-                                  <Text style={styles.listItemText}>{item.trim() || "No content added yet."}</Text>
+                                  <Text style={styles.listItemText}>
+                                    {item.trim() || "No content added yet."}
+                                  </Text>
                                 </View>
                               ))}
                             </View>
@@ -357,7 +385,10 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
                                     <Text style={styles.materialText}>No materials needed.</Text>
                                   ) : activePreviewTab.materials.length > 0 ? (
                                     activePreviewTab.materials.map((material) => (
-                                      <PreviewMaterialItem key={`${activePreviewTab.id}-${material}`} label={material} />
+                                      <PreviewMaterialItem
+                                        key={`${activePreviewTab.id}-${material}`}
+                                        label={material}
+                                      />
                                     ))
                                   ) : (
                                     <Text style={styles.materialText}>No materials added yet.</Text>
@@ -389,20 +420,36 @@ export const PublishPreviewModal: React.FC<PublishPreviewModalProps> = ({
               </View>
 
               <View pointerEvents="none" style={styles.phoneFrameWrap}>
-                <Image source={PHONE_FRAME_IMAGE} style={styles.phoneFrameImage} resizeMode="stretch" />
+                <Image
+                  source={PhoneFrameImage}
+                  style={styles.phoneFrameImage}
+                  resizeMode="stretch"
+                />
               </View>
             </View>
 
             <View style={styles.actionsRow}>
-              <TouchableOpacity style={styles.secondaryButton} onPress={onClose} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={onClose}
+                activeOpacity={0.85}
+              >
                 <Text style={styles.secondaryButtonText}>Keep Editing</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.secondaryButton} onPress={onSaveDraft} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={onSaveDraft}
+                activeOpacity={0.85}
+              >
                 <Text style={styles.secondaryButtonText}>Save as Draft</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.primaryButton} onPress={onPublish} activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={onPublish}
+                activeOpacity={0.85}
+              >
                 <Text style={styles.primaryButtonText}>{publishLabel}</Text>
               </TouchableOpacity>
             </View>
@@ -770,6 +817,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  webVideo: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    display: "block",
+  },
   facilitateTabDivider: {
     width: 1,
     backgroundColor: "#E2E7F0",
@@ -797,7 +850,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   secondaryButton: {
-    padding:12,
+    padding: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#153A7A",
@@ -812,7 +865,7 @@ const styles = StyleSheet.create({
     fontFamily: "Instrument Sans",
   },
   primaryButton: {
-    padding:12,
+    padding: 12,
     borderRadius: 8,
     backgroundColor: "#153A7A",
     alignItems: "center",
