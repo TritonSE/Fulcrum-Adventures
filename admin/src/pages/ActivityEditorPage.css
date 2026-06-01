@@ -1,0 +1,1103 @@
+.activity-page {
+  display: grid;
+  gap: 16px;
+  padding: 40px;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-editor-header,
+.activity-editor-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.activity-editor-header {
+  justify-content: space-between;
+}
+
+.activity-editor-header h1 {
+  margin: 0;
+  color: #153a7a;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 104%;
+  text-overflow: ellipsis;
+}
+
+.activity-editor-actions,
+.activity-editor-footer {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.activity-editor-footer {
+  justify-content: flex-end;
+}
+
+.activity-section-card {
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.activity-section-toggle {
+  width: 100%;
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: #1f3b82;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.04;
+  text-align: left;
+  cursor: pointer;
+}
+
+.activity-section-arrow {
+  font-size: 14px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.activity-section-arrow-open {
+  transform: rotate(180deg);
+}
+
+.activity-section-body {
+  padding: 0 32px 32px;
+}
+
+.activity-field-stack {
+  display: grid;
+  gap: 28px;
+}
+
+.activity-field-group {
+  display: grid;
+  gap: 12px;
+}
+
+.activity-field-label {
+  margin: 0;
+  color: #153a7a;
+  font-size: 22px;
+  font-weight: 700;
+  font-family: "Instrument Sans Bold", "Instrument Sans", sans-serif;
+}
+
+.activity-field-label-light {
+  font-weight: 400;
+}
+
+.activity-text-input,
+.activity-text-area,
+.activity-select-input,
+.activity-section-title-input {
+  width: 100%;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  color: #343434;
+  font: inherit;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.activity-text-input,
+.activity-select-input {
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.activity-text-area {
+  min-height: 160px;
+  padding: 16px 20px;
+  resize: vertical;
+}
+
+.activity-text-area-compact {
+  min-height: 72px;
+  padding: 14px;
+}
+
+.activity-section-title-input {
+  min-height: 56px;
+  padding: 0 10px;
+  border-radius: 14px;
+  color: #3b3b3b;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "Instrument Sans Bold", "Instrument Sans", sans-serif;
+}
+
+.activity-text-input:focus,
+.activity-text-area:focus,
+.activity-select-input:focus,
+.activity-section-title-input:focus {
+  outline: 2px solid rgba(31, 79, 149, 0.18);
+  border-color: #1f4f95;
+}
+
+.activity-input-error {
+  border-color: #ef4444;
+}
+
+.activity-input-disabled {
+  background: #f6f6f6;
+  color: #b4b4b4;
+}
+
+.activity-support-text,
+.activity-upload-meta,
+.activity-youtube-preview span,
+.activity-grade-value {
+  margin: 0;
+  color: #b4b4b4;
+  font-size: 14px;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-grade-value {
+  color: #1f3b82;
+  font-weight: 600;
+}
+
+.activity-error-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.activity-error-icon {
+  width: 17px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.activity-error-text {
+  margin: 0;
+  color: #ef4444;
+  font-size: 14px;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-primary-button,
+.activity-secondary-button,
+.activity-upload-button,
+.activity-chip,
+.activity-add-section-button {
+  border-radius: 8px;
+  font: inherit;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.activity-primary-button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  background: #153a7a;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.activity-secondary-button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #153a7a;
+  background: #ffffff;
+  color: #153a7a;
+  font-weight: 500;
+}
+
+.activity-primary-button:disabled,
+.activity-secondary-button:disabled,
+.activity-add-section-button:disabled,
+.activity-icon-button:disabled,
+.activity-grade-handle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activity-button-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.activity-button-icon-text img {
+  width: 16px;
+  height: 16px;
+}
+
+.activity-thumbnail-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.activity-upload-card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 22px;
+  border: 1px dashed #b4b4b4;
+  border-radius: 8px;
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+}
+
+.activity-upload-card-error {
+  border-color: #ef4444;
+}
+
+.activity-upload-preview {
+  width: min(220px, 100%);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #e7ecf5;
+}
+
+.activity-upload-plus {
+  color: #153a7a;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.activity-upload-title {
+  color: #6c6c6c;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-upload-copy {
+  color: #6c6c6c;
+  font-size: 13px;
+  line-height: 18px;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-upload-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #153a7a;
+  color: #153a7a;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.activity-inline-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.activity-inline-inputs-slim {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.activity-range-separator {
+  color: #7b86a0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.activity-youtube-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.activity-youtube-preview img {
+  width: min(220px, 100%);
+  border-radius: 8px;
+  background: #e7ecf5;
+}
+
+.activity-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.activity-chip {
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid #d7dde8;
+  background: #fff;
+  color: #5b6b8b;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.activity-chip-pill {
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 8px 16px;
+}
+
+.activity-category-chip {
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 8px 16px;
+}
+
+.activity-chip-active {
+  border-color: #1f3b82;
+  background: #eaf0ff;
+  color: #153a7a;
+}
+
+.activity-chip-error {
+  border-color: #ef4444;
+}
+
+.activity-energy-chip-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.activity-energy-star-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.activity-two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.activity-group-size-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activity-group-size-input {
+  width: 78px;
+  height: 40px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 10px;
+  color: #0f172a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+}
+
+.activity-checkbox-row-spaced {
+  margin-top: 14px;
+}
+
+.activity-overview-bottom-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.activity-overview-environment-column {
+  flex: 1;
+  width: 100%;
+}
+
+.activity-overview-setup-column {
+  width: 220px;
+}
+
+.activity-checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #4d5f7f;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+}
+
+.activity-facilitate-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.activity-tab-container {
+  width: 100%;
+  display: flex;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.activity-tab {
+  flex: 1;
+  border: 0;
+  border-right: 1px solid #d9d9d9;
+  background: #f3f3f3;
+  color: #6b7280;
+  padding: 8px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.activity-tab:last-child {
+  border-right: 0;
+}
+
+.activity-tab-active {
+  background: #ffffff;
+  color: #153a7a;
+}
+
+.activity-details-container {
+  width: 100%;
+  margin-top: 28px;
+  display: grid;
+  gap: 24px;
+}
+
+.activity-guided-item-group {
+  display: grid;
+  gap: 10px;
+}
+
+.activity-guided-item-label {
+  margin: 0;
+  color: #153a7a;
+  font-family: "Instrument Sans Bold", "Instrument Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.activity-guided-item-row,
+.activity-material-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-guided-action-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.activity-icon-button,
+.activity-delete-section-button {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.activity-icon-button img,
+.activity-delete-section-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.activity-icon-button-outline {
+  border: 1px solid #1f4aa5;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.activity-icon-spacer {
+  width: 40px;
+  height: 40px;
+}
+
+.activity-tag-list {
+  display: grid;
+  gap: 12px;
+}
+
+.activity-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-tag-value-box {
+  flex: 1;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+}
+
+.activity-add-section-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #153a7a;
+  background: #ffffff;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.activity-section-editor-card {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  padding: 24px;
+  background: #ffffff;
+  display: grid;
+  gap: 16px;
+}
+
+.activity-section-editor-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.activity-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.activity-editor-state {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.activity-editor-state h1 {
+  margin: 0 0 12px;
+  color: #153a7a;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.activity-editor-state p {
+  margin: 0 0 16px;
+  color: #5f6b85;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.activity-grade-rail-container {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+.activity-grade-rail {
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #2e4a8a;
+}
+
+.activity-grade-rail-error {
+  border-color: #ef4444;
+}
+
+.activity-grade-selected-rail {
+  position: absolute;
+  top: 8px;
+  height: 6px;
+  border-radius: 999px;
+  background: #2e4a8a;
+}
+
+.activity-grade-selected-rail-error {
+  background: #ef4444;
+}
+
+.activity-grade-handle {
+  position: absolute;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 3px solid #2e4a8a;
+  background: #ffffff;
+  cursor: grab;
+  padding: 0;
+}
+
+.activity-grade-handle-error {
+  border-color: #ef4444;
+}
+
+.activity-grade-tick-label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 11px;
+}
+
+.activity-grade-tick-label {
+  color: #4b649d;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.activity-modal-open {
+  overflow: hidden;
+}
+
+.activity-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.activity-preview-shell {
+  width: min(1000px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  background: #ffffff;
+  padding: 40px;
+  display: grid;
+  justify-items: center;
+}
+
+.activity-preview-title {
+  margin: 0;
+  color: #153a7a;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 700;
+  text-align: center;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+}
+
+.activity-preview-subtitle {
+  margin: 22px 0 14px;
+  color: #909090;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 10px;
+  font-style: normal;
+  text-align: center;
+}
+
+.activity-preview-phone-wrapper {
+  position: relative;
+  width: min(500px, 100%);
+  aspect-ratio: 300 / 550;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-preview-phone-screen {
+  position: absolute;
+  top: 2.6%;
+  right: 3.2%;
+  bottom: 2.6%;
+  left: 3.2%;
+  border-radius: 54px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1;
+  background: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.activity-preview-phone-screen::-webkit-scrollbar {
+  display: none;
+}
+
+.activity-preview-phone-frame-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.activity-preview-hero-card {
+  position: relative;
+  min-height: 286px;
+  overflow: hidden;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  background: #dde7f8;
+}
+
+.activity-preview-hero-image,
+.activity-preview-hero-placeholder {
+  width: 100%;
+  height: 286px;
+  object-fit: cover;
+}
+
+.activity-preview-hero-placeholder {
+  background: #dce5f4;
+}
+
+.activity-preview-hero-overlay {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+}
+
+.activity-preview-tutorial-pill {
+  min-height: 28px;
+  padding: 8px 16px;
+  border-radius: 63px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.12);
+}
+
+.activity-preview-tutorial-pill img {
+  width: 13px;
+  height: 13px;
+}
+
+.activity-preview-tutorial-pill span {
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 15px;
+}
+
+.activity-preview-content-card {
+  background: #ffffff;
+  margin-top: -14px;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  padding: 18px 22px 18px;
+}
+
+.activity-preview-top-row,
+.activity-preview-action-row,
+.activity-preview-category-row,
+.activity-preview-tag-row,
+.activity-preview-metric-row,
+.activity-preview-sel-tag-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.activity-preview-top-row {
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.activity-preview-action-button {
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.activity-preview-action-button img {
+  width: 15px;
+  height: 15px;
+}
+
+.activity-preview-category-chip {
+  background: #10b981;
+  border-radius: 5.028px;
+  padding: 5px 14px;
+  color: #ffffff;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 6.285px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%;
+  letter-spacing: 0.126px;
+}
+
+.activity-preview-activity-title {
+  margin: 0 0 10px;
+  color: #153a7a;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 28px;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+}
+
+.activity-preview-metric-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 8.799px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.activity-preview-metric-item img {
+  width: 16px;
+  height: 16px;
+}
+
+.activity-preview-dot {
+  color: #153a7a;
+  font-size: 12px;
+}
+
+.activity-preview-description-text,
+.activity-preview-body-section-text,
+.activity-preview-list-item-text,
+.activity-preview-section-block-text {
+  margin: 0;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 8.799px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 13px;
+}
+
+.activity-preview-description-text {
+  margin-bottom: 12px;
+  line-height: 21px;
+}
+
+.activity-preview-energy-stars-row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.activity-preview-energy-stars-row img {
+  width: 16px;
+  height: 16px;
+}
+
+.activity-preview-chip {
+  border-radius: 25px;
+  border: 1px solid #ebebeb;
+  background: #ffffff;
+  padding: 6px 14px;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 7.542px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.activity-preview-body-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e3e8f0;
+}
+
+.activity-preview-body-section-no-border {
+  border-top: 0;
+}
+
+.activity-preview-body-section-title {
+  margin: 0 0 8px;
+  color: #153a7a;
+  font-size: 16.341px;
+  font-style: normal;
+  font-weight: 700;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+}
+
+.activity-preview-facilitate-tab-bar {
+  display: flex;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.activity-preview-facilitate-tab-wrap {
+  flex: 1;
+  display: flex;
+}
+
+.activity-preview-facilitate-tab {
+  flex: 1;
+  height: 23px;
+  border: 0;
+  background: #f3f3f3;
+  color: #6c6c6c;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.activity-preview-facilitate-tab-active {
+  background: #ffffff;
+  color: #153a7a;
+}
+
+.activity-preview-facilitate-tab-divider {
+  width: 1px;
+  background: #e2e7f0;
+}
+
+.activity-preview-tab-card {
+  margin-top: 10px;
+  border: 1px solid #d8dee9;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px 16px;
+}
+
+.activity-preview-list-group {
+  display: grid;
+  gap: 18px;
+}
+
+.activity-preview-list-item-label,
+.activity-preview-section-block-title {
+  margin: 0 0 8px;
+  color: #153a7a;
+  font-size: 12.57px;
+  font-style: normal;
+  font-weight: 900;
+  font-family: "League Spartan", "Instrument Sans", sans-serif;
+}
+
+.activity-preview-material-block {
+  display: grid;
+  gap: 10px;
+}
+
+.activity-preview-material-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-preview-material-checkbox {
+  display: block;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #153a7a;
+  background: #ffffff;
+}
+
+.activity-preview-sel-tag-chip {
+  background: #153a7a;
+  border-radius: 40px;
+  padding: 4px 12px;
+  color: #ffffff;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 7.54px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.activity-preview-actions-row {
+  margin-top: 28px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .activity-page {
+    padding: 24px 16px 40px;
+  }
+
+  .activity-editor-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .activity-editor-actions,
+  .activity-editor-footer,
+  .activity-facilitate-header,
+  .activity-preview-actions-row {
+    width: 100%;
+  }
+
+  .activity-two-column-grid,
+  .activity-inline-inputs,
+  .activity-inline-inputs-slim {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-overview-bottom-row {
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .activity-overview-setup-column {
+    width: 100%;
+  }
+
+  .activity-tab-container {
+    flex-wrap: wrap;
+  }
+
+  .activity-preview-shell {
+    padding: 24px 16px;
+  }
+}
