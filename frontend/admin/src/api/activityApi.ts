@@ -1,8 +1,10 @@
-const viteEnv = (import.meta as ImportMeta & {
-  env?: {
-    VITE_API_BASE_URL?: string;
-  };
-}).env;
+const viteEnv = (
+  import.meta as ImportMeta & {
+    env?: {
+      VITE_API_BASE_URL?: string;
+    };
+  }
+).env;
 
 export const ACTIVITY_API_BASE_URL = viteEnv?.VITE_API_BASE_URL ?? "";
 export const ACTIVITY_API_URL = `${ACTIVITY_API_BASE_URL}/api/activities`;
