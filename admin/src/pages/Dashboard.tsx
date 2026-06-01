@@ -124,7 +124,7 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts and to determine if there are any activities at all)
+  const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts)
   const [categoryCounts, setCategoryCounts] =
     useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
@@ -138,6 +138,8 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState<
     "All" | "Draft" | "Published"
   >("All");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
 
   useEffect(() => {
     const getActivityData = async () => {
@@ -183,6 +185,7 @@ export default function Dashboard() {
       } else {
         console.error("Failed to fetch activities:", activitiesResult.error);
       }
+      setIsLoading(false);
     };
     getActivityData();
   }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
@@ -205,6 +208,7 @@ export default function Dashboard() {
         setTrueTotalActivities(activityStatsResult.data.total);
         setCategoryCounts(counts);
       }
+      setIsStatsLoading(false);
     };
     getActivityStatsData();
   }, []);
@@ -309,260 +313,280 @@ export default function Dashboard() {
   const hasAppliedFilters = Object.keys(appliedFilters).length > 0;
 
   return (
-    <div style={{ background: "#F9F9F9", minHeight: "100vh" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        background: "#F9F9F9",
+        minHeight: "100dvh",
+      }}
+    >
       <NavBar />
-      <div className="dashboard-container">
-        <div className="header-and-category-cards-container">
-          <div className="header-container">
-            <p className="header-text">Activities Dashboard</p>
-            <div className="header-buttons-container">
-              <Button
-                icon={MailingListIcon}
-                variant="secondary-left"
-                onClick={() => {
-                  window.location.href = "/mailing-list";
-                }}
-              >
-                Mailing List
-              </Button>
-              <Button icon={AddIcon}>Create New Activity</Button>
-            </div>
-          </div>
-          <div className="category-cards-container">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category}
-                category={category}
-                numActivities={categoryCounts ? categoryCounts[category] : 0}
-                totalActivities={trueTotalActivities}
-              />
-            ))}
-          </div>
-
-          <div className="search-input-container" style={{ display: "none" }}>
-            {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
-            <img src={SearchIcon} className="search-input-icon" alt="Search" />
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search activities"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="search-container">
-            <SearchBar
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search activities"
-            />
-          </div>
-
-          <div className="filter-row">
-            {/* Toggle tabs for All / Draft / Published */}
-            <div className="status-tabs-container">
-              {(["All", "Draft", "Published"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  className={`status-tab ${statusFilter === tab ? "active" : ""}`}
-                  onClick={() => handleStatusFilterChange(tab)}
+      {isLoading || isStatsLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <p className="loading-text">Loading...</p>
+        </div>
+      ) : (
+        <div className="dashboard-container">
+          <div className="header-and-category-cards-container">
+            <div className="header-container">
+              <p className="header-text">Activities Dashboard</p>
+              <div className="header-buttons-container">
+                <Button
+                  icon={MailingListIcon}
+                  variant="secondary-left"
+                  onClick={() => {
+                    window.location.href = "/mailing-list";
+                  }}
                 >
-                  {tab}
-                </button>
+                  Mailing List
+                </Button>
+                <Button icon={AddIcon}>Create New Activity</Button>
+              </div>
+            </div>
+            <div className="category-cards-container">
+              {categories.map((category) => (
+                <CategoryCard
+                  key={category}
+                  category={category}
+                  numActivities={categoryCounts ? categoryCounts[category] : 0}
+                  totalActivities={trueTotalActivities}
+                />
               ))}
             </div>
 
-            <div className="sort-filter-actions">
-              <div className="dropdown-control">
-                <button
-                  className={`sort-btn ${
-                    isSortDropdownOpen || sort !== "-createdAt" ? "active" : ""
-                  } ${activities.length === 0 ? "empty" : ""}`}
-                  onClick={toggleSortDropdown}
-                  aria-expanded={isSortDropdownOpen}
-                  aria-haspopup="menu"
-                  disabled={activities.length === 0}
-                >
-                  Sort
-                  <svg
-                    width="12"
-                    height="8"
-                    viewBox="0 0 12 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
+            <div className="search-input-container" style={{ display: "none" }}>
+              {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
+              <img
+                src={SearchIcon}
+                className="search-input-icon"
+                alt="Search"
+              />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search activities"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <div className="search-container">
+              <SearchBar
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search activities"
+              />
+            </div>
+
+            <div className="filter-row">
+              {/* Toggle tabs for All / Draft / Published */}
+              <div className="status-tabs-container">
+                {(["All", "Draft", "Published"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    className={`status-tab ${statusFilter === tab ? "active" : ""}`}
+                    onClick={() => handleStatusFilterChange(tab)}
                   >
-                    <path
-                      d="M5.99837 7.16667L11.8317 0.5H0.165039L5.99837 7.16667Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
-                {isSortDropdownOpen && (
-                  <div className="sort-dropdown" role="menu">
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={`sort-option ${
-                          sort === option.value ? "selected" : ""
-                        }`}
-                        role="menuitem"
-                        onClick={() => handleSortChange(option.value)}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                    {tab}
+                  </button>
+                ))}
               </div>
-              <div className="dropdown-control">
-                <button
-                  className={`filter-btn ${
-                    isFilterDropdownOpen || hasAppliedFilters ? "active" : ""
-                  } ${activities.length === 0 && !hasAppliedFilters ? "empty" : ""}`}
-                  onClick={toggleFilterDropdown}
-                  aria-expanded={isFilterDropdownOpen}
-                  aria-haspopup="dialog"
-                  disabled={activities.length === 0 && !hasAppliedFilters}
-                >
-                  Filter
-                  <svg
-                    width="13"
-                    height="16"
-                    viewBox="0 0 13 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
+
+              <div className="sort-filter-actions">
+                <div className="dropdown-control">
+                  <button
+                    className={`sort-btn ${
+                      isSortDropdownOpen || sort !== "-createdAt"
+                        ? "active"
+                        : ""
+                    } ${activities.length === 0 ? "empty" : ""}`}
+                    onClick={toggleSortDropdown}
+                    aria-expanded={isSortDropdownOpen}
+                    aria-haspopup="menu"
+                    disabled={activities.length === 0}
                   >
-                    <path
-                      d="M0.5 1H12.5L7.5 8.5V13.5L5.5 15V8.5L0.5 1Z"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {isFilterDropdownOpen && (
-                  <div className="filters-dropdown" role="dialog">
-                    <div className="filters-dropdown-content">
-                      {filterSections.map((section) => (
-                        <div className="filter-section" key={section.label}>
-                          <p className="filter-section-title">
-                            {section.label}
-                          </p>
-                          {section.label === "Energy Level" ? (
-                            <div
-                              className="energy-filter-icons"
-                              aria-label="Energy level filters"
-                            >
-                              {[1, 2, 3].map((level) => (
-                                <button
-                                  key={level}
-                                  type="button"
-                                  className={`energy-filter-icon-btn ${
-                                    selectedEnergyLevel >= level
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    handleFilterChange(
-                                      "energyLevel",
-                                      section.options[level - 1],
-                                    )
-                                  }
-                                  aria-label={`Energy level ${level}`}
-                                  aria-pressed={selectedEnergyLevel === level}
-                                >
-                                  <img
-                                    src={
-                                      selectedEnergyLevel >= level
-                                        ? LightningIcon
-                                        : LightningUnselectedIcon
-                                    }
-                                    className="energy-filter-icon"
-                                    alt=""
-                                    aria-hidden="true"
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="filter-tags">
-                              {section.options.map((option) => (
-                                <button
-                                  key={option}
-                                  type="button"
-                                  className={`filter-tag ${
-                                    getFilterValues(
-                                      section.key as keyof DashboardFilters,
-                                    ).includes(option) ||
-                                    (section.key === "category" &&
-                                      option === "All" &&
-                                      !draftFilters.category?.length)
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    handleFilterChange(
-                                      section.key as keyof DashboardFilters,
-                                      option,
-                                    )
-                                  }
-                                >
-                                  {option}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                    Sort
+                    <svg
+                      width="12"
+                      height="8"
+                      viewBox="0 0 12 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5.99837 7.16667L11.8317 0.5H0.165039L5.99837 7.16667Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                  {isSortDropdownOpen && (
+                    <div className="sort-dropdown" role="menu">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`sort-option ${
+                            sort === option.value ? "selected" : ""
+                          }`}
+                          role="menuitem"
+                          onClick={() => handleSortChange(option.value)}
+                        >
+                          {option.label}
+                        </button>
                       ))}
                     </div>
-                    <div className="filters-footer">
-                      <button
-                        type="button"
-                        className="clear-filters-btn"
-                        onClick={clearFilters}
-                      >
-                        Reset All
-                      </button>
-                      <button
-                        type="button"
-                        className="apply-filters-btn"
-                        onClick={applyFilters}
-                      >
-                        Apply Filters
-                      </button>
+                  )}
+                </div>
+                <div className="dropdown-control">
+                  <button
+                    className={`filter-btn ${
+                      isFilterDropdownOpen || hasAppliedFilters ? "active" : ""
+                    } ${activities.length === 0 && !hasAppliedFilters ? "empty" : ""}`}
+                    onClick={toggleFilterDropdown}
+                    aria-expanded={isFilterDropdownOpen}
+                    aria-haspopup="dialog"
+                    disabled={activities.length === 0 && !hasAppliedFilters}
+                  >
+                    Filter
+                    <svg
+                      width="13"
+                      height="16"
+                      viewBox="0 0 13 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M0.5 1H12.5L7.5 8.5V13.5L5.5 15V8.5L0.5 1Z"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {isFilterDropdownOpen && (
+                    <div className="filters-dropdown" role="dialog">
+                      <div className="filters-dropdown-content">
+                        {filterSections.map((section) => (
+                          <div className="filter-section" key={section.label}>
+                            <p className="filter-section-title">
+                              {section.label}
+                            </p>
+                            {section.label === "Energy Level" ? (
+                              <div
+                                className="energy-filter-icons"
+                                aria-label="Energy level filters"
+                              >
+                                {[1, 2, 3].map((level) => (
+                                  <button
+                                    key={level}
+                                    type="button"
+                                    className={`energy-filter-icon-btn ${
+                                      selectedEnergyLevel >= level
+                                        ? "selected"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      handleFilterChange(
+                                        "energyLevel",
+                                        section.options[level - 1],
+                                      )
+                                    }
+                                    aria-label={`Energy level ${level}`}
+                                    aria-pressed={selectedEnergyLevel === level}
+                                  >
+                                    <img
+                                      src={
+                                        selectedEnergyLevel >= level
+                                          ? LightningIcon
+                                          : LightningUnselectedIcon
+                                      }
+                                      className="energy-filter-icon"
+                                      alt=""
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="filter-tags">
+                                {section.options.map((option) => (
+                                  <button
+                                    key={option}
+                                    type="button"
+                                    className={`filter-tag ${
+                                      getFilterValues(
+                                        section.key as keyof DashboardFilters,
+                                      ).includes(option) ||
+                                      (section.key === "category" &&
+                                        option === "All" &&
+                                        !draftFilters.category?.length)
+                                        ? "selected"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      handleFilterChange(
+                                        section.key as keyof DashboardFilters,
+                                        option,
+                                      )
+                                    }
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="filters-footer">
+                        <button
+                          type="button"
+                          className="clear-filters-btn"
+                          onClick={clearFilters}
+                        >
+                          Reset All
+                        </button>
+                        <button
+                          type="button"
+                          className="apply-filters-btn"
+                          onClick={applyFilters}
+                        >
+                          Apply Filters
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div
-          className="table-wrapper"
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
-          <DashboardTable
-            activities={activities}
-            onEditActivity={handleEditActivity}
+          <div
+            className="table-wrapper"
+            style={{
+              maxWidth: "1200px",
+              margin: "0 auto",
+              width: "100%",
+            }}
+          >
+            <DashboardTable
+              activities={activities}
+              onEditActivity={handleEditActivity}
+            />
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
           />
         </div>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      )}
     </div>
   );
 }
