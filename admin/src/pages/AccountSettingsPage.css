@@ -57,6 +57,28 @@
   color: #153a7a;
 }
 
+.settings-card__readonly {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  color: #374151;
+  background: #f8fafc;
+}
+
+.settings-card__hint {
+  margin: 8px 0 0;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .admin-email-list {
   list-style: none;
   margin: 0 0 24px;

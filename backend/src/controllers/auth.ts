@@ -23,14 +23,8 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  res.json({
-    user: {
-      id: authUser.userId,
-      email: authUser.email,
-      firstName: "",
-      lastName: "",
-      role: authUser.role,
-    },
+  res.status(403).json({
+    error: "This account is not authorized for admin access.",
   });
 }
 
@@ -61,14 +55,12 @@ export async function registerProfile(req: Request, res: Response): Promise<void
   }
 
   const userCount = await User.countDocuments();
-  if (userCount > 0) {
-    const allowed = await AllowedAdminEmail.findOne({ email });
-    if (!allowed) {
-      res.status(403).json({
-        error: "This email is not authorized to create an account. Contact your administrator.",
-      });
-      return;
-    }
+  const allowed = await AllowedAdminEmail.findOne({ email });
+  if (!allowed) {
+    res.status(403).json({
+      error: "This email is not authorized to create an account. Contact your administrator.",
+    });
+    return;
   }
 
   const role = userCount === 0 ? "super_admin" : "admin";

@@ -1,4 +1,5 @@
 import { getAuthToken } from "./auth";
+import { apiUrl } from "./baseUrl";
 
 const JSON_HEADERS = { "Content-Type": "application/json" } as const;
 
@@ -13,5 +14,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  return fetch(path, { ...init, headers });
+  return fetch(apiUrl(path), { ...init, headers });
 }
+
+export { apiUrl };

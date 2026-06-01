@@ -16,6 +16,7 @@ import {
 } from "firebase/auth";
 
 import { auth } from "../lib/firebase";
+import { apiUrl } from "./baseUrl";
 
 import type { User } from "../types/user";
 
@@ -79,28 +80,26 @@ function getFirebaseError(err: unknown, fallback: string): { code: string; messa
     };
   }
 
+  if (err instanceof Error) {
+    return { code: "", message: err.message || fallback };
+  }
+
   const code = (err as { code?: string }).code ?? "";
   return { code, message: firebaseAuthErrorMessage(code, fallback) };
 }
 
-function mapFirebaseUser(fbUser: FirebaseUser): User {
-  const displayName = fbUser.displayName?.trim() ?? "";
-  const parts = displayName.split(/\s+/).filter(Boolean);
-  const firstName = parts[0] ?? "";
-  const lastName = parts.slice(1).join(" ");
-
-  return {
-    id: fbUser.uid,
-    email: fbUser.email ?? "",
-    firstName,
-    lastName,
-    role: "admin",
-  };
-}
-
 async function buildSessionFromUser(fbUser: FirebaseUser): Promise<{ token: string; user: User }> {
   const token = await fbUser.getIdToken();
-  const user = mapFirebaseUser(fbUser);
+  const res = await fetch(apiUrl(`${AUTH_BASE}/me`), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = (await res.json().catch(() => ({}))) as { error?: string; user?: User };
+
+  if (!res.ok || !data.user) {
+    throw new Error(data.error ?? "This account is not authorized for admin access.");
+  }
+
+  const user = data.user;
   setAdminSession(token, user);
   return { token, user };
 }
@@ -148,7 +147,7 @@ export async function registerAdmin(input: RegisterInput): Promise<RegisterResul
     }
 
     const token = await firebaseUser.getIdToken();
-    const syncRes = await fetch(`${AUTH_BASE}/register`, {
+    const syncRes = await fetch(apiUrl(`${AUTH_BASE}/register`), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -323,26 +322,23 @@ export async function fetchCurrentUser(): Promise<User | null> {
 
   const token = await fbUser.getIdToken();
   try {
-    const res = await fetch(`${AUTH_BASE}/me`, {
+    const res = await fetch(apiUrl(`${AUTH_BASE}/me`), {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      const mapped = mapFirebaseUser(fbUser);
-      setAdminSession(token, mapped);
-      return mapped;
+      await clearAdminSession();
+      return null;
     }
     const data = (await res.json()) as { user?: User };
     if (!data.user) {
-      const mapped = mapFirebaseUser(fbUser);
-      setAdminSession(token, mapped);
-      return mapped;
+      await clearAdminSession();
+      return null;
     }
     setAdminSession(token, data.user);
     return data.user;
   } catch {
-    const mapped = mapFirebaseUser(fbUser);
-    setAdminSession(token, mapped);
-    return mapped;
+    await clearAdminSession();
+    return null;
   }
 }
 

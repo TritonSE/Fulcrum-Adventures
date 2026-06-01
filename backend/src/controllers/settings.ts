@@ -41,11 +41,10 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
   }
 
   const body = requestBody(req);
-  const email = normalizeEmail(body.email);
   const names = parseFullName(body.fullName);
 
-  if (!email || !names) {
-    res.status(400).json({ error: "A valid full name and email are required." });
+  if (!names) {
+    res.status(400).json({ error: "A valid full name is required." });
     return;
   }
 
@@ -53,15 +52,6 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
   if (!user) {
     res.status(401).json({ error: "Unauthorized" });
     return;
-  }
-
-  if (email !== user.email) {
-    const taken = await User.findOne({ email });
-    if (taken) {
-      res.status(409).json({ error: "An account with this email already exists." });
-      return;
-    }
-    user.email = email;
   }
 
   user.firstName = names.firstName;

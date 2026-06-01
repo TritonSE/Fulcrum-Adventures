@@ -8,11 +8,62 @@ export type Category =
 
 export type EnergyLevel = "Low" | "Medium" | "High";
 
-export type Environment = "Indoor" | "Outdoor";
+export type Environment = "Any Environment" | "Classroom" | "Field" | "Gym/MPR" | "Blacktop";
+
+export type Setup = "None" | "Required";
+
+export type ApiDuration = "5-15 min" | "15-30 min" | "30+ min";
+
+export type ActivityStatus = "Draft" | "Published" | "Archived";
 
 export type Range = {
   min: number;
   max: number;
+};
+
+export type ApiGroupSize =
+  | {
+      anySize: true;
+      min?: number;
+      max?: number;
+    }
+  | {
+      anySize?: false;
+      min: number;
+      max: number;
+    };
+
+export type ApiAdditionalMedia = {
+  type: "image" | "video";
+  url: string;
+};
+
+export type ApiFacilitateSection = {
+  tabName: string;
+  content: string;
+};
+
+export type ApiActivity = {
+  _id: string;
+  title: string;
+  overview: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+  additionalMedia?: ApiAdditionalMedia[];
+  category: Category[];
+  gradeRange: Range;
+  groupSize: ApiGroupSize;
+  duration: ApiDuration;
+  energyLevel: EnergyLevel;
+  environment: Environment[];
+  setup: Setup;
+  objective?: string;
+  facilitateSections: ApiFacilitateSection[];
+  materials: string[];
+  selTags: string[];
+  status: ActivityStatus;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PrepTab = {
@@ -33,6 +84,7 @@ export type DebriefTab = {
   questions: string[];
 };
 
+// Structure for additional custom tabs (Safety, Variations, Pro-Tip, etc.)
 export type CustomTab = {
   sections: CustomSection[];
 };
@@ -48,16 +100,14 @@ export type Activity = {
 
   /** Range endpoints; 0 means Kindergarten ("K"). */
   gradeLevel: Range;
-  groupSize: Range;
+  groupSize: Range & { anySize?: boolean };
   duration: Range; // In minutes
-
-  category: Category;
+  category?: Category;
+  categories?: Category[];
   description: string;
   energyLevel: EnergyLevel;
   environment: Environment;
-
   materials: string[];
-
   isSaved?: boolean;
   imageUrl?: string;
   hasTutorial?: boolean;
@@ -74,4 +124,8 @@ export type Activity = {
   selTags?: string[];
   isCompleted?: boolean;
   isDownloaded?: boolean;
+  isHistory?: boolean;
+  isPlaylist?: boolean;
+  lastViewedAt?: number;
+  videoUrl?: string;
 };

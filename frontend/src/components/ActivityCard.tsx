@@ -4,10 +4,14 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../assets/icons/bookmark.svg";
 import ClockIcon from "../../assets/icons/clock.svg";
-import GraduationCapIcon from "../../assets/icons/graduation-cap.svg";
 import PeopleIcon from "../../assets/icons/people.svg";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../constants/activityColors";
-import { formatDuration, formatGradeLevel, formatGroupSize } from "../utils/textUtils";
+import {
+  formatDuration,
+  formatGradeLevel,
+  formatGroupSize,
+  getSortedCategories,
+} from "../utils/textUtils";
 
 import { styles } from "./ActivityCard.styles";
 
@@ -17,9 +21,22 @@ type ActivityCardProps = {
   activity: Activity;
   onPress?: () => void;
   onSaveToggle?: (id: string) => void;
+  contextCategory?: string;
 };
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, onSaveToggle }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({
+  activity,
+  onPress,
+  onSaveToggle,
+  contextCategory,
+}) => {
+  const displayCategories = getSortedCategories(
+    activity.categories || activity.category,
+    contextCategory,
+  );
+  const primaryCategory = displayCategories[0];
+  const extraCount = displayCategories.length - 1;
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.imageContainer}>
@@ -32,18 +49,12 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
 
       <View style={styles.content}>
         <View style={styles.headerContent}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
             {activity.title}
           </Text>
 
           <View style={styles.metaContainer}>
-            <View style={styles.metaItem}>
-              <View style={styles.iconWrapper}>
-                <GraduationCapIcon />
-              </View>
-              <Text style={styles.metaText}>{formatGradeLevel(activity.gradeLevel)}</Text>
-            </View>
-
+            <Text style={styles.metaText}>{formatGradeLevel(activity.gradeLevel)}</Text>
             <Text style={styles.metaDivider}>•</Text>
 
             <View style={styles.metaItem}>
@@ -65,17 +76,33 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onPress, o
         </View>
 
         <View style={styles.footer}>
-          <View
-            style={[
-              styles.categoryTag,
-              {
-                backgroundColor: CATEGORY_COLORS[activity.category] || DEFAULT_CATEGORY_COLOR,
-              },
-            ]}
-          >
-            <Text style={styles.categoryText}>{activity.category}</Text>
+          {/* THE TAGS CONTAINER */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {/* Tag 1: The Primary Category */}
+            {primaryCategory && (
+              <View
+                style={[
+                  styles.categoryTag,
+                  {
+                    backgroundColor:
+                      CATEGORY_COLORS[primaryCategory as keyof typeof CATEGORY_COLORS] ||
+                      DEFAULT_CATEGORY_COLOR,
+                  },
+                ]}
+              >
+                <Text style={styles.categoryText}>{primaryCategory}</Text>
+              </View>
+            )}
+
+            {/* Tag 2: The +1 / +2 Grey Bubble */}
+            {extraCount > 0 && (
+              <View style={styles.extraTag}>
+                <Text style={styles.extraTagText}>+{extraCount}</Text>
+              </View>
+            )}
           </View>
 
+          {/* BOOKMARK BUTTON */}
           <TouchableOpacity
             style={styles.bookmarkButton}
             onPress={(e) => {

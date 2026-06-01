@@ -5,7 +5,7 @@ function requireEnv(name: keyof ImportMetaEnv): string {
   const value = import.meta.env[name];
   if (!value) {
     throw new Error(
-      `Missing ${name}. Add it to backend/.env and restart the admin dev server (npm run dev).`,
+      `Missing ${name}. Add it to admin/.env or the admin Vercel environment variables, then restart the admin dev server.`,
     );
   }
   return value;

@@ -65,12 +65,12 @@ export function AccountSettingsPage() {
 
   async function onSaveProfile(e: FormEvent) {
     e.preventDefault();
-    if (!fullName.trim() || !isValidEmail(email)) {
-      setToast({ message: "Enter a valid full name and email.", variant: "error" });
+    if (!fullName.trim()) {
+      setToast({ message: "Enter a valid full name.", variant: "error" });
       return;
     }
     setProfileSaving(true);
-    const result = await updateProfile({ fullName, email });
+    const result = await updateProfile({ fullName });
     setProfileSaving(false);
     if (!result.ok) {
       setToast({ message: result.message, variant: "error" });
@@ -143,7 +143,7 @@ export function AccountSettingsPage() {
 
         <form className="settings-card" onSubmit={onSaveProfile}>
           <h2 className="settings-card__title">Profile Information</h2>
-          <p className="settings-card__subtitle">Update your name and email address</p>
+          <p className="settings-card__subtitle">Update your display name</p>
 
           <div className="settings-card__field">
             <label className="settings-card__label" htmlFor="settings-full-name">
@@ -161,13 +161,12 @@ export function AccountSettingsPage() {
             <label className="settings-card__label" htmlFor="settings-email">
               Email
             </label>
-            <TextField
-              id="settings-email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              placeholder="Enter email"
-            />
+            <div id="settings-email" className="settings-card__readonly">
+              {email || "No email available"}
+            </div>
+            <p className="settings-card__hint">
+              Email changes must be made in Firebase Authentication.
+            </p>
           </div>
 
           <Button type="submit" icon={false} disabled={profileSaving}>

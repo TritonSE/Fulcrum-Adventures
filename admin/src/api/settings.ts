@@ -14,14 +14,12 @@ async function parseError(res: Response, fallback: string): Promise<string> {
 
 export async function updateProfile(input: {
   fullName: string;
-  email: string;
 }): Promise<SettingsResult<{ user: User; message: string }>> {
   try {
     const res = await apiFetch(`${AUTH_BASE}/me`, {
       method: "PATCH",
       body: JSON.stringify({
         fullName: input.fullName.trim(),
-        email: input.email.trim(),
       }),
     });
     if (!res.ok) {
