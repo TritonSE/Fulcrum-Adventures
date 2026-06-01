@@ -1,7 +1,6 @@
 import path from "node:path";
 
 import cors from "cors";
-import dotenv from "dotenv"; // This loads the .env file into process.env
 import express from "express";
 
 import { connectDb } from "./db";
@@ -9,21 +8,6 @@ import activityRoutes from "./routes/activity";
 import emailRoutes from "./routes/email";
 
 import type { NextFunction, Request, Response } from "express";
-dotenv.config();
-
-const allowedOrigins = [
-  process.env.FRONTEND_ORIGIN,
-  ...(process.env.FRONTEND_ORIGINS ?? "").split(","),
-]
-  .map((origin) => origin?.trim())
-  .filter((origin): origin is string => Boolean(origin));
-
-const adminPreviewOriginPattern =
-  /^https:\/\/fulcrum-admin-git-[a-z0-9-]+-philip-chens-projects\.vercel\.app$/;
-
-function isAllowedOrigin(origin: string): boolean {
-  return allowedOrigins.includes(origin) || adminPreviewOriginPattern.test(origin);
-}
 
 const allowedOrigins = [
   process.env.FRONTEND_ORIGIN,
