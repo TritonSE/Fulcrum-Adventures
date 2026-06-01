@@ -24,8 +24,8 @@ import PhoneFrameImageUrl from "../assets/378_rectangle_extracted.png";
 import GraduationCapIconUrl from "../assets/graduation-cap.svg";
 import PageIconUrl from "../assets/PageIcon.svg";
 import PeopleIconUrl from "../assets/people.svg";
-import UploadTabIconUrl from "../../src/assets/upload.svg";
-import VideoTabIconUrl from "../../src/assets/video.svg";
+import UploadTabIconUrl from "../assets/upload.svg";
+import VideoTabIconUrl from "../assets/video.svg";
 import VectorIconUrl from "../assets/Vector.svg";
 import YellowEnergyStarIconUrl from "../assets/yellowenergystar.svg";
 import { NavBar } from "../components/NavBar";
@@ -781,6 +781,9 @@ const parseActivityTabs = (activity: ActivityDetail): ActivityTab[] => {
 
 const createFormStateFromActivity = (activity: ActivityDetail): FormState => {
   const environments = (activity.environment ?? []).filter((item) => item !== "Any Environment");
+  const existingVideoThumbnail = activity.videoUrl && activity.thumbnailUrl
+    ? activity.thumbnailUrl
+    : null;
 
   return {
     title: activity.title ?? "",
@@ -799,8 +802,8 @@ const createFormStateFromActivity = (activity: ActivityDetail): FormState => {
     objective: activity.objective ?? "",
     selTags: activity.selTags ?? [],
     videoUrl: activity.videoUrl ?? "",
-    videoThumbnailUrl: null,
-    videoThumbnailStatus: "idle",
+    videoThumbnailUrl: existingVideoThumbnail,
+    videoThumbnailStatus: existingVideoThumbnail ? "ready" : "idle",
     videoThumbnailError: null,
   };
 };
@@ -999,8 +1002,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       setForm((current) => ({
         ...current,
         videoThumbnailUrl: null,
-        videoThumbnailStatus: "idle",
-        videoThumbnailError: null,
+        videoThumbnailStatus: "error",
+        videoThumbnailError: "Please enter a valid YouTube URL.",
       }));
       return;
     }
@@ -1020,8 +1023,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       setForm((current) => ({
         ...current,
         videoThumbnailUrl: null,
-        videoThumbnailStatus: "idle",
-        videoThumbnailError: null,
+        videoThumbnailStatus: "error",
+        videoThumbnailError: "We couldn't find a usable YouTube thumbnail for that link.",
       }));
       return;
     }
@@ -1038,8 +1041,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     setForm((current) => ({
       ...current,
       videoThumbnailUrl: null,
-      videoThumbnailStatus: "idle",
-      videoThumbnailError: null,
+      videoThumbnailStatus: "error",
+      videoThumbnailError: "We couldn't find a usable YouTube thumbnail for that link.",
     }));
   };
 
@@ -1195,27 +1198,18 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     }));
   };
 
-  const validate = () => {
+  const validate = (targetStatus: ActivityStatus = "Published") => {
     const nextErrors: FormErrors = {};
     const prepTab = tabs.find((tab) => tab.kind === "prep");
     const playTab = tabs.find((tab) => tab.kind === "play");
     const debriefTab = tabs.find((tab) => tab.kind === "debrief");
     const sectionErrors: Record<string, { title?: string; content?: string }> = {};
 
-    if (!thumbnailPreviewUrl && !form.videoThumbnailUrl) {
-      nextErrors.thumbnail = "Please upload either an image or a video frame";
-    }
     if (!form.title.trim()) nextErrors.title = "Please enter an activity title";
     if (!form.overview.trim()) nextErrors.overview = "Please enter an activity overview";
     if (form.categories.length === 0) nextErrors.categories = "Please select at least one category";
     if (!form.duration) nextErrors.duration = "Please select a duration";
     if (!form.energyLevel) nextErrors.energyLevel = "Please select an energy level";
-    if (!form.setup) nextErrors.setup = "Please select whether the activity needs props";
-    if (!form.objective.trim()) nextErrors.objective = "Please enter an activity objective";
-    if (form.selTags.length === 0) nextErrors.selTags = "Please enter at least one SEL tag";
-    if (!form.anyEnvironment && form.environments.length === 0) {
-      nextErrors.environment = "Please select an environment or Any Environment";
-    }
     if (toGradeNumber(form.gradeMax) < toGradeNumber(form.gradeMin)) {
       nextErrors.grade = "Please select a valid grade range";
     }
@@ -1227,6 +1221,21 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       } else if (min < 1 || max < min) {
         nextErrors.groupSize = "Please enter a valid group size range";
       }
+    }
+
+    if (targetStatus === "Draft") {
+      setErrors(nextErrors);
+      return Object.keys(nextErrors).length === 0;
+    }
+
+    if (!thumbnailPreviewUrl && !form.videoThumbnailUrl) {
+      nextErrors.thumbnail = "Please upload either an image or a video frame";
+    }
+    if (!form.setup) nextErrors.setup = "Please select whether the activity needs props";
+    if (!form.objective.trim()) nextErrors.objective = "Please enter an activity objective";
+    if (form.selTags.length === 0) nextErrors.selTags = "Please enter at least one SEL tag";
+    if (!form.anyEnvironment && form.environments.length === 0) {
+      nextErrors.environment = "Please select an environment or Any Environment";
     }
 
     if (prepTab) {
@@ -1276,7 +1285,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
   const submit = async (targetStatus: ActivityStatus) => {
     if (isSubmitting) return;
-    if (targetStatus === "Published" && !validate()) return;
+    if (!validate(targetStatus)) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -1331,7 +1340,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   };
 
   const openPreview = () => {
-    if (!validate()) return;
+    if (!validate("Published")) return;
     setIsPreviewVisible(true);
   };
 
