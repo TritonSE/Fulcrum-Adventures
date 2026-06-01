@@ -1,4 +1,23 @@
-import type { AuthSession, User } from "../types/user";
+import { FirebaseError } from "firebase/app";
+import {
+  EmailAuthProvider,
+  confirmPasswordReset,
+  createUserWithEmailAndPassword,
+  deleteUser,
+  onAuthStateChanged,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  updateProfile,
+  verifyPasswordResetCode,
+  type User as FirebaseUser,
+} from "firebase/auth";
+
+import { auth } from "../lib/firebase";
+
+import type { User } from "../types/user";
 
 const TOKEN_KEY = "fulcrum_admin_token";
 const USER_KEY = "fulcrum_admin_user";
@@ -22,107 +41,239 @@ export type ForgotPasswordResult = { ok: true } | { ok: false; message: string }
 
 export type ResetPasswordResult = { ok: true } | { ok: false; message: string };
 
+let authReady = false;
+let authReadyPromise: Promise<void> | null = null;
+
+function firebaseAuthErrorMessage(code: string, fallback: string): string {
+  switch (code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+    case "auth/invalid-email":
+      return "Incorrect email or password.";
+    case "auth/email-already-in-use":
+      return "An account with this email already exists.";
+    case "auth/weak-password":
+      return "Password must be more than 6 characters.";
+    case "auth/operation-not-allowed":
+      return "Email/password sign-in is not enabled. In Firebase Console, open Authentication → Sign-in method and enable Email/Password.";
+    case "auth/invalid-api-key":
+    case "auth/app-not-authorized":
+      return "Firebase is misconfigured for this app. Check your API key, authorized domains, and restart the admin dev server.";
+    case "auth/expired-action-code":
+    case "auth/invalid-action-code":
+      return "Invalid or expired reset link.";
+    default:
+      return fallback;
+  }
+}
+
+function getFirebaseError(err: unknown, fallback: string): { code: string; message: string } {
+  if (err instanceof FirebaseError) {
+    if (import.meta.env.DEV) {
+      console.error("[auth]", err.code, err.message);
+    }
+    return {
+      code: err.code,
+      message: firebaseAuthErrorMessage(err.code, err.message || fallback),
+    };
+  }
+
+  const code = (err as { code?: string }).code ?? "";
+  return { code, message: firebaseAuthErrorMessage(code, fallback) };
+}
+
+function mapFirebaseUser(fbUser: FirebaseUser): User {
+  const displayName = fbUser.displayName?.trim() ?? "";
+  const parts = displayName.split(/\s+/).filter(Boolean);
+  const firstName = parts[0] ?? "";
+  const lastName = parts.slice(1).join(" ");
+
+  return {
+    id: fbUser.uid,
+    email: fbUser.email ?? "",
+    firstName,
+    lastName,
+    role: "admin",
+  };
+}
+
+async function buildSessionFromUser(fbUser: FirebaseUser): Promise<{ token: string; user: User }> {
+  const token = await fbUser.getIdToken();
+  const user = mapFirebaseUser(fbUser);
+  setAdminSession(token, user);
+  return { token, user };
+}
+
+export function waitForAuth(): Promise<void> {
+  if (authReady) {
+    return Promise.resolve();
+  }
+  if (!authReadyPromise) {
+    authReadyPromise = new Promise((resolve) => {
+      onAuthStateChanged(auth, () => {
+        authReady = true;
+        resolve();
+      });
+    });
+  }
+  return authReadyPromise;
+}
+
 export async function loginAdmin(email: string, password: string): Promise<LoginResult> {
   try {
-    const res = await fetch(`${AUTH_BASE}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), password }),
-    });
-    const data = (await res.json().catch(() => ({}))) as {
-      error?: string;
-      token?: string;
-      user?: User;
-    };
-    if (!res.ok || !data.token || !data.user) {
-      return {
-        ok: false,
-        message: data.error ?? "Incorrect email or password.",
-      };
-    }
-    return { ok: true, token: data.token, user: data.user };
-  } catch {
-    return {
-      ok: false,
-      message: "Incorrect email or password.",
-    };
+    const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+    const session = await buildSessionFromUser(credential.user);
+    return { ok: true, ...session };
+  } catch (err) {
+    const { message } = getFirebaseError(err, "Incorrect email or password.");
+    return { ok: false, message };
   }
 }
 
 export async function registerAdmin(input: RegisterInput): Promise<RegisterResult> {
+  let firebaseUser: FirebaseUser | null = null;
+
   try {
-    const res = await fetch(`${AUTH_BASE}/register`, {
+    const credential = await createUserWithEmailAndPassword(
+      auth,
+      input.email.trim(),
+      input.password,
+    );
+    firebaseUser = credential.user;
+
+    const displayName = `${input.firstName.trim()} ${input.lastName.trim()}`.trim();
+    if (displayName) {
+      await updateProfile(firebaseUser, { displayName });
+    }
+
+    const token = await firebaseUser.getIdToken();
+    const syncRes = await fetch(`${AUTH_BASE}/register`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         firstName: input.firstName.trim(),
         lastName: input.lastName.trim(),
-        email: input.email.trim(),
-        password: input.password,
       }),
     });
-    const data = (await res.json().catch(() => ({}))) as {
+
+    const syncData = (await syncRes.json().catch(() => ({}))) as {
       error?: string;
-      token?: string;
       user?: User;
     };
-    if (!res.ok || !data.token || !data.user) {
-      const message = data.error ?? "Unable to create account.";
-      const field =
-        res.status === 400 && message.toLowerCase().includes("password")
-          ? "password"
-          : undefined;
-      return { ok: false, message, field };
+
+    if (!syncRes.ok || !syncData.user) {
+      try {
+        await deleteUser(firebaseUser);
+      } catch {
+        // ignore cleanup failure
+      }
+      const message = syncData.error ?? "Unable to create account.";
+      return { ok: false, message };
     }
-    return { ok: true, token: data.token, user: data.user };
-  } catch {
-    return { ok: false, message: "Unable to create account." };
+
+    setAdminSession(token, syncData.user);
+    return { ok: true, token, user: syncData.user };
+  } catch (err) {
+    if (firebaseUser) {
+      try {
+        await deleteUser(firebaseUser);
+      } catch {
+        // ignore cleanup failure
+      }
+    }
+    const { code, message } = getFirebaseError(err, "Unable to create account.");
+    const field = code === "auth/weak-password" ? "password" : undefined;
+    return { ok: false, message, field };
   }
+}
+
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+export type ChangePasswordResult = { ok: true } | { ok: false; message: string };
+
+export async function changePasswordAdmin(
+  input: ChangePasswordInput,
+): Promise<ChangePasswordResult> {
+  if (input.newPassword !== input.confirmPassword) {
+    return { ok: false, message: "New password and confirmation do not match." };
+  }
+
+  if (input.newPassword.length <= 6) {
+    return { ok: false, message: "Password must be more than 6 characters." };
+  }
+
+  const user = auth.currentUser;
+  if (!user?.email) {
+    return { ok: false, message: "You must be signed in to change your password." };
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(user.email, input.currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, input.newPassword);
+    return { ok: true };
+  } catch (err) {
+    const { message } = getFirebaseError(err, "Unable to change password.");
+    return { ok: false, message };
+  }
+}
+
+function resetPasswordContinueUrl(): string {
+  return `${window.location.origin}/reset-password?resetComplete=true`;
 }
 
 export async function forgotPasswordAdmin(email: string): Promise<ForgotPasswordResult> {
   try {
-    const res = await fetch(`${AUTH_BASE}/forgot-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim() }),
+    await sendPasswordResetEmail(auth, email.trim(), {
+      // After Firebase's reset UI saves, user is redirected here (confirmation).
+      // With handleCodeInApp, the email link can also open /reset-password?oobCode=… (our form).
+      url: resetPasswordContinueUrl(),
+      handleCodeInApp: true,
     });
-    if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      return {
-        ok: false,
-        message: data.error ?? "Unable to send reset email.",
-      };
-    }
     return { ok: true };
-  } catch {
-    return { ok: false, message: "Unable to send reset email." };
+  } catch (err) {
+    const { message } = getFirebaseError(err, "Unable to send reset email.");
+    return { ok: false, message };
+  }
+}
+
+export function isPasswordResetCompleteFromUrl(searchParams: URLSearchParams): boolean {
+  return (
+    searchParams.get("resetComplete") === "true" ||
+    searchParams.get("reset") === "success"
+  );
+}
+
+export async function verifyPasswordResetOobCode(
+  oobCode: string,
+): Promise<{ ok: true; email: string } | { ok: false; message: string }> {
+  try {
+    const email = await verifyPasswordResetCode(auth, oobCode);
+    return { ok: true, email };
+  } catch (err) {
+    const { message } = getFirebaseError(err, "Invalid or expired reset link.");
+    return { ok: false, message };
   }
 }
 
 export async function resetPasswordAdmin(
-  token: string,
+  oobCode: string,
   password: string,
 ): Promise<ResetPasswordResult> {
   try {
-    const res = await fetch(`${AUTH_BASE}/reset-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password }),
-    });
-    const data = (await res.json().catch(() => ({}))) as {
-      error?: string;
-      message?: string;
-    };
-    if (!res.ok) {
-      return {
-        ok: false,
-        message: data.error ?? "Unable to reset password.",
-      };
-    }
+    await confirmPasswordReset(auth, oobCode, password);
     return { ok: true };
-  } catch {
-    return { ok: false, message: "Unable to reset password." };
+  } catch (err) {
+    const { message } = getFirebaseError(err, "Unable to reset password.");
+    return { ok: false, message };
   }
 }
 
@@ -131,13 +282,19 @@ export function setAdminSession(token: string, user: User): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-export function getAuthToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+export async function getAuthToken(): Promise<string | null> {
+  const user = auth.currentUser;
+  if (!user) {
+    return null;
+  }
+  return user.getIdToken();
 }
 
 export function getStoredUser(): User | null {
   const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   try {
     return JSON.parse(raw) as User;
   } catch {
@@ -145,58 +302,48 @@ export function getStoredUser(): User | null {
   }
 }
 
-export function clearAdminSession(): void {
+export async function clearAdminSession(): Promise<void> {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-}
-
-function isTokenExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1] ?? "")) as {
-      exp?: number;
-    };
-    if (typeof payload.exp !== "number") return true;
-    return payload.exp * 1000 < Date.now();
-  } catch {
-    return true;
+  if (auth.currentUser) {
+    await signOut(auth);
   }
 }
 
 export function isAdminAuthenticated(): boolean {
-  const token = getAuthToken();
-  if (!token) return false;
-  if (isTokenExpired(token)) {
-    clearAdminSession();
-    return false;
-  }
-  return true;
+  return auth.currentUser !== null;
 }
 
 export async function fetchCurrentUser(): Promise<User | null> {
-  const token = getAuthToken();
-  if (!token || isTokenExpired(token)) {
-    clearAdminSession();
+  const fbUser = auth.currentUser;
+  if (!fbUser) {
+    await clearAdminSession();
     return null;
   }
 
+  const token = await fbUser.getIdToken();
   try {
     const res = await fetch(`${AUTH_BASE}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      clearAdminSession();
-      return null;
+      const mapped = mapFirebaseUser(fbUser);
+      setAdminSession(token, mapped);
+      return mapped;
     }
     const data = (await res.json()) as { user?: User };
     if (!data.user) {
-      clearAdminSession();
-      return null;
+      const mapped = mapFirebaseUser(fbUser);
+      setAdminSession(token, mapped);
+      return mapped;
     }
-    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    setAdminSession(token, data.user);
     return data.user;
   } catch {
-    return getStoredUser();
+    const mapped = mapFirebaseUser(fbUser);
+    setAdminSession(token, mapped);
+    return mapped;
   }
 }
 
-export type { AuthSession };
+export type { AuthSession } from "../types/user";

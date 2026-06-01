@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
-import { isAdminAuthenticated, loginAdmin, setAdminSession } from "../api/auth";
+import { isAdminAuthenticated, loginAdmin, setAdminSession, waitForAuth } from "../api/auth";
 import WarningIcon from "../../icons/error.svg";
 
 const fulcrumLogoMarkSrc = "/sign-in/fulcrum-logo-mark.svg";
@@ -19,9 +19,11 @@ export function SignInPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAdminAuthenticated()) {
-      navigate("/", { replace: true });
-    }
+    void waitForAuth().then(() => {
+      if (isAdminAuthenticated()) {
+        navigate("/", { replace: true });
+      }
+    });
   }, [navigate]);
 
   const bothFilled = email.trim().length > 0 && password.length > 0;

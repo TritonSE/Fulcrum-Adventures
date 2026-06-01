@@ -1,7 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import { isAdminAuthenticated, resetPasswordAdmin } from "../api/auth";
+import {
+  isAdminAuthenticated,
+  isPasswordResetCompleteFromUrl,
+  resetPasswordAdmin,
+  verifyPasswordResetOobCode,
+  waitForAuth,
+} from "../api/auth";
 import { AuthShell } from "../components/AuthShell";
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
@@ -11,23 +17,87 @@ import "./AuthConfirmation.css";
 import "./ResetPasswordPage.css";
 import "./SignInPage.css";
 
+type PagePhase = "loading" | "success" | "form";
+
+function ConfirmationCard({ onBackToSignIn }: { onBackToSignIn: () => void }) {
+  return (
+    <div className="sign-in__card auth-confirmation__card">
+      <h1 className="sign-in__title">Reset Password</h1>
+      <p className="auth-confirmation__message">
+        Your password has been successfully reset! Please use your new password to sign in.
+      </p>
+      <Button
+        variant="primary"
+        icon={false}
+        type="button"
+        fullWidth
+        className="sign-in__submit"
+        onClick={onBackToSignIn}
+      >
+        Back to Sign-In
+      </Button>
+    </div>
+  );
+}
+
 export function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") ?? "";
+  const resetCode = searchParams.get("oobCode") ?? searchParams.get("token") ?? "";
 
+  const [phase, setPhase] = useState<PagePhase>("loading");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mismatchError, setMismatchError] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (isAdminAuthenticated()) {
-      navigate("/", { replace: true });
+    let cancelled = false;
+
+    async function resolvePage() {
+      await waitForAuth();
+
+      if (cancelled) {
+        return;
+      }
+
+      if (isAdminAuthenticated()) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      if (isPasswordResetCompleteFromUrl(searchParams)) {
+        setPhase("success");
+        return;
+      }
+
+      if (!resetCode) {
+        setSubmitError("Invalid or expired reset link.");
+        setPhase("form");
+        return;
+      }
+
+      const verification = await verifyPasswordResetOobCode(resetCode);
+      if (cancelled) {
+        return;
+      }
+
+      if (!verification.ok) {
+        setSubmitError(verification.message);
+        setPhase("form");
+        return;
+      }
+
+      setPhase("form");
     }
-  }, [navigate]);
+
+    void resolvePage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, resetCode, searchParams]);
 
   const bothFilled = password.length > 0 && confirmPassword.length > 0;
 
@@ -51,9 +121,13 @@ export function ResetPasswordPage() {
     }
   }
 
+  function onBackToSignIn() {
+    navigate("/sign-in", { replace: true });
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!bothFilled || submitting) {
+    if (!bothFilled || submitting || phase !== "form") {
       return;
     }
 
@@ -62,14 +136,14 @@ export function ResetPasswordPage() {
       return;
     }
 
-    if (!token) {
+    if (!resetCode) {
       setSubmitError("Invalid or expired reset link.");
       return;
     }
 
     setSubmitting(true);
     setSubmitError(null);
-    const result = await resetPasswordAdmin(token, password);
+    const result = await resetPasswordAdmin(resetCode, password);
     setSubmitting(false);
 
     if (!result.ok) {
@@ -77,30 +151,27 @@ export function ResetPasswordPage() {
       return;
     }
 
-    setSuccess(true);
+    setPhase("success");
+  }
+
+  if (phase === "loading") {
+    return (
+      <AuthShell>
+        <div className="sign-in__card" aria-busy="true" aria-label="Loading reset password" />
+      </AuthShell>
+    );
+  }
+
+  if (phase === "success") {
+    return (
+      <AuthShell>
+        <ConfirmationCard onBackToSignIn={onBackToSignIn} />
+      </AuthShell>
+    );
   }
 
   return (
     <AuthShell>
-      {success ? (
-        <div className="sign-in__card auth-confirmation__card">
-          <h1 className="sign-in__title">Reset Password</h1>
-          <p className="auth-confirmation__message">
-            Your password has been successfully reset! Please use your new password to sign
-            in.
-          </p>
-          <Button
-            variant="primary"
-            icon={false}
-            type="button"
-            fullWidth
-            className="sign-in__submit"
-            onClick={() => navigate("/sign-in")}
-          >
-            Back to Sign-In
-          </Button>
-        </div>
-      ) : (
       <form className="sign-in__card" onSubmit={onSubmit} noValidate>
         <h1 className="sign-in__title">Reset Password</h1>
 
@@ -173,12 +244,11 @@ export function ResetPasswordPage() {
           type="submit"
           fullWidth
           className="sign-in__submit"
-          disabled={!bothFilled || submitting}
+          disabled={!bothFilled || submitting || !resetCode}
         >
           {submitting ? "Resetting…" : "Reset Password"}
         </Button>
       </form>
-      )}
     </AuthShell>
   );
 }

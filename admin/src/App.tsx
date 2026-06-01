@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { isAdminAuthenticated } from "./api/auth";
+import { isAdminAuthenticated, waitForAuth } from "./api/auth";
 import { AccountSettingsPage } from "./pages/AccountSettingsPage";
 import { AdminHome } from "./pages/AdminHome";
 import { CreateAccountPage } from "./pages/CreateAccountPage";
@@ -17,6 +17,16 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    void waitForAuth().then(() => setAuthReady(true));
+  }, []);
+
+  if (!authReady) {
+    return null;
+  }
+
   return (
     <Routes>
       <Route path="/sign-in" element={<SignInPage />} />

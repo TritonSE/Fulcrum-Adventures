@@ -1,7 +1,7 @@
 import type { User } from "../types/user";
 
 import { apiFetch } from "./client";
-import { getAuthToken, setAdminSession } from "./auth";
+import { changePasswordAdmin, getAuthToken, setAdminSession } from "./auth";
 
 const AUTH_BASE = "/api/auth";
 
@@ -28,7 +28,7 @@ export async function updateProfile(input: {
       return { ok: false, message: await parseError(res, "Unable to save profile.") };
     }
     const data = (await res.json()) as { user: User; message?: string };
-    const token = getAuthToken();
+    const token = await getAuthToken();
     if (token && data.user) {
       setAdminSession(token, data.user);
     }
@@ -46,22 +46,14 @@ export async function changePassword(input: {
   newPassword: string;
   confirmPassword: string;
 }): Promise<SettingsResult<{ message: string }>> {
-  try {
-    const res = await apiFetch(`${AUTH_BASE}/me/password`, {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    });
-    if (!res.ok) {
-      return { ok: false, message: await parseError(res, "Unable to change password.") };
-    }
-    const data = (await res.json()) as { message?: string };
-    return {
-      ok: true,
-      data: { message: data.message ?? "Password changed successfully." },
-    };
-  } catch {
-    return { ok: false, message: "Unable to change password." };
+  const result = await changePasswordAdmin(input);
+  if (!result.ok) {
+    return { ok: false, message: result.message };
   }
+  return {
+    ok: true,
+    data: { message: "Password changed successfully." },
+  };
 }
 
 export async function fetchAllowedAdminEmails(): Promise<SettingsResult<{ emails: string[] }>> {

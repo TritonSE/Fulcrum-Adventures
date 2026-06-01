@@ -7,6 +7,7 @@ import {
   isAdminAuthenticated,
   registerAdmin,
   setAdminSession,
+  waitForAuth,
 } from "../api/auth";
 import WarningIcon from "../../icons/error.svg";
 
@@ -27,9 +28,11 @@ export function CreateAccountPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAdminAuthenticated()) {
-      navigate("/", { replace: true });
-    }
+    void waitForAuth().then(() => {
+      if (isAdminAuthenticated()) {
+        navigate("/", { replace: true });
+      }
+    });
   }, [navigate]);
 
   const allFilled =

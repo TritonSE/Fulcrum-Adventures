@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { forgotPasswordAdmin, isAdminAuthenticated } from "../api/auth";
+import { forgotPasswordAdmin, isAdminAuthenticated, waitForAuth } from "../api/auth";
 import { AuthShell } from "../components/AuthShell";
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
@@ -17,9 +17,11 @@ export function ForgotPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAdminAuthenticated()) {
-      navigate("/", { replace: true });
-    }
+    void waitForAuth().then(() => {
+      if (isAdminAuthenticated()) {
+        navigate("/", { replace: true });
+      }
+    });
   }, [navigate]);
 
   const emailFilled = email.trim().length > 0;

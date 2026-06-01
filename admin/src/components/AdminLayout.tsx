@@ -31,8 +31,9 @@ export function AdminLayout({ children, tabs, activeTab, onTabChange }: AdminLay
     : "A";
 
   function onLogout() {
-    clearAdminSession();
-    navigate("/sign-in", { replace: true });
+    void clearAdminSession().then(() => {
+      navigate("/sign-in", { replace: true });
+    });
   }
 
   function onSettings() {

@@ -1,8 +1,9 @@
-import { verifyAccessToken } from "../util/jwt";
+import User from "../models/user";
+import { verifyFirebaseIdToken } from "../util/firebaseAdmin";
 
 import type { NextFunction, Request, Response } from "express";
 
-export function authenticate(req: Request, res: Response, next: NextFunction): void {
+export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ error: "Unauthorized" });
@@ -16,7 +17,15 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
   }
 
   try {
-    req.authUser = verifyAccessToken(token);
+    const firebaseUser = await verifyFirebaseIdToken(token);
+    const email = firebaseUser.email.toLowerCase();
+    const dbUser = await User.findOne({ email });
+
+    req.authUser = {
+      userId: dbUser ? String(dbUser._id) : firebaseUser.userId,
+      email: firebaseUser.email,
+      role: dbUser?.role ?? firebaseUser.role,
+    };
     next();
   } catch {
     res.status(401).json({ error: "Unauthorized" });

@@ -1,8 +1,7 @@
 import express from "express";
 
-import { forgotPassword, getMe, login, register, resetPassword } from "../controllers/auth";
+import { getMe, registerProfile } from "../controllers/auth";
 import {
-  changePassword,
   listAllowedAdminEmails,
   updateAllowedAdminEmails,
   updateProfile,
@@ -12,26 +11,11 @@ import { requireRole } from "../middleware/requireRole";
 
 const router = express.Router();
 
-router.post("/login", login);
-router.post("/register", register);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
-
 router.get("/me", authenticate, getMe);
+router.post("/register", authenticate, registerProfile);
 router.patch("/me", authenticate, updateProfile);
-router.patch("/me/password", authenticate, changePassword);
 
-router.get(
-  "/allowed-admins",
-  authenticate,
-  requireRole("super_admin"),
-  listAllowedAdminEmails,
-);
-router.put(
-  "/allowed-admins",
-  authenticate,
-  requireRole("super_admin"),
-  updateAllowedAdminEmails,
-);
+router.get("/allowed-admins", authenticate, requireRole("super_admin"), listAllowedAdminEmails);
+router.put("/allowed-admins", authenticate, requireRole("super_admin"), updateAllowedAdminEmails);
 
 export default router;

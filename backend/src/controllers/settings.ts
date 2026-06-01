@@ -1,7 +1,6 @@
-import User from "../models/user";
 import AllowedAdminEmail from "../models/allowedAdminEmail";
-import { normalizeEmail, parsePassword } from "../util/authValidation";
-import { verifyPassword, hashPassword } from "../util/password";
+import User from "../models/user";
+import { normalizeEmail } from "../util/authValidation";
 import { requestBody } from "../util/requestBody";
 import { toPublicUser } from "../util/userResponse";
 
@@ -70,48 +69,6 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
   await user.save();
 
   res.json({ user: toPublicUser(user), message: "Profile updated successfully." });
-}
-
-export async function changePassword(req: Request, res: Response): Promise<void> {
-  const userId = req.authUser?.userId;
-  if (!userId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-
-  const body = requestBody(req);
-  const currentPassword = parsePassword(body.currentPassword);
-  const newPassword = parsePassword(body.newPassword);
-  const confirmPassword = parsePassword(body.confirmPassword);
-
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    res.status(400).json({
-      error: "Current password, new password, and confirmation are required (min 7 characters).",
-    });
-    return;
-  }
-
-  if (newPassword !== confirmPassword) {
-    res.status(400).json({ error: "New password and confirmation do not match." });
-    return;
-  }
-
-  const user = await User.findById(userId).select("+hashedPassword");
-  if (!user?.hashedPassword) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-
-  const valid = await verifyPassword(currentPassword, user.hashedPassword);
-  if (!valid) {
-    res.status(400).json({ error: "Incorrect current password" });
-    return;
-  }
-
-  user.hashedPassword = await hashPassword(newPassword);
-  await user.save();
-
-  res.json({ message: "Password changed successfully." });
 }
 
 export async function listAllowedAdminEmails(req: Request, res: Response): Promise<void> {
