@@ -28,6 +28,7 @@ import UploadTabIconUrl from "../../src/assets/upload.svg";
 import VideoTabIconUrl from "../../src/assets/video.svg";
 import VectorIconUrl from "../assets/Vector.svg";
 import YellowEnergyStarIconUrl from "../assets/yellowenergystar.svg";
+import { NavBar } from "../components/NavBar";
 import "./ActivityEditorPage.css";
 
 const CATEGORY_OPTIONS = [
@@ -1336,20 +1337,26 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
   if (isLoading) {
     return (
-      <div className="activity-editor-state">
-        <h1>Loading activity...</h1>
+      <div className="activity-editor-app">
+        <NavBar />
+        <div className="activity-editor-state">
+          <h1>Loading activity...</h1>
+        </div>
       </div>
     );
   }
 
   if (loadError || (mode === "edit" && !activityId)) {
     return (
-      <div className="activity-editor-state">
-        <h1>Unable to load activity</h1>
-        <p>{loadError ?? "Missing activity id."}</p>
-        <button type="button" className="activity-secondary-button" onClick={handleCancel}>
-          Go Back
-        </button>
+      <div className="activity-editor-app">
+        <NavBar />
+        <div className="activity-editor-state">
+          <h1>Unable to load activity</h1>
+          <p>{loadError ?? "Missing activity id."}</p>
+          <button type="button" className="activity-secondary-button" onClick={handleCancel}>
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -1362,7 +1369,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const minimumGuidedItems = activeTab?.kind === "play" ? 2 : activeTab?.kind === "debrief" ? 1 : 0;
 
   return (
-    <>
+    <div className="activity-editor-app">
+      <NavBar />
       <main className="activity-page">
         <header className="activity-editor-header">
           <h1>{pageTitle}</h1>
@@ -2091,6 +2099,6 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         tabs={tabs}
         selTags={form.selTags}
       />
-    </>
+    </div>
   );
 }

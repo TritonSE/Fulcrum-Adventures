@@ -1,7 +1,29 @@
+.activity-editor-app {
+  min-height: 100dvh;
+  background: #f9f9f9;
+  font-family: "Instrument Sans", sans-serif;
+}
+
 .activity-page {
-  display: grid;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 16px;
-  padding: 40px;
+  padding: 144px 120px 80px;
+}
+
+.activity-editor-state {
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 144px 120px 80px;
+  color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
 }
 
@@ -1175,7 +1197,11 @@
 
 @media (max-width: 960px) {
   .activity-page {
-    padding: 24px 16px 40px;
+    padding: 120px 16px 40px;
+  }
+
+  .activity-editor-state {
+    padding: 120px 16px 40px;
   }
 
   .activity-editor-header {
