@@ -1,10 +1,10 @@
 import React, {
+  type CSSProperties,
   forwardRef,
   useEffect,
   useImperativeHandle,
   useMemo,
   useState,
-  type CSSProperties,
 } from "react";
 import { createPortal } from "react-dom";
 
@@ -91,8 +91,7 @@ export const useWindowDimensions = () => {
   return dimensions;
 };
 
-export const View = forwardRef<HTMLDivElement, DOMProps<HTMLDivElement> & { pointerEvents?: string }>(
-  ({ style, pointerEvents, ...props }, ref) => (
+export const View = ({ ref, style, pointerEvents, ...props }: DOMProps<HTMLDivElement> & { pointerEvents?: string } & { ref?: React.RefObject<HTMLDivElement | null> }) => (
     <div
       ref={ref}
       style={{
@@ -102,14 +101,10 @@ export const View = forwardRef<HTMLDivElement, DOMProps<HTMLDivElement> & { poin
       }}
       {...props}
     />
-  ),
-);
+  );
 View.displayName = "View";
 
-export const Text = forwardRef<
-  HTMLSpanElement,
-  DOMProps<HTMLSpanElement> & { numberOfLines?: number; ellipsizeMode?: string }
->(({ style, numberOfLines, ...props }, ref) => {
+export const Text = ({ ref, style, numberOfLines, ...props }: DOMProps<HTMLSpanElement> & { numberOfLines?: number; ellipsizeMode?: string } & { ref?: React.RefObject<HTMLSpanElement | null> }) => {
   const baseStyle = textStyleFixups(flattenStyle(style));
   const lineClampStyle =
     typeof numberOfLines === "number"
@@ -122,13 +117,10 @@ export const Text = forwardRef<
       : undefined;
 
   return <span ref={ref} style={{ ...baseStyle, ...lineClampStyle }} {...props} />;
-});
+};
 Text.displayName = "Text";
 
-export const Pressable = forwardRef<
-  HTMLDivElement,
-  DOMProps<HTMLDivElement> & { onPress?: (event: React.MouseEvent<HTMLDivElement>) => void; disabled?: boolean }
->(({ style, onPress, disabled, ...props }, ref) => (
+export const Pressable = ({ ref, style, onPress, disabled, ...props }: DOMProps<HTMLDivElement> & { onPress?: (event: React.MouseEvent<HTMLDivElement>) => void; disabled?: boolean } & { ref?: React.RefObject<HTMLDivElement | null> }) => (
   <div
     ref={ref}
     onClick={createPressHandler(onPress, disabled)}
@@ -139,17 +131,14 @@ export const Pressable = forwardRef<
     }}
     {...props}
   />
-));
+);
 Pressable.displayName = "Pressable";
 
-export const TouchableOpacity = forwardRef<
-  HTMLDivElement,
-  DOMProps<HTMLDivElement> & {
+export const TouchableOpacity = ({ ref, style, onPress, disabled, ...props }: DOMProps<HTMLDivElement> & {
     onPress?: (event: React.MouseEvent<HTMLDivElement>) => void;
     activeOpacity?: number;
     disabled?: boolean;
-  }
->(({ style, onPress, disabled, ...props }, ref) => (
+  } & { ref?: React.RefObject<HTMLDivElement | null> }) => (
   <div
     ref={ref}
     onClick={createPressHandler(onPress, disabled)}
@@ -160,7 +149,7 @@ export const TouchableOpacity = forwardRef<
     }}
     {...props}
   />
-));
+);
 TouchableOpacity.displayName = "TouchableOpacity";
 
 type TextInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "style" | "onChange"> &
@@ -173,19 +162,8 @@ type TextInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "style" 
     editable?: boolean;
   };
 
-export const TextInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextInputProps>(
-  (
-    {
-      style,
-      onChangeText,
-      multiline,
-      numberOfLines,
-      placeholderTextColor,
-      editable = true,
-      value,
-      ...props
-    },
-    ref,
+export const TextInput = (
+    { ref, style, onChangeText, multiline, numberOfLines, placeholderTextColor, editable = true, value, ...props }: TextInputProps & { ref?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null> },
   ) => {
     const mergedStyle = flattenStyle(style);
     const sharedStyle: CSSProperties = {
@@ -219,8 +197,7 @@ export const TextInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         {...(commonProps as React.InputHTMLAttributes<HTMLInputElement>)}
       />
     );
-  },
-);
+  };
 TextInput.displayName = "TextInput";
 
 type ScrollViewProps = DOMProps<HTMLDivElement> & {
@@ -229,8 +206,7 @@ type ScrollViewProps = DOMProps<HTMLDivElement> & {
   nestedScrollEnabled?: boolean;
 };
 
-export const ScrollView = forwardRef<HTMLDivElement, ScrollViewProps>(
-  ({ style, contentContainerStyle, children, showsVerticalScrollIndicator = true, ...props }, ref) => (
+export const ScrollView = ({ ref, style, contentContainerStyle, children, showsVerticalScrollIndicator = true, ...props }: ScrollViewProps & { ref?: React.RefObject<HTMLDivElement | null> }) => (
     <div
       ref={ref}
       style={{
@@ -243,8 +219,7 @@ export const ScrollView = forwardRef<HTMLDivElement, ScrollViewProps>(
     >
       <div style={{ boxSizing: "border-box", ...flattenStyle(contentContainerStyle) }}>{children}</div>
     </div>
-  ),
-);
+  );
 ScrollView.displayName = "ScrollView";
 
 type ImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "style" | "src" | "onLoad"> & {
@@ -264,8 +239,7 @@ type ImageComponent = React.ForwardRefExoticComponent<
   ) => void;
 };
 
-const ImageBase = forwardRef<HTMLImageElement, ImageProps>(
-  ({ source, style, resizeMode = "cover", onLoad, ...props }, ref) => {
+const ImageBase = ({ ref, source, style, resizeMode = "cover", onLoad, ...props }: ImageProps & { ref?: React.RefObject<HTMLImageElement | null> }) => {
     const src = typeof source === "string" ? source : source?.uri;
     return (
       <img
@@ -290,8 +264,7 @@ const ImageBase = forwardRef<HTMLImageElement, ImageProps>(
         {...props}
       />
     );
-  },
-) as ImageComponent;
+  } as ImageComponent;
 ImageBase.displayName = "Image";
 
 ImageBase.getSize = (uri, success, failure) => {

@@ -707,21 +707,20 @@ export const ActivityEditor: React.FC<ActivityEditorProps> = ({
         objective: objective.trim() ? null : prev.objective,
         setupInstructions: prepTab?.sections[0]?.content.trim() ? null : prev.setupInstructions,
         materials:
-          prepTab && (prepTab.noMaterialsNeeded || prepTab.materials.length > 0 || materialInput.trim())
+          prepTab &&
+          (prepTab.noMaterialsNeeded || prepTab.materials.length > 0 || materialInput.trim())
             ? null
             : prev.materials,
-        playGuidedItems:
-          playTab
-            ? prev.playGuidedItems.map((error, index) =>
-                playTab.guidedItems[index]?.trim() ? null : error,
-              )
-            : prev.playGuidedItems,
-        debriefGuidedItems:
-          debriefTab
-            ? prev.debriefGuidedItems.map((error, index) =>
-                debriefTab.guidedItems[index]?.trim() ? null : error,
-              )
-            : prev.debriefGuidedItems,
+        playGuidedItems: playTab
+          ? prev.playGuidedItems.map((error, index) =>
+              playTab.guidedItems[index]?.trim() ? null : error,
+            )
+          : prev.playGuidedItems,
+        debriefGuidedItems: debriefTab
+          ? prev.debriefGuidedItems.map((error, index) =>
+              debriefTab.guidedItems[index]?.trim() ? null : error,
+            )
+          : prev.debriefGuidedItems,
         selTags: selTags.length > 0 ? null : prev.selTags,
       };
 

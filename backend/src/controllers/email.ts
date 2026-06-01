@@ -1,4 +1,3 @@
-
 import EmailModel from "../models/email";
 
 import type { RequestHandler } from "express";
