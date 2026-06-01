@@ -40,6 +40,10 @@
   justify-content: flex-end;
 }
 
+.activity-submit-error {
+  width: 100%;
+}
+
 .activity-section-card {
   border-radius: 16px;
   background: #ffffff;

@@ -15,7 +15,7 @@ export const uploadActivityThumbnail = async ({
 
   formData.append("mediaTarget", "thumbnail");
   formData.append("mediaType", "image");
-  formData.append("activityMedia", file, file.name);
+  formData.append("file", file, file.name);
 
   const response = await fetch(
     `${trimTrailingSlash(apiBaseUrl)}/api/activities/${activityId}/media`,

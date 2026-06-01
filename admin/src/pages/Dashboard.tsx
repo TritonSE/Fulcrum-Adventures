@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
@@ -123,6 +124,7 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts)
   const [categoryCounts, setCategoryCounts] =
@@ -224,8 +226,7 @@ export default function Dashboard() {
   };
 
   const handleEditActivity = (id: string) => {
-    console.log("Edit activity clicked:", id);
-    // Future: navigate to the edit page
+    navigate(`/activities/${id}/edit`);
   };
 
   const toggleSortDropdown = () => {
@@ -336,13 +337,13 @@ export default function Dashboard() {
                 <Button
                   icon={MailingListIcon}
                   variant="secondary-left"
-                  onClick={() => {
-                    window.location.href = "/mailing-list";
-                  }}
+                  onClick={() => navigate("/mailing-list")}
                 >
                   Mailing List
                 </Button>
-                <Button icon={AddIcon}>Create New Activity</Button>
+                <Button icon={AddIcon} onClick={() => navigate("/activities/new")}>
+                  Create New Activity
+                </Button>
               </div>
             </div>
             <div className="category-cards-container">

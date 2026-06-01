@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import MailingList from "./pages/MailingList";
-import ActivityEditorPage from "./pages/ActivityEditorPage";
+import { ActivityEditorPage } from "./pages/ActivityEditorPage";
 import "./App.css";
 
 function App() {

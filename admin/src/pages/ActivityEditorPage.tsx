@@ -12,6 +12,7 @@ import {
   type ActivityStatus,
   type CreateActivityPayload,
 } from "../api/activityApi";
+import { uploadActivityThumbnail } from "../api/activityMediaApi";
 import AddIconUrl from "../assets/AddIcon.svg";
 import ActionIconUrl from "../assets/Action.svg";
 import BlankEnergyStarIconUrl from "../assets/blankenergystar.svg";
@@ -336,7 +337,6 @@ function PublishPreviewModal({
 
   useEffect(() => {
     if (visible) {
-      setActiveFacilitateTab("prep");
       document.body.classList.add("activity-modal-open");
       return;
     }
@@ -859,6 +859,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeTabId && tabs[0]) setActiveTabId(tabs[0].id);
@@ -1269,6 +1270,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     if (targetStatus === "Published" && !validate()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const payload = buildPayload(form, tabs, targetStatus, thumbnailPreviewUrl);
@@ -1277,8 +1279,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         const created = await createActivity(payload);
         const createdId = getActivityId(created);
 
-        if (!createdId && targetStatus === "Published") {
+        if (!createdId && (targetStatus === "Published" || thumbnailFile)) {
           throw new Error("Activity was created, but the response did not include an activity id.");
+        }
+
+        if (createdId && thumbnailFile) {
+          await uploadActivityThumbnail({ activityId: createdId, file: thumbnailFile });
         }
 
         if (createdId && targetStatus === "Published") {
@@ -1296,11 +1302,20 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
       await updateActivity(activityId, payload);
 
+      if (thumbnailFile) {
+        await uploadActivityThumbnail({ activityId, file: thumbnailFile });
+      }
+
       if (targetStatus === "Published") {
         await updateActivityStatus(activityId, "Published");
       }
 
       setIsPreviewVisible(false);
+    } catch (error) {
+      setIsPreviewVisible(false);
+      setSubmitError(
+        error instanceof Error ? error.message : "Unable to save activity.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -1371,6 +1386,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           </div>
         </header>
 
+        {submitError ? (
+          <div className="activity-submit-error">
+            <FieldError message={submitError} />
+          </div>
+        ) : null}
+
         <CollapsibleSection title="Overview" defaultOpen>
           <div className="activity-field-stack">
             <div className="activity-field-group">
@@ -1400,7 +1421,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                     {thumbnailFile ? `Image selected: ${thumbnailFile.name}` : "No image selected"}
                   </span>
                   <span className="activity-upload-meta">
-                    Supported formats: JPG, JPEG, PNG, HEIC, HEIF, WEBP
+                    Supported formats: JPG, JPEG, PNG, GIF, WEBP
                   </span>
                   <span className="activity-upload-meta">Max size: 10 MB</span>
                 </label>
@@ -1408,7 +1429,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                   id="thumbnail-upload"
                   className="activity-sr-only"
                   type="file"
-                  accept=".jpg,.jpeg,.png,.heic,.heif,.webp,image/jpeg,image/png,image/heic,image/heif,image/webp"
+                  accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
                   onChange={handleThumbnailFileChange}
                 />
                 {errors.thumbnail ? <FieldError message={errors.thumbnail} /> : null}
