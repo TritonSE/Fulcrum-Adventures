@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityList } from "../../components/ActivityList";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 
 export default function DownloadsScreen() {
   const { activities, toggleSaved, markViewed } = useActivities();

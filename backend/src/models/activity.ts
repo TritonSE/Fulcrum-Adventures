@@ -4,7 +4,7 @@ import type { InferSchemaType } from "mongoose";
 
 const additionalMediaSchema = new Schema(
   {
-    type: { type: String, enum: ["image", "video"], required: true },
+    type: { type: String, enum: ["image"], required: true, default: "image" },
     url: { type: String, required: true },
   },
   { _id: false },
@@ -18,11 +18,33 @@ const facilitateSectionSchema = new Schema(
   { _id: false },
 );
 
+type GroupSizeDoc = { anySize?: boolean };
+
+const groupSizeSchema = new Schema(
+  {
+    min: {
+      type: Number,
+      required: function groupSizeMinRequired(this: GroupSizeDoc) {
+        return !this.anySize;
+      },
+    },
+    max: {
+      type: Number,
+      required: function groupSizeMaxRequired(this: GroupSizeDoc) {
+        return !this.anySize;
+      },
+    },
+    anySize: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
 const activitySchema = new Schema(
   {
     title: { type: String, required: true },
     overview: { type: String, required: true },
     thumbnailUrl: { type: String },
+    videoUrl: { type: String },
     additionalMedia: [additionalMediaSchema],
     category: {
       type: [String],
@@ -37,11 +59,7 @@ const activitySchema = new Schema(
       min: { type: Number, required: true },
       max: { type: Number, required: true },
     },
-    groupSize: {
-      min: { type: Number, required: true },
-      max: { type: Number, required: true },
-      anySize: { type: Boolean, default: false },
-    },
+    groupSize: { type: groupSizeSchema, required: true },
     duration: {
       type: String,
       enum: ["5-15 min", "15-30 min", "30+ min"],

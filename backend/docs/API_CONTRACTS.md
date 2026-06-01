@@ -16,15 +16,30 @@ type Setup = "None" | "Required";
 type Duration = "5-15 min" | "15-30 min" | "30+ min";
 type Status = "Draft" | "Published" | "Archived";
 
+type GroupSizeRange = {
+  anySize?: false;
+  min: number;
+  max: number;
+};
+
+type GroupSizeAny = {
+  anySize: true;
+  min?: number;
+  max?: number;
+};
+
+type GroupSize = GroupSizeRange | GroupSizeAny;
+
 type Activity = {
   _id: string;
   title: string;
   overview: string;
-  thumbnailUrl?: string;
-  additionalMedia?: { type: "image" | "video"; url: string }[];
+  thumbnailUrl?: string; // uploaded image, or YouTube thumbnail when only videoUrl is set
+  videoUrl?: string; // YouTube link for activity video
+  additionalMedia?: { type: "image"; url: string }[];
   category: Category[]; // 1–3 items
   gradeRange: { min: number; max: number }; // K = 0
-  groupSize: { min: number; max: number; anySize: boolean };
+  groupSize: GroupSize;
   duration: Duration;
   energyLevel: EnergyLevel;
   environment: Environment[];
@@ -103,6 +118,13 @@ Content-Type: application/json
 ```
 
 Status is always forced to `"Draft"` on creation regardless of what is sent in the body.
+
+**`groupSize` rules:**
+
+| Shape                                                                  | Required fields                                    |
+| ---------------------------------------------------------------------- | -------------------------------------------------- |
+| `{ "anySize": true }`                                                  | `anySize` only (`min` / `max` optional)            |
+| `{ "min": N, "max": M }` or `{ "min": N, "max": M, "anySize": false }` | `min` and `max` (positive integers, `min` ≤ `max`) |
 
 **Request Body:**
 
@@ -222,11 +244,12 @@ Content-Type: multipart/form-data
 
 **Form Fields:**
 
-| Field         | Type   | Required | Description                                                               |
-| ------------- | ------ | -------- | ------------------------------------------------------------------------- |
-| `file`        | File   | Yes      | Image or video file (jpg, png, gif, webp, mp4, webm, mov)                 |
-| `mediaTarget` | string | Yes      | `"thumbnail"` or `"additional"`                                           |
-| `mediaType`   | string | No       | `"image"` or `"video"` (for additional media only, defaults to `"image"`) |
+| Field         | Type   | Required | Description                                                                    |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------------ |
+| `file`        | File   | Yes      | Image file only (jpg, jpeg, png, gif, webp)                                    |
+| `mediaTarget` | string | Yes      | `"thumbnail"` sets `thumbnailUrl`, or `"additional"` adds to `additionalMedia` |
+
+**Thumbnail behavior:** If `mediaTarget` is `"thumbnail"`, the uploaded image is stored as `thumbnailUrl`. On create/update, when `thumbnailUrl` is omitted but `videoUrl` is a YouTube link, the API sets `thumbnailUrl` to the YouTube preview image automatically.
 
 **Max file size:** 10 MB
 
@@ -327,6 +350,26 @@ curl -X POST http://localhost:4000/api/activities \
     ],
     "materials": [],
     "selTags": ["teamwork"]
+  }'
+
+# Create a draft activity with any group size
+curl -X POST http://localhost:4000/api/activities \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Moon Ball",
+    "overview": "Keep a large ball aloft while adding movement challenges.",
+    "category": ["Active", "Connection"],
+    "gradeRange": { "min": 0, "max": 12 },
+    "groupSize": { "anySize": true },
+    "duration": "5-15 min",
+    "energyLevel": "Medium",
+    "environment": ["Gym/MPR"],
+    "setup": "Required",
+    "facilitateSections": [
+      { "tabName": "Play", "content": "Volley the ball; add rules each round." }
+    ],
+    "materials": ["Large beach ball"],
+    "selTags": ["Cooperation"]
   }'
 
 # Publish it (replace <id> with the _id from above)

@@ -2,7 +2,9 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { RECOMMENDED_TITLES } from "../constants/homeSections";
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
+import { mockActivities } from "../data/mockActivities";
+import { applyActivityState } from "../utils/activityState";
 
 import { SeeAll } from "./SeeAll";
 
@@ -29,9 +31,10 @@ export function HomeRecommendedSection() {
   const { activities } = useActivities();
 
   // Filter based on admin-selected list and show only 4 for the preview
-  const recommendedActivities = activities
-    .filter((a) => RECOMMENDED_TITLES.includes(a.title))
-    .slice(0, 4);
+  const recommendedActivities = applyActivityState(
+    mockActivities.filter((a) => RECOMMENDED_TITLES.includes(a.title)).slice(0, 4),
+    activities,
+  );
 
   return (
     <View>
@@ -44,6 +47,7 @@ export function HomeRecommendedSection() {
         variant="condensed"
         horizontal={true}
         showHeader={false}
+        showApiStatus={false}
       />
     </View>
   );

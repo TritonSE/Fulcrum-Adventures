@@ -2,8 +2,43 @@ import { isValidObjectId } from "mongoose";
 
 import Activity from "../models/activity";
 import { uploadActivityMedia } from "../services/firebaseStorage";
+import { resolveThumbnailUrl } from "../utils/activity-thumbnail";
 
 import type { Request, Response } from "express";
+
+function routeParam(value: string | string[] | undefined): string {
+  if (value === undefined) return "";
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function applyThumbnailFields(body: Record<string, unknown>): Record<string, unknown> {
+  const thumbnailUrl = resolveThumbnailUrl(
+    body.thumbnailUrl as string | undefined,
+    body.videoUrl as string | undefined,
+  );
+  if (thumbnailUrl !== undefined) {
+    return { ...body, thumbnailUrl };
+  }
+  return body;
+}
+
+async function applyThumbnailFieldsForUpdate(
+  id: string,
+  body: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const existing = await Activity.findById(id).select("thumbnailUrl videoUrl").lean();
+  if (!existing) return body;
+
+  const thumbnailUrl = resolveThumbnailUrl(
+    (body.thumbnailUrl as string | undefined) ?? existing.thumbnailUrl,
+    (body.videoUrl as string | undefined) ?? existing.videoUrl,
+  );
+
+  if (thumbnailUrl !== undefined) {
+    return { ...body, thumbnailUrl };
+  }
+  return body;
+}
 
 type AggregateRow = { _id: string; count: number };
 
@@ -60,12 +95,13 @@ export async function listActivities(req: Request, res: Response) {
 }
 
 export async function getActivity(req: Request, res: Response) {
-  if (!isValidObjectId(req.params.id)) {
+  const id = routeParam(req.params.id);
+  if (!isValidObjectId(id)) {
     res.status(400).json({ error: "Invalid activity id" });
     return;
   }
 
-  const activity = await Activity.findById(req.params.id);
+  const activity = await Activity.findById(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
@@ -74,14 +110,15 @@ export async function getActivity(req: Request, res: Response) {
 }
 
 export async function createActivity(req: Request, res: Response) {
-  const body = req.body as Record<string, unknown>;
+  const body = applyThumbnailFields(req.body as Record<string, unknown>);
   const activity = await Activity.create({ ...body, status: "Draft" });
   res.status(201).json(activity);
 }
 
 export async function updateActivity(req: Request, res: Response) {
-  const body = req.body as Record<string, unknown>;
-  const activity = await Activity.findByIdAndUpdate(req.params.id, body, {
+  const id = routeParam(req.params.id);
+  const body = await applyThumbnailFieldsForUpdate(id, req.body as Record<string, unknown>);
+  const activity = await Activity.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true,
   });
@@ -99,8 +136,9 @@ export async function updateActivityStatus(req: Request, res: Response) {
     return;
   }
 
+  const id = routeParam(req.params.id);
   const activity = await Activity.findByIdAndUpdate(
-    req.params.id,
+    id,
     { status },
     { new: true, runValidators: true },
   );
@@ -112,7 +150,8 @@ export async function updateActivityStatus(req: Request, res: Response) {
 }
 
 export async function deleteActivity(req: Request, res: Response) {
-  const activity = await Activity.findByIdAndDelete(req.params.id);
+  const id = routeParam(req.params.id);
+  const activity = await Activity.findByIdAndDelete(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
@@ -126,8 +165,8 @@ export async function uploadMedia(req: Request, res: Response) {
     return;
   }
 
-  const activityId = req.params.id;
-  if (Array.isArray(activityId)) {
+  const activityId = routeParam(req.params.id);
+  if (!isValidObjectId(activityId)) {
     res.status(400).json({ error: "Invalid activity id" });
     return;
   }
@@ -139,15 +178,14 @@ export async function uploadMedia(req: Request, res: Response) {
   }
 
   const fileUrl = await uploadActivityMedia(req.file, activityId);
-  const body = (req.body ?? {}) as { mediaTarget?: string; mediaType?: string };
+  const body = (req.body ?? {}) as { mediaTarget?: string };
   const mediaTarget = body.mediaTarget;
 
   if (mediaTarget === "thumbnail") {
     await Activity.findByIdAndUpdate(activityId, { thumbnailUrl: fileUrl });
   } else if (mediaTarget === "additional") {
-    const mediaType = body.mediaType === "video" ? "video" : "image";
     await Activity.findByIdAndUpdate(activityId, {
-      $push: { additionalMedia: { type: mediaType, url: fileUrl } },
+      $push: { additionalMedia: { type: "image", url: fileUrl } },
     });
   } else {
     res.status(400).json({ error: "Invalid mediaTarget." });

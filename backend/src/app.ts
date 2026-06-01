@@ -10,13 +10,34 @@ import activityRoutes from "./routes/activity";
 import type { NextFunction, Request, Response } from "express";
 dotenv.config();
 
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  ...(process.env.FRONTEND_ORIGINS ?? "").split(","),
+]
+  .map((origin) => origin?.trim())
+  .filter((origin): origin is string => Boolean(origin));
+
+const adminPreviewOriginPattern =
+  /^https:\/\/fulcrum-admin-git-[a-z0-9-]+-philip-chens-projects\.vercel\.app$/;
+
+function isAllowedOrigin(origin: string): boolean {
+  return allowedOrigins.includes(origin) || adminPreviewOriginPattern.test(origin);
+}
+
 const app = express();
 
 app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN,
+    origin(origin, callback) {
+      if (!origin || isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked origin: ${origin}`));
+    },
   }),
 );
 
