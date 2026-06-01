@@ -20,20 +20,20 @@ export const EnergyTag: React.FC<EnergyTagProps> = ({
   return (
     <div
       className={`tag tag-energy ${selected ? "tag-energy--selected" : ""}`}
+      aria-label={`Energy level: ${labels[level]}`}
       onClick={() => onClick?.(level)}
     >
       <span className="energy-icon-wrapper">
-        {Array.from({ length: level }).map((_, index) => (
+        {Array.from({ length: 3 }).map((_, index) => (
           <img
             key={index}
             src={LightningIcon}
             alt=""
             aria-hidden="true"
-            className="energy-icon"
+            className={`energy-icon ${index < level ? "energy-icon--active" : "energy-icon--inactive"}`}
           />
         ))}
       </span>
-      <span>{labels[level]}</span>
     </div>
   );
 };

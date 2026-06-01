@@ -14,7 +14,8 @@ export type ButtonVariant =
 interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
-  icon?: boolean;
+  showIcon?: boolean;
+  icon?: string;
   onClick?: () => void;
   children: React.ReactNode;
   type?: "button" | "submit" | "reset";
@@ -26,7 +27,8 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   disabled = false,
-  icon = true,
+  showIcon = true,
+  icon,
   onClick,
   children,
   type = "button",
@@ -35,18 +37,20 @@ export const Button: React.FC<ButtonProps> = ({
   ariaLabel,
 }) => {
   // determine which SVG to use
-  let currentIcon = UploadIcon;
-  if (disabled) {
-    currentIcon = UploadDisabledIcon;
-  } else if (variant === "primary") {
-    currentIcon = UploadPrimaryIcon;
+  if (!icon) {
+    icon = UploadIcon;
+    if (disabled) {
+      icon = UploadDisabledIcon;
+    } else if (variant === "primary") {
+      icon = UploadPrimaryIcon;
+    }
   }
 
   // determine icon placement AND if it should be displayed at all
   const showLeftIcon =
-    icon && (variant === "primary" || variant === "secondary-left");
+    showIcon && (variant === "primary" || variant === "secondary-left");
   const showRightIcon =
-    icon && (variant === "tertiary" || variant === "secondary-right");
+    showIcon && (variant === "tertiary" || variant === "secondary-right");
 
   const buttonClasses = [
     "button",
@@ -68,7 +72,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {showLeftIcon && (
         <span className="button__icon button__icon--left">
-          <img src={currentIcon} alt="" aria-hidden="true" />
+          <img src={icon} alt="" aria-hidden="true" />
         </span>
       )}
 
@@ -76,7 +80,7 @@ export const Button: React.FC<ButtonProps> = ({
 
       {showRightIcon && (
         <span className="button__icon button__icon--right">
-          <img src={currentIcon} alt="" aria-hidden="true" />
+          <img src={icon} alt="" aria-hidden="true" />
         </span>
       )}
     </button>

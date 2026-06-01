@@ -6,9 +6,24 @@ import express from "express";
 
 import { connectDb } from "./db";
 import activityRoutes from "./routes/activity";
+import emailRoutes from "./routes/email";
 
 import type { NextFunction, Request, Response } from "express";
 dotenv.config();
+
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  ...(process.env.FRONTEND_ORIGINS ?? "").split(","),
+]
+  .map((origin) => origin?.trim())
+  .filter((origin): origin is string => Boolean(origin));
+
+const adminPreviewOriginPattern =
+  /^https:\/\/fulcrum-admin-git-[a-z0-9-]+-philip-chens-projects\.vercel\.app$/;
+
+function isAllowedOrigin(origin: string): boolean {
+  return allowedOrigins.includes(origin) || adminPreviewOriginPattern.test(origin);
+}
 
 const allowedOrigins = [
   process.env.FRONTEND_ORIGIN,
@@ -55,6 +70,7 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.use("/api/activities", activityRoutes);
+app.use("/api/emails", emailRoutes);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   let statusCode = 500;

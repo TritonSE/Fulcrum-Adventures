@@ -65,29 +65,47 @@
 }
 
 .tag-energy {
-  background-color: #ffffff;
-  border: 1px solid #d9d9d9;
-  color: #153a7a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  box-shadow: none;
+  padding: 6px 12px;
+  gap: 3px;
 }
 
 .tag-energy:hover:not(.tag-energy--selected) {
-  background-color: #f3f3f3;
-  border-color: #b4b4b4;
+  background-color: transparent;
+  border-color: transparent;
 }
 
 .tag-energy--selected,
 .tag-energy.tag-energy--selected {
-  background-color: #153a7a;
-  border-color: #153a7a;
-  color: #ffffff;
+  background-color: transparent;
+  border-color: transparent;
+  color: inherit;
   box-shadow: none;
 }
 
 .energy-icon-wrapper {
   display: inline-flex;
   align-items: center;
+  gap: 1px;
+}
+
+.energy-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.energy-icon--inactive {
+  opacity: 0.28;
+  filter: grayscale(1) brightness(1.55) saturate(0);
+}
+
+.energy-icon--active {
+  opacity: 1;
+  filter: none;
 }
 
 /* --- STATUS BADGES --- */

@@ -14,7 +14,7 @@
 .toast-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   background-color: #22c55e;
   border-radius: 8px;
   padding: 16px 20px;

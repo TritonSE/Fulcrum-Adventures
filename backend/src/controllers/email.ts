@@ -1,37 +1,38 @@
-import EmailModel from "../models/email";
+import Email from "../models/email";
 
-import type { RequestHandler } from "express";
+import type { Request, Response } from "express";
 
-type CreateEmailBody = {
-  user_email: string;
-};
+export async function listEmails(req: Request, res: Response) {
+  const sort = (req.query.sort as string) || "-createdAt";
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 10));
+  const skip = (page - 1) * limit;
 
-export const createEmail: RequestHandler = async (req, res, next) => {
-  // const validation_errors = validationResult(req);
-  const { user_email } = req.body as CreateEmailBody;
+  const [emails, total] = await Promise.all([
+    Email.find().sort(sort).skip(skip).limit(limit),
+    Email.countDocuments(),
+  ]);
 
-  try {
-    // validationErrorParser(validation_errors);
+  res.json({
+    emails,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit - 1e-10),
+  });
+}
 
-    const created_email_model = await EmailModel.create({
-      email: user_email,
-      dateSubscribed: Date.now(),
-    });
+export async function getAllEmails(req: Request, res: Response) {
+  const EMAILS_PER_PAGE = 10;
 
-    res.status(201).json(created_email_model);
-  } catch (error) {
-    next(error);
-  }
-};
+  const [emails, total] = await Promise.all([
+    Email.find().sort("-createdAt"),
+    Email.countDocuments(),
+  ]);
 
-export const existsEmail: RequestHandler = async (req, res, next) => {
-  // const validation_errors = validationResult(req);
-  const { req_email } = req.body as { req_email: string };
-  try {
-    // validationErrorParser(validation_errors);
-    const user_email = await EmailModel.findOne({ email: req_email });
-    res.status(200).json({ exists_email: !!user_email });
-  } catch (error) {
-    next(error);
-  }
-};
+  res.json({
+    emails,
+    total,
+    totalPages: Math.ceil(total / EMAILS_PER_PAGE - 1e-10),
+  });
+}

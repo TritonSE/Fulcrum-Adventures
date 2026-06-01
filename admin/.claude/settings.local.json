@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__get_screenshot",
+      "Bash(ls \"C:\\\\Users\\\\prana\\\\Documents\\\\ucsd\\\\tse\\\\Fulcrum-Adventures\\\\admin\\\\src\\\\components\\\\Pagination\"*)",
+      "Bash(ls \"C:\\\\Users\\\\prana\\\\Documents\\\\ucsd\\\\tse\\\\Fulcrum-Adventures\\\\admin\\\\src\\\\components\\\\pagination\"*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)"
+    ]
+  }
+}
