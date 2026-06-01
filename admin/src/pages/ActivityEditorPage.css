@@ -95,9 +95,11 @@
 .activity-field-label {
   margin: 0;
   color: #153a7a;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
+  text-align: left;
   font-family: "Instrument Sans Bold", "Instrument Sans", sans-serif;
+
 }
 
 .activity-field-label-light {
@@ -168,9 +170,10 @@
 .activity-youtube-preview span,
 .activity-grade-value {
   margin: 0;
-  color: #b4b4b4;
+  color: #9c9c9c;
   font-size: 14px;
   font-family: "Instrument Sans", sans-serif;
+  text-align: left;
 }
 
 .activity-grade-value {
@@ -253,13 +256,118 @@
   gap: 16px;
 }
 
+.activity-cover-panel {
+  display: grid;
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: #fff;
+}
+
+.activity-cover-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #d9d9d9;
+  border-bottom: 0;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow-x: auto;
+}
+
+.activity-cover-tab {
+  flex: 0 0 215px;
+  width: 215px;
+  height: 48px;
+  border: 0;
+  border-right: 1px solid #d9d9d9;
+  background: #f5f7fb;
+  color: #66748f;
+  padding: 0 18px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.activity-cover-tab-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.activity-cover-tab-content img {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.activity-cover-tab-icon {
+  filter: brightness(0) saturate(100%) invert(47%) sepia(11%) saturate(692%) hue-rotate(182deg)
+    brightness(92%) contrast(90%);
+}
+
+.activity-cover-tab-active .activity-cover-tab-icon {
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+.activity-cover-tab:last-child {
+  border-right: 0;
+}
+
+.activity-cover-tab-active {
+  background: #153a7a;
+  color: #ffffff;
+}
+
+.activity-cover-body {
+  padding: 0;
+}
+
+.activity-youtube-panel {
+  display: grid;
+  gap: 18px;
+  padding: 32px;
+  border: 1px solid #d9d9d9;
+  border-radius: 0 16px 16px 16px;
+  background: #fff;
+}
+
+.activity-youtube-copy-block {
+  display: grid;
+  gap: 8px;
+}
+
+.activity-youtube-copy-block h3 {
+  margin: 0;
+  color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.08;
+}
+
+.activity-youtube-copy-block p {
+  margin: 0;
+  color: #6f7684;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: "Instrument Sans", sans-serif;
+}
+
 .activity-upload-card {
   display: grid;
   justify-items: center;
   gap: 10px;
   padding: 28px 22px;
-  border: 1px dashed #b4b4b4;
-  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 0 0 16px 16px;
   background: #fff;
   text-align: center;
   cursor: pointer;

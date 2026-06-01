@@ -24,6 +24,8 @@ import PhoneFrameImageUrl from "../assets/378_rectangle_extracted.png";
 import GraduationCapIconUrl from "../assets/graduation-cap.svg";
 import PageIconUrl from "../assets/PageIcon.svg";
 import PeopleIconUrl from "../assets/people.svg";
+import UploadTabIconUrl from "../../src/assets/upload.svg";
+import VideoTabIconUrl from "../../src/assets/video.svg";
 import VectorIconUrl from "../assets/Vector.svg";
 import YellowEnergyStarIconUrl from "../assets/yellowenergystar.svg";
 import "./ActivityEditorPage.css";
@@ -46,6 +48,7 @@ const MAX_SECTIONS = 6;
 
 type EditorMode = "create" | "edit";
 type TabKind = "prep" | "play" | "debrief" | "custom";
+type CoverTabKind = "image" | "youtube";
 
 type ActivitySection = {
   id: string;
@@ -850,6 +853,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [form, setForm] = useState<FormState>(() => createDefaultFormState());
   const [tabs, setTabs] = useState<ActivityTab[]>(() => createDefaultTabs());
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [activeCoverTab, setActiveCoverTab] = useState<CoverTabKind>("image");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
   const [materialInput, setMaterialInput] = useState("");
@@ -878,6 +882,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         setForm(createFormStateFromActivity(activity));
         setTabs(parseActivityTabs(activity));
         setThumbnailPreviewUrl(activity.thumbnailUrl ?? null);
+        setActiveCoverTab(activity.videoUrl || activity.videoThumbnailUrl ? "youtube" : "image");
       })
       .catch((error: unknown) => {
         if (!isMounted) return;
@@ -952,11 +957,13 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
     setThumbnailFile(nextFile);
     setThumbnailPreviewUrl(nextFile ? URL.createObjectURL(nextFile) : null);
+    if (nextFile) setActiveCoverTab("image");
     if (nextFile) clearErrorKeys("thumbnail");
   };
 
   const handleVideoUrlChange = (value: string) => {
     const trimmedValue = value.trim();
+    setActiveCoverTab("youtube");
     setForm((current) => ({
       ...current,
       videoUrl: value,
@@ -972,6 +979,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
   const handleExtractThumbnail = () => {
     const trimmedVideoUrl = form.videoUrl.trim();
+    setActiveCoverTab("youtube");
 
     if (!trimmedVideoUrl) {
       setForm((current) => ({
@@ -1395,83 +1403,129 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         <CollapsibleSection title="Overview" defaultOpen>
           <div className="activity-field-stack">
             <div className="activity-field-group">
-              <label className="activity-field-label" htmlFor="thumbnail-upload">
-                Thumbnail
-              </label>
-              <div className="activity-thumbnail-panel">
-                <label
-                  className={`activity-upload-card ${errors.thumbnail ? "activity-upload-card-error" : ""}`}
-                  htmlFor="thumbnail-upload"
-                >
-                  {thumbnailPreviewUrl ? (
-                    <img
-                      src={thumbnailPreviewUrl}
-                      alt="Selected thumbnail preview"
-                      className="activity-upload-preview"
-                    />
-                  ) : (
-                    <span className="activity-upload-plus">+</span>
-                  )}
-                  <span className="activity-upload-title">Upload cover image</span>
-                  <span className="activity-upload-copy">
-                    Upload an image to use as the activity cover.
-                  </span>
-                  <span className="activity-upload-button">Choose Image</span>
-                  <span className="activity-upload-meta">
-                    {thumbnailFile ? `Image selected: ${thumbnailFile.name}` : "No image selected"}
-                  </span>
-                  <span className="activity-upload-meta">
-                    Supported formats: JPG, JPEG, PNG, GIF, WEBP
-                  </span>
-                  <span className="activity-upload-meta">Max size: 10 MB</span>
-                </label>
-                <input
-                  id="thumbnail-upload"
-                  className="activity-sr-only"
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
-                  onChange={handleThumbnailFileChange}
-                />
-                {errors.thumbnail ? <FieldError message={errors.thumbnail} /> : null}
-              </div>
-            </div>
-
-            <div className="activity-field-group">
-              <label className="activity-field-label" htmlFor="video-url">
-                YouTube Video URL
-              </label>
-              <div className="activity-inline-inputs">
-                <input
-                  id="video-url"
-                  className="activity-text-input"
-                  value={form.videoUrl}
-                  onChange={(event) => handleVideoUrlChange(event.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                />
-                <button
-                  type="button"
-                  className="activity-primary-button"
-                  onClick={handleExtractThumbnail}
-                >
-                  {form.videoThumbnailStatus === "ready" ? "Refresh Thumbnail" : "Extract Thumbnail"}
-                </button>
-              </div>
-              {form.videoThumbnailError ? <FieldError message={form.videoThumbnailError} /> : null}
-              {form.videoThumbnailUrl ? (
-                <div className="activity-youtube-preview">
-                  <img
-                    src={form.videoThumbnailUrl}
-                    alt="Extracted YouTube thumbnail"
-                    onLoad={handleThumbnailImageLoad}
-                    onError={handleThumbnailImageError}
-                  />
-                  <span>
-                    {form.videoThumbnailStatus === "checking"
-                      ? "Checking thumbnail..."
-                      : "Extracted thumbnail"}
-                  </span>
+              <label className="activity-field-label">Cover Image/Video</label>
+              <div className="activity-cover-panel">
+                <div className="activity-cover-tabs" role="tablist" aria-label="Cover media type">
+                  <button
+                    type="button"
+                    className={`activity-cover-tab ${activeCoverTab === "image" ? "activity-cover-tab-active" : ""}`}
+                    aria-selected={activeCoverTab === "image"}
+                    role="tab"
+                    onClick={() => setActiveCoverTab("image")}
+                  >
+                    <span className="activity-cover-tab-content">
+                      <img
+                        src={UploadTabIconUrl}
+                        alt=""
+                        aria-hidden="true"
+                        className="activity-cover-tab-icon"
+                      />
+                      <span>Image upload</span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`activity-cover-tab ${activeCoverTab === "youtube" ? "activity-cover-tab-active" : ""}`}
+                    aria-selected={activeCoverTab === "youtube"}
+                    role="tab"
+                    onClick={() => setActiveCoverTab("youtube")}
+                  >
+                    <span className="activity-cover-tab-content">
+                      <img
+                        src={VideoTabIconUrl}
+                        alt=""
+                        aria-hidden="true"
+                        className="activity-cover-tab-icon"
+                      />
+                      <span>Youtube video</span>
+                    </span>
+                  </button>
                 </div>
-              ) : null}
+
+                <div className="activity-cover-body">
+                  {activeCoverTab === "image" ? (
+                    <div className="activity-thumbnail-panel">
+                      <label
+                        className={`activity-upload-card ${errors.thumbnail ? "activity-upload-card-error" : ""}`}
+                        htmlFor="thumbnail-upload"
+                      >
+                        {thumbnailPreviewUrl ? (
+                          <img
+                            src={thumbnailPreviewUrl}
+                            alt="Selected thumbnail preview"
+                            className="activity-upload-preview"
+                          />
+                        ) : (
+                          <span className="activity-upload-plus">+</span>
+                        )}
+                        <span className="activity-upload-title">Upload cover image</span>
+                        <span className="activity-upload-copy">
+                          Upload an image to use as the activity cover.
+                        </span>
+                        <span className="activity-upload-button">Choose Image</span>
+                        <span className="activity-upload-meta">
+                          {thumbnailFile ? `Image selected: ${thumbnailFile.name}` : "No image selected"}
+                        </span>
+                        <span className="activity-upload-meta">
+                          Supported formats: JPG, JPEG, PNG, GIF, WEBP
+                        </span>
+                        <span className="activity-upload-meta">Max size: 10 MB</span>
+                      </label>
+                      <input
+                        id="thumbnail-upload"
+                        className="activity-sr-only"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
+                        onChange={handleThumbnailFileChange}
+                      />
+                      {errors.thumbnail ? <FieldError message={errors.thumbnail} /> : null}
+                    </div>
+                  ) : (
+                    <div className="activity-youtube-panel">
+                      <div className="activity-youtube-copy-block">
+                        <h3>Import video from Youtube</h3>
+
+                      </div>
+
+                      <div className="activity-inline-inputs">
+                        <input
+                          id="video-url"
+                          className="activity-text-input"
+                          value={form.videoUrl}
+                          onChange={(event) => handleVideoUrlChange(event.target.value)}
+                          placeholder="Paste Youtube link here..."
+                        />
+                        <button
+                          type="button"
+                          className="activity-primary-button"
+                          onClick={handleExtractThumbnail}
+                        >
+                          {form.videoThumbnailStatus === "ready" ? "Refresh Thumbnail" : "Use video"}
+                        </button>
+                      </div>
+
+                      <p className="activity-support-text">We’ll auto-fetch the thumbnail from YouTube.</p>
+
+                      {form.videoThumbnailError ? <FieldError message={form.videoThumbnailError} /> : null}
+                      {form.videoThumbnailUrl ? (
+                        <div className="activity-youtube-preview">
+                          <img
+                            src={form.videoThumbnailUrl}
+                            alt="Extracted YouTube thumbnail"
+                            onLoad={handleThumbnailImageLoad}
+                            onError={handleThumbnailImageError}
+                          />
+                          <span>
+                            {form.videoThumbnailStatus === "checking"
+                              ? "Checking thumbnail..."
+                              : "Extracted thumbnail"}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="activity-field-group">
