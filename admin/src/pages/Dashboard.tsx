@@ -5,7 +5,11 @@ import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import { Pagination } from "../components/Pagination";
 import type { Activity } from "../types/activity";
-import { fetchActivities, getActivityStats } from "../api/activity";
+import {
+  fetchActivities,
+  getActivityStats,
+  type ListActivitiesRequest,
+} from "../api/activity";
 
 import "./Dashboard.css";
 import AddIcon from "../../icons/add.svg";
@@ -137,7 +141,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const getActivityData = async () => {
-      const request: Record<string, string> = {
+      const request: ListActivitiesRequest = {
         page: String(currentPage),
         limit: String(ITEMS_PER_PAGE),
       };
@@ -151,22 +155,22 @@ export default function Dashboard() {
         request.sort = sort;
       }
       if (appliedFilters.category?.length) {
-        request.category = appliedFilters.category.join(",");
+        request.category = appliedFilters.category;
       }
       if (appliedFilters.duration?.length) {
-        request.duration = appliedFilters.duration.join(",");
+        request.duration = appliedFilters.duration;
       }
       if (appliedFilters.gradeLevel?.length) {
-        request.gradeLevel = appliedFilters.gradeLevel.join(",");
+        request.gradeLevel = appliedFilters.gradeLevel;
       }
       if (appliedFilters.groupSize?.length) {
-        request.groupSize = appliedFilters.groupSize.join(",");
+        request.groupSize = appliedFilters.groupSize;
       }
       if (appliedFilters.energyLevel) {
         request.energyLevel = appliedFilters.energyLevel;
       }
       if (appliedFilters.environment?.length) {
-        request.environment = appliedFilters.environment.join(",");
+        request.environment = appliedFilters.environment;
       }
       if (appliedFilters.setup) {
         request.setup = appliedFilters.setup;
