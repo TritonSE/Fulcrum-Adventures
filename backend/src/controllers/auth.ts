@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 import User from "../models/user";
+import AllowedAdminEmail from "../models/allowedAdminEmail";
 import { normalizeEmail, parseName, parsePassword, parseResetToken } from "../util/authValidation";
 import { signAccessToken } from "../util/jwt";
 import { hashPassword, verifyPassword } from "../util/password";
@@ -71,6 +72,16 @@ export async function register(req: Request, res: Response): Promise<void> {
   }
 
   const userCount = await User.countDocuments();
+  if (userCount > 0) {
+    const allowed = await AllowedAdminEmail.findOne({ email });
+    if (!allowed) {
+      res.status(403).json({
+        error: "This email is not authorized to create an account. Contact your administrator.",
+      });
+      return;
+    }
+  }
+
   const role = userCount === 0 ? "super_admin" : "admin";
 
   const hashedPassword = await hashPassword(password);
@@ -81,6 +92,14 @@ export async function register(req: Request, res: Response): Promise<void> {
     hashedPassword,
     role,
   });
+
+  if (role === "super_admin") {
+    await AllowedAdminEmail.findOneAndUpdate(
+      { email },
+      { email },
+      { upsert: true, setDefaultsOnInsert: true },
+    );
+  }
 
   res.status(201).json(buildAuthResponse(user));
 }

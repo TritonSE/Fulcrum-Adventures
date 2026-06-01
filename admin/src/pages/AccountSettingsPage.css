@@ -1,0 +1,116 @@
+.account-settings {
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  padding: 48px 120px 80px;
+  box-sizing: border-box;
+}
+
+.account-settings__title {
+  margin: 0 0 32px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #153a7a;
+}
+
+.settings-card {
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  padding: 28px 32px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.settings-card__title {
+  margin: 0;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #153a7a;
+}
+
+.settings-card__subtitle {
+  margin: 4px 0 24px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.settings-card__field {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.settings-card__label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #153a7a;
+}
+
+.admin-email-list {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-email-list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-email-list__row--add .textfield-container {
+  flex: 1;
+}
+
+.admin-email-list__email {
+  flex: 1;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  color: #374151;
+  padding: 12px 0;
+}
+
+.admin-email-list__icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #153a7a;
+}
+
+.admin-email-list__icon-btn--remove {
+  color: #153a7a;
+  font-weight: 400;
+}
+
+.admin-email-list__icon-btn--add {
+  color: #153a7a;
+  font-weight: 500;
+}
+
+.admin-email-list__icon-btn:hover {
+  background: #f3f3f3;
+}

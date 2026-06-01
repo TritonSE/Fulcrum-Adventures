@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { isAdminAuthenticated } from "./api/auth";
+import { AccountSettingsPage } from "./pages/AccountSettingsPage";
 import { AdminHome } from "./pages/AdminHome";
 import { CreateAccountPage } from "./pages/CreateAccountPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -27,6 +28,14 @@ export default function App() {
         element={
           <RequireAuth>
             <AdminHome />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <RequireAuth>
+            <AccountSettingsPage />
           </RequireAuth>
         }
       />

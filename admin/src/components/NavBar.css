@@ -13,10 +13,19 @@
   align-items: center;
   width: 135px;
   margin-right: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.navbar-logo:hover {
+  opacity: 0.85;
 }
 
 .navbar-logo img {
   height: 48px;
+  display: block;
 }
 
 .navbar-tabs {
@@ -57,6 +66,10 @@
   padding-right: 120px;
 }
 
+.navbar-user-menu-anchor {
+  position: relative;
+}
+
 .user-avatar {
   width: 48px;
   height: 48px;
@@ -69,4 +82,11 @@
   font-size: 20px;
   font-weight: 400;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.user-avatar--open {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #153a7a;
 }
