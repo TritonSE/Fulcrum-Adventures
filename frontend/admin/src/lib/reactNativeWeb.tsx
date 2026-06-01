@@ -54,7 +54,7 @@ export const StyleSheet = {
     right: 0,
     bottom: 0,
     left: 0,
-  } satisfies CSSProperties,
+  } as CSSProperties,
 };
 
 export const Platform = { OS: "web" as const };
@@ -113,7 +113,7 @@ export const Text = ({ ref, style, numberOfLines, ...props }: DOMProps<HTMLSpanE
           WebkitLineClamp: numberOfLines,
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
-        } satisfies CSSProperties)
+        } as CSSProperties)
       : undefined;
 
   return <span ref={ref} style={{ ...baseStyle, ...lineClampStyle }} {...props} />;
