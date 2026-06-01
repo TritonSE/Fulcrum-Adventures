@@ -1,4 +1,4 @@
-export const ACTIVITY_API_BASE_URL = "http://localhost:4000";
+export const ACTIVITY_API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 export const ACTIVITY_API_URL = `${ACTIVITY_API_BASE_URL}/api/activities`;
 
 export type ActivityStatus = "Draft" | "Published" | "Archived";

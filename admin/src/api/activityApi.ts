@@ -1,4 +1,4 @@
-const defaultApiBaseUrl = "http://localhost:4000";
+const defaultApiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
 
 export const ACTIVITY_API_BASE_URL = defaultApiBaseUrl.replace(/\/+$/, "");
 export const ACTIVITY_API_URL = `${ACTIVITY_API_BASE_URL}/api/activities`;
