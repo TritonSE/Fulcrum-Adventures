@@ -73,8 +73,12 @@ function validateGroupSize(value: unknown): boolean {
 // Normalizes a query param that may arrive as a single string or string[]
 // (express parses repeated keys as string[] automatically when using query())
 function toStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) return value.map(String);
-  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => String(item).split(",").map((s) => s.trim()).filter(Boolean));
+  }
+  if (typeof value === "string") {
+    return value.split(",").map((s) => s.trim()).filter(Boolean);
+  }
   return [];
 }
 
