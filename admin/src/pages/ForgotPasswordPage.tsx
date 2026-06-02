@@ -5,6 +5,7 @@ import { forgotPasswordAdmin, isAdminAuthenticated, waitForAuth } from "../api/a
 import { AuthShell } from "../components/AuthShell";
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
+import WarningIcon from "../../icons/error.svg";
 
 import "./AuthConfirmation.css";
 import "./ForgotPasswordPage.css";
@@ -15,6 +16,7 @@ export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     void waitForAuth().then(() => {
@@ -33,8 +35,15 @@ export function ForgotPasswordPage() {
     }
 
     setSubmitting(true);
-    await forgotPasswordAdmin(email);
+    setSubmitError(null);
+    const result = await forgotPasswordAdmin(email);
     setSubmitting(false);
+
+    if (!result.ok) {
+      setSubmitError(result.message);
+      return;
+    }
+
     setSent(true);
   }
 
@@ -92,6 +101,13 @@ export function ForgotPasswordPage() {
           >
             {submitting ? "Sending…" : "Send Email"}
           </Button>
+
+          {submitError ? (
+            <div className="sign-in__error-banner" role="alert">
+              <img src={WarningIcon} alt="" className="sign-in__error-icon" aria-hidden="true" />
+              <p className="sign-in__error-text">{submitError}</p>
+            </div>
+          ) : null}
         </form>
       )}
     </AuthShell>

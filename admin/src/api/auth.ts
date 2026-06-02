@@ -225,18 +225,9 @@ export async function changePasswordAdmin(
   }
 }
 
-function resetPasswordContinueUrl(): string {
-  return `${window.location.origin}/reset-password?resetComplete=true`;
-}
-
 export async function forgotPasswordAdmin(email: string): Promise<ForgotPasswordResult> {
   try {
-    await sendPasswordResetEmail(auth, email.trim(), {
-      // After Firebase's reset UI saves, user is redirected here (confirmation).
-      // With handleCodeInApp, the email link can also open /reset-password?oobCode=… (our form).
-      url: resetPasswordContinueUrl(),
-      handleCodeInApp: true,
-    });
+    await sendPasswordResetEmail(auth, email.trim());
     return { ok: true };
   } catch (err) {
     const { message } = getFirebaseError(err, "Unable to send reset email.");
