@@ -27,7 +27,8 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       role: dbUser?.role ?? firebaseUser.role,
     };
     next();
-  } catch {
+  } catch (error) {
+    console.error("Firebase authentication failed:", error);
     res.status(401).json({ error: "Unauthorized" });
   }
 }
