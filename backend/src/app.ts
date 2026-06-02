@@ -17,7 +17,7 @@ const allowedOrigins = [
   .filter((origin): origin is string => Boolean(origin));
 
 const adminPreviewOriginPattern =
-  /^https:\/\/fulcrum-admin-git-[a-z0-9-]+-philip-chens-projects\.vercel\.app$/;
+  /^https:\/\/fulcrum-admin(?:-git-[a-z0-9-]+|-[a-z0-9]+)-philip-chens-projects\.vercel\.app$/;
 
 function isAllowedOrigin(origin: string): boolean {
   return allowedOrigins.includes(origin) || adminPreviewOriginPattern.test(origin);
