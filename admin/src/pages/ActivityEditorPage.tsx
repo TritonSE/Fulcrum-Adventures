@@ -19,6 +19,7 @@ import BlankEnergyStarIconUrl from "../assets/blankenergystar.svg";
 import BookmarkIconUrl from "../assets/BookMarkIcon.svg";
 import ButtonIconUrl from "../assets/Button.svg";
 import ClockIconUrl from "../assets/clock.svg";
+import CloseIconUrl from "../assets/CloseIcon.svg";
 import DeleteSectionButtonUrl from "../assets/DeleteSectionButton.svg";
 import PhoneFrameImageUrl from "../assets/378_rectangle_extracted.png";
 import GraduationCapIconUrl from "../assets/graduation-cap.svg";
@@ -46,6 +47,8 @@ const GRADE_OPTIONS = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/;
 const MAX_SECTION_TITLE_LENGTH = 30;
 const MAX_SECTIONS = 6;
+const MAX_TABS = 6;
+const MAX_TAB_NAME_LENGTH = 20;
 
 type EditorMode = "create" | "edit";
 type TabKind = "prep" | "play" | "debrief" | "custom";
@@ -106,6 +109,7 @@ type FormErrors = {
   playGuidedItems?: (string | null)[];
   debriefGuidedItems?: (string | null)[];
   selTags?: string;
+  customTabs?: Record<string, string>;
   sections?: Record<string, { title?: string; content?: string }>;
 };
 
@@ -857,6 +861,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [form, setForm] = useState<FormState>(() => createDefaultFormState());
   const [tabs, setTabs] = useState<ActivityTab[]>(() => createDefaultTabs());
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [isCreatingTab, setIsCreatingTab] = useState(false);
+  const [pendingTabName, setPendingTabName] = useState("");
+  const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [activeCoverTab, setActiveCoverTab] = useState<CoverTabKind>("image");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
@@ -1076,12 +1083,152 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     clearErrorKeys("grade");
   };
 
-  const handleCreateTab = () => {
-    setTabs((current) => {
-      const nextTab = createDefaultTab(`Tab ${current.length + 1}`, "custom");
-      setActiveTabId(nextTab.id);
-      return [...current, nextTab];
+  const clearCustomTabError = (tabId: string) => {
+    setErrors((current) => {
+      if (!current.customTabs?.[tabId]) return current;
+
+      const nextCustomTabs = { ...current.customTabs };
+      delete nextCustomTabs[tabId];
+
+      return {
+        ...current,
+        customTabs: Object.keys(nextCustomTabs).length > 0 ? nextCustomTabs : undefined,
+      };
     });
+  };
+
+  const clearPendingCustomTabError = () => {
+    setErrors((current) => {
+      if (!current.customTabs?.pending) return current;
+
+      const nextCustomTabs = { ...current.customTabs };
+      delete nextCustomTabs.pending;
+
+      return {
+        ...current,
+        customTabs: Object.keys(nextCustomTabs).length > 0 ? nextCustomTabs : undefined,
+      };
+    });
+  };
+
+  const handleStartCreateTab = () => {
+    if (tabs.length >= MAX_TABS) return;
+    setIsCreatingTab(true);
+    setPendingTabName("");
+    clearPendingCustomTabError();
+  };
+
+  const handleCancelCreateTab = () => {
+    setIsCreatingTab(false);
+    setPendingTabName("");
+    clearPendingCustomTabError();
+  };
+
+  const handleConfirmCreateTab = () => {
+    const trimmedName = pendingTabName.trim();
+
+    if (!trimmedName) {
+      setErrors((current) => ({
+        ...current,
+        customTabs: {
+          ...(current.customTabs ?? {}),
+          pending: "Please enter a tab name",
+        },
+      }));
+      return;
+    }
+
+    const hasDuplicate = tabs.some((tab) => tab.name.trim().toLowerCase() === trimmedName.toLowerCase());
+
+    if (hasDuplicate) {
+      setErrors((current) => ({
+        ...current,
+        customTabs: {
+          ...(current.customTabs ?? {}),
+          pending: "Tab names must be unique",
+        },
+      }));
+      return;
+    }
+
+    const nextTab = createDefaultTab(trimmedName, "custom");
+    setTabs((current) => [...current, nextTab]);
+    setActiveTabId(nextTab.id);
+    setEditingTabId(nextTab.id);
+    setIsCreatingTab(false);
+    setPendingTabName("");
+    clearPendingCustomTabError();
+  };
+
+  const handleCustomTabNameChange = (tabId: string, value: string) => {
+    setTabs((current) =>
+      current.map((tab) => (tab.id === tabId ? { ...tab, name: value } : tab)),
+    );
+
+    clearCustomTabError(tabId);
+  };
+
+  const handleStartEditTab = (tabId: string) => {
+    const targetTab = tabs.find((tab) => tab.id === tabId);
+    if (!targetTab || targetTab.kind !== "custom") return;
+
+    setActiveTabId(tabId);
+    setEditingTabId(tabId);
+  };
+
+  const handleFinishEditTab = (tabId: string) => {
+    const targetTab = tabs.find((tab) => tab.id === tabId);
+    if (!targetTab || targetTab.kind !== "custom") return;
+
+    const trimmedName = targetTab.name.trim();
+
+    if (!trimmedName) {
+      setErrors((current) => ({
+        ...current,
+        customTabs: {
+          ...(current.customTabs ?? {}),
+          [tabId]: "Please enter a tab name",
+        },
+      }));
+      return;
+    }
+
+    const hasDuplicate = tabs.some(
+      (tab) => tab.id !== tabId && tab.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    );
+
+    if (hasDuplicate) {
+      setErrors((current) => ({
+        ...current,
+        customTabs: {
+          ...(current.customTabs ?? {}),
+          [tabId]: "Tab names must be unique",
+        },
+      }));
+      return;
+    }
+
+    setTabs((current) =>
+      current.map((tab) => (tab.id === tabId ? { ...tab, name: trimmedName } : tab)),
+    );
+    clearCustomTabError(tabId);
+    setEditingTabId((current) => (current === tabId ? null : current));
+  };
+
+  const handleDeleteCustomTab = (tabId: string) => {
+    setTabs((current) => {
+      const tabIndex = current.findIndex((tab) => tab.id === tabId);
+      if (tabIndex < 0 || current[tabIndex]?.kind !== "custom") return current;
+
+      const nextTabs = current.filter((tab) => tab.id !== tabId);
+      const nextActiveTab = nextTabs[tabIndex] ?? nextTabs[tabIndex - 1] ?? nextTabs[0] ?? null;
+      setActiveTabId(nextActiveTab?.id ?? null);
+      return nextTabs;
+    });
+
+    setEditingTabId((current) => (current === tabId ? null : current));
+
+    clearCustomTabError(tabId);
   };
 
   const handleAddSection = () => {
@@ -1203,7 +1350,15 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     const prepTab = tabs.find((tab) => tab.kind === "prep");
     const playTab = tabs.find((tab) => tab.kind === "play");
     const debriefTab = tabs.find((tab) => tab.kind === "debrief");
+    const customTabErrors: Record<string, string> = {};
     const sectionErrors: Record<string, { title?: string; content?: string }> = {};
+    const tabNameCounts = new Map<string, number>();
+
+    tabs.forEach((tab) => {
+      const normalizedName = tab.name.trim().toLowerCase();
+      if (!normalizedName) return;
+      tabNameCounts.set(normalizedName, (tabNameCounts.get(normalizedName) ?? 0) + 1);
+    });
 
     if (!form.title.trim()) nextErrors.title = "Please enter an activity title";
     if (!form.overview.trim()) nextErrors.overview = "Please enter an activity overview";
@@ -1237,6 +1392,20 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     if (!form.anyEnvironment && form.environments.length === 0) {
       nextErrors.environment = "Please select an environment or Any Environment";
     }
+
+    tabs.forEach((tab) => {
+      if (tab.kind !== "custom") return;
+
+      const trimmedName = tab.name.trim();
+      if (!trimmedName) {
+        customTabErrors[tab.id] = "Please enter a tab name";
+        return;
+      }
+
+      if ((tabNameCounts.get(trimmedName.toLowerCase()) ?? 0) > 1) {
+        customTabErrors[tab.id] = "Tab names must be unique";
+      }
+    });
 
     if (prepTab) {
       const setupSection = prepTab.sections[0];
@@ -1278,6 +1447,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     });
 
     if (Object.keys(sectionErrors).length > 0) nextErrors.sections = sectionErrors;
+    if (Object.keys(customTabErrors).length > 0) nextErrors.customTabs = customTabErrors;
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -1779,7 +1949,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
             <div className="activity-facilitate-header">
               <p className="activity-field-label">Facilitate</p>
-              <button type="button" className="activity-secondary-button" onClick={handleCreateTab}>
+              <button
+                type="button"
+                className="activity-secondary-button activity-create-tab-button"
+                onClick={handleStartCreateTab}
+                disabled={tabs.length >= MAX_TABS}
+              >
                 <span className="activity-button-icon-text">
                   <img src={AddIconUrl} alt="" aria-hidden="true" />
                   <span>Create New Tab</span>
@@ -1787,22 +1962,108 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
               </button>
             </div>
 
+            {isCreatingTab ? (
+              <div className="activity-create-tab-row">
+                <div className="activity-create-tab-form">
+                  <div className="activity-support-block">
+                    <input
+                      className={`activity-text-input ${errors.customTabs?.pending ? "activity-input-error" : ""}`}
+                      value={pendingTabName}
+                      autoFocus
+                      maxLength={MAX_TAB_NAME_LENGTH}
+                      onChange={(event) => {
+                        setPendingTabName(event.target.value);
+                        clearPendingCustomTabError();
+                      }}
+                      placeholder="Enter tab name.."
+                    />
+                    <p className="activity-support-text">
+                      {pendingTabName.length}/{MAX_TAB_NAME_LENGTH} characters
+                    </p>
+                  </div>
+                  {errors.customTabs?.pending ? <FieldError message={errors.customTabs.pending} /> : null}
+                </div>
+                <div className="activity-create-tab-actions">
+                  <button
+                    type="button"
+                    className="activity-secondary-button activity-create-tab-confirm"
+                    onClick={handleConfirmCreateTab}
+                  >
+                    Create
+                  </button>
+                  <button
+                    type="button"
+                    className="activity-inline-text-button"
+                    onClick={handleCancelCreateTab}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             <div className="activity-tab-container">
               {tabs.map((tab) => {
                 const isActive = tab.id === activeTabId;
+                const isEditing = editingTabId === tab.id;
+                const isCustomTab = tab.kind === "custom";
 
                 return (
-                  <button
+                  <div
                     key={tab.id}
-                    type="button"
-                    className={`activity-tab ${isActive ? "activity-tab-active" : ""}`}
-                    onClick={() => setActiveTabId(tab.id)}
+                    className={`activity-tab ${isActive ? "activity-tab-active" : ""} ${
+                      isCustomTab ? "activity-tab-custom" : ""
+                    } ${isEditing ? "activity-tab-editing" : ""
+                    }`}
                   >
-                    {tab.name}
-                  </button>
+                    {isEditing ? (
+                      <input
+                        className={`activity-tab-name-input ${
+                          errors.customTabs?.[tab.id] ? "activity-input-error" : ""
+                        }`}
+                        value={tab.name}
+                        maxLength={MAX_TAB_NAME_LENGTH}
+                        autoFocus
+                        onChange={(event) => handleCustomTabNameChange(tab.id, event.target.value)}
+                        onBlur={() => handleFinishEditTab(tab.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            handleFinishEditTab(tab.id);
+                          }
+                        }}
+                        placeholder="Enter tab name.."
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="activity-tab-label"
+                        onClick={() => {
+                          setActiveTabId(tab.id);
+                          if (isCustomTab && isActive) handleStartEditTab(tab.id);
+                        }}
+                      >
+                        {tab.name.trim()}
+                      </button>
+                    )}
+
+                    {isCustomTab ? (
+                      <button
+                        type="button"
+                        className="activity-tab-close"
+                        aria-label={`Delete ${tab.name.trim() || "custom tab"}`}
+                        onClick={() => handleDeleteCustomTab(tab.id)}
+                      >
+                        <img src={CloseIconUrl} />
+                      </button>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
+            {activeTab?.kind === "custom" && errors.customTabs?.[activeTab.id] ? (
+              <FieldError message={errors.customTabs[activeTab.id]} />
+            ) : null}
 
             {activeTab ? (
               <div className="activity-details-container">
