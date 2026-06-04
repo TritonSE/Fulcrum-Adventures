@@ -1549,15 +1549,17 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
               <label className="activity-field-label" htmlFor="title">
                 Activity Title
               </label>
-              <input
-                id="title"
-                className={`activity-text-input ${errors.title ? "activity-input-error" : ""}`}
-                value={form.title}
-                maxLength={40}
-                onChange={(event) => setField("title", event.target.value)}
-                placeholder="Enter activity title"
-              />
-              <p className="activity-support-text">{form.title.length}/40 characters</p>
+              <div className="activity-support-block">
+                <input
+                  id="title"
+                  className={`activity-text-input ${errors.title ? "activity-input-error" : ""}`}
+                  value={form.title}
+                  maxLength={40}
+                  onChange={(event) => setField("title", event.target.value)}
+                  placeholder="Enter activity title"
+                />
+                <p className="activity-support-text">{form.title.length}/40 characters</p>
+              </div>
               {errors.title ? <FieldError message={errors.title} /> : null}
             </div>
 
@@ -1761,15 +1763,17 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
               <label className="activity-field-label" htmlFor="objective">
                 Objective
               </label>
-              <input
-                id="objective"
-                className={`activity-text-input ${errors.objective ? "activity-input-error" : ""}`}
-                value={form.objective}
-                maxLength={150}
-                onChange={(event) => setField("objective", event.target.value)}
-                placeholder="Enter activity objective"
-              />
-              <p className="activity-support-text">{form.objective.length}/150 characters</p>
+              <div className="activity-support-block">
+                <input
+                  id="objective"
+                  className={`activity-text-input ${errors.objective ? "activity-input-error" : ""}`}
+                  value={form.objective}
+                  maxLength={150}
+                  onChange={(event) => setField("objective", event.target.value)}
+                  placeholder="Enter activity objective"
+                />
+                <p className="activity-support-text">{form.objective.length}/150 characters</p>
+              </div>
               {errors.objective ? <FieldError message={errors.objective} /> : null}
             </div>
 
@@ -1964,28 +1968,30 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                         className="activity-delete-section-button"
                         onClick={() => handleDeleteSection(section.id)}
                       >
-                        <img src={DeleteSectionButtonUrl} alt="" aria-hidden="true" />
+                        <img src={DeleteSectionButtonUrl} alt="" aria-hidden="true"/>
                       </button>
                     </div>
 
-                    <input
-                      className={`activity-section-title-input ${
-                        errors.sections?.[section.id]?.title ? "activity-input-error" : ""
-                      }`}
-                      value={section.title}
-                      onChange={(event) =>
-                        handleUpdateSection(section.id, (existingSection) => ({
-                          ...existingSection,
-                          title: event.target.value,
-                        }))
-                      }
-                      placeholder="Section Title"
-                      maxLength={MAX_SECTION_TITLE_LENGTH}
-                    />
+                    <div className="activity-support-block">
+                      <input
+                        className={`activity-section-title-input ${
+                          errors.sections?.[section.id]?.title ? "activity-input-error" : ""
+                        }`}
+                        value={section.title}
+                        onChange={(event) =>
+                          handleUpdateSection(section.id, (existingSection) => ({
+                            ...existingSection,
+                            title: event.target.value,
+                          }))
+                        }
+                        placeholder="Section Title"
+                        maxLength={MAX_SECTION_TITLE_LENGTH}
+                      />
 
-                    <p className="activity-support-text">
-                      {section.title.length}/{MAX_SECTION_TITLE_LENGTH} characters
-                    </p>
+                      <p className="activity-support-text">
+                        {section.title.length}/{MAX_SECTION_TITLE_LENGTH} characters
+                      </p>
+                    </div>
                     {errors.sections?.[section.id]?.title ? (
                       <FieldError message={errors.sections[section.id].title ?? ""} />
                     ) : null}
@@ -2037,29 +2043,31 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
               </div>
             ) : null}
 
-            <div className="activity-material-input-row">
-              <input
-                className={`activity-text-input ${errors.selTags ? "activity-input-error" : ""}`}
-                value={selTagInput}
-                onChange={(event) => setSelTagInput(event.target.value)}
-                placeholder="Add SEL Tag.."
-                maxLength={30}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter") return;
-                  event.preventDefault();
-                  handleAddSelTag();
-                }}
-              />
-              <button
-                type="button"
-                className="activity-icon-button activity-icon-button-outline"
-                onClick={handleAddSelTag}
-              >
-                <img src={AddIconUrl} alt="" aria-hidden="true" />
-              </button>
-            </div>
+            <div className="activity-support-block">
+              <div className="activity-material-input-row">
+                <input
+                  className={`activity-text-input ${errors.selTags ? "activity-input-error" : ""}`}
+                  value={selTagInput}
+                  onChange={(event) => setSelTagInput(event.target.value)}
+                  placeholder="Add SEL Tag.."
+                  maxLength={30}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    handleAddSelTag();
+                  }}
+                />
+                <button
+                  type="button"
+                  className="activity-icon-button activity-icon-button-outline"
+                  onClick={handleAddSelTag}
+                >
+                  <img src={AddIconUrl} alt="" aria-hidden="true" />
+                </button>
+              </div>
 
-            <p className="activity-support-text">{selTagInput.length}/30 characters</p>
+              <p className="activity-support-text">{selTagInput.length}/30 characters</p>
+            </div>
             {errors.selTags ? <FieldError message={errors.selTags} /> : null}
           </div>
         </CollapsibleSection>
