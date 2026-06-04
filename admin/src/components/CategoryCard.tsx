@@ -67,9 +67,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           </p>
           <p className="percent-of-total-activities-text">
             {totalActivities > 0
-              ? ((numActivities / totalActivities) * 100)
-                  .toFixed(2)
-                  .replace(/\.?0+$/, "")
+              ? Math.round((numActivities / totalActivities) * 100)
               : "0"}
             % of total
           </p>

@@ -17,11 +17,44 @@ import { ConfirmationPopup } from "./ConfirmationPopup";
 interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
+  categoryFilters?: Activity["category"];
 }
+
+const CATEGORY_ORDER: Activity["category"] = [
+  "Opener",
+  "Icebreaker",
+  "Connection",
+  "Active",
+  "Debrief",
+  "Team Challenge",
+];
+
+const sortCategoriesByOrder = (categories: Activity["category"]) =>
+  categories
+    .slice()
+    .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
+
+const getPrimaryCategory = (
+  categories: Activity["category"],
+  filterCategories?: Activity["category"],
+) => {
+  if (filterCategories?.length) {
+    const filteredCategories = CATEGORY_ORDER.filter(
+      (category) =>
+        filterCategories.includes(category) && categories.includes(category),
+    );
+    if (filteredCategories.length) {
+      return filteredCategories[0];
+    }
+  }
+
+  return sortCategoriesByOrder(categories)[0];
+};
 
 export default function DashboardTable({
   activities,
   onEditActivity,
+  categoryFilters,
 }: DashboardTableProps) {
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
@@ -169,15 +202,38 @@ export default function DashboardTable({
               <td className="col-title">{activity.title}</td>
               <td className="col-category">
                 <div className="category-tag-container">
-                  <CategoryTag category={activity.category[0]} selected />
-                  {activity.category.length > 1 && (
-                    <div className="plus-categories-tag">
-                      +{activity.category.length - 1}
-                    </div>
-                  )}
+                  {(() => {
+                    const primaryCategory = getPrimaryCategory(
+                      activity.category,
+                      categoryFilters,
+                    );
+                    const extraCategories = sortCategoriesByOrder(
+                      activity.category,
+                    ).filter((category) => category !== primaryCategory);
+
+                    return (
+                      <>
+                        <CategoryTag category={primaryCategory} selected />
+                        {extraCategories.length > 0 && (
+                          <div className="plus-categories-tag">
+                            +{extraCategories.length}
+                            <div className="category-tooltip" role="tooltip">
+                              {extraCategories.map((category, index) => (
+                                <CategoryTag
+                                  category={category}
+                                  key={`${category}-${index}`}
+                                  selected
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </td>
-              <td>
+              <td className="col-energy">
                 <EnergyTag level={formatEnergyLevel(activity.energyLevel)} />
               </td>
               <td className="col-grade">

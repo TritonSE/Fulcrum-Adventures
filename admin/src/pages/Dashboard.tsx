@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
@@ -39,24 +39,17 @@ const ITEMS_PER_PAGE = 10;
 
 type SortValue = "-createdAt" | "title" | "-title" | "-updatedAt";
 type GradeLevel = "K-2" | "3-5" | "6-8" | "9-12";
-type GroupSize = "Small (3-15)" | "Medium (15-30)" | "Large (30+)";
 
 type DashboardFilters = {
   category?: Category[];
   duration?: Duration[];
   gradeLevel?: GradeLevel[];
-  groupSize?: GroupSize[];
   energyLevel?: EnergyLevel;
   environment?: Environment[];
   setup?: Setup;
 };
 
-type MultiFilterKey =
-  | "category"
-  | "duration"
-  | "gradeLevel"
-  | "groupSize"
-  | "environment";
+type MultiFilterKey = "category" | "duration" | "gradeLevel" | "environment";
 
 const sortOptions: { label: string; value: SortValue }[] = [
   { label: "A - Z", value: "title" },
@@ -89,11 +82,6 @@ const filterSections = [
     options: ["K-2", "3-5", "6-8", "9-12"],
   },
   {
-    key: "groupSize",
-    label: "Group Size",
-    options: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
-  },
-  {
     key: "energyLevel",
     label: "Energy Level",
     options: ["Low", "Medium", "High"],
@@ -114,7 +102,6 @@ const multiFilterKeys: MultiFilterKey[] = [
   "category",
   "duration",
   "gradeLevel",
-  "groupSize",
   "environment",
 ];
 
@@ -140,6 +127,23 @@ export default function Dashboard() {
   >("All");
   const [isLoading, setIsLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const sortFilterActionsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        sortFilterActionsRef.current &&
+        !sortFilterActionsRef.current.contains(target)
+      ) {
+        setIsSortDropdownOpen(false);
+        setIsFilterDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const getActivityData = async () => {
@@ -164,9 +168,6 @@ export default function Dashboard() {
       }
       if (appliedFilters.gradeLevel?.length) {
         request.gradeLevel = appliedFilters.gradeLevel;
-      }
-      if (appliedFilters.groupSize?.length) {
-        request.groupSize = appliedFilters.groupSize;
       }
       if (appliedFilters.energyLevel) {
         request.energyLevel = appliedFilters.energyLevel;
@@ -394,7 +395,7 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              <div className="sort-filter-actions">
+              <div className="sort-filter-actions" ref={sortFilterActionsRef}>
                 <div className="dropdown-control">
                   <button
                     className={`sort-btn ${
@@ -577,6 +578,7 @@ export default function Dashboard() {
             <DashboardTable
               activities={activities}
               onEditActivity={handleEditActivity}
+              categoryFilters={appliedFilters.category}
             />
           </div>
 

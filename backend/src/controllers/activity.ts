@@ -124,10 +124,7 @@ export async function listActivities(req: Request, res: Response) {
   }
   if (search) {
     const escapedSearch = escapeRegex(search);
-    const searchFilter = [
-      { title: { $regex: escapedSearch, $options: "i" } },
-      { overview: { $regex: escapedSearch, $options: "i" } },
-    ];
+    const searchFilter = [{ title: { $regex: escapedSearch, $options: "i" } }];
     andFilters.push({ $or: searchFilter });
   }
   if (andFilters.length > 0) {
