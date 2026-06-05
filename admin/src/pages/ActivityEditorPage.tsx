@@ -802,7 +802,7 @@ const createFormStateFromActivity = (activity: ActivityDetail): FormState => {
     energyLevel: activity.energyLevel ?? "",
     environments,
     anyEnvironment: (activity.environment ?? []).includes("Any Environment"),
-    setup: activity.setup === "Required" ? "Props" : "No Props",
+    setup: activity.setup === "Required" ? "Props" : activity.status === "Draft" ? "" : "No Props",
     objective: activity.objective ?? "",
     selTags: activity.selTags ?? [],
     videoUrl: activity.videoUrl ?? "",
