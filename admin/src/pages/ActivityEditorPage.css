@@ -926,6 +926,7 @@
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
   font-size: 14px;
+  text-align: left;
 }
 
 .activity-add-section-button {
@@ -1074,11 +1075,12 @@
 }
 
 .activity-preview-shell {
-  width: min(1000px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
+  width: 900px;
+  max-height: 600px;
   overflow: auto;
   background: #ffffff;
-  padding: 40px;
+  border-radius: 8px;
+  padding: 36px 40px 40px;
   display: grid;
   justify-items: center;
 }
@@ -1094,17 +1096,19 @@
 }
 
 .activity-preview-subtitle {
-  margin: 22px 0 14px;
+  margin: 16px 0 10px;
   color: #909090;
   font-family: "Instrument Sans", sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
   text-align: center;
 }
 
 .activity-preview-phone-wrapper {
   position: relative;
-  width: min(500px, 100%);
+  width: 300px;
   aspect-ratio: 300 / 550;
   display: flex;
   align-items: center;
@@ -1167,7 +1171,7 @@
 
 .activity-preview-tutorial-pill {
   min-height: 28px;
-  padding: 8px 16px;
+  padding: 3px 15px;
   border-radius: 63px;
   background: #ffffff;
   display: inline-flex;
@@ -1253,6 +1257,7 @@
   font-weight: 700;
   line-height: 28px;
   font-family: "League Spartan", "Instrument Sans", sans-serif;
+  text-align: left;
 }
 
 .activity-preview-metric-item {
@@ -1287,6 +1292,7 @@
   font-style: normal;
   font-weight: 400;
   line-height: 13px;
+  text-align: left;
 }
 
 .activity-preview-description-text {
@@ -1308,7 +1314,7 @@
   border-radius: 25px;
   border: 1px solid #ebebeb;
   background: #ffffff;
-  padding: 6px 14px;
+  padding: 0px 8px 0px 8px;
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
   font-size: 7.542px;
@@ -1333,6 +1339,7 @@
   font-style: normal;
   font-weight: 700;
   font-family: "League Spartan", "Instrument Sans", sans-serif;
+  text-align: left;
 }
 
 .activity-preview-facilitate-tab-bar {
@@ -1392,6 +1399,7 @@
   font-style: normal;
   font-weight: 900;
   font-family: "League Spartan", "Instrument Sans", sans-serif;
+  text-align: left;
 }
 
 .activity-preview-material-block {
