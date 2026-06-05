@@ -10,8 +10,8 @@ import {
   ACTIVITY_STATUSES,
 } from "../constants/activity";
 
-import type { ValidationChain } from "express-validator";
 import type { Request } from "express";
+import type { ValidationChain } from "express-validator";
 
 const GRADE_LEVELS = ["K-2", "3-5", "6-8", "9-12"] as const;
 const GROUP_SIZES = ["Small (3-15)", "Medium (15-30)", "Large (30+)"] as const;
@@ -43,13 +43,13 @@ function parsePositiveInt(value: unknown): number | null {
 
 function validateGroupSize(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("groupSize must be an object.");
+    throw new TypeError("groupSize must be an object.");
   }
 
   const groupSize = value as { min?: unknown; max?: unknown; anySize?: unknown };
 
   if (groupSize.anySize !== undefined && typeof groupSize.anySize !== "boolean") {
-    throw new Error("groupSize.anySize must be a boolean.");
+    throw new TypeError("groupSize.anySize must be a boolean.");
   }
 
   if (groupSize.anySize === true) {
@@ -59,20 +59,21 @@ function validateGroupSize(value: unknown): boolean {
   const min = parsePositiveInt(groupSize.min);
   const max = parsePositiveInt(groupSize.max);
   if (min === null) {
-    throw new Error("groupSize.min must be a positive integer.");
+    throw new TypeError("groupSize.min must be a positive integer.");
   }
   if (max === null) {
-    throw new Error("groupSize.max must be a positive integer.");
+    throw new TypeError("groupSize.max must be a positive integer.");
   }
   if (min > max) {
-    throw new Error("groupSize.min cannot be greater than groupSize.max.");
+    throw new TypeError("groupSize.min cannot be greater than groupSize.max.");
   }
 
   return true;
 }
 
 function isDraftRequest(req: Request): boolean {
-  return req.body?.status === "Draft";
+  const requestBody = req.body as { status?: unknown } | undefined;
+  return requestBody?.status === "Draft";
 }
 
 // Normalizes a query param that may arrive as a single string or string[]
@@ -103,16 +104,16 @@ const optionalActivityBodyFields: ValidationChain[] = [
     .optional()
     .custom((value, { req }) => {
       if (!Array.isArray(value)) {
-        throw new Error("category must be an array.");
+        throw new TypeError("category must be an array.");
       }
       if (value.length === 0) {
         return isDraftRequest(req as Request);
       }
       if (value.length < 1 || value.length > 3) {
-        throw new Error("category must have between 1 and 3 items.");
+        throw new TypeError("category must have between 1 and 3 items.");
       }
       if (!categoryItemsValidator(value)) {
-        throw new Error(`category must be one of: ${ACTIVITY_CATEGORIES.join(", ")}.`);
+        throw new TypeError(`category must be one of: ${ACTIVITY_CATEGORIES.join(", ")}.`);
       }
       return true;
     }),
@@ -150,7 +151,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || !(ACTIVITY_DURATIONS as readonly string[]).includes(value)) {
-        throw new Error(`duration must be one of: ${ACTIVITY_DURATIONS.join(", ")}.`);
+        throw new TypeError(`duration must be one of: ${ACTIVITY_DURATIONS.join(", ")}.`);
       }
       return true;
     }),
@@ -161,7 +162,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || !(ACTIVITY_ENERGY_LEVELS as readonly string[]).includes(value)) {
-        throw new Error(`energyLevel must be one of: ${ACTIVITY_ENERGY_LEVELS.join(", ")}.`);
+        throw new TypeError(`energyLevel must be one of: ${ACTIVITY_ENERGY_LEVELS.join(", ")}.`);
       }
       return true;
     }),
@@ -169,13 +170,13 @@ const optionalActivityBodyFields: ValidationChain[] = [
     .optional()
     .custom((value, { req }) => {
       if (!Array.isArray(value)) {
-        throw new Error("environment must be an array.");
+        throw new TypeError("environment must be an array.");
       }
       if (value.length === 0) {
         return isDraftRequest(req as Request);
       }
       if (!environmentItemsValidator(value)) {
-        throw new Error(`environment must be one of: ${ACTIVITY_ENVIRONMENTS.join(", ")}.`);
+        throw new TypeError(`environment must be one of: ${ACTIVITY_ENVIRONMENTS.join(", ")}.`);
       }
       return true;
     }),
@@ -186,7 +187,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || !(ACTIVITY_SETUPS as readonly string[]).includes(value)) {
-        throw new Error(`setup must be one of: ${ACTIVITY_SETUPS.join(", ")}.`);
+        throw new TypeError(`setup must be one of: ${ACTIVITY_SETUPS.join(", ")}.`);
       }
       return true;
     }),
@@ -198,7 +199,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("facilitateSections tabName is required.");
+        throw new TypeError("facilitateSections tabName is required.");
       }
       return true;
     }),
@@ -209,7 +210,7 @@ const optionalActivityBodyFields: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("facilitateSections content is required.");
+        throw new TypeError("facilitateSections content is required.");
       }
       return true;
     }),
@@ -237,10 +238,11 @@ export const listActivitiesQuery: ValidationChain[] = [
     .optional()
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
-      if (values.length === 0) throw new Error("category must include at least one value.");
+      if (values.length === 0) throw new TypeError("category must include at least one value.");
+      
       const invalid = values.filter((v) => !(ACTIVITY_CATEGORIES as readonly string[]).includes(v));
       if (invalid.length > 0) {
-        throw new Error(
+        throw new TypeError(
           `Invalid category: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_CATEGORIES.join(", ")}.`,
         );
       }
@@ -251,10 +253,10 @@ export const listActivitiesQuery: ValidationChain[] = [
     .optional()
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
-      if (values.length === 0) throw new Error("duration must include at least one value.");
+      if (values.length === 0) throw new TypeError("duration must include at least one value.");
       const invalid = values.filter((v) => !(ACTIVITY_DURATIONS as readonly string[]).includes(v));
       if (invalid.length > 0) {
-        throw new Error(
+        throw new TypeError(
           `Invalid duration: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_DURATIONS.join(", ")}.`,
         );
       }
@@ -265,10 +267,10 @@ export const listActivitiesQuery: ValidationChain[] = [
     .optional()
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
-      if (values.length === 0) throw new Error("gradeLevel must include at least one value.");
+      if (values.length === 0) throw new TypeError("gradeLevel must include at least one value.");
       const invalid = values.filter((v) => !(GRADE_LEVELS as readonly string[]).includes(v));
       if (invalid.length > 0) {
-        throw new Error(
+        throw new TypeError(
           `Invalid gradeLevel: ${invalid.join(", ")}. Must be one of: ${GRADE_LEVELS.join(", ")}.`,
         );
       }
@@ -279,10 +281,10 @@ export const listActivitiesQuery: ValidationChain[] = [
     .optional()
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
-      if (values.length === 0) throw new Error("groupSize must include at least one value.");
+      if (values.length === 0) throw new TypeError("groupSize must include at least one value.");
       const invalid = values.filter((v) => !(GROUP_SIZES as readonly string[]).includes(v));
       if (invalid.length > 0) {
-        throw new Error(
+        throw new TypeError(
           `Invalid groupSize: ${invalid.join(", ")}. Must be one of: ${GROUP_SIZES.join(", ")}.`,
         );
       }
@@ -298,12 +300,12 @@ export const listActivitiesQuery: ValidationChain[] = [
     .optional()
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
-      if (values.length === 0) throw new Error("environment must include at least one value.");
+      if (values.length === 0) throw new TypeError("environment must include at least one value.");
       const invalid = values.filter(
         (v) => !(ACTIVITY_ENVIRONMENTS as readonly string[]).includes(v),
       );
       if (invalid.length > 0) {
-        throw new Error(
+        throw new TypeError(
           `Invalid environment: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_ENVIRONMENTS.join(", ")}.`,
         );
       }
@@ -320,7 +322,7 @@ export const listActivitiesQuery: ValidationChain[] = [
     .custom((value: string) => {
       const field = value.startsWith("-") ? value.slice(1) : value;
       if (!(ACTIVITY_SORT_FIELDS as readonly string[]).includes(field)) {
-        throw new Error(`Invalid sort field. Allowed: ${ACTIVITY_SORT_FIELDS.join(", ")}.`);
+        throw new TypeError(`Invalid sort field. Allowed: ${ACTIVITY_SORT_FIELDS.join(", ")}.`);
       }
       return true;
     }),
@@ -339,7 +341,7 @@ export const createActivityBody: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("title is required.");
+        throw new TypeError("title is required.");
       }
       return true;
     }),
@@ -350,7 +352,7 @@ export const createActivityBody: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("overview is required.");
+        throw new TypeError("overview is required.");
       }
       return true;
     }),
@@ -374,7 +376,7 @@ export const updateActivityBody: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("title cannot be empty.");
+        throw new TypeError("title cannot be empty.");
       }
       return true;
     }),
@@ -385,7 +387,7 @@ export const updateActivityBody: ValidationChain[] = [
         return true;
       }
       if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("overview cannot be empty.");
+        throw new TypeError("overview cannot be empty.");
       }
       return true;
     }),

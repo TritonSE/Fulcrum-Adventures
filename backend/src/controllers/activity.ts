@@ -74,10 +74,6 @@ function parseActivitySort(value: string | undefined): string {
 
 const UNTITLED_ACTIVITY_BASE = "Untitled Activity";
 
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 async function resolveDraftTitle(excludeActivityId?: string): Promise<string> {
   const filter: Record<string, unknown> = {
     title: new RegExp(`^${escapeRegex(UNTITLED_ACTIVITY_BASE)}(?:\\s+(\\d+))?$`),
@@ -99,7 +95,7 @@ async function resolveDraftTitle(excludeActivityId?: string): Promise<string> {
       return;
     }
 
-    const match = title.match(/^Untitled Activity\s+(\d+)$/);
+    const match = /^Untitled Activity\s+(\d+)$/.exec(title);
     if (match?.[1]) {
       usedNumbers.add(Number(match[1]));
     }
