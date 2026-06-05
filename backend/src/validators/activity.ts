@@ -161,7 +161,10 @@ const optionalActivityBodyFields: ValidationChain[] = [
       if (value === "" && isDraftRequest(req as Request)) {
         return true;
       }
-      if (typeof value !== "string" || !(ACTIVITY_ENERGY_LEVELS as readonly string[]).includes(value)) {
+      if (
+        typeof value !== "string" ||
+        !(ACTIVITY_ENERGY_LEVELS as readonly string[]).includes(value)
+      ) {
         throw new TypeError(`energyLevel must be one of: ${ACTIVITY_ENERGY_LEVELS.join(", ")}.`);
       }
       return true;
@@ -239,7 +242,7 @@ export const listActivitiesQuery: ValidationChain[] = [
     .customSanitizer(toStringArray)
     .custom((values: string[]) => {
       if (values.length === 0) throw new TypeError("category must include at least one value.");
-      
+
       const invalid = values.filter((v) => !(ACTIVITY_CATEGORIES as readonly string[]).includes(v));
       if (invalid.length > 0) {
         throw new TypeError(

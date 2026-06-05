@@ -116,12 +116,18 @@ const activitySchema = new Schema(
       type: groupSizeSchema,
       required: requiresCompleteActivity,
       validate: {
-        validator(this: ActivityValidationDoc, value: GroupSizeDoc & { min?: number; max?: number } | undefined) {
+        validator(
+          this: ActivityValidationDoc,
+          value: (GroupSizeDoc & { min?: number; max?: number }) | undefined,
+        ) {
           if (isDraftActivity.call(this)) {
             return true;
           }
 
-          if (!value || (value.min === undefined && value.max === undefined && value.anySize !== true)) {
+          if (
+            !value ||
+            (value.min === undefined && value.max === undefined && value.anySize !== true)
+          ) {
             return false;
           }
 
