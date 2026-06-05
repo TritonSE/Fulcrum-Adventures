@@ -1109,6 +1109,7 @@
 .activity-preview-phone-wrapper {
   position: relative;
   width: 300px;
+  height: 549px;
   aspect-ratio: 300 / 550;
   display: flex;
   align-items: center;
@@ -1117,11 +1118,11 @@
 
 .activity-preview-phone-screen {
   position: absolute;
-  top: 2.6%;
+  top: 1.6%;
   right: 3.2%;
   bottom: 2.6%;
   left: 3.2%;
-  border-radius: 54px;
+  border-radius: 44px;
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 1;
@@ -1145,17 +1146,15 @@
 
 .activity-preview-hero-card {
   position: relative;
-  min-height: 286px;
   overflow: hidden;
   border-top-left-radius: 40px;
   border-top-right-radius: 40px;
-  background: #dde7f8;
+  background: #ffffff;
 }
 
 .activity-preview-hero-image,
 .activity-preview-hero-placeholder {
   width: 100%;
-  height: 286px;
   object-fit: cover;
 }
 
@@ -1196,10 +1195,10 @@
 
 .activity-preview-content-card {
   background: #ffffff;
-  margin-top: -14px;
+  margin-top: -10px;
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
-  padding: 18px 22px 18px;
+  padding: 18px 16px 18px 16px;
 }
 
 .activity-preview-top-row,
@@ -1210,8 +1209,9 @@
 .activity-preview-sel-tag-wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  text-align: left;
 }
 
 .activity-preview-top-row {
@@ -1297,29 +1297,41 @@
 
 .activity-preview-description-text {
   margin-bottom: 12px;
-  line-height: 21px;
+  line-height: 150%;
 }
 
 .activity-preview-energy-stars-row {
   display: inline-flex;
   align-items: center;
+  align-self: center;
+  gap: 0;
 }
 
 .activity-preview-energy-stars-row img {
   width: 16px;
   height: 16px;
+  display: block;
 }
 
 .activity-preview-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
   border-radius: 25px;
   border: 1px solid #ebebeb;
   background: #ffffff;
-  padding: 0px 8px 0px 8px;
+  padding: 2.5px 10px 2.5px 10px;
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
   font-size: 7.542px;
   font-style: normal;
   font-weight: 400;
+  line-height: 1;
+}
+
+.activity-preview-tag-row {
+  gap: 5px;
 }
 
 .activity-preview-body-section {
@@ -1344,7 +1356,7 @@
 
 .activity-preview-facilitate-tab-bar {
   display: flex;
-  border: 1px solid #d8dee9;
+  border: 0.6px solid #9d9d9d;
   border-radius: 8px;
   background: #ffffff;
   overflow: hidden;
@@ -1380,10 +1392,10 @@
 
 .activity-preview-tab-card {
   margin-top: 10px;
-  border: 1px solid #d8dee9;
+  border: 0.6px solid #D9D9D9;
   border-radius: 8px;
   background: #ffffff;
-  padding: 14px 16px;
+  padding: 15.084px 10.056px 25.14px 10.056px
 }
 
 .activity-preview-list-group {
@@ -1404,7 +1416,6 @@
 
 .activity-preview-material-block {
   display: grid;
-  gap: 10px;
 }
 
 .activity-preview-material-item-row {
@@ -1424,8 +1435,8 @@
 
 .activity-preview-sel-tag-chip {
   background: #153a7a;
-  border-radius: 40px;
-  padding: 4px 12px;
+  border-radius: 25px;
+  padding: 2.5px 10px;
   color: #ffffff;
   font-family: "Instrument Sans", sans-serif;
   font-size: 7.54px;
