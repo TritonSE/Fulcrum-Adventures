@@ -197,7 +197,7 @@
 .activity-upload-meta,
 .activity-youtube-preview span,
 .activity-grade-value {
-  margin-bottom: -8px;
+  margin-bottom: -6px;
   color: #9c9c9c;
   font-size: 14px;
   font-family: "Instrument Sans", sans-serif;
@@ -216,6 +216,11 @@
 }
 
 .activity-field-group > .activity-error-row {
+  margin-top: -10px;
+}
+
+.activity-section-editor-card > .activity-error-row,
+.activity-section-editor-card > .activity-support-block + .activity-error-row {
   margin-top: -8px;
 }
 
@@ -624,12 +629,17 @@
   border-radius: 999px;
   min-height: 36px;
   padding: 8px 16px;
+  color: var(--activity-category-color, #153a7a);
 }
 
 .activity-chip-active {
   border-color: #1f3b82;
   background: #eaf0ff;
   color: #153a7a;
+}
+
+.activity-category-chip.activity-chip-active {
+  color: var(--activity-category-color, #153a7a);
 }
 
 .activity-chip-error {
@@ -962,7 +972,7 @@
   padding: 16px 24px 32px 24px;
   background: #ffffff;
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .activity-support-block {
@@ -1258,9 +1268,9 @@
 }
 
 .activity-preview-category-chip {
-  background: #10b981;
+  background: var(--activity-category-color, #10b981);
   border-radius: 5.028px;
-  padding: 5px 14px;
+  padding: 2.514px 10.056px;
   color: #ffffff;
   font-family: "Instrument Sans", sans-serif;
   font-size: 6.285px;
@@ -1268,6 +1278,30 @@
   font-weight: 500;
   line-height: 150%;
   letter-spacing: 0.126px;
+}
+
+.activity-category-opener {
+  --activity-category-color: #1322c6;
+}
+
+.activity-category-icebreaker {
+  --activity-category-color: #4272d1;
+}
+
+.activity-category-active {
+  --activity-category-color: #ff6b6b;
+}
+
+.activity-category-connection {
+  --activity-category-color: #72cf1a;
+}
+
+.activity-category-debrief {
+  --activity-category-color: #ecd528;
+}
+
+.activity-category-team-challenge {
+  --activity-category-color: #00bc7b;
 }
 
 .activity-preview-activity-title {

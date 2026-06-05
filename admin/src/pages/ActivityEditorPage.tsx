@@ -45,6 +45,8 @@ const CATEGORY_OPTIONS = [
   "Debrief",
   "Team Challenge",
 ] as const;
+const getCategoryClassName = (category: string) =>
+  `activity-category-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 const DURATION_OPTIONS = ["5-15 min", "15-30 min", "30+ min"] as const;
 const ENERGY_OPTIONS = ["Low", "Medium", "High"] as const;
 const ENVIRONMENT_OPTIONS = ["Blacktop", "Field", "Classroom", "Gym/MPR"] as const;
@@ -791,8 +793,11 @@ function PublishPreviewModal({
             <div className="activity-preview-content-card">
               <div className="activity-preview-top-row">
                 <div className="activity-preview-category-row">
-                  {form.categories.slice(0, 1).map((category) => (
-                    <span key={category} className="activity-preview-category-chip">
+                  {form.categories.map((category) => (
+                    <span
+                      key={category}
+                      className={`activity-preview-category-chip ${getCategoryClassName(category)}`}
+                    >
                       {category}
                     </span>
                   ))}
@@ -1820,6 +1825,28 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     clearCustomTabError(tabId);
   };
 
+  const clearSectionError = (sectionId: string, field: "title" | "content") => {
+    setErrors((current) => {
+      const currentSectionErrors = current.sections?.[sectionId];
+      if (!currentSectionErrors?.[field]) return current;
+
+      const nextSections = { ...(current.sections ?? {}) };
+      const nextSectionErrors = { ...currentSectionErrors };
+      delete nextSectionErrors[field];
+
+      if (Object.keys(nextSectionErrors).length > 0) {
+        nextSections[sectionId] = nextSectionErrors;
+      } else {
+        delete nextSections[sectionId];
+      }
+
+      return {
+        ...current,
+        sections: Object.keys(nextSections).length > 0 ? nextSections : undefined,
+      };
+    });
+  };
+
   const handleAddSection = () => {
     if (!activeTab || activeTab.sections.length >= MAX_SECTIONS) return;
 
@@ -1833,16 +1860,27 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     sectionId: string,
     updater: (section: ActivitySection) => ActivitySection,
   ) => {
+    let titleChanged = false;
+    let contentChanged = false;
+
     updateActiveTab((tab) => ({
       ...tab,
-      sections: tab.sections.map((section) =>
-        section.id === sectionId ? updater(section) : section,
-      ),
+      sections: tab.sections.map((section) => {
+        if (section.id !== sectionId) return section;
+
+        const nextSection = updater(section);
+        titleChanged = section.title !== nextSection.title;
+        contentChanged = section.content !== nextSection.content;
+        return nextSection;
+      }),
     }));
 
     if (activeTab?.kind === "prep" && activeTab.sections[0]?.id === sectionId) {
       clearErrorKeys("setupInstructions");
     }
+
+    if (titleChanged) clearSectionError(sectionId, "title");
+    if (contentChanged) clearSectionError(sectionId, "content");
   };
 
   const handleDeleteSection = (sectionId: string) => {
@@ -2464,7 +2502,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                     key={category}
                     active={form.categories.includes(category)}
                     disabled={!form.categories.includes(category) && form.categories.length >= 3}
-                    className={`activity-category-chip ${errors.categories ? "activity-chip-error" : ""}`}
+                    className={`${getCategoryClassName(category)} activity-category-chip ${
+                      errors.categories ? "activity-chip-error" : ""
+                    }`}
                     onClick={() => toggleCategory(category)}
                   >
                     {category}
@@ -2952,12 +2992,13 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                           errors.sections?.[section.id]?.title ? "activity-input-error" : ""
                         }`}
                         value={section.title}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          clearSectionError(section.id, "title");
                           handleUpdateSection(section.id, (existingSection) => ({
                             ...existingSection,
                             title: event.target.value,
-                          }))
-                        }
+                          }));
+                        }}
                         placeholder="Section Title"
                         maxLength={MAX_SECTION_TITLE_LENGTH}
                       />
@@ -2975,12 +3016,13 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                         errors.sections?.[section.id]?.content ? "activity-input-error" : ""
                       }`}
                       value={section.content}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        clearSectionError(section.id, "content");
                         handleUpdateSection(section.id, (existingSection) => ({
                           ...existingSection,
                           content: event.target.value,
-                        }))
-                      }
+                        }));
+                      }}
                       placeholder="Enter section contents.."
                       rows={7}
                     />
