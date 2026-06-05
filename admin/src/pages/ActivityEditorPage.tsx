@@ -30,6 +30,7 @@ import PageIconUrl from "../assets/PageIcon.svg";
 import PeopleIconUrl from "../assets/people.svg";
 import UploadTabIconUrl from "../assets/upload.svg";
 import UploadImageIconUrl from "../assets/UploadImage.svg";
+import MediaUploadIconUrl from "../assets/UploadMediaIcon.svg";
 import VideoTabIconUrl from "../assets/video.svg";
 import VectorIconUrl from "../assets/Vector.svg";
 import YellowEnergyStarIconUrl from "../assets/yellowenergystar.svg";
@@ -226,19 +227,34 @@ function CollapsibleSection({
   title,
   children,
   defaultOpen = true,
+  isOpen: controlledIsOpen,
+  onToggle,
 }: {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(defaultOpen);
+  const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
+
+  const handleToggle = () => {
+    const nextIsOpen = !isOpen;
+
+    if (controlledIsOpen === undefined) {
+      setUncontrolledIsOpen(nextIsOpen);
+    }
+
+    onToggle?.(nextIsOpen);
+  };
 
   return (
     <section className="activity-section-card">
       <button
         type="button"
         className="activity-section-toggle"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={handleToggle}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
@@ -1254,6 +1270,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [pendingVideoUrl, setPendingVideoUrl] = useState<string | null>(null);
   const [pendingVideoSource, setPendingVideoSource] = useState<"initial" | "replace" | null>(null);
   const [isReplaceVideoModalVisible, setIsReplaceVideoModalVisible] = useState(false);
+  const [sectionOpenState, setSectionOpenState] = useState({
+    overview: true,
+    content: true,
+    sel: true,
+  });
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const [materialInput, setMaterialInput] = useState("");
   const [selTagInput, setSelTagInput] = useState("");
@@ -2147,6 +2168,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const isPlayTab = activeTab?.kind === "play";
   const isDebriefTab = activeTab?.kind === "debrief";
   const minimumGuidedItems = activeTab?.kind === "play" ? 2 : activeTab?.kind === "debrief" ? 1 : 0;
+  const areAllSectionsCollapsed = Object.values(sectionOpenState).every((isOpen) => !isOpen);
 
   return (
     <div className="activity-editor-app">
@@ -2188,7 +2210,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           </div>
         ) : null}
 
-        <CollapsibleSection title="Overview" defaultOpen>
+        <CollapsibleSection
+          title="Overview"
+          isOpen={sectionOpenState.overview}
+          onToggle={(isOpen) => setSectionOpenState((current) => ({ ...current, overview: isOpen }))}
+        >
           <div className="activity-field-stack">
             <div className="activity-field-group">
               <label className="activity-field-label">Cover Image/Video</label>
@@ -2282,15 +2308,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                           className={`activity-upload-card ${errors.thumbnail ? "activity-upload-card-error" : ""}`}
                           htmlFor="thumbnail-upload"
                         >
-                          <span className="activity-upload-plus">+</span>
+                          <img src={MediaUploadIconUrl} alt="Upload media" aria-hidden="true" />
                           <span className="activity-upload-title">Upload cover image</span>
-                          <span className="activity-upload-copy">
-                            Upload an image to use as the activity cover.
-                          </span>
-                          <span className="activity-upload-button">Choose Image</span>
-                          <span className="activity-upload-meta">No image selected</span>
+                          <span className="activity-upload-button">Choose File</span>
                           <span className="activity-upload-meta">
-                            Supported formats: JPG, JPEG, PNG, GIF, WEBP
+                            Supported formats: JPG, JPEG, PNG, WEBP
                           </span>
                           <span className="activity-upload-meta">Max size: 10 MB</span>
                         </label>
@@ -2609,7 +2631,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Activity Content" defaultOpen>
+        <CollapsibleSection
+          title="Activity Content"
+          isOpen={sectionOpenState.content}
+          onToggle={(isOpen) => setSectionOpenState((current) => ({ ...current, content: isOpen }))}
+        >
           <div className="activity-field-stack">
             <div className="activity-field-group">
               <label className="activity-field-label" htmlFor="objective">
@@ -2966,7 +2992,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="SEL Opportunity" defaultOpen>
+        <CollapsibleSection
+          title="SEL Opportunity"
+          isOpen={sectionOpenState.sel}
+          onToggle={(isOpen) => setSectionOpenState((current) => ({ ...current, sel: isOpen }))}
+        >
           <div className="activity-field-group">
             <p className="activity-field-label">Social and Emotional Learning Tags</p>
 
@@ -3021,32 +3051,34 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           </div>
         </CollapsibleSection>
 
-        <footer className="activity-editor-footer">
-          <button
-            type="button"
-            className="activity-secondary-button"
-            disabled={isSubmitting}
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="activity-secondary-button"
-            disabled={isSubmitting}
-            onClick={() => void submit("Draft")}
-          >
-            Save as Draft
-          </button>
-          <button
-            type="button"
-            className="activity-primary-button"
-            disabled={isSubmitting}
-            onClick={openPreview}
-          >
-            {publishLabel}
-          </button>
-        </footer>
+        {!areAllSectionsCollapsed ? (
+          <footer className="activity-editor-footer">
+            <button
+              type="button"
+              className="activity-secondary-button"
+              disabled={isSubmitting}
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="activity-secondary-button"
+              disabled={isSubmitting}
+              onClick={() => void submit("Draft")}
+            >
+              Save as Draft
+            </button>
+            <button
+              type="button"
+              className="activity-primary-button"
+              disabled={isSubmitting}
+              onClick={openPreview}
+            >
+              {publishLabel}
+            </button>
+          </footer>
+        ) : null}
       </main>
 
       <ThumbnailCropModal
