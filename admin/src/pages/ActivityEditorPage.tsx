@@ -941,6 +941,16 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     });
   };
 
+  const scrollToFirstError = () => {
+    window.requestAnimationFrame(() => {
+      const firstError = document.querySelector(
+        ".activity-upload-card-error, .activity-input-error, .activity-error-row",
+      ) as HTMLElement | null;
+
+      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
+
   const setField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
 
@@ -1458,7 +1468,13 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     if (Object.keys(customTabErrors).length > 0) nextErrors.customTabs = customTabErrors;
 
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+
+    if (Object.keys(nextErrors).length > 0) {
+      scrollToFirstError();
+      return false;
+    }
+
+    return true;
   };
 
   const submit = async (targetStatus: ActivityStatus) => {
@@ -1489,7 +1505,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
         setIsPreviewVisible(false);
         if (targetStatus === "Draft") {
-          navigate("/dashboard", { replace: true });
+          navigate("/dashboard", {
+            replace: true,
+            state: { draftSaved: true },
+          });
         } else if (createdId) {
           navigate(`/activities/${createdId}/edit`, { replace: true });
         }
@@ -1510,7 +1529,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
       setIsPreviewVisible(false);
       if (targetStatus === "Draft") {
-        navigate("/dashboard", { replace: true });
+        navigate("/dashboard", {
+          replace: true,
+          state: { draftSaved: true },
+        });
       }
     } catch (error) {
       setIsPreviewVisible(false);
