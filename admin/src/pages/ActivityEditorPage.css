@@ -181,7 +181,7 @@
 .activity-text-area:focus,
 .activity-select-input:focus,
 .activity-section-title-input:focus {
-  outline: 2px solid rgba(31, 79, 149, 0.18);
+  outline: 0;
 }
 
 .activity-input-error {
@@ -197,7 +197,7 @@
 .activity-upload-meta,
 .activity-youtube-preview span,
 .activity-grade-value {
-  margin: 0;
+  margin-bottom: -8px;
   color: #9c9c9c;
   font-size: 14px;
   font-family: "Instrument Sans", sans-serif;
@@ -210,10 +210,13 @@
 }
 
 .activity-error-row {
-  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.activity-field-group > .activity-error-row {
+  margin-top: -8px;
 }
 
 .activity-error-icon {
@@ -285,7 +288,7 @@
 
 .activity-thumbnail-panel {
   display: grid;
-  gap: 16px;
+  gap: 4px;
 }
 
 .activity-cover-panel {
@@ -419,12 +422,12 @@
 }
 
 .activity-youtube-url-error .activity-error-icon {
-  width: 22px;
-  height: 22px;
+  width: 17px;
+  height: 16px;
 }
 
 .activity-youtube-url-error .activity-error-text {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.25;
 }
 
