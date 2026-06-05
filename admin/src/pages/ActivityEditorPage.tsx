@@ -2096,8 +2096,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
             replace: true,
             state: { draftSaved: true },
           });
-        } else if (createdId) {
-          navigate(`/activities/${createdId}/edit`, { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
         }
         return;
       }
@@ -2120,6 +2120,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           replace: true,
           state: { draftSaved: true },
         });
+      } else {
+        navigate("/dashboard", { replace: true });
       }
     } catch (error) {
       setIsPreviewVisible(false);
