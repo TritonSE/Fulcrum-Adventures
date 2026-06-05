@@ -1379,8 +1379,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     }
 
     if (targetStatus === "Draft") {
-      setErrors(nextErrors);
-      return Object.keys(nextErrors).length === 0;
+      setErrors({});
+      return true;
     }
 
     if (!thumbnailPreviewUrl && !form.videoThumbnailUrl) {
