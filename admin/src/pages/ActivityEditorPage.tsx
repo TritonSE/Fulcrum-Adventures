@@ -1637,6 +1637,47 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     });
   };
 
+  const syncCustomTabErrors = (nextTabs: ActivityTab[]) => {
+    setErrors((current) => {
+      if (!current.customTabs) return current;
+
+      const nextCustomTabs = { ...current.customTabs };
+      const customNameCounts = new Map<string, number>();
+
+      nextTabs.forEach((tab) => {
+        if (tab.kind !== "custom") return;
+
+        const normalizedName = tab.name.trim().toLowerCase();
+        if (!normalizedName) return;
+
+        customNameCounts.set(normalizedName, (customNameCounts.get(normalizedName) ?? 0) + 1);
+      });
+
+      nextTabs.forEach((tab) => {
+        if (tab.kind !== "custom") return;
+
+        const trimmedName = tab.name.trim();
+        const existingError = nextCustomTabs[tab.id];
+        if (!existingError) return;
+
+        const isEmptyNameError = existingError === "Please enter a tab name";
+        const isDuplicateNameError = existingError === "Tab names must be unique";
+        const hasDuplicate = trimmedName
+          ? (customNameCounts.get(trimmedName.toLowerCase()) ?? 0) > 1
+          : false;
+
+        if ((isEmptyNameError && trimmedName) || (isDuplicateNameError && !hasDuplicate)) {
+          delete nextCustomTabs[tab.id];
+        }
+      });
+
+      return {
+        ...current,
+        customTabs: Object.keys(nextCustomTabs).length > 0 ? nextCustomTabs : undefined,
+      };
+    });
+  };
+
   const handleStartCreateTab = () => {
     if (tabs.length >= MAX_TABS) return;
     setIsCreatingTab(true);
@@ -1687,11 +1728,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   };
 
   const handleCustomTabNameChange = (tabId: string, value: string) => {
-    setTabs((current) =>
-      current.map((tab) => (tab.id === tabId ? { ...tab, name: value } : tab)),
-    );
-
-    clearCustomTabError(tabId);
+    setTabs((current) => {
+      const nextTabs = current.map((tab) => (tab.id === tabId ? { ...tab, name: value } : tab));
+      syncCustomTabErrors(nextTabs);
+      return nextTabs;
+    });
   };
 
   const handleStartEditTab = (tabId: string) => {
@@ -1749,6 +1790,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       const nextTabs = current.filter((tab) => tab.id !== tabId);
       const nextActiveTab = nextTabs[tabIndex] ?? nextTabs[tabIndex - 1] ?? nextTabs[0] ?? null;
       setActiveTabId(nextActiveTab?.id ?? null);
+      syncCustomTabErrors(nextTabs);
       return nextTabs;
     });
 
@@ -1776,6 +1818,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         section.id === sectionId ? updater(section) : section,
       ),
     }));
+
+    if (activeTab?.kind === "prep" && activeTab.sections[0]?.id === sectionId) {
+      clearErrorKeys("setupInstructions");
+    }
   };
 
   const handleDeleteSection = (sectionId: string) => {
@@ -1794,6 +1840,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       ...tab,
       guidedItems: tab.guidedItems.map((item, itemIndex) => (itemIndex === index ? value : item)),
     }));
+
+    if (activeTab?.kind === "play") clearErrorKeys("playGuidedItems");
+    if (activeTab?.kind === "debrief") clearErrorKeys("debriefGuidedItems");
   };
 
   const handleAddGuidedItem = () => {
@@ -1832,6 +1881,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     });
 
     setMaterialInput("");
+    clearErrorKeys("materials");
   };
 
   const handleRemoveMaterial = (material: string) => {
@@ -1850,6 +1900,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       ...tab,
       noMaterialsNeeded: !tab.noMaterialsNeeded,
     }));
+
+    clearErrorKeys("materials");
   };
 
   const handleAddSelTag = () => {
@@ -1862,6 +1914,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       selTags: [...current.selTags, nextTag],
     }));
     setSelTagInput("");
+    clearErrorKeys("selTags");
   };
 
   const handleRemoveSelTag = (tag: string) => {
@@ -2806,7 +2859,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                           activeTab.noMaterialsNeeded ? "activity-input-disabled" : ""
                         }`}
                         value={materialInput}
-                        onChange={(event) => setMaterialInput(event.target.value)}
+                        onChange={(event) => {
+                          setMaterialInput(event.target.value);
+                          clearErrorKeys("materials");
+                        }}
                         placeholder="Add new material item..."
                         disabled={activeTab.noMaterialsNeeded}
                         onKeyDown={(event) => {
@@ -2938,7 +2994,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                 <input
                   className={`activity-text-input ${errors.selTags ? "activity-input-error" : ""}`}
                   value={selTagInput}
-                  onChange={(event) => setSelTagInput(event.target.value)}
+                  onChange={(event) => {
+                    setSelTagInput(event.target.value);
+                    clearErrorKeys("selTags");
+                  }}
                   placeholder="Add SEL Tag.."
                   maxLength={30}
                   onKeyDown={(event) => {
