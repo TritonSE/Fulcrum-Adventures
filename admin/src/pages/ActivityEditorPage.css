@@ -270,12 +270,17 @@
 .activity-button-icon-text {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  font-size: 14px;
+  font-family: "Instrument Sans", sans-serif;
+  font-weight: 500;
 }
 
 .activity-button-icon-text img {
   width: 16px;
-  height: 16px;
+  height: 17px;
+  display: block;
+  padding-right: 6px;
 }
 
 .activity-thumbnail-panel {
@@ -850,6 +855,7 @@
   font-family: "Instrument Sans Bold", "Instrument Sans", sans-serif;
   font-size: 16px;
   font-weight: 700;
+  text-align: left;
 }
 
 .activity-guided-item-row,
@@ -1638,7 +1644,7 @@
   font-size: 24px;
   font-weight: 700;
   line-height: 1;
-  flex: left;
+  text-align: left;
 }
 
 .activity-discard-copy {
@@ -1648,6 +1654,7 @@
   font-size: 16px;
   font-weight: 500;
   line-height: 1.25;
+  text-align: left;
 }
 
 .activity-discard-actions {
@@ -1720,9 +1727,10 @@
   margin: 0;
   color: #153a7a;
   font-family: "Instrument Sans Bold", sans-serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
+  text-align: left;
 }
 
 .activity-replace-video-form {
@@ -1737,7 +1745,7 @@
 .activity-replace-video-input {
   min-height: 45px;
   border-radius: 8px;
-  padding: 0 22px;
+  padding: 12px;
   border-color: #dfe3eb;
   font-size: 14px;
 }

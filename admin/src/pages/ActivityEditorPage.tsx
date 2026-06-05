@@ -95,7 +95,6 @@ type FormState = {
   videoUrl: string;
   videoThumbnailUrl: string | null;
   videoThumbnailStatus: "idle" | "checking" | "ready" | "error";
-  videoThumbnailError: string | null;
 };
 
 type FormErrors = {
@@ -994,7 +993,6 @@ const createDefaultFormState = (): FormState => ({
   videoUrl: "",
   videoThumbnailUrl: null,
   videoThumbnailStatus: "idle",
-  videoThumbnailError: null,
 });
 
 const toGradeLabel = (value: number) => (value === 0 ? "K" : String(value));
@@ -1181,7 +1179,6 @@ const createFormStateFromActivity = (activity: ActivityDetail): FormState => {
     videoUrl: activity.videoUrl ?? "",
     videoThumbnailUrl: existingVideoThumbnail,
     videoThumbnailStatus: existingVideoThumbnail ? "ready" : "idle",
-    videoThumbnailError: null,
   };
 };
 
@@ -1254,6 +1251,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [videoInputError, setVideoInputError] = useState<string | null>(null);
   const [replaceVideoDraftUrl, setReplaceVideoDraftUrl] = useState("");
   const [replaceVideoError, setReplaceVideoError] = useState<string | null>(null);
+  const [pendingVideoUrl, setPendingVideoUrl] = useState<string | null>(null);
+  const [pendingVideoSource, setPendingVideoSource] = useState<"initial" | "replace" | null>(null);
   const [isReplaceVideoModalVisible, setIsReplaceVideoModalVisible] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const [materialInput, setMaterialInput] = useState("");
@@ -1287,6 +1286,8 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         setReplaceVideoDraftUrl("");
         setVideoInputError(null);
         setReplaceVideoError(null);
+        setPendingVideoUrl(null);
+        setPendingVideoSource(null);
         setActiveCoverTab(activity.videoUrl || activity.videoThumbnailUrl ? "youtube" : "image");
       })
       .catch((error: unknown) => {
@@ -1437,6 +1438,15 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     setReplaceVideoError(null);
   };
 
+  const handleVideoAttemptError = (source: "initial" | "replace") => {
+    if (source === "replace") {
+      setReplaceVideoError("Invalid link");
+      return;
+    }
+
+    setVideoInputError("Invalid link");
+  };
+
   const handleExtractThumbnail = (source: "initial" | "replace") => {
     const draftUrl = source === "replace" ? replaceVideoDraftUrl : videoDraftUrl;
     const trimmedVideoUrl = draftUrl.trim();
@@ -1454,37 +1464,31 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
           videoUrl: "",
           videoThumbnailUrl: null,
           videoThumbnailStatus: "idle",
-          videoThumbnailError: null,
         }));
       }
+      setPendingVideoUrl(null);
+      setPendingVideoSource(null);
       return;
     }
 
     const videoId = getYoutubeVideoId(trimmedVideoUrl);
 
     if (!videoId) {
-      if (source === "replace") {
-        setReplaceVideoError("Invalid link");
-      } else {
-        setVideoInputError("Invalid link");
-      }
+      handleVideoAttemptError(source);
+      setPendingVideoUrl(null);
+      setPendingVideoSource(null);
       return;
     }
 
     setVideoInputError(null);
     setReplaceVideoError(null);
+    setPendingVideoUrl(trimmedVideoUrl);
+    setPendingVideoSource(source);
     setForm((current) => ({
       ...current,
-      videoUrl: trimmedVideoUrl,
       videoThumbnailUrl: getYoutubeThumbnailUrl(videoId),
       videoThumbnailStatus: "checking",
-      videoThumbnailError: null,
     }));
-    setVideoDraftUrl(trimmedVideoUrl);
-    if (source === "replace") {
-      setReplaceVideoDraftUrl("");
-      setIsReplaceVideoModalVisible(false);
-    }
   };
 
   const handleThumbnailImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -1494,16 +1498,29 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         ...current,
         videoThumbnailUrl: null,
         videoThumbnailStatus: "error",
-        videoThumbnailError: "Invalid link",
       }));
+      if (pendingVideoSource) {
+        handleVideoAttemptError(pendingVideoSource);
+      }
+      setPendingVideoUrl(null);
+      setPendingVideoSource(null);
       return;
     }
 
     setForm((current) => ({
       ...current,
+      videoUrl: pendingVideoUrl ?? current.videoUrl,
       videoThumbnailStatus: "ready",
-      videoThumbnailError: null,
     }));
+    if (pendingVideoUrl) {
+      setVideoDraftUrl(pendingVideoUrl);
+    }
+    if (pendingVideoSource === "replace") {
+      setReplaceVideoDraftUrl("");
+      setIsReplaceVideoModalVisible(false);
+    }
+    setPendingVideoUrl(null);
+    setPendingVideoSource(null);
     clearErrorKeys("thumbnail");
   };
 
@@ -1512,8 +1529,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       ...current,
       videoThumbnailUrl: null,
       videoThumbnailStatus: "error",
-      videoThumbnailError: "Invalid link",
     }));
+    if (pendingVideoSource) {
+      handleVideoAttemptError(pendingVideoSource);
+    }
+    setPendingVideoUrl(null);
+    setPendingVideoSource(null);
   };
 
   const handleOpenReplaceVideoModal = () => {
@@ -1525,6 +1546,19 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const handleCloseReplaceVideoModal = () => {
     setReplaceVideoDraftUrl("");
     setReplaceVideoError(null);
+    if (pendingVideoSource === "replace") {
+      setPendingVideoUrl(null);
+      setPendingVideoSource(null);
+      setForm((current) => {
+        const committedVideoId = getYoutubeVideoId(current.videoUrl.trim());
+
+        return {
+          ...current,
+          videoThumbnailUrl: committedVideoId ? getYoutubeThumbnailUrl(committedVideoId) : null,
+          videoThumbnailStatus: committedVideoId ? "ready" : "idle",
+        };
+      });
+    }
     setIsReplaceVideoModalVisible(false);
   };
 
@@ -1533,13 +1567,14 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     setVideoInputError(null);
     setReplaceVideoDraftUrl("");
     setReplaceVideoError(null);
+    setPendingVideoUrl(null);
+    setPendingVideoSource(null);
     setIsReplaceVideoModalVisible(false);
     setForm((current) => ({
       ...current,
       videoUrl: "",
       videoThumbnailUrl: null,
       videoThumbnailStatus: "idle",
-      videoThumbnailError: null,
     }));
     clearErrorKeys("thumbnail");
   };
