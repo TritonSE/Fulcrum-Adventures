@@ -6,30 +6,30 @@ export const ACTIVITY_API_URL = `${ACTIVITY_API_BASE_URL}/api/activities`;
 export type ActivityStatus = "Draft" | "Published" | "Archived";
 
 export type CreateActivityPayload = {
-  title: string;
-  overview: string;
+  title?: string;
+  overview?: string;
   thumbnailUrl?: string;
-  category: string[];
-  gradeRange: {
+  category?: string[];
+  gradeRange?: {
     min: number;
     max: number;
   };
-  groupSize: {
+  groupSize?: {
     min: number;
     max: number;
     anySize: boolean;
   };
-  duration: string;
-  energyLevel: string;
-  environment: string[];
-  setup: "None" | "Required";
-  objective: string;
-  facilitateSections: {
+  duration?: string;
+  energyLevel?: string;
+  environment?: string[];
+  setup?: "None" | "Required";
+  objective?: string;
+  facilitateSections?: {
     tabName: string;
     content: string;
   }[];
-  materials: string[];
-  selTags: string[];
+  materials?: string[];
+  selTags?: string[];
   status: ActivityStatus;
   videoUrl?: string;
 };

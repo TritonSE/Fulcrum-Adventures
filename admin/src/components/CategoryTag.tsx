@@ -20,6 +20,9 @@ export const CategoryTag: React.FC<CategoryTagProps> = ({
   selected = false,
   onClick,
 }) => {
+  if (!category) {
+    return null;
+  }
   const formattedCategory = category.toLowerCase().replace(" ", "-");
 
   const classes = [

@@ -823,9 +823,17 @@ const buildPayload = (
       ? thumbnailPreviewUrl
       : (form.videoThumbnailUrl ?? undefined);
 
+  const trimmedTitle = form.title.trim();
+  const trimmedOverview = form.overview.trim();
+  const trimmedObjective = form.objective.trim();
+  const trimmedVideoUrl = form.videoUrl.trim();
+  const normalizedDuration = form.duration || undefined;
+  const normalizedEnergyLevel = form.energyLevel || undefined;
+  const normalizedSetup = form.setup ? (form.setup === "Props" ? "Required" : "None") : undefined;
+
   return {
-    title: form.title.trim(),
-    overview: form.overview.trim(),
+    title: trimmedTitle || undefined,
+    overview: trimmedOverview || undefined,
     thumbnailUrl: normalizedThumbnailUrl || undefined,
     category: form.categories,
     gradeRange: {
@@ -837,18 +845,18 @@ const buildPayload = (
       max: form.anyGroupSize ? 0 : Number(form.groupSizeMax),
       anySize: form.anyGroupSize,
     },
-    duration: form.duration,
-    energyLevel: form.energyLevel,
+    duration: normalizedDuration,
+    energyLevel: normalizedEnergyLevel,
     environment: form.anyEnvironment ? ["Any Environment"] : form.environments,
-    setup: form.setup === "Props" ? "Required" : "None",
-    objective: form.objective.trim(),
+    setup: normalizedSetup,
+    objective: trimmedObjective || undefined,
     facilitateSections: buildFacilitateSections(tabs),
     materials: tabs.find((tab) => tab.kind === "prep")?.noMaterialsNeeded
       ? []
       : (tabs.find((tab) => tab.kind === "prep")?.materials ?? []),
     selTags: form.selTags,
     status,
-    videoUrl: form.videoUrl.trim() || undefined,
+    videoUrl: trimmedVideoUrl || undefined,
   };
 };
 
@@ -1480,7 +1488,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         }
 
         setIsPreviewVisible(false);
-        if (createdId) {
+        if (targetStatus === "Draft") {
+          navigate("/dashboard", { replace: true });
+        } else if (createdId) {
           navigate(`/activities/${createdId}/edit`, { replace: true });
         }
         return;
@@ -1499,6 +1509,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       }
 
       setIsPreviewVisible(false);
+      if (targetStatus === "Draft") {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       setIsPreviewVisible(false);
       setSubmitError(
