@@ -182,7 +182,6 @@
 .activity-select-input:focus,
 .activity-section-title-input:focus {
   outline: 2px solid rgba(31, 79, 149, 0.18);
-  border-color: #1f4f95;
 }
 
 .activity-input-error {
@@ -389,6 +388,41 @@
   font-family: "Instrument Sans", sans-serif;
 }
 
+.activity-youtube-embed-shell {
+  width: 100%;
+  max-width: 780px;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  background: #000000;
+}
+
+.activity-youtube-embed {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.activity-youtube-url-error {
+  margin-top: -6px;
+}
+
+.activity-youtube-url-error .activity-error-row {
+  margin-top: 0;
+  gap: 10px;
+}
+
+.activity-youtube-url-error .activity-error-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.activity-youtube-url-error .activity-error-text {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
 .activity-upload-card {
   display: grid;
   justify-items: center;
@@ -429,7 +463,7 @@
   max-width: 780px;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: 20px;
+  border-radius: 8px;
   border: 1px solid #d9d9d9;
   background: #e7ecf5;
 }
@@ -438,6 +472,23 @@
   display: grid;
   gap: 18px;
   justify-items: center;
+}
+
+.activity-video-preview-actions {
+  position: relative;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.activity-video-preview-actions::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 54px;
+  height: 1px;
+  background: #d9d9d9;
+  transform: translate(-50%, -50%);
 }
 
 .activity-upload-action-button {
@@ -1317,7 +1368,7 @@
 .activity-preview-tab-card {
   margin-top: 10px;
   border: 1px solid #d8dee9;
-  border-radius: 14px;
+  border-radius: 8px;
   background: #ffffff;
   padding: 14px 16px;
 }
@@ -1381,7 +1432,7 @@
   width: min(1420px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   overflow: auto;
-  border-radius: 24px;
+  border-radius: 8px;
   background: #ffffff;
   padding: 28px 28px 40px;
   display: grid;
@@ -1396,7 +1447,7 @@
   justify-content: center;
   align-items: center;
   border: 1px solid #d7dce5;
-  border-radius: 18px;
+  border-radius: 8px;
   overflow: hidden;
   background: #f5f7fb;
 }
@@ -1573,7 +1624,7 @@
   width: 482px;
   height: 216px;
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 8px;
   padding: 26px 24px 18px 28px;
   box-sizing: border-box;
   display: flex;
@@ -1612,7 +1663,7 @@
 .activity-discard-button {
   min-height: 47px;
   padding: 0 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 14px;
   line-height: 1;
   white-space: nowrap;
@@ -1626,124 +1677,101 @@
   cursor: pointer;
 }
 
-@media (max-width: 960px) {
-  .activity-page {
-    padding: 120px 16px 40px;
-  }
+.activity-replace-video-shell {
+  width: 1120px;
+  height: 195px;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 37px 40px 37px 40px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  column-gap: 20px;
+  row-gap: 18px;
+  box-shadow: 0 18px 44px rgba(21, 58, 122, 0.12);
+}
 
-  .activity-editor-state {
-    padding: 120px 16px 40px;
-  }
+.activity-replace-video-close {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
 
-  .activity-editor-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.activity-replace-video-close img {
+  width: 24px;
+  height: 24px;
+}
 
-  .activity-editor-actions,
-  .activity-editor-footer,
-  .activity-facilitate-header,
-  .activity-preview-actions-row {
-    width: 100%;
-  }
+.activity-replace-video-title {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
+  color: #153a7a;
+  font-family: "Instrument Sans Bold", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
 
-  .activity-two-column-grid,
-  .activity-inline-inputs,
-  .activity-inline-inputs-slim {
-    grid-template-columns: 1fr;
-  }
+.activity-replace-video-form {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: stretch;
+}
 
-  .activity-overview-bottom-row {
-    flex-direction: column;
-    gap: 28px;
-  }
+.activity-replace-video-input {
+  min-height: 45px;
+  border-radius: 8px;
+  padding: 0 22px;
+  border-color: #dfe3eb;
+  font-size: 14px;
+}
 
-  .activity-overview-setup-column {
-    width: 100%;
-  }
+.activity-replace-video-input.activity-input-error {
+  border-width: 2px;
+  border-color: #f04444;
+  box-shadow: none;
+}
 
-  .activity-tab-container {
-    flex-wrap: wrap;
-  }
+.activity-replace-video-submit {
+  min-height: 45px;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 0 24px;
+}
 
-  .activity-create-tab-row,
-  .activity-create-tab-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.activity-replace-video-error {
+  grid-column: 1;
+  grid-row: 3;
+  margin-top: -8px;
+}
 
-  .activity-create-tab-form {
-    width: 100%;
-  }
+.activity-replace-video-error .activity-error-row {
+  margin-top: 0;
+  gap: 10px;
+}
 
-  .activity-tab {
-    flex: 1 1 50%;
-  }
+.activity-replace-video-error .activity-error-icon {
+  width: 26px;
+  height: 26px;
+}
 
-  .activity-upload-preview-shell {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
-
-  .activity-upload-preview-large {
-    max-width: 100%;
-  }
-
-  .activity-upload-preview-actions {
-    width: 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .activity-upload-action-button {
-    width: 100%;
-    max-width: 72px;
-    height: 50px;
-  }
-
-  .activity-preview-shell {
-    padding: 24px 16px;
-  }
-
-  .activity-crop-shell {
-    width: calc(100vw - 20px);
-    padding: 20px 16px 28px;
-  }
-
-  .activity-crop-image {
-    max-height: calc(100vh - 320px);
-  }
-
-  .activity-crop-actions {
-    justify-content: stretch;
-  }
-
-  .activity-crop-actions .activity-secondary-button,
-  .activity-crop-actions .activity-primary-button {
-    width: 100%;
-  }
-
-  .activity-discard-shell {
-    height: auto;
-    padding: 24px 20px 20px;
-  }
-
-  .activity-discard-title {
-    font-size: 28px;
-  }
-
-  .activity-discard-copy {
-    font-size: 16px;
-  }
-
-  .activity-discard-actions {
-    margin-top: auto;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-
-  .activity-discard-actions .activity-secondary-button,
-  .activity-discard-button {
-    width: 100%;
-  }
+.activity-replace-video-error .activity-error-text {
+  font-size: 16px;
+  line-height: 1.25;
 }

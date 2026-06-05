@@ -18,6 +18,7 @@ import ActionIconUrl from "../assets/Action.svg";
 import BlankEnergyStarIconUrl from "../assets/blankenergystar.svg";
 import BookmarkIconUrl from "../assets/BookMarkIcon.svg";
 import ButtonIconUrl from "../assets/Button.svg";
+import ChangeVideoIconUrl from "../assets/ChangeVideo.svg";
 import ClockIconUrl from "../assets/clock.svg";
 import CloseIconUrl from "../assets/CloseIcon.svg";
 import CropImageIconUrl from "../assets/CropImage.svg";
@@ -1045,6 +1046,7 @@ const getYoutubeVideoId = (value: string) => {
 };
 
 const getYoutubeThumbnailUrl = (videoId: string) => `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+const getYoutubeEmbedUrl = (videoId: string) => `https://www.youtube.com/embed/${videoId}`;
 
 const buildFacilitateSections = (tabs: ActivityTab[]) =>
   tabs
@@ -1248,6 +1250,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
   const [isThumbnailConfirmed, setIsThumbnailConfirmed] = useState(false);
   const [isCropModalVisible, setIsCropModalVisible] = useState(false);
+  const [videoDraftUrl, setVideoDraftUrl] = useState("");
+  const [videoInputError, setVideoInputError] = useState<string | null>(null);
+  const [replaceVideoDraftUrl, setReplaceVideoDraftUrl] = useState("");
+  const [replaceVideoError, setReplaceVideoError] = useState<string | null>(null);
+  const [isReplaceVideoModalVisible, setIsReplaceVideoModalVisible] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const [materialInput, setMaterialInput] = useState("");
   const [selTagInput, setSelTagInput] = useState("");
@@ -1276,6 +1283,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         setTabs(parseActivityTabs(activity));
         setThumbnailPreviewUrl(activity.thumbnailUrl ?? null);
         setIsThumbnailConfirmed(Boolean(activity.thumbnailUrl));
+        setVideoDraftUrl(activity.videoUrl ?? "");
+        setReplaceVideoDraftUrl("");
+        setVideoInputError(null);
+        setReplaceVideoError(null);
         setActiveCoverTab(activity.videoUrl || activity.videoThumbnailUrl ? "youtube" : "image");
       })
       .catch((error: unknown) => {
@@ -1303,6 +1314,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null,
     [activeTabId, tabs],
   );
+  const currentVideoId = useMemo(() => getYoutubeVideoId(form.videoUrl.trim()), [form.videoUrl]);
 
   const clearErrorKeys = (...keys: (keyof FormErrors)[]) => {
     setErrors((current) => {
@@ -1415,48 +1427,52 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   };
 
   const handleVideoUrlChange = (value: string) => {
-    const trimmedValue = value.trim();
     setActiveCoverTab("youtube");
-    setForm((current) => ({
-      ...current,
-      videoUrl: value,
-      videoThumbnailUrl: null,
-      videoThumbnailStatus: "idle",
-      videoThumbnailError: null,
-    }));
-
-    if (!trimmedValue) {
-      clearErrorKeys("thumbnail");
-    }
+    setVideoDraftUrl(value);
+    setVideoInputError(null);
   };
 
-  const handleExtractThumbnail = () => {
-    const trimmedVideoUrl = form.videoUrl.trim();
+  const handleReplaceVideoUrlChange = (value: string) => {
+    setReplaceVideoDraftUrl(value);
+    setReplaceVideoError(null);
+  };
+
+  const handleExtractThumbnail = (source: "initial" | "replace") => {
+    const draftUrl = source === "replace" ? replaceVideoDraftUrl : videoDraftUrl;
+    const trimmedVideoUrl = draftUrl.trim();
     setActiveCoverTab("youtube");
 
     if (!trimmedVideoUrl) {
-      setForm((current) => ({
-        ...current,
-        videoUrl: "",
-        videoThumbnailUrl: null,
-        videoThumbnailStatus: "idle",
-        videoThumbnailError: null,
-      }));
+      if (source === "replace") {
+        setReplaceVideoDraftUrl("");
+        setReplaceVideoError("Invalid link");
+      } else {
+        setVideoDraftUrl("");
+        setVideoInputError("Invalid link");
+        setForm((current) => ({
+          ...current,
+          videoUrl: "",
+          videoThumbnailUrl: null,
+          videoThumbnailStatus: "idle",
+          videoThumbnailError: null,
+        }));
+      }
       return;
     }
 
     const videoId = getYoutubeVideoId(trimmedVideoUrl);
 
     if (!videoId) {
-      setForm((current) => ({
-        ...current,
-        videoThumbnailUrl: null,
-        videoThumbnailStatus: "error",
-        videoThumbnailError: "Please enter a valid YouTube URL.",
-      }));
+      if (source === "replace") {
+        setReplaceVideoError("Invalid link");
+      } else {
+        setVideoInputError("Invalid link");
+      }
       return;
     }
 
+    setVideoInputError(null);
+    setReplaceVideoError(null);
     setForm((current) => ({
       ...current,
       videoUrl: trimmedVideoUrl,
@@ -1464,6 +1480,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       videoThumbnailStatus: "checking",
       videoThumbnailError: null,
     }));
+    setVideoDraftUrl(trimmedVideoUrl);
+    if (source === "replace") {
+      setReplaceVideoDraftUrl("");
+      setIsReplaceVideoModalVisible(false);
+    }
   };
 
   const handleThumbnailImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -1473,7 +1494,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         ...current,
         videoThumbnailUrl: null,
         videoThumbnailStatus: "error",
-        videoThumbnailError: "We couldn't find a usable YouTube thumbnail for that link.",
+        videoThumbnailError: "Invalid link",
       }));
       return;
     }
@@ -1491,8 +1512,36 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       ...current,
       videoThumbnailUrl: null,
       videoThumbnailStatus: "error",
-      videoThumbnailError: "We couldn't find a usable YouTube thumbnail for that link.",
+      videoThumbnailError: "Invalid link",
     }));
+  };
+
+  const handleOpenReplaceVideoModal = () => {
+    setReplaceVideoDraftUrl("");
+    setReplaceVideoError(null);
+    setIsReplaceVideoModalVisible(true);
+  };
+
+  const handleCloseReplaceVideoModal = () => {
+    setReplaceVideoDraftUrl("");
+    setReplaceVideoError(null);
+    setIsReplaceVideoModalVisible(false);
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoDraftUrl("");
+    setVideoInputError(null);
+    setReplaceVideoDraftUrl("");
+    setReplaceVideoError(null);
+    setIsReplaceVideoModalVisible(false);
+    setForm((current) => ({
+      ...current,
+      videoUrl: "",
+      videoThumbnailUrl: null,
+      videoThumbnailStatus: "idle",
+      videoThumbnailError: null,
+    }));
+    clearErrorKeys("thumbnail");
   };
 
   const toggleCategory = (category: string) => {
@@ -2170,46 +2219,90 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                     </div>
                   ) : (
                     <div className="activity-youtube-panel">
-                      <div className="activity-youtube-copy-block">
-                        <h3>Import video from Youtube</h3>
+                      {currentVideoId && form.videoThumbnailUrl ? (
+                        <div className="activity-upload-preview-shell">
+                          <div className="activity-youtube-embed-shell">
+                            <iframe
+                              src={getYoutubeEmbedUrl(currentVideoId)}
+                              title="Selected YouTube video"
+                              className="activity-youtube-embed"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            />
+                          </div>
 
-                      </div>
-
-                      <div className="activity-inline-inputs">
-                        <input
-                          id="video-url"
-                          className="activity-text-input"
-                          value={form.videoUrl}
-                          onChange={(event) => handleVideoUrlChange(event.target.value)}
-                          placeholder="Paste Youtube link here..."
-                        />
-                        <button
-                          type="button"
-                          className="activity-primary-button"
-                          onClick={handleExtractThumbnail}
-                        >
-                          {form.videoThumbnailStatus === "ready" ? "Refresh Thumbnail" : "Use video"}
-                        </button>
-                      </div>
-
-                      <p className="activity-support-text">We’ll auto-fetch the thumbnail from YouTube.</p>
-
-                      {form.videoThumbnailError ? <FieldError message={form.videoThumbnailError} /> : null}
-                      {form.videoThumbnailUrl ? (
-                        <div className="activity-youtube-preview">
-                          <img
-                            src={form.videoThumbnailUrl}
-                            alt="Extracted YouTube thumbnail"
-                            onLoad={handleThumbnailImageLoad}
-                            onError={handleThumbnailImageError}
-                          />
-                          <span>
-                            {form.videoThumbnailStatus === "checking"
-                              ? "Checking thumbnail..."
-                              : "Extracted thumbnail"}
-                          </span>
+                          <div
+                            className="activity-upload-preview-actions activity-video-preview-actions"
+                            aria-label="Video actions"
+                          >
+                            <button
+                              type="button"
+                              className="activity-upload-action-button"
+                              onClick={handleRemoveVideo}
+                              aria-label="Remove video"
+                            >
+                              <img src={DeleteImageIconUrl} alt="" aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              className="activity-upload-action-button"
+                              onClick={handleOpenReplaceVideoModal}
+                              aria-label="Change YouTube video"
+                            >
+                              <img src={ChangeVideoIconUrl} alt="" aria-hidden="true" />
+                            </button>
+                          </div>
                         </div>
-                      ) : null}
+                      ) : (
+                        <>
+                          <div className="activity-youtube-copy-block">
+                            <h3>Import video from Youtube</h3>
+                          </div>
+
+                          <div className="activity-inline-inputs">
+                            <input
+                              id="video-url"
+                              className={`activity-text-input ${
+                                videoInputError ? "activity-input-error" : ""
+                              }`}
+                              value={videoDraftUrl}
+                              onChange={(event) => handleVideoUrlChange(event.target.value)}
+                              placeholder="Paste Youtube link here..."
+                            />
+                            <button
+                              type="button"
+                              className="activity-primary-button"
+                              onClick={() => handleExtractThumbnail("initial")}
+                            >
+                              Use video
+                            </button>
+                          </div>
+
+                          {videoInputError ? (
+                            <div className="activity-youtube-url-error">
+                              <FieldError message="Invalid link" />
+                            </div>
+                          ) : null}
+
+                          <p className="activity-support-text">We’ll auto-fetch the thumbnail from YouTube.</p>
+
+                          {form.videoThumbnailUrl ? (
+                            <div className="activity-youtube-preview">
+                              <img
+                                src={form.videoThumbnailUrl}
+                                alt="Extracted YouTube thumbnail"
+                                onLoad={handleThumbnailImageLoad}
+                                onError={handleThumbnailImageError}
+                              />
+                              <span>
+                                {form.videoThumbnailStatus === "checking"
+                                  ? "Checking thumbnail..."
+                                  : "Extracted thumbnail"}
+                              </span>
+                            </div>
+                          ) : null}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2869,6 +2962,48 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         onClose={() => setIsCropModalVisible(false)}
         onSave={handleSaveCroppedThumbnail}
       />
+
+      {isReplaceVideoModalVisible ? (
+        <div className="activity-preview-backdrop" role="dialog" aria-modal="true">
+          <div className="activity-replace-video-shell">
+            <button
+              type="button"
+              className="activity-replace-video-close"
+              onClick={handleCloseReplaceVideoModal}
+              aria-label="Close replace video dialog"
+            >
+              <img src={CloseIconUrl} alt="" aria-hidden="true" />
+            </button>
+
+            <h2 className="activity-replace-video-title">Replace video</h2>
+
+            
+            <div className="activity-replace-video-form">
+              <input
+                className={`activity-text-input activity-replace-video-input ${
+                  replaceVideoError ? "activity-input-error" : ""
+                }`}
+                value={replaceVideoDraftUrl}
+                onChange={(event) => handleReplaceVideoUrlChange(event.target.value)}
+                placeholder="Paste Youtube link here..."
+              />
+              <button
+                type="button"
+                className="activity-primary-button activity-replace-video-submit"
+                onClick={() => handleExtractThumbnail("replace")}
+              >
+                Use video
+              </button>
+            </div>
+
+            {replaceVideoError ? (
+              <div className="activity-replace-video-error">
+                <FieldError message="Invalid link" />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <PublishPreviewModal
         visible={isPreviewVisible}
