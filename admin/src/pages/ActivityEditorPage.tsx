@@ -20,12 +20,15 @@ import BookmarkIconUrl from "../assets/BookMarkIcon.svg";
 import ButtonIconUrl from "../assets/Button.svg";
 import ClockIconUrl from "../assets/clock.svg";
 import CloseIconUrl from "../assets/CloseIcon.svg";
+import CropImageIconUrl from "../assets/CropImage.svg";
+import DeleteImageIconUrl from "../assets/DeleteImage.svg";
 import DeleteSectionButtonUrl from "../assets/DeleteSectionButton.svg";
 import PhoneFrameImageUrl from "../assets/378_rectangle_extracted.png";
 import GraduationCapIconUrl from "../assets/graduation-cap.svg";
 import PageIconUrl from "../assets/PageIcon.svg";
 import PeopleIconUrl from "../assets/people.svg";
 import UploadTabIconUrl from "../assets/upload.svg";
+import UploadImageIconUrl from "../assets/UploadImage.svg";
 import VideoTabIconUrl from "../assets/video.svg";
 import VectorIconUrl from "../assets/Vector.svg";
 import YellowEnergyStarIconUrl from "../assets/yellowenergystar.svg";
@@ -49,6 +52,8 @@ const MAX_SECTION_TITLE_LENGTH = 30;
 const MAX_SECTIONS = 6;
 const MAX_TABS = 6;
 const MAX_TAB_NAME_LENGTH = 20;
+const THUMBNAIL_CROP_ASPECT_RATIO = 16 / 9;
+const MIN_CROP_WIDTH_RATIO = 0.22;
 
 type EditorMode = "create" | "edit";
 type TabKind = "prep" | "play" | "debrief" | "custom";
@@ -116,6 +121,106 @@ type FormErrors = {
 type ActivityEditorPageProps = {
   mode: EditorMode;
 };
+
+type CropRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type CropHandle = "move" | "nw" | "ne" | "sw" | "se";
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function createCenteredCropRect(containerWidth: number, containerHeight: number): CropRect {
+  const maxWidth = containerWidth * 0.68;
+  const maxHeight = containerHeight * 0.68;
+
+  let width = maxWidth;
+  let height = width / THUMBNAIL_CROP_ASPECT_RATIO;
+
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * THUMBNAIL_CROP_ASPECT_RATIO;
+  }
+
+  return {
+    x: (containerWidth - width) / 2,
+    y: (containerHeight - height) / 2,
+    width,
+    height,
+  };
+}
+
+function constrainCropRect(rect: CropRect, containerWidth: number, containerHeight: number): CropRect {
+  const maxWidth = Math.min(containerWidth, containerHeight * THUMBNAIL_CROP_ASPECT_RATIO);
+  const minWidth = Math.min(containerWidth * MIN_CROP_WIDTH_RATIO, maxWidth);
+  const width = clamp(rect.width, minWidth, maxWidth);
+  const height = width / THUMBNAIL_CROP_ASPECT_RATIO;
+
+  return {
+    x: clamp(rect.x, 0, Math.max(containerWidth - width, 0)),
+    y: clamp(rect.y, 0, Math.max(containerHeight - height, 0)),
+    width,
+    height,
+  };
+}
+
+async function cropImageToFile({
+  image,
+  cropRect,
+  renderedWidth,
+  renderedHeight,
+  fileName,
+}: {
+  image: HTMLImageElement;
+  cropRect: CropRect;
+  renderedWidth: number;
+  renderedHeight: number;
+  fileName: string;
+}) {
+  const scaleX = image.naturalWidth / renderedWidth;
+  const scaleY = image.naturalHeight / renderedHeight;
+  const canvas = document.createElement("canvas");
+  const outputWidth = Math.max(Math.round(cropRect.width * scaleX), 1);
+  const outputHeight = Math.max(Math.round(cropRect.height * scaleY), 1);
+
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Unable to prepare cropped image.");
+  }
+
+  context.drawImage(
+    image,
+    cropRect.x * scaleX,
+    cropRect.y * scaleY,
+    cropRect.width * scaleX,
+    cropRect.height * scaleY,
+    0,
+    0,
+    outputWidth,
+    outputHeight,
+  );
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((nextBlob) => {
+      if (nextBlob) {
+        resolve(nextBlob);
+        return;
+      }
+      reject(new Error("Unable to save cropped image."));
+    }, "image/jpeg", 0.92);
+  });
+
+  const normalizedFileName = fileName.replace(/\.[^.]+$/, "") || "activity-thumbnail";
+  return new File([blob], `${normalizedFileName}-cropped.jpg`, { type: "image/jpeg" });
+}
 
 function CollapsibleSection({
   title,
@@ -303,6 +408,272 @@ function GradeSlider({
           </span>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ThumbnailCropModal({
+  visible,
+  imageSrc,
+  fileName,
+  onClose,
+  onSave,
+}: {
+  visible: boolean;
+  imageSrc: string | null;
+  fileName: string;
+  onClose: () => void;
+  onSave: (file: File, previewUrl: string) => void;
+}) {
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [cropRect, setCropRect] = useState<CropRect | null>(null);
+  const [initialCropRect, setInitialCropRect] = useState<CropRect | null>(null);
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [cropError, setCropError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDiscardConfirmVisible, setIsDiscardConfirmVisible] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      document.body.classList.add("activity-modal-open");
+      return;
+    }
+
+    document.body.classList.remove("activity-modal-open");
+  }, [visible]);
+
+  useEffect(() => () => document.body.classList.remove("activity-modal-open"), []);
+
+  useEffect(() => {
+    if (!visible) {
+      setCropRect(null);
+      setInitialCropRect(null);
+      setImageSize({ width: 0, height: 0 });
+      setCropError(null);
+      setIsSaving(false);
+      setIsDiscardConfirmVisible(false);
+    }
+  }, [visible]);
+
+  const handleImageLoad = () => {
+    const image = imageRef.current;
+    if (!image) return;
+
+    const width = image.clientWidth;
+    const height = image.clientHeight;
+    const nextCropRect = createCenteredCropRect(width, height);
+
+    setImageSize({ width, height });
+    setCropRect(nextCropRect);
+    setInitialCropRect(nextCropRect);
+    setCropError(null);
+  };
+
+  const beginDrag = (handle: CropHandle, event: ReactMouseEvent<HTMLButtonElement | HTMLDivElement>) => {
+    if (!cropRect || imageSize.width <= 0 || imageSize.height <= 0) return;
+
+    event.preventDefault();
+    const startRect = cropRect;
+    const startClientX = event.clientX;
+    const startClientY = event.clientY;
+    const minWidth = Math.min(imageSize.width * MIN_CROP_WIDTH_RATIO, imageSize.width);
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startClientX;
+      const deltaY = moveEvent.clientY - startClientY;
+
+      setCropRect(() => {
+        if (handle === "move") {
+          return constrainCropRect(
+            {
+              ...startRect,
+              x: startRect.x + deltaX,
+              y: startRect.y + deltaY,
+            },
+            imageSize.width,
+            imageSize.height,
+          );
+        }
+
+        const right = startRect.x + startRect.width;
+        const bottom = startRect.y + startRect.height;
+        const widthFromX = handle === "nw" || handle === "sw" ? right - (startRect.x + deltaX) : startRect.width + deltaX;
+        const widthFromY =
+          handle === "nw" || handle === "ne"
+            ? (bottom - (startRect.y + deltaY)) * THUMBNAIL_CROP_ASPECT_RATIO
+            : (startRect.height + deltaY) * THUMBNAIL_CROP_ASPECT_RATIO;
+
+        let nextWidth = clamp(
+          Math.min(
+            widthFromX,
+            widthFromY,
+            handle === "nw" || handle === "sw" ? right : imageSize.width - startRect.x,
+            (handle === "nw" || handle === "ne" ? bottom : imageSize.height - startRect.y) *
+              THUMBNAIL_CROP_ASPECT_RATIO,
+          ),
+          minWidth,
+          Math.min(imageSize.width, imageSize.height * THUMBNAIL_CROP_ASPECT_RATIO),
+        );
+
+        const nextHeight = nextWidth / THUMBNAIL_CROP_ASPECT_RATIO;
+        let nextX = startRect.x;
+        let nextY = startRect.y;
+
+        if (handle === "nw" || handle === "sw") {
+          nextX = right - nextWidth;
+        }
+        if (handle === "nw" || handle === "ne") {
+          nextY = bottom - nextHeight;
+        }
+
+        return constrainCropRect(
+          {
+            x: nextX,
+            y: nextY,
+            width: nextWidth,
+            height: nextHeight,
+          },
+          imageSize.width,
+          imageSize.height,
+        );
+      });
+    };
+
+    const stopDragging = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", stopDragging);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", stopDragging);
+  };
+
+  const handleReset = () => {
+    if (initialCropRect) {
+      setCropRect(initialCropRect);
+      setCropError(null);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!imageRef.current || !cropRect || imageSize.width <= 0 || imageSize.height <= 0) return;
+
+    try {
+      setIsSaving(true);
+      setCropError(null);
+      const file = await cropImageToFile({
+        image: imageRef.current,
+        cropRect,
+        renderedWidth: imageSize.width,
+        renderedHeight: imageSize.height,
+        fileName,
+      });
+      const previewUrl = URL.createObjectURL(file);
+      onSave(file, previewUrl);
+    } catch (error) {
+      setCropError(error instanceof Error ? error.message : "Unable to crop image.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRequestClose = () => {
+    setIsDiscardConfirmVisible(true);
+  };
+
+  const handleKeepEditing = () => {
+    setIsDiscardConfirmVisible(false);
+  };
+
+  const handleDiscardChanges = () => {
+    setIsDiscardConfirmVisible(false);
+    onClose();
+  };
+
+  if (!visible || !imageSrc) return null;
+
+  return (
+    <div className="activity-preview-backdrop" role="dialog" aria-modal="true">
+      <div className="activity-crop-shell">
+        <div className="activity-crop-stage">
+          <div className="activity-crop-image-wrap">
+            <img
+              ref={imageRef}
+              src={imageSrc}
+              alt="Crop thumbnail"
+              className="activity-crop-image"
+              crossOrigin="anonymous"
+              onLoad={handleImageLoad}
+            />
+
+            {cropRect ? (
+              <div
+                className="activity-crop-selection"
+                style={{
+                  left: `${cropRect.x}px`,
+                  top: `${cropRect.y}px`,
+                  width: `${cropRect.width}px`,
+                  height: `${cropRect.height}px`,
+                }}
+              >
+                <button
+                  type="button"
+                  className="activity-crop-selection-hitbox"
+                  onMouseDown={(event) => beginDrag("move", event)}
+                  aria-label="Move crop area"
+                />
+                <span className="activity-crop-grid-line activity-crop-grid-line-v1" />
+                <span className="activity-crop-grid-line activity-crop-grid-line-v2" />
+                <span className="activity-crop-grid-line activity-crop-grid-line-h1" />
+                <span className="activity-crop-grid-line activity-crop-grid-line-h2" />
+
+                {(["nw", "ne", "sw", "se"] as const).map((handle) => (
+                  <button
+                    key={handle}
+                    type="button"
+                    className={`activity-crop-handle activity-crop-handle-${handle}`}
+                    onMouseDown={(event) => beginDrag(handle, event)}
+                    aria-label={`Resize crop ${handle}`}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <p className="activity-crop-instructions">Drag rectangle or adjust corners to crop</p>
+        {cropError ? <FieldError message={cropError} /> : null}
+
+        <div className="activity-crop-actions">
+          <button type="button" className="activity-secondary-button" onClick={handleReset}>
+            Reset Changes
+          </button>
+          <button type="button" className="activity-secondary-button" onClick={handleRequestClose}>
+            Cancel
+          </button>
+          <button type="button" className="activity-primary-button" disabled={isSaving} onClick={() => void handleSave()}>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      {isDiscardConfirmVisible ? (
+        <div className="activity-discard-backdrop" role="dialog" aria-modal="true">
+          <div className="activity-discard-shell">
+            <h2 className="activity-discard-title">Discard edits?</h2>
+            <p className="activity-discard-copy">You will lose all changes made to the image.</p>
+
+            <div className="activity-discard-actions">
+              <button type="button" className="activity-secondary-button" onClick={handleKeepEditing}>
+                Keep Editing
+              </button>
+              <button type="button" className="activity-discard-button" onClick={handleDiscardChanges}>
+                Discard Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -875,6 +1246,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [activeCoverTab, setActiveCoverTab] = useState<CoverTabKind>("image");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
+  const [isThumbnailConfirmed, setIsThumbnailConfirmed] = useState(false);
+  const [isCropModalVisible, setIsCropModalVisible] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const [materialInput, setMaterialInput] = useState("");
   const [selTagInput, setSelTagInput] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
@@ -901,6 +1275,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         setForm(createFormStateFromActivity(activity));
         setTabs(parseActivityTabs(activity));
         setThumbnailPreviewUrl(activity.thumbnailUrl ?? null);
+        setIsThumbnailConfirmed(Boolean(activity.thumbnailUrl));
         setActiveCoverTab(activity.videoUrl || activity.videoThumbnailUrl ? "youtube" : "image");
       })
       .catch((error: unknown) => {
@@ -986,8 +1361,57 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
     setThumbnailFile(nextFile);
     setThumbnailPreviewUrl(nextFile ? URL.createObjectURL(nextFile) : null);
+    setIsThumbnailConfirmed(false);
     if (nextFile) setActiveCoverTab("image");
-    if (nextFile) clearErrorKeys("thumbnail");
+  };
+
+  const handleConfirmThumbnail = () => {
+    if (!thumbnailPreviewUrl) return;
+
+    setIsThumbnailConfirmed(true);
+    clearErrorKeys("thumbnail");
+  };
+
+  const handleUploadAction = () => {
+    if (isThumbnailConfirmed) {
+      thumbnailInputRef.current?.click();
+      return;
+    }
+
+    handleConfirmThumbnail();
+  };
+
+  const handleOpenCropModal = () => {
+    if (!thumbnailPreviewUrl) return;
+    setIsCropModalVisible(true);
+  };
+
+  const handleSaveCroppedThumbnail = (file: File, previewUrl: string) => {
+    if (thumbnailPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(thumbnailPreviewUrl);
+    }
+
+    setThumbnailFile(file);
+    setThumbnailPreviewUrl(previewUrl);
+    setIsThumbnailConfirmed(false);
+    setIsCropModalVisible(false);
+    clearErrorKeys("thumbnail");
+  };
+
+  const handleRemoveThumbnail = () => {
+    if (thumbnailPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(thumbnailPreviewUrl);
+    }
+
+    setThumbnailFile(null);
+    setThumbnailPreviewUrl(null);
+    setIsThumbnailConfirmed(false);
+    setIsCropModalVisible(false);
+    clearErrorKeys("thumbnail");
+
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = "";
+    }
   };
 
   const handleVideoUrlChange = (value: string) => {
@@ -1401,7 +1825,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       return true;
     }
 
-    if (!thumbnailPreviewUrl && !form.videoThumbnailUrl) {
+    if ((!isThumbnailConfirmed || !thumbnailPreviewUrl) && !form.videoThumbnailUrl) {
       nextErrors.thumbnail = "Please upload either an image or a video frame";
     }
     if (!form.setup) nextErrors.setup = "Please select whether the activity needs props";
@@ -1485,7 +1909,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     setSubmitError(null);
 
     try {
-      const payload = buildPayload(form, tabs, targetStatus, thumbnailPreviewUrl);
+      const payload = buildPayload(
+        form,
+        tabs,
+        targetStatus,
+        isThumbnailConfirmed ? thumbnailPreviewUrl : null,
+      );
 
       if (mode === "create") {
         const created = await createActivity(payload);
@@ -1667,34 +2096,71 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                 <div className="activity-cover-body">
                   {activeCoverTab === "image" ? (
                     <div className="activity-thumbnail-panel">
-                      <label
-                        className={`activity-upload-card ${errors.thumbnail ? "activity-upload-card-error" : ""}`}
-                        htmlFor="thumbnail-upload"
-                      >
-                        {thumbnailPreviewUrl ? (
+                      {thumbnailPreviewUrl ? (
+                        <div
+                          className={`activity-upload-preview-shell ${
+                            errors.thumbnail ? "activity-upload-card-error" : ""
+                          }`}
+                        >
                           <img
                             src={thumbnailPreviewUrl}
                             alt="Selected thumbnail preview"
-                            className="activity-upload-preview"
+                            className="activity-upload-preview-large"
                           />
-                        ) : (
+
+                          <div className="activity-upload-preview-actions" aria-label="Image actions">
+                            <button
+                              type="button"
+                              className="activity-upload-action-button"
+                              onClick={handleOpenCropModal}
+                              aria-label="Crop image"
+                              title="Crop image"
+                            >
+                              <img src={CropImageIconUrl} alt="" aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              className={`activity-upload-action-button ${
+                                isThumbnailConfirmed ? "activity-upload-action-button-active" : ""
+                              }`}
+                              onClick={handleUploadAction}
+                              aria-label={isThumbnailConfirmed ? "Replace image" : "Confirm image"}
+                              aria-pressed={!isThumbnailConfirmed}
+                              title={isThumbnailConfirmed ? "Upload a new image" : "Confirm image"}
+                            >
+                              <img src={UploadImageIconUrl} alt="" aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              className="activity-upload-action-button"
+                              onClick={handleRemoveThumbnail}
+                              aria-label="Remove image"
+                            >
+                              <img src={DeleteImageIconUrl} alt="" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label
+                          className={`activity-upload-card ${errors.thumbnail ? "activity-upload-card-error" : ""}`}
+                          htmlFor="thumbnail-upload"
+                        >
                           <span className="activity-upload-plus">+</span>
-                        )}
-                        <span className="activity-upload-title">Upload cover image</span>
-                        <span className="activity-upload-copy">
-                          Upload an image to use as the activity cover.
-                        </span>
-                        <span className="activity-upload-button">Choose Image</span>
-                        <span className="activity-upload-meta">
-                          {thumbnailFile ? `Image selected: ${thumbnailFile.name}` : "No image selected"}
-                        </span>
-                        <span className="activity-upload-meta">
-                          Supported formats: JPG, JPEG, PNG, GIF, WEBP
-                        </span>
-                        <span className="activity-upload-meta">Max size: 10 MB</span>
-                      </label>
+                          <span className="activity-upload-title">Upload cover image</span>
+                          <span className="activity-upload-copy">
+                            Upload an image to use as the activity cover.
+                          </span>
+                          <span className="activity-upload-button">Choose Image</span>
+                          <span className="activity-upload-meta">No image selected</span>
+                          <span className="activity-upload-meta">
+                            Supported formats: JPG, JPEG, PNG, GIF, WEBP
+                          </span>
+                          <span className="activity-upload-meta">Max size: 10 MB</span>
+                        </label>
+                      )}
                       <input
                         id="thumbnail-upload"
+                        ref={thumbnailInputRef}
                         className="activity-sr-only"
                         type="file"
                         accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
@@ -2396,6 +2862,14 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         </footer>
       </main>
 
+      <ThumbnailCropModal
+        visible={isCropModalVisible}
+        imageSrc={thumbnailPreviewUrl}
+        fileName={thumbnailFile?.name ?? "activity-thumbnail"}
+        onClose={() => setIsCropModalVisible(false)}
+        onSave={handleSaveCroppedThumbnail}
+      />
+
       <PublishPreviewModal
         visible={isPreviewVisible}
         onClose={() => setIsPreviewVisible(false)}
@@ -2407,7 +2881,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         }}
         publishLabel={publishLabel}
         form={form}
-        thumbnailPreviewUrl={thumbnailPreviewUrl}
+        thumbnailPreviewUrl={isThumbnailConfirmed ? thumbnailPreviewUrl : null}
         objective={form.objective}
         tabs={tabs}
         selTags={form.selTags}
