@@ -1376,6 +1376,32 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     });
   };
 
+  const getTabIdForValidationError = (
+    nextErrors: FormErrors,
+    customTabErrors: Record<string, string>,
+    sectionErrors: Record<string, { title?: string; content?: string }>,
+  ) => {
+    if (nextErrors.setupInstructions || nextErrors.materials) {
+      return tabs.find((tab) => tab.kind === "prep")?.id ?? null;
+    }
+
+    if (nextErrors.playGuidedItems) {
+      return tabs.find((tab) => tab.kind === "play")?.id ?? null;
+    }
+
+    if (nextErrors.debriefGuidedItems) {
+      return tabs.find((tab) => tab.kind === "debrief")?.id ?? null;
+    }
+
+    const customTabErrorId = Object.keys(customTabErrors)[0];
+    if (customTabErrorId) return customTabErrorId;
+
+    const sectionErrorSectionId = Object.keys(sectionErrors)[0];
+    if (!sectionErrorSectionId) return null;
+
+    return tabs.find((tab) => tab.sections.some((section) => section.id === sectionErrorSectionId))?.id ?? null;
+  };
+
   const setField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
 
@@ -2098,12 +2124,18 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
     if (Object.keys(sectionErrors).length > 0) nextErrors.sections = sectionErrors;
     if (Object.keys(customTabErrors).length > 0) nextErrors.customTabs = customTabErrors;
 
-    setErrors(nextErrors);
-
     if (Object.keys(nextErrors).length > 0) {
+      const nextActiveTabId = getTabIdForValidationError(nextErrors, customTabErrors, sectionErrors);
+      if (nextActiveTabId) {
+        setActiveTabId(nextActiveTabId);
+      }
+
+      setErrors(nextErrors);
       scrollToFirstError();
       return false;
     }
+
+    setErrors(nextErrors);
 
     return true;
   };
@@ -2405,6 +2437,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                               className="activity-upload-action-button"
                               onClick={handleRemoveVideo}
                               aria-label="Remove video"
+                              data-tooltip="Remove video"
                             >
                               <img src={DeleteImageIconUrl} alt="" aria-hidden="true" />
                             </button>
@@ -2413,6 +2446,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                               className="activity-upload-action-button"
                               onClick={handleOpenReplaceVideoModal}
                               aria-label="Change YouTube video"
+                              data-tooltip="Change YouTube video"
                             >
                               <img src={ChangeVideoIconUrl} alt="" aria-hidden="true" />
                             </button>

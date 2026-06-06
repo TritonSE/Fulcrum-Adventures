@@ -386,8 +386,8 @@
   display: grid;
   gap: 18px;
   padding: 32px;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
+  border: 1px solid #b4b4b4;
+  border-radius: 0 8px 8px 8px;
   background: #fff;
 }
 
@@ -455,7 +455,7 @@
   gap: 10px;
   padding: 28px 22px;
   border: 1px solid #B4B4B4;
-  border-radius: 8px;
+  border-radius: 0 8px 8px 8px;
   background: #fff;
   text-align: center;
   cursor: pointer;
@@ -468,7 +468,7 @@
   align-items: flex-start;
   padding: 20px;
   border: 1px solid #d9d9d9;
-  border-radius: 8px;
+  border-radius: 0 8px 8px 8px;
   background: #fff;
 }
 
@@ -498,12 +498,14 @@
   display: grid;
   gap: 18px;
   justify-items: center;
+  transform: translateX(-220px);
 }
 
 .activity-video-preview-actions {
   position: relative;
   padding-top: 10px;
   padding-bottom: 10px;
+  transform: translateX(-160px);
 }
 
 .activity-video-preview-actions::before {
@@ -724,7 +726,7 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 24px;
+  gap: 16px;
 }
 
 .activity-overview-environment-column {
@@ -733,7 +735,8 @@
 }
 
 .activity-overview-setup-column {
-  width: 220px;
+  width: 196px;
+  flex: 0 0 588px;
 }
 
 .activity-checkbox-row {
@@ -1291,11 +1294,11 @@
 }
 
 .activity-preview-content-card {
-  background: #ffffff;
+  background: #f9f9f9;
   margin-top: -10px;
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
-  padding: 18px 16px 18px 16px;
+  padding: 18px 24px 18px 24px;
 }
 
 .activity-preview-top-row,
@@ -1344,7 +1347,7 @@
   padding: 2.514px 10.056px;
   color: #ffffff;
   font-family: "Instrument Sans", sans-serif;
-  font-size: 6.285px;
+  font-size: 8px;
   font-style: normal;
   font-weight: 500;
   line-height: 150%;
@@ -1392,9 +1395,9 @@
   gap: 6px;
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
-  font-size: 8.799px;
+  font-size: 10px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .activity-preview-metric-item img {
@@ -1414,7 +1417,7 @@
   margin: 0;
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
-  font-size: 8.799px;
+  font-size: 10px;
   font-style: normal;
   font-weight: 400;
   line-height: 13px;
@@ -1447,10 +1450,10 @@
   border-radius: 25px;
   border: 1px solid #ebebeb;
   background: #ffffff;
-  padding: 2.5px 10px 2.5px 10px;
+  padding: 4px 10px 4px 10px;
   color: #153a7a;
   font-family: "Instrument Sans", sans-serif;
-  font-size: 7.542px;
+  font-size: 8.5px;
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -1483,7 +1486,7 @@
 .activity-preview-facilitate-tab-bar {
   display: flex;
   border: 0.6px solid #9d9d9d;
-  border-radius: 8px;
+  border-radius: 5px;
   background: #ffffff;
   overflow: hidden;
 }
