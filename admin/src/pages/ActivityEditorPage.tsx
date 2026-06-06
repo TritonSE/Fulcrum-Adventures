@@ -421,12 +421,13 @@ function GradeSlider({
           aria-label="Maximum grade"
         />
       </div>
-      <div
-        className="activity-grade-tick-label-row"
-        style={{ gridTemplateColumns: `repeat(${GRADE_OPTIONS.length}, minmax(0, 1fr))` }}
-      >
-        {GRADE_OPTIONS.map((grade) => (
-          <span key={grade} className="activity-grade-tick-label">
+      <div className="activity-grade-tick-label-row">
+        {GRADE_OPTIONS.map((grade, index) => (
+          <span
+            key={grade}
+            className="activity-grade-tick-label"
+            style={{ left: `${getCenterXForIndex(index)}px` }}
+          >
             {grade}
           </span>
         ))}
@@ -2348,6 +2349,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                               className="activity-upload-action-button"
                               onClick={handleRemoveThumbnail}
                               aria-label="Remove image"
+                              title="Remove image"
                             >
                               <img src={DeleteImageIconUrl} alt="" aria-hidden="true" />
                             </button>
