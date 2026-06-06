@@ -29,6 +29,7 @@ interface TextFieldProps {
   emphasized?: boolean;
   id?: string;
   autoComplete?: string;
+  readOnly?: boolean;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -47,6 +48,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   emphasized = false,
   id,
   autoComplete,
+  readOnly = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -94,6 +96,7 @@ export const TextField: React.FC<TextFieldProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             autoComplete={autoComplete}
+            readOnly={readOnly}
           />
         )}
       </div>

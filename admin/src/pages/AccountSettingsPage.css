@@ -8,9 +8,9 @@
 
 .account-settings__title {
   margin: 0 0 32px;
-  font-family: "Instrument Sans", sans-serif;
+  font-family: "League Spartan", sans-serif;
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 700;
   color: #153a7a;
 }
 
@@ -30,9 +30,9 @@
 
 .settings-card__title {
   margin: 0;
-  font-family: "Instrument Sans", sans-serif;
+  font-family: "League Spartan", sans-serif;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   color: #153a7a;
 }
 
@@ -79,6 +79,11 @@
   color: #6b7280;
 }
 
+.settings-card__label--section {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
 .admin-email-list {
   list-style: none;
   margin: 0 0 24px;
@@ -95,16 +100,12 @@
   gap: 12px;
 }
 
-.admin-email-list__row--add .textfield-container {
+.admin-email-list__row .textfield-container {
   flex: 1;
 }
 
-.admin-email-list__email {
+.admin-email-list__row--add .textfield-container {
   flex: 1;
-  font-family: "Instrument Sans", sans-serif;
-  font-size: 14px;
-  color: #374151;
-  padding: 12px 0;
 }
 
 .admin-email-list__icon-btn {

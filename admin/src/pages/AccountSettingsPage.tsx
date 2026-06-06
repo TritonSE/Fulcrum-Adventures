@@ -187,7 +187,7 @@ export function AccountSettingsPage() {
               type="password"
               value={currentPassword}
               onChange={setCurrentPassword}
-              placeholder=""
+              placeholder="********"
               autoComplete="current-password"
             />
           </div>
@@ -201,7 +201,7 @@ export function AccountSettingsPage() {
               type="password"
               value={newPassword}
               onChange={setNewPassword}
-              placeholder=""
+              placeholder="********"
               autoComplete="new-password"
             />
           </div>
@@ -215,7 +215,7 @@ export function AccountSettingsPage() {
               type="password"
               value={confirmPassword}
               onChange={setConfirmPassword}
-              placeholder=""
+              placeholder="********"
               autoComplete="new-password"
             />
           </div>
@@ -230,10 +230,17 @@ export function AccountSettingsPage() {
             <h2 className="settings-card__title">Manage Admins</h2>
             <p className="settings-card__subtitle">Add or remove admins</p>
 
+            <label className="settings-card__label settings-card__label--section">Admin Email</label>
+
             <ul className="admin-email-list">
               {allowedEmails.map((adminEmail) => (
                 <li key={adminEmail} className="admin-email-list__row">
-                  <span className="admin-email-list__email">{adminEmail}</span>
+                  <TextField
+                    value={adminEmail}
+                    onChange={() => {}}
+                    type="email"
+                    readOnly
+                  />
                   <button
                     type="button"
                     className="admin-email-list__icon-btn admin-email-list__icon-btn--remove"
@@ -248,7 +255,7 @@ export function AccountSettingsPage() {
                 <TextField
                   value={newAdminEmail}
                   onChange={setNewAdminEmail}
-                  placeholder=""
+                  placeholder="Enter admin email"
                   type="email"
                 />
                 <button
