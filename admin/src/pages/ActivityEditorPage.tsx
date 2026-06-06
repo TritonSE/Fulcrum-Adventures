@@ -18,6 +18,7 @@ import ActionIconUrl from "../assets/Action.svg";
 import BlankEnergyStarIconUrl from "../assets/blankenergystar.svg";
 import BookmarkIconUrl from "../assets/BookMarkIcon.svg";
 import ButtonIconUrl from "../assets/Button.svg";
+import ButtonUpload from "../assets/ButtonUpload.svg";
 import ChangeVideoIconUrl from "../assets/ChangeVideo.svg";
 import ClockIconUrl from "../assets/clock.svg";
 import CloseIconUrl from "../assets/CloseIcon.svg";
@@ -2359,7 +2360,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                         >
                           <img src={MediaUploadIconUrl} alt="Upload media" aria-hidden="true" />
                           <span className="activity-upload-title">Upload cover image</span>
-                          <span className="activity-upload-button">Choose File</span>
+                          <span className="activity-upload-button">
+                            <img src={ButtonUpload} alt="" aria-hidden="true" />
+                            <span>Choose File</span>
+                          </span>
                           <span className="activity-upload-meta">
                             Supported formats: JPG, JPEG, PNG, WEBP
                           </span>
