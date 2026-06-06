@@ -56,6 +56,7 @@ const MAX_SECTION_TITLE_LENGTH = 30;
 const MAX_SECTIONS = 6;
 const MAX_TABS = 6;
 const MAX_TAB_NAME_LENGTH = 20;
+const MAX_OVERVIEW_LENGTH = 200;
 const THUMBNAIL_CROP_ASPECT_RATIO = 16 / 9;
 const MIN_CROP_WIDTH_RATIO = 0.22;
 
@@ -419,7 +420,10 @@ function GradeSlider({
           aria-label="Maximum grade"
         />
       </div>
-      <div className="activity-grade-tick-label-row">
+      <div
+        className="activity-grade-tick-label-row"
+        style={{ gridTemplateColumns: `repeat(${GRADE_OPTIONS.length}, minmax(0, 1fr))` }}
+      >
         {GRADE_OPTIONS.map((grade) => (
           <span key={grade} className="activity-grade-tick-label">
             {grade}
@@ -1194,7 +1198,12 @@ const createFormStateFromActivity = (activity: ActivityDetail): FormState => {
     energyLevel: activity.energyLevel ?? "",
     environments,
     anyEnvironment: (activity.environment ?? []).includes("Any Environment"),
-    setup: activity.setup === "Required" ? "Props" : activity.status === "Draft" ? "" : "No Props",
+    setup:
+      activity.setup === "Required"
+        ? "Props"
+        : activity.setup === "None"
+          ? "No Props"
+          : "",
     objective: activity.objective ?? "",
     selTags: activity.selTags ?? [],
     videoUrl: activity.videoUrl ?? "",
@@ -2479,8 +2488,9 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
             <div className="activity-field-group">
               <label className="activity-field-label" htmlFor="overview">
-                Overview
+               Activity Overview
               </label>
+              <div className="activity-support-block">
               <textarea
                 id="overview"
                 className={`activity-text-area ${errors.overview ? "activity-input-error" : ""}`}
@@ -2489,8 +2499,11 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                 placeholder="Write a short overview for the activity"
                 rows={5}
               />
+              <p className="activity-support-text">{form.overview.length}/{MAX_OVERVIEW_LENGTH} characters</p>
+              </div>
               {errors.overview ? <FieldError message={errors.overview} /> : null}
-            </div>
+               </div>
+           
 
             <div className="activity-field-group">
               <p className="activity-field-label">
