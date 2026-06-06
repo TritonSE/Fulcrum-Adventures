@@ -28,6 +28,13 @@ export function ForgotPasswordPage() {
 
   const emailFilled = email.trim().length > 0;
 
+  function onEmailChange(value: string) {
+    setEmail(value);
+    if (submitError) {
+      setSubmitError(null);
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!emailFilled || submitting || sent) {
@@ -79,13 +86,21 @@ export function ForgotPasswordPage() {
                 id="forgot-email"
                 className="sign-in__textfield"
                 value={email}
-                onChange={setEmail}
+                onChange={onEmailChange}
                 placeholder="example@gmail.com"
                 type="email"
                 autoComplete="email"
+                emphasized={Boolean(submitError)}
               />
             </div>
           </div>
+
+          {submitError ? (
+            <div className="sign-in__error-banner" role="alert">
+              <img src={WarningIcon} alt="" className="sign-in__error-icon" aria-hidden="true" />
+              <p className="sign-in__error-text">{submitError}</p>
+            </div>
+          ) : null}
 
           <Link to="/sign-in" className="sign-in__link forgot-password__back-link">
             ← Back to Sign-In
@@ -101,13 +116,6 @@ export function ForgotPasswordPage() {
           >
             {submitting ? "Sending…" : "Send Email"}
           </Button>
-
-          {submitError ? (
-            <div className="sign-in__error-banner" role="alert">
-              <img src={WarningIcon} alt="" className="sign-in__error-icon" aria-hidden="true" />
-              <p className="sign-in__error-text">{submitError}</p>
-            </div>
-          ) : null}
         </form>
       )}
     </AuthShell>

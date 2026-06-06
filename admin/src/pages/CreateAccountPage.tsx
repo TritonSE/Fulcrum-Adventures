@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "../components/Button";
+import { AuthShell } from "../components/AuthShell";
 import { TextField } from "../components/TextField";
 import {
   isAdminAuthenticated,
@@ -13,9 +14,6 @@ import WarningIcon from "../../icons/error.svg";
 
 import "./SignInPage.css";
 import "./CreateAccountPage.css";
-
-const fulcrumLogoMarkSrc = "/sign-in/fulcrum-logo-mark.svg";
-const tseLogoSrc = "/sign-in/tse-logo.png";
 
 export function CreateAccountPage() {
   const navigate = useNavigate();
@@ -95,23 +93,12 @@ export function CreateAccountPage() {
   }
 
   return (
-    <div className="sign-in">
-      <div className="sign-in__inner">
-        <div className="sign-in__brand" aria-label="Fulcrum — do. risk. grow.">
-          <img
-            src={fulcrumLogoMarkSrc}
-            alt=""
-            className="sign-in__logo-vector"
-            aria-hidden="true"
-          />
-          <p className="sign-in__tagline">do. risk. grow.</p>
-        </div>
-
-        <form
-          className="sign-in__card create-account__card"
-          onSubmit={onSubmit}
-          noValidate
-        >
+    <AuthShell>
+      <form
+        className="sign-in__card create-account__card"
+        onSubmit={onSubmit}
+        noValidate
+      >
           <h1 className="sign-in__title">Create Account</h1>
 
           <div className="sign-in__fields">
@@ -221,26 +208,6 @@ export function CreateAccountPage() {
             </Link>
           </p>
         </form>
-
-        <footer className="sign-in__footer">
-          <img
-            src={tseLogoSrc}
-            alt=""
-            className="sign-in__footer-mark"
-            aria-hidden="true"
-          />
-          <p className="sign-in__footer-text">
-            Built for free by{" "}
-            <a
-              href="https://tritonse.github.io/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Triton Software Engineering
-            </a>
-          </p>
-        </footer>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

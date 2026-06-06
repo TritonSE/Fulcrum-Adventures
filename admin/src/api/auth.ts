@@ -4,6 +4,7 @@ import {
   confirmPasswordReset,
   createUserWithEmailAndPassword,
   deleteUser,
+  fetchSignInMethodsForEmail,
   onAuthStateChanged,
   reauthenticateWithCredential,
   sendPasswordResetEmail,
@@ -225,13 +226,44 @@ export async function changePasswordAdmin(
   }
 }
 
+const INVALID_EMAIL_MESSAGE = "Invalid email";
+
+function isValidEmailAddress(email: string): boolean {
+  return /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/.test(email.trim());
+}
+
+function resetPasswordContinueUrl(): string {
+  return `${window.location.origin}/reset-password?resetComplete=true`;
+}
+
 export async function forgotPasswordAdmin(email: string): Promise<ForgotPasswordResult> {
+  const trimmed = email.trim();
+
+  if (!isValidEmailAddress(trimmed)) {
+    return { ok: false, message: INVALID_EMAIL_MESSAGE };
+  }
+
   try {
-    await sendPasswordResetEmail(auth, email.trim());
+    const signInMethods = await fetchSignInMethodsForEmail(auth, trimmed);
+    if (signInMethods.length === 0) {
+      return { ok: false, message: INVALID_EMAIL_MESSAGE };
+    }
+
+    await sendPasswordResetEmail(auth, trimmed, {
+      url: resetPasswordContinueUrl(),
+      handleCodeInApp: true,
+    });
     return { ok: true };
   } catch (err) {
-    const { message } = getFirebaseError(err, "Unable to send reset email.");
-    return { ok: false, message };
+    const { code } = getFirebaseError(err, INVALID_EMAIL_MESSAGE);
+    if (
+      code === "auth/invalid-email" ||
+      code === "auth/user-not-found" ||
+      code === "auth/invalid-credential"
+    ) {
+      return { ok: false, message: INVALID_EMAIL_MESSAGE };
+    }
+    return { ok: false, message: INVALID_EMAIL_MESSAGE };
   }
 }
 

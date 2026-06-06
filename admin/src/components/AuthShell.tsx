@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-const fulcrumLogoMarkSrc = "/sign-in/fulcrum-logo-mark.svg";
+const fulcrumLogoSrc = "/sign-in/fulcrum-logo.png";
 const tseLogoSrc = "/sign-in/tse-logo.png";
 
 import "../pages/SignInPage.css";
@@ -13,14 +13,13 @@ export function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="sign-in">
       <div className="sign-in__inner">
-        <div className="sign-in__brand" aria-label="Fulcrum — do. risk. grow.">
+        <div className="sign-in__brand sign-in__brand--full-logo" aria-label="Fulcrum — do. risk. grow.">
           <img
-            src={fulcrumLogoMarkSrc}
+            src={fulcrumLogoSrc}
             alt=""
-            className="sign-in__logo-vector"
+            className="sign-in__logo-full"
             aria-hidden="true"
           />
-          <p className="sign-in__tagline">do. risk. grow.</p>
         </div>
 
         {children}
