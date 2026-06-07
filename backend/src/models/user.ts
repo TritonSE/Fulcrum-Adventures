@@ -20,6 +20,7 @@ const userSchema = new Schema(
       enum: ["super_admin", "admin"],
       required: true,
     },
+    isActive: { type: Boolean, default: true },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
   },

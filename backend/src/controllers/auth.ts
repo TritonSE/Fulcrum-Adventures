@@ -18,7 +18,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
 
   const email = authUser.email.toLowerCase();
   const user = await User.findOne({ email });
-  if (user) {
+  if (user && user.isActive !== false) {
     res.json({ user: toPublicUser(user) });
     return;
   }
@@ -48,13 +48,6 @@ export async function registerProfile(req: Request, res: Response): Promise<void
     return;
   }
 
-  const existing = await User.findOne({ email });
-  if (existing) {
-    res.status(409).json({ error: "An account with this email already exists." });
-    return;
-  }
-
-  const userCount = await User.countDocuments();
   const allowed = await AllowedAdminEmail.findOne({ email });
   if (!allowed) {
     res.status(403).json({
@@ -63,6 +56,23 @@ export async function registerProfile(req: Request, res: Response): Promise<void
     return;
   }
 
+  const existing = await User.findOne({ email });
+  if (existing) {
+    if (existing.isActive !== false) {
+      res.status(409).json({ error: "An account with this email already exists." });
+      return;
+    }
+
+    existing.firstName = firstName;
+    existing.lastName = lastName;
+    existing.isActive = true;
+    await existing.save();
+
+    res.status(200).json({ user: toPublicUser(existing) });
+    return;
+  }
+
+  const userCount = await User.countDocuments();
   const role = userCount === 0 ? "super_admin" : "admin";
   const placeholderPassword = await hashPassword(crypto.randomBytes(32).toString("hex"));
 

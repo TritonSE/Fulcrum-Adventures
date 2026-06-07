@@ -33,6 +33,19 @@ function parseEmailList(raw: unknown): string[] | null {
   return emails;
 }
 
+async function getManagedAdminEmails(): Promise<string[]> {
+  const [allowedRows, activeUsers] = await Promise.all([
+    AllowedAdminEmail.find().select("email").lean(),
+    User.find({ isActive: { $ne: false } })
+      .select("email")
+      .lean(),
+  ]);
+
+  return [
+    ...new Set([...allowedRows.map((row) => row.email), ...activeUsers.map((user) => user.email)]),
+  ].sort();
+}
+
 export async function updateProfile(req: Request, res: Response): Promise<void> {
   const userId = req.authUser?.userId;
   if (!userId) {
@@ -62,8 +75,7 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
 }
 
 export async function listAllowedAdminEmails(req: Request, res: Response): Promise<void> {
-  const rows = await AllowedAdminEmail.find().sort({ email: 1 }).lean();
-  res.json({ emails: rows.map((row) => row.email) });
+  res.json({ emails: await getManagedAdminEmails() });
 }
 
 export async function updateAllowedAdminEmails(req: Request, res: Response): Promise<void> {
@@ -76,6 +88,11 @@ export async function updateAllowedAdminEmails(req: Request, res: Response): Pro
   }
 
   const currentUser = await User.findById(req.authUser?.userId);
+  if (!currentUser || currentUser.isActive === false) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
   if (currentUser && !emails.includes(currentUser.email)) {
     emails.push(currentUser.email);
   }
@@ -85,5 +102,8 @@ export async function updateAllowedAdminEmails(req: Request, res: Response): Pro
     await AllowedAdminEmail.insertMany(emails.map((email) => ({ email })));
   }
 
-  res.json({ emails, message: "Allowed admin emails updated." });
+  await User.updateMany({ role: "admin", email: { $in: emails } }, { $set: { isActive: true } });
+  await User.updateMany({ role: "admin", email: { $nin: emails } }, { $set: { isActive: false } });
+
+  res.json({ emails: await getManagedAdminEmails(), message: "Admin access updated." });
 }
