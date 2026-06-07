@@ -142,6 +142,7 @@ export default function Dashboard() {
   >("All");
   const [isLoading, setIsLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const getActivityData = async () => {
@@ -190,7 +191,7 @@ export default function Dashboard() {
       setIsLoading(false);
     };
     getActivityData();
-  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
+  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters, refreshKey]);
 
   useEffect(() => {
     const getActivityStatsData = async () => {
@@ -213,7 +214,11 @@ export default function Dashboard() {
       setIsStatsLoading(false);
     };
     getActivityStatsData();
-  }, []);
+  }, [refreshKey]);
+
+  const refreshDashboardData = () => {
+    setRefreshKey((key) => key + 1);
+  };
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -578,6 +583,7 @@ export default function Dashboard() {
             <DashboardTable
               activities={activities}
               onEditActivity={handleEditActivity}
+              onDataChange={refreshDashboardData}
             />
           </div>
 

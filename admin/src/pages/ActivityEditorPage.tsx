@@ -527,7 +527,7 @@ function ThumbnailCropModal({
             ? (bottom - (startRect.y + deltaY)) * THUMBNAIL_CROP_ASPECT_RATIO
             : (startRect.height + deltaY) * THUMBNAIL_CROP_ASPECT_RATIO;
 
-        let nextWidth = clamp(
+        const nextWidth = clamp(
           Math.min(
             widthFromX,
             widthFromY,
@@ -2543,7 +2543,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
               </div>
               {errors.overview ? <FieldError message={errors.overview} /> : null}
                </div>
-           
+
 
             <div className="activity-field-group">
               <p className="activity-field-label">
@@ -3200,7 +3200,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
             <h2 className="activity-replace-video-title">Replace video</h2>
 
-            
+
             <div className="activity-replace-video-form">
               <input
                 className={`activity-text-input activity-replace-video-input ${

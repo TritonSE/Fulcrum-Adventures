@@ -230,14 +230,13 @@ export async function updateActivity(req: Request, res: Response) {
   const id = routeParam(req.params.id);
   const body = await applyThumbnailFieldsForUpdate(id, req.body as Record<string, unknown>);
   const draftBody = await applyDraftTitleDefaults(body, id);
-  const activity = await Activity.findByIdAndUpdate(id, draftBody, {
-    returnDocument: "after",
-    runValidators: true,
-  });
+  const activity = await Activity.findById(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }
+  activity.set(draftBody);
+  await activity.save();
   res.json(activity);
 }
 
@@ -249,15 +248,13 @@ export async function updateActivityStatus(req: Request, res: Response) {
   }
 
   const id = routeParam(req.params.id);
-  const activity = await Activity.findByIdAndUpdate(
-    id,
-    { status },
-    { returnDocument: "after", runValidators: true },
-  );
+  const activity = await Activity.findById(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }
+  activity.set("status", status);
+  await activity.save();
   res.json(activity);
 }
 
