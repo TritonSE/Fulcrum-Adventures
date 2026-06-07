@@ -228,7 +228,7 @@ export function AccountSettingsPage() {
         {isSuperAdmin && (
           <form className="settings-card" onSubmit={onSaveAdmins}>
             <h2 className="settings-card__title">Manage Admins</h2>
-            <p className="settings-card__subtitle">Add, remove, or reactivate admin portal access</p>
+            <p className="settings-card__subtitle">Add or remove admin portal access</p>
 
             <label className="settings-card__label settings-card__label--section">Admin Email</label>
 
