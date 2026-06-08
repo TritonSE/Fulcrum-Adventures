@@ -229,6 +229,29 @@ export default function Dashboard() {
     // Future: navigate to the edit page
   };
 
+  const handleActivityDeleted = (deletedActivity: Activity) => {
+    setActivities((prevActivities) => {
+      const nextActivities = prevActivities.filter(
+        (activity) => activity._id !== deletedActivity._id,
+      );
+      if (nextActivities.length === 0 && currentPage > 1) {
+        setCurrentPage((page) => Math.max(1, page - 1));
+      }
+      return nextActivities;
+    });
+
+    setTrueTotalActivities((total) => Math.max(0, total - 1));
+
+    setCategoryCounts((prevCounts) => {
+      if (!prevCounts) return prevCounts;
+      const nextCounts = { ...prevCounts };
+      deletedActivity.category.forEach((category) => {
+        nextCounts[category] = Math.max(0, nextCounts[category] - 1);
+      });
+      return nextCounts;
+    });
+  };
+
   const toggleSortDropdown = () => {
     setIsSortDropdownOpen((isOpen) => !isOpen);
     setIsFilterDropdownOpen(false);
@@ -579,6 +602,7 @@ export default function Dashboard() {
               activities={activities}
               onEditActivity={handleEditActivity}
               categoryFilters={appliedFilters.category}
+              onDeleteActivity={handleActivityDeleted}
             />
           </div>
 

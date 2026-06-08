@@ -18,6 +18,7 @@ interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
   categoryFilters?: Activity["category"];
+  onDeleteActivity?: (activity: Activity) => void;
 }
 
 const CATEGORY_ORDER: Activity["category"] = [
@@ -55,6 +56,7 @@ export default function DashboardTable({
   activities,
   onEditActivity,
   categoryFilters,
+  onDeleteActivity,
 }: DashboardTableProps) {
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
@@ -154,12 +156,14 @@ export default function DashboardTable({
 
   const handleDeleteActivity = async (activityId: string | null) => {
     if (!activityId) return;
+    const activityToDelete = activities.find(
+      (activity) => activity._id === activityId,
+    );
     const result = await deleteActivity(activityId);
     if (result.success) {
-      activities.splice(
-        activities.findIndex((activity) => activity._id === activityId),
-        1,
-      );
+      if (activityToDelete) {
+        onDeleteActivity?.(activityToDelete);
+      }
       setShowDeleteConfirmationPopup(false);
       setToastActionText("");
       setToastAction(null);
