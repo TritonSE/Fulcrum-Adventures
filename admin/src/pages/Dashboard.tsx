@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import { Pagination } from "../components/Pagination";
+import { Toast } from "../components/Toast";
 import type { Activity } from "../types/activity";
 import {
   fetchActivities,
@@ -125,6 +126,7 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts)
   const [categoryCounts, setCategoryCounts] =
@@ -142,6 +144,8 @@ export default function Dashboard() {
   >("All");
   const [isLoading, setIsLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastKey, setToastKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -215,6 +219,15 @@ export default function Dashboard() {
     };
     getActivityStatsData();
   }, [refreshKey]);
+
+  useEffect(() => {
+    const nextToastMessage = (location.state as { toastMessage?: string } | null)?.toastMessage;
+    if (!nextToastMessage) return;
+
+    setToastMessage(nextToastMessage);
+    setToastKey((prev) => prev + 1);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   const refreshDashboardData = () => {
     setRefreshKey((key) => key + 1);
@@ -594,6 +607,13 @@ export default function Dashboard() {
           />
         </div>
       )}
+      {toastMessage ? (
+        <Toast
+          key={toastKey}
+          message={toastMessage}
+          onClose={() => setToastMessage("")}
+        />
+      ) : null}
     </div>
   );
 }

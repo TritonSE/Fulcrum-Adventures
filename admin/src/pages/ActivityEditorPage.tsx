@@ -2216,14 +2216,15 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         }
 
         setIsPreviewVisible(false);
-        if (targetStatus === "Draft") {
-          navigate("/dashboard", {
-            replace: true,
-            state: { draftSaved: true },
-          });
-        } else {
-          navigate("/dashboard", { replace: true });
-        }
+        navigate("/dashboard", {
+          replace: true,
+          state: {
+            toastMessage:
+              targetStatus === "Draft"
+                ? `"${form.title.trim() || "Untitled activity"}" saved as draft!`
+                : `"${form.title.trim() || "Untitled activity"}" published to app!`,
+          },
+        });
         return;
       }
 
@@ -2240,14 +2241,15 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       }
 
       setIsPreviewVisible(false);
-      if (targetStatus === "Draft") {
-        navigate("/dashboard", {
-          replace: true,
-          state: { draftSaved: true },
-        });
-      } else {
-        navigate("/dashboard", { replace: true });
-      }
+      navigate("/dashboard", {
+        replace: true,
+        state: {
+          toastMessage:
+            targetStatus === "Draft"
+              ? `"${form.title.trim() || "Untitled activity"}" saved as draft!`
+              : `"${form.title.trim() || "Untitled activity"}" published to app!`,
+        },
+      });
     } catch (error) {
       setIsPreviewVisible(false);
       setSubmitError(
