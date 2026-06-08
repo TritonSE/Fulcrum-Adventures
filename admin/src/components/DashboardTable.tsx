@@ -87,18 +87,33 @@ export default function DashboardTable({
   }
 
   // Helper to format the grade range from min and max numbers to "K-12", "3-5", etc.
-  const formatGradeRange = (range: { min: number; max: number }) => {
+  const formatGradeRange = (
+    range: { min: number; max: number } | null | undefined,
+  ) => {
+    if (!range || !Number.isFinite(range.min) || !Number.isFinite(range.max)) {
+      return "-";
+    }
+
     const minText = range.min === 0 ? "K" : range.min.toString();
     return `${minText}-${range.max}`;
   };
 
   // Helper to format group size
-  const formatGroupSize = (size: {
-    min?: number;
-    max?: number;
-    anySize?: boolean;
-  }) => {
+  const formatGroupSize = (
+    size:
+      | {
+          min?: number;
+          max?: number;
+          anySize?: boolean;
+        }
+      | null
+      | undefined,
+  ) => {
+    if (!size) return "-";
     if (size.anySize) return "Any";
+    if (!Number.isFinite(size.min) || !Number.isFinite(size.max)) {
+      return "-";
+    }
     return `${size.min}-${size.max}`;
   };
 
@@ -242,7 +257,9 @@ export default function DashboardTable({
               <td className="col-group">
                 {formatGroupSize(activity.groupSize)}
               </td>
-              <td className="col-duration">{activity.duration}</td>
+              <td className="col-duration">
+                {activity.duration ? activity.duration : "-"}
+              </td>
               <td>
                 <StatusBadge status={activity.status} />
               </td>
