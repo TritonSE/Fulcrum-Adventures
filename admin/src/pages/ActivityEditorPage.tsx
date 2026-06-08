@@ -725,7 +725,7 @@ function PublishPreviewModal({
   tabs: ActivityTab[];
   selTags: string[];
 }) {
-  const [activeFacilitateTab, setActiveFacilitateTab] = useState<"prep" | "play" | "debrief">("prep");
+  const [activePreviewTabId, setActivePreviewTabId] = useState<string | null>(null);
   const previewTabs = useMemo(
     () =>
       tabs.map((tab) => ({
@@ -737,6 +737,18 @@ function PublishPreviewModal({
       })),
     [tabs],
   );
+
+  useEffect(() => {
+    if (!visible) return;
+
+    setActivePreviewTabId((current) => {
+      if (current && previewTabs.some((tab) => tab.id === current)) {
+        return current;
+      }
+
+      return previewTabs[0]?.id ?? null;
+    });
+  }, [previewTabs, visible]);
 
   useEffect(() => {
     if (visible) {
@@ -753,8 +765,7 @@ function PublishPreviewModal({
 
   const energyLevelFilledStars =
     form.energyLevel === "High" ? 3 : form.energyLevel === "Medium" ? 2 : form.energyLevel === "Low" ? 1 : 0;
-  const activePreviewTab =
-    previewTabs.find((tab) => tab.kind === activeFacilitateTab) ?? previewTabs[0] ?? null;
+  const activePreviewTab = previewTabs.find((tab) => tab.id === activePreviewTabId) ?? previewTabs[0] ?? null;
   const gradeRangeLabel = `${form.gradeMin}-${form.gradeMax}`;
   const groupSizeLabel = form.anyGroupSize
     ? "Any size"
@@ -869,18 +880,20 @@ function PublishPreviewModal({
                 <h4 className="activity-preview-body-section-title">Facilitate</h4>
 
                 <div className="activity-preview-facilitate-tab-bar">
-                  {(["prep", "play", "debrief"] as const).map((tabKind, index) => (
-                    <div className="activity-preview-facilitate-tab-wrap" key={tabKind}>
+                  {previewTabs.map((tab, index) => (
+                    <div className="activity-preview-facilitate-tab-wrap" key={tab.id}>
                       <button
                         type="button"
                         className={`activity-preview-facilitate-tab ${
-                          activeFacilitateTab === tabKind ? "activity-preview-facilitate-tab-active" : ""
+                          activePreviewTab?.id === tab.id ? "activity-preview-facilitate-tab-active" : ""
                         }`}
-                        onClick={() => setActiveFacilitateTab(tabKind)}
+                        onClick={() => setActivePreviewTabId(tab.id)}
                       >
-                        {tabKind === "prep" ? "Prep" : tabKind === "play" ? "Play" : "Debrief"}
+                        {tab.name.trim() || `Tab ${index + 1}`}
                       </button>
-                      {index < 2 ? <span className="activity-preview-facilitate-tab-divider" /> : null}
+                      {index < previewTabs.length - 1 ? (
+                        <span className="activity-preview-facilitate-tab-divider" />
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -902,32 +915,79 @@ function PublishPreviewModal({
                       </div>
                     ) : (
                       <div className="activity-preview-list-group">
-                        {activePreviewTab.sections.map((section, index) => (
-                          <div key={`${activePreviewTab.id}-section-${index}`} className="activity-preview-section-block">
-                            <h5 className="activity-preview-section-block-title">{section.title}</h5>
-                            <p className="activity-preview-section-block-text">
-                              {section.content || "No content added yet."}
-                            </p>
-                          </div>
-                        ))}
-
                         {activePreviewTab.kind === "prep" ? (
-                          <div className="activity-preview-material-block">
-                            <h5 className="activity-preview-section-block-title">Materials</h5>
-                            {activePreviewTab.noMaterialsNeeded ? (
-                              <p className="activity-preview-section-block-text">No materials needed.</p>
-                            ) : activePreviewTab.materials.length > 0 ? (
-                              activePreviewTab.materials.map((material) => (
-                                <div key={`${activePreviewTab.id}-${material}`} className="activity-preview-material-item-row">
-                                  <div className="activity-preview-material-checkbox" />
-                                  <span className="activity-preview-section-block-text">{material}</span>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="activity-preview-section-block-text">No materials added yet.</p>
-                            )}
-                          </div>
-                        ) : null}
+                          <>
+                            {activePreviewTab.sections.slice(0, 1).map((section, index) => (
+                              <div
+                                key={`${activePreviewTab.id}-section-${index}`}
+                                className="activity-preview-section-block"
+                              >
+                                <h5 className="activity-preview-section-block-title">{section.title}</h5>
+                                <p className="activity-preview-section-block-text">
+                                  {section.content || "No content added yet."}
+                                </p>
+                              </div>
+                            ))}
+
+                            <div className="activity-preview-material-block">
+                              <h5 className="activity-preview-section-block-title">Materials</h5>
+                              {activePreviewTab.noMaterialsNeeded ? (
+                                <p className="activity-preview-section-block-text">No materials needed.</p>
+                              ) : activePreviewTab.materials.length > 0 ? (
+                                activePreviewTab.materials.map((material) => (
+                                  <div key={`${activePreviewTab.id}-${material}`} className="activity-preview-material-item-row">
+                                    <div className="activity-preview-material-checkbox" />
+                                    <span className="activity-preview-section-block-text">{material}</span>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="activity-preview-section-block-text">No materials added yet.</p>
+                              )}
+                            </div>
+
+                            {activePreviewTab.sections.slice(1).map((section, index) => (
+                              <div
+                                key={`${activePreviewTab.id}-section-${index + 1}`}
+                                className="activity-preview-section-block"
+                              >
+                                <h5 className="activity-preview-section-block-title">{section.title}</h5>
+                                <p className="activity-preview-section-block-text">
+                                  {section.content || "No content added yet."}
+                                </p>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          (() => {
+                            const customSections =
+                              activePreviewTab.kind === "custom"
+                                ? (() => {
+                                    const meaningfulSections = activePreviewTab.sections.filter((section, index) => {
+                                      const trimmedTitle = section.title.trim();
+                                      const trimmedContent = section.content.trim();
+                                      const isSeedPlaceholder =
+                                        index === 0 && trimmedTitle === "Section" && !trimmedContent;
+
+                                      return !isSeedPlaceholder && (trimmedTitle || trimmedContent);
+                                    });
+
+                                    return meaningfulSections.length > 0
+                                      ? meaningfulSections
+                                      : activePreviewTab.sections.slice(0, 1);
+                                  })()
+                                : activePreviewTab.sections;
+
+                            return customSections.map((section, index) => (
+                              <div key={`${activePreviewTab.id}-section-${index}`} className="activity-preview-section-block">
+                                <h5 className="activity-preview-section-block-title">{section.title}</h5>
+                                <p className="activity-preview-section-block-text">
+                                  {section.content || "No content added yet."}
+                                </p>
+                              </div>
+                            ));
+                          })()
+                        )}
+
                       </div>
                     )}
                   </div>
@@ -1277,7 +1337,6 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
   const [activeCoverTab, setActiveCoverTab] = useState<CoverTabKind>("image");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
-  const [isThumbnailConfirmed, setIsThumbnailConfirmed] = useState(false);
   const [isCropModalVisible, setIsCropModalVisible] = useState(false);
   const [videoDraftUrl, setVideoDraftUrl] = useState("");
   const [videoInputError, setVideoInputError] = useState<string | null>(null);
@@ -1318,7 +1377,6 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         setForm(createFormStateFromActivity(activity));
         setTabs(parseActivityTabs(activity));
         setThumbnailPreviewUrl(activity.thumbnailUrl ?? null);
-        setIsThumbnailConfirmed(Boolean(activity.thumbnailUrl));
         setVideoDraftUrl(activity.videoUrl ?? "");
         setReplaceVideoDraftUrl("");
         setVideoInputError(null);
@@ -1437,24 +1495,12 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
     setThumbnailFile(nextFile);
     setThumbnailPreviewUrl(nextFile ? URL.createObjectURL(nextFile) : null);
-    setIsThumbnailConfirmed(false);
+    clearErrorKeys("thumbnail");
     if (nextFile) setActiveCoverTab("image");
   };
 
-  const handleConfirmThumbnail = () => {
-    if (!thumbnailPreviewUrl) return;
-
-    setIsThumbnailConfirmed(true);
-    clearErrorKeys("thumbnail");
-  };
-
   const handleUploadAction = () => {
-    if (isThumbnailConfirmed) {
-      thumbnailInputRef.current?.click();
-      return;
-    }
-
-    handleConfirmThumbnail();
+    thumbnailInputRef.current?.click();
   };
 
   const handleOpenCropModal = () => {
@@ -1469,7 +1515,6 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
     setThumbnailFile(file);
     setThumbnailPreviewUrl(previewUrl);
-    setIsThumbnailConfirmed(false);
     setIsCropModalVisible(false);
     clearErrorKeys("thumbnail");
   };
@@ -1481,7 +1526,6 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
 
     setThumbnailFile(null);
     setThumbnailPreviewUrl(null);
-    setIsThumbnailConfirmed(false);
     setIsCropModalVisible(false);
     clearErrorKeys("thumbnail");
 
@@ -2058,7 +2102,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
       return true;
     }
 
-    if ((!isThumbnailConfirmed || !thumbnailPreviewUrl) && !form.videoThumbnailUrl) {
+    if (!thumbnailPreviewUrl && !form.videoThumbnailUrl) {
       nextErrors.thumbnail = "Please upload either an image or a video frame";
     }
     if (!form.setup) nextErrors.setup = "Please select whether the activity needs props";
@@ -2152,7 +2196,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         form,
         tabs,
         targetStatus,
-        isThumbnailConfirmed ? thumbnailPreviewUrl : null,
+        thumbnailPreviewUrl,
       );
 
       if (mode === "create") {
@@ -2366,13 +2410,10 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
                             </button>
                             <button
                               type="button"
-                              className={`activity-upload-action-button ${
-                                isThumbnailConfirmed ? "activity-upload-action-button-active" : ""
-                              }`}
+                              className="activity-upload-action-button"
                               onClick={handleUploadAction}
-                              aria-label={isThumbnailConfirmed ? "Replace image" : "Confirm image"}
-                              aria-pressed={!isThumbnailConfirmed}
-                              title={isThumbnailConfirmed ? "Upload a new image" : "Confirm image"}
+                              aria-label="Upload a new image"
+                              title="Upload a new image"
                             >
                               <img src={UploadImageIconUrl} alt="" aria-hidden="true" />
                             </button>
@@ -3239,7 +3280,7 @@ export function ActivityEditorPage({ mode }: ActivityEditorPageProps) {
         }}
         publishLabel={publishLabel}
         form={form}
-        thumbnailPreviewUrl={isThumbnailConfirmed ? thumbnailPreviewUrl : null}
+        thumbnailPreviewUrl={thumbnailPreviewUrl}
         objective={form.objective}
         tabs={tabs}
         selTags={form.selTags}

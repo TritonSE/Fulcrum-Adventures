@@ -571,10 +571,6 @@
   outline-offset: 2px;
 }
 
-.activity-upload-action-button-active {
-  opacity: 0.72;
-}
-
 .activity-upload-plus {
   color: #153a7a;
   font-size: 40px;
@@ -1298,7 +1294,7 @@
   margin-top: -10px;
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
-  padding: 18px 24px 18px 24px;
+  padding: 18px 24px 40px 24px;
 }
 
 .activity-preview-top-row,
@@ -1316,7 +1312,23 @@
 
 .activity-preview-top-row {
   justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   margin-bottom: 8px;
+  gap: 12px;
+}
+
+.activity-preview-category-row {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.activity-preview-action-row {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .activity-preview-action-button {
