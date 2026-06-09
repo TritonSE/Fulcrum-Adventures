@@ -1,0 +1,16 @@
+.admin-home__main {
+  flex: 1;
+  padding: 48px 120px;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-home__message {
+  margin: 0;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #153a7a;
+}

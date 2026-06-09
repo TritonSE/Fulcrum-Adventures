@@ -5,6 +5,7 @@ import express from "express";
 
 import { connectDb } from "./db";
 import activityRoutes from "./routes/activity";
+import authRoutes from "./routes/auth";
 import emailRoutes from "./routes/email";
 
 import type { NextFunction, Request, Response } from "express";
@@ -17,7 +18,7 @@ const allowedOrigins = [
   .filter((origin): origin is string => Boolean(origin));
 
 const adminPreviewOriginPattern =
-  /^https:\/\/fulcrum-admin-git-[a-z0-9-]+-philip-chens-projects\.vercel\.app$/;
+  /^https:\/\/fulcrum-admin(?:-git-[a-z0-9-]+|-[a-z0-9]+)-philip-chens-projects\.vercel\.app$/;
 
 function isAllowedOrigin(origin: string): boolean {
   return allowedOrigins.includes(origin) || adminPreviewOriginPattern.test(origin);
@@ -53,6 +54,7 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
   }
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/emails", emailRoutes);
 
@@ -61,15 +63,16 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   let errorMessage = "An error has occurred.";
 
   if (error instanceof Error) {
-    if (error.name === "ValidationError") {
+    const status = (error as { status?: number }).status;
+    if (typeof status === "number") {
+      statusCode = status;
+    } else if (error.name === "ValidationError") {
       statusCode = 400;
-      errorMessage = error.message;
     } else if (error.name === "CastError") {
       statusCode = 400;
       errorMessage = "Invalid ID format";
-    } else {
-      errorMessage = error.message;
     }
+    errorMessage = error.message;
   }
 
   res.status(statusCode).json({ error: errorMessage });

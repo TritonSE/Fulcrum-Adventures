@@ -14,7 +14,8 @@
 .toast-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 12px;
   background-color: #22c55e;
   border-radius: 8px;
   padding: 16px 20px;
@@ -24,6 +25,10 @@
   pointer-events: auto;
   animation: slideUp 0.3s ease-out forwards;
   line-height: 1;
+}
+
+.toast-container--error {
+  background-color: #ef4444;
 }
 
 .toast-content {
@@ -63,6 +68,21 @@
 .toast-action:hover {
   background-color: #ffffff;
   color: #22c55e;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 4px;
+}
+
+.toast-container--error .toast-action:hover {
+  color: #ef4444;
 }
 
 @keyframes slideUp {

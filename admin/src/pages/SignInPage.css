@@ -1,0 +1,238 @@
+.sign-in {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 80px 24px 48px;
+  box-sizing: border-box;
+  background-color: #153a7a;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.sign-in__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.sign-in__brand {
+  position: relative;
+  width: 140px;
+  height: 42px;
+  aspect-ratio: 10 / 3;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sign-in__logo-vector {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0.41%;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sign-in__tagline {
+  position: absolute;
+  left: 78px;
+  top: 42px;
+  transform: translateY(-100%);
+  margin: 0;
+  font-family: "League Spartan", sans-serif;
+  font-weight: 600;
+  font-size: 8px;
+  line-height: 1.04;
+  letter-spacing: -0.24px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.sign-in__brand--full-logo {
+  width: 140px;
+  height: 42px;
+}
+
+.sign-in__logo-full {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+}
+
+.sign-in__card {
+  width: 100%;
+  max-width: 522px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 56px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 540px) {
+  .sign-in__card {
+    padding: 32px 24px;
+  }
+}
+
+.sign-in__title {
+  margin: 0;
+  font-family: "League Spartan", sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.04;
+  color: #153a7a;
+  text-align: center;
+}
+
+.sign-in__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.sign-in__field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.sign-in__label {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #153a7a;
+}
+
+.sign-in .textfield-wrapper {
+  padding: 12px;
+}
+
+.sign-in__link {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #153a7a;
+  text-decoration: underline;
+  text-align: left;
+  text-underline-position: from-font;
+}
+
+.sign-in__link:hover {
+  color: #0e2d63;
+}
+
+.sign-in__error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.08);
+}
+
+.sign-in__error-icon {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+.sign-in__error-text {
+  margin: 0;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #ef4444;
+}
+
+.sign-in__submit.button {
+  min-height: 48px;
+  font-weight: 400;
+}
+
+.sign-in__submit.button--primary:disabled,
+.sign-in__submit.button--primary.button--disabled {
+  background-color: #d8d8d8;
+  color: #ffffff;
+  border-color: #d8d8d8;
+}
+
+.sign-in__signup {
+  margin: 0;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #153a7a;
+  text-align: left;
+}
+
+.sign-in__signup-link {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: #153a7a;
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+.sign-in__signup-link:hover {
+  color: #0e2d63;
+}
+
+.sign-in__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sign-in__footer-mark {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+}
+
+.sign-in__footer-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.sign-in__footer-text a {
+  color: #ffffff;
+  text-decoration: underline;
+}
