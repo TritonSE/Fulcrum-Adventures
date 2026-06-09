@@ -133,6 +133,7 @@ export default function Dashboard() {
   const [isStatsLoading, setIsStatsLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
   const [toastKey, setToastKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const sortFilterActionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -195,7 +196,14 @@ export default function Dashboard() {
       setIsLoading(false);
     };
     getActivityData();
-  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
+  }, [
+    currentPage,
+    statusFilter,
+    searchQuery,
+    sort,
+    appliedFilters,
+    refreshKey,
+  ]);
 
   useEffect(() => {
     const getActivityStatsData = async () => {
@@ -218,7 +226,7 @@ export default function Dashboard() {
       setIsStatsLoading(false);
     };
     getActivityStatsData();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     const nextToastMessage = (
@@ -247,6 +255,10 @@ export default function Dashboard() {
 
   const handleEditActivity = (id: string) => {
     navigate(`/activities/${id}/edit`);
+  };
+
+  const refreshDashboardData = () => {
+    setRefreshKey((key) => key + 1);
   };
 
   const handleActivityDeleted = (deletedActivity: Activity) => {
@@ -630,6 +642,7 @@ export default function Dashboard() {
               onEditActivity={handleEditActivity}
               categoryFilters={appliedFilters.category}
               onDeleteActivity={handleActivityDeleted}
+              onDataChange={refreshDashboardData}
             />
           </div>
 

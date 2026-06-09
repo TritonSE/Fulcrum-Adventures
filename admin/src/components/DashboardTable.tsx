@@ -17,6 +17,7 @@ interface DashboardTableProps {
   onEditActivity: (activityId: string) => void;
   categoryFilters?: Category[];
   onDeleteActivity?: (activity: Activity) => void;
+  onDataChange?: () => void;
 }
 
 const CATEGORY_ORDER: Category[] = [
@@ -55,6 +56,7 @@ export default function DashboardTable({
   onEditActivity,
   categoryFilters,
   onDeleteActivity,
+  onDataChange,
 }: DashboardTableProps) {
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
@@ -118,8 +120,7 @@ export default function DashboardTable({
   const handleUnpublishActivity = async (activityId: string) => {
     const result = await updateActivityStatus(activityId, "Draft");
     if (result.success) {
-      activities.filter((activity) => activity._id === activityId)[0].status =
-        "Draft";
+      onDataChange?.();
       showUnpublishedToast(activityId);
     } else {
       console.error("Failed to unpublish activity: ", result.error);
@@ -131,8 +132,7 @@ export default function DashboardTable({
     if (!result.success) {
       console.error("Failed to republish activity: ", result.error);
     } else {
-      activities.filter((activity) => activity._id === activityId)[0].status =
-        "Published";
+      onDataChange?.();
       setToastMessage("");
     }
   };
@@ -154,6 +154,7 @@ export default function DashboardTable({
       if (activityToDelete) {
         onDeleteActivity?.(activityToDelete);
       }
+      onDataChange?.();
       setShowDeleteConfirmationPopup(false);
       setToastActionText("");
       setToastAction(null);
