@@ -12,6 +12,9 @@ import {
 
 import type { ValidationChain } from "express-validator";
 
+const GRADE_LEVELS = ["K-2", "3-5", "6-8", "9-12"] as const;
+const GROUP_SIZES = ["Small (3-15)", "Medium (15-30)", "Large (30+)"] as const;
+
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
@@ -65,6 +68,26 @@ function validateGroupSize(value: unknown): boolean {
   }
 
   return true;
+}
+
+// Normalizes a query param that may arrive as a single string or string[]
+// (express parses repeated keys as string[] automatically when using query())
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((item) =>
+      String(item)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+  }
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
 }
 
 const optionalActivityBodyFields: ValidationChain[] = [
@@ -171,11 +194,64 @@ export const listActivitiesQuery: ValidationChain[] = [
     .isIn(ACTIVITY_STATUSES)
     .withMessage(`status must be one of: ${ACTIVITY_STATUSES.join(", ")}.`),
   query("search").optional().isString().withMessage("search must be a string."),
+
+  // Accepts repeated keys: category=Opener&category=Active
   query("category")
     .optional()
-    .isString()
-    .isIn(ACTIVITY_CATEGORIES)
-    .withMessage(`category must be one of: ${ACTIVITY_CATEGORIES.join(", ")}.`),
+    .customSanitizer(toStringArray)
+    .custom((values: string[]) => {
+      if (values.length === 0) throw new Error("category must include at least one value.");
+      const invalid = values.filter((v) => !(ACTIVITY_CATEGORIES as readonly string[]).includes(v));
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid category: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_CATEGORIES.join(", ")}.`,
+        );
+      }
+      return true;
+    }),
+
+  query("duration")
+    .optional()
+    .customSanitizer(toStringArray)
+    .custom((values: string[]) => {
+      if (values.length === 0) throw new Error("duration must include at least one value.");
+      const invalid = values.filter((v) => !(ACTIVITY_DURATIONS as readonly string[]).includes(v));
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid duration: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_DURATIONS.join(", ")}.`,
+        );
+      }
+      return true;
+    }),
+
+  query("gradeLevel")
+    .optional()
+    .customSanitizer(toStringArray)
+    .custom((values: string[]) => {
+      if (values.length === 0) throw new Error("gradeLevel must include at least one value.");
+      const invalid = values.filter((v) => !(GRADE_LEVELS as readonly string[]).includes(v));
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid gradeLevel: ${invalid.join(", ")}. Must be one of: ${GRADE_LEVELS.join(", ")}.`,
+        );
+      }
+      return true;
+    }),
+
+  query("groupSize")
+    .optional()
+    .customSanitizer(toStringArray)
+    .custom((values: string[]) => {
+      if (values.length === 0) throw new Error("groupSize must include at least one value.");
+      const invalid = values.filter((v) => !(GROUP_SIZES as readonly string[]).includes(v));
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid groupSize: ${invalid.join(", ")}. Must be one of: ${GROUP_SIZES.join(", ")}.`,
+        );
+      }
+      return true;
+    }),
+
   query("energyLevel")
     .optional()
     .isString()
@@ -183,20 +259,16 @@ export const listActivitiesQuery: ValidationChain[] = [
     .withMessage(`energyLevel must be one of: ${ACTIVITY_ENERGY_LEVELS.join(", ")}.`),
   query("environment")
     .optional()
-    .isString()
-    .custom((value: string) => {
-      const environments = value
-        .split(",")
-        .map((part) => part.trim())
-        .filter(Boolean);
-      if (environments.length === 0) {
-        throw new Error("environment must include at least one value.");
-      }
-      const invalid = environments.filter(
-        (part) => !(ACTIVITY_ENVIRONMENTS as readonly string[]).includes(part),
+    .customSanitizer(toStringArray)
+    .custom((values: string[]) => {
+      if (values.length === 0) throw new Error("environment must include at least one value.");
+      const invalid = values.filter(
+        (v) => !(ACTIVITY_ENVIRONMENTS as readonly string[]).includes(v),
       );
       if (invalid.length > 0) {
-        throw new Error(`Invalid environment: ${invalid.join(", ")}.`);
+        throw new Error(
+          `Invalid environment: ${invalid.join(", ")}. Must be one of: ${ACTIVITY_ENVIRONMENTS.join(", ")}.`,
+        );
       }
       return true;
     }),

@@ -5,6 +5,7 @@ import express from "express";
 
 import { connectDb } from "./db";
 import activityRoutes from "./routes/activity";
+import emailRoutes from "./routes/email";
 
 import type { NextFunction, Request, Response } from "express";
 
@@ -53,6 +54,7 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.use("/api/activities", activityRoutes);
+app.use("/api/emails", emailRoutes);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   let statusCode = 500;
