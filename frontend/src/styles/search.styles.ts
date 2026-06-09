@@ -123,5 +123,15 @@ export const styles = StyleSheet.create({
     flexBasis: "48%",
     flexGrow: 0,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#D9D9D9",
+
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+
+    borderRadius: 16,
   },
 });

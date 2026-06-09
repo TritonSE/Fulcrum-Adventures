@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "700",
     color: "#153F7A",
-    marginTop: 20,
+    marginTop: 32,
     lineHeight: 27,
     alignSelf: "flex-start",
     marginLeft: 24,

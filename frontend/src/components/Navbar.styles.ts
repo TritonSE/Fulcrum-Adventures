@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#E5E5E5",
 
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: Platform.OS === "ios" ? 30 : 16,
 

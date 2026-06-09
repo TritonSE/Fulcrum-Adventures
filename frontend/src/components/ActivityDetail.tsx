@@ -45,10 +45,11 @@ type ActivityDetailProps = {
 
 // --- Helper to handle YouTube URLs ---
 const getYouTubeId = (url: string) => {
+  if (!url) return null;
   // eslint-disable-next-line regexp/no-unused-capturing-group
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = regExp.exec(url);
-  return match && match[2].length === 11 ? match[2] : url;
+  return match && match[2].length === 11 ? match[2] : null;
 };
 
 const dividerStyles = StyleSheet.create({
@@ -825,15 +826,18 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               <BackArrowIcon />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.tutorialButton}
-              onPress={() => setShowVideo(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Watch tutorial"
-            >
-              <PlayArrowIcon />
-              <Text style={styles.tutorialText}>Tutorial</Text>
-            </TouchableOpacity>
+            {/* only show tutorial button if valid yt id */}
+            {ytId && (
+              <TouchableOpacity
+                style={styles.tutorialButton}
+                onPress={() => setShowVideo(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Watch tutorial"
+              >
+                <PlayArrowIcon />
+                <Text style={styles.tutorialText}>Tutorial</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.contentPanel}>
@@ -1141,7 +1145,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <YoutubePlayer
               height={300}
               play={showVideo}
-              videoId={getYouTubeId(activity.videoUrl ?? "dQw4w9WgXcQ")}
+              videoId={ytId ?? ""}
               onChangeState={(state: string) => {
                 if (state === "ended") setShowVideo(false);
               }}

@@ -12,9 +12,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     margin: 4,
   },
-  selected: { borderColor: "#1F4ED6", backgroundColor: "#E8EEFF" },
+  selected: {
+    borderColor: "#153A7A",
+    backgroundColor: "#153A7A",
+    fontWeight: "500",
+  },
   text: { color: "#153A7A", fontWeight: "400" },
-  textSelected: { color: "#1F4ED6" },
+  textSelected: { color: "#fff" },
 });
 
 export const FilterPill = ({ label, selected, onPress }: Props) => {
