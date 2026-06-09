@@ -192,7 +192,7 @@ export function CreateAccountPage() {
 
           <Button
             variant="primary"
-            icon={false}
+            showIcon={false}
             type="submit"
             fullWidth
             className="sign-in__submit"

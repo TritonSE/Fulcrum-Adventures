@@ -2,12 +2,10 @@
  * Initializes mongoose and express.
  */
 
-import dotenv from "dotenv";
+import "dotenv/config";
 
 import app from "./app";
 import { connectDb } from "./db";
-
-dotenv.config();
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 

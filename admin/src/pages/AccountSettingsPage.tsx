@@ -169,7 +169,7 @@ export function AccountSettingsPage() {
             </p>
           </div>
 
-          <Button type="submit" icon={false} disabled={profileSaving}>
+          <Button type="submit" showIcon={false} disabled={profileSaving}>
             {profileSaving ? "Saving…" : "Save Changes"}
           </Button>
         </form>
@@ -220,7 +220,7 @@ export function AccountSettingsPage() {
             />
           </div>
 
-          <Button type="submit" icon={false} disabled={passwordSaving}>
+          <Button type="submit" showIcon={false} disabled={passwordSaving}>
             {passwordSaving ? "Saving…" : "Change Password"}
           </Button>
         </form>
@@ -269,7 +269,7 @@ export function AccountSettingsPage() {
               </li>
             </ul>
 
-            <Button type="submit" icon={false} disabled={adminsSaving}>
+            <Button type="submit" showIcon={false} disabled={adminsSaving}>
               {adminsSaving ? "Saving…" : "Save Changes"}
             </Button>
           </form>

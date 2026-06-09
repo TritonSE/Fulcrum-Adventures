@@ -3,11 +3,15 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { isAdminAuthenticated, waitForAuth } from "./api/auth";
 import { AccountSettingsPage } from "./pages/AccountSettingsPage";
-import { AdminHome } from "./pages/AdminHome";
+import { ActivityEditorPage } from "./pages/ActivityEditorPage";
 import { CreateAccountPage } from "./pages/CreateAccountPage";
+import Dashboard from "./pages/Dashboard";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import MailingList from "./pages/MailingList";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SignInPage } from "./pages/SignInPage";
+
+import "./App.css";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!isAdminAuthenticated()) {
@@ -37,7 +41,39 @@ export default function App() {
         path="/"
         element={
           <RequireAuth>
-            <AdminHome />
+            <Navigate to="/dashboard" replace />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <RequireAuth>
+            <Dashboard />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/mailing-list"
+        element={
+          <RequireAuth>
+            <MailingList />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/activities/new"
+        element={
+          <RequireAuth>
+            <ActivityEditorPage mode="create" />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/activities/:activityId/edit"
+        element={
+          <RequireAuth>
+            <ActivityEditorPage mode="edit" />
           </RequireAuth>
         }
       />

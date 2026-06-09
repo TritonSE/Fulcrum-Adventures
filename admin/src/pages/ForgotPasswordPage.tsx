@@ -64,7 +64,7 @@ export function ForgotPasswordPage() {
           </p>
           <Button
             variant="primary"
-            icon={false}
+            showIcon={false}
             type="button"
             fullWidth
             className="sign-in__submit"
@@ -108,7 +108,7 @@ export function ForgotPasswordPage() {
 
           <Button
             variant="primary"
-            icon={false}
+            showIcon={false}
             type="submit"
             fullWidth
             className="sign-in__submit"

@@ -2,6 +2,7 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "prettier.enable": true,
   "editor.formatOnSave": true,
+  "editor.tabSize": 2,
 
   // Auto fix
   "editor.codeActionsOnSave": {
@@ -33,7 +34,5 @@
     "scss",
     "pcss",
     "postcss"
-  ],
-
-  "editor.tabSize": 2
+  ]
 }

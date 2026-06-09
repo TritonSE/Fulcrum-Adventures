@@ -100,7 +100,7 @@ export function SignInPage() {
 
           <Button
             variant="primary"
-            icon={false}
+            showIcon={false}
             type="submit"
             fullWidth
             className="sign-in__submit"

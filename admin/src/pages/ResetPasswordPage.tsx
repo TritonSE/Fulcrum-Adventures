@@ -28,7 +28,7 @@ function ConfirmationCard({ onBackToSignIn }: { onBackToSignIn: () => void }) {
       </p>
       <Button
         variant="primary"
-        icon={false}
+        showIcon={false}
         type="button"
         fullWidth
         className="sign-in__submit"
@@ -240,7 +240,7 @@ export function ResetPasswordPage() {
 
         <Button
           variant="primary"
-          icon={false}
+          showIcon={false}
           type="submit"
           fullWidth
           className="sign-in__submit"
