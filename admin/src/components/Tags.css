@@ -10,6 +10,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  white-space: nowrap;
+  width: auto;
 }
 
 /* Base Unselected State */
@@ -19,25 +21,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-.tag-category--opener {
-  color: #1322c6;
-}
-.tag-category--icebreaker {
-  color: #4272d1;
-}
-.tag-category--active {
-  color: #72cf1a;
-}
-.tag-category--debrief {
-  color: #ff6b6b;
-}
-.tag-category--connection {
-  color: #ecd528;
-}
-.tag-category--team-challenge {
-  color: #00bc7b;
-}
-
 /* Base Selected State */
 .tag-category.tag-category--selected {
   color: #ffffff;
@@ -45,37 +28,11 @@
   box-shadow: none;
 }
 
-.tag-category--opener.tag-category--selected {
-  background-color: #1322c6;
-}
-.tag-category--icebreaker.tag-category--selected {
-  background-color: #4272d1;
-}
-.tag-category--active.tag-category--selected {
-  background-color: #72cf1a;
-}
-.tag-category--debrief.tag-category--selected {
-  background-color: #ff6b6b;
-}
-.tag-category--connection.tag-category--selected {
-  background-color: #ecd528;
-}
-.tag-category--team-challenge.tag-category--selected {
-  background-color: #00bc7b;
-}
-
 .tag-energy {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
   border-radius: 24px;
   box-shadow: none;
   padding: 6px 12px;
   gap: 3px;
-}
-
-.tag-energy:hover:not(.tag-energy--selected) {
-  background-color: transparent;
-  border-color: transparent;
 }
 
 .tag-energy--selected,
@@ -98,9 +55,9 @@
   display: block;
 }
 
-.energy-icon--inactive {
-  opacity: 0.28;
-  filter: grayscale(1) brightness(1.55) saturate(0);
+.energy-icon--outline {
+  opacity: 0.7;
+  filter: none;
 }
 
 .energy-icon--active {

@@ -1,10 +1,8 @@
-import type { Activity } from "../types/activity";
+import type { Activity, Category } from "../types/activity";
 import { useEffect, useState } from "react";
 import DeleteIcon from "../../icons/delete.svg";
 import UnpublishIcon from "../../icons/unpublish.svg";
 
-// Import existing components that match the column data
-// (Assuming these exist and match the design based on their names)
 import { CategoryTag } from "./CategoryTag";
 import { EnergyTag } from "./EnergyTag";
 import { StatusBadge } from "./StatusBadge";
@@ -17,13 +15,46 @@ import { ConfirmationPopup } from "./ConfirmationPopup";
 interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
-  onDataChange: () => void;
+  categoryFilters?: Category[];
+  onDeleteActivity?: (activity: Activity) => void;
 }
+
+const CATEGORY_ORDER: Category[] = [
+  "Opener",
+  "Icebreaker",
+  "Connection",
+  "Active",
+  "Debrief",
+  "Team Challenge",
+];
+
+const sortCategoriesByOrder = (categories: Category[]) =>
+  categories
+    .slice()
+    .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
+
+const getPrimaryCategory = (
+  categories: Category[],
+  filterCategories?: Category[],
+): Category | null => {
+  if (filterCategories?.length) {
+    const filteredCategories = CATEGORY_ORDER.filter(
+      (category) =>
+        filterCategories.includes(category) && categories.includes(category),
+    );
+    if (filteredCategories.length) {
+      return filteredCategories[0];
+    }
+  }
+
+  return sortCategoriesByOrder(categories)[0] ?? null;
+};
 
 export default function DashboardTable({
   activities,
   onEditActivity,
-  onDataChange,
+  categoryFilters,
+  onDeleteActivity,
 }: DashboardTableProps) {
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
@@ -49,19 +80,32 @@ export default function DashboardTable({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Helper to format the grade range from min and max numbers to "K-12", "3-5", etc.
-  const formatGradeRange = (range: { min: number; max: number }) => {
+  const formatGradeRange = (
+    range: { min: number; max: number } | null | undefined,
+  ) => {
+    if (!range || !Number.isFinite(range.min) || !Number.isFinite(range.max)) {
+      return "-";
+    }
+
     const minText = range.min === 0 ? "K" : range.min.toString();
     return `${minText}-${range.max}`;
   };
 
-  // Helper to format group size
-  const formatGroupSize = (size: {
-    min?: number;
-    max?: number;
-    anySize?: boolean;
-  }) => {
+  const formatGroupSize = (
+    size:
+      | {
+          min?: number;
+          max?: number;
+          anySize?: boolean;
+        }
+      | null
+      | undefined,
+  ) => {
+    if (!size) return "-";
     if (size.anySize) return "Any";
+    if (!Number.isFinite(size.min) || !Number.isFinite(size.max)) {
+      return "-";
+    }
     return `${size.min}-${size.max}`;
   };
 
@@ -74,7 +118,8 @@ export default function DashboardTable({
   const handleUnpublishActivity = async (activityId: string) => {
     const result = await updateActivityStatus(activityId, "Draft");
     if (result.success) {
-      onDataChange();
+      activities.filter((activity) => activity._id === activityId)[0].status =
+        "Draft";
       showUnpublishedToast(activityId);
     } else {
       console.error("Failed to unpublish activity: ", result.error);
@@ -86,7 +131,8 @@ export default function DashboardTable({
     if (!result.success) {
       console.error("Failed to republish activity: ", result.error);
     } else {
-      onDataChange();
+      activities.filter((activity) => activity._id === activityId)[0].status =
+        "Published";
       setToastMessage("");
     }
   };
@@ -100,9 +146,14 @@ export default function DashboardTable({
 
   const handleDeleteActivity = async (activityId: string | null) => {
     if (!activityId) return;
+    const activityToDelete = activities.find(
+      (activity) => activity._id === activityId,
+    );
     const result = await deleteActivity(activityId);
     if (result.success) {
-      onDataChange();
+      if (activityToDelete) {
+        onDeleteActivity?.(activityToDelete);
+      }
       setShowDeleteConfirmationPopup(false);
       setToastActionText("");
       setToastAction(null);
@@ -162,15 +213,43 @@ export default function DashboardTable({
                   <td className="col-title">{activity.title}</td>
                   <td className="col-category">
                     <div className="category-tag-container">
-                      <CategoryTag category={activity.category[0]} selected />
-                      {activity.category.length > 1 && (
-                        <div className="plus-categories-tag">
-                          +{activity.category.length - 1}
-                        </div>
-                      )}
+                      {(() => {
+                        const primaryCategory = getPrimaryCategory(
+                          activity.category,
+                          categoryFilters,
+                        );
+                        if (!primaryCategory) return null;
+
+                        const extraCategories = sortCategoriesByOrder(
+                          activity.category,
+                        ).filter((category) => category !== primaryCategory);
+
+                        return (
+                          <>
+                            <CategoryTag category={primaryCategory} selected />
+                            {extraCategories.length > 0 && (
+                              <div className="plus-categories-tag">
+                                +{extraCategories.length}
+                                <div
+                                  className="category-tooltip"
+                                  role="tooltip"
+                                >
+                                  {extraCategories.map((category, index) => (
+                                    <CategoryTag
+                                      category={category}
+                                      key={`${category}-${index}`}
+                                      selected
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </td>
-                  <td>
+                  <td className="col-energy">
                     <EnergyTag level={formatEnergyLevel(activity.energyLevel)} />
                   </td>
                   <td className="col-grade">
@@ -179,7 +258,9 @@ export default function DashboardTable({
                   <td className="col-group">
                     {formatGroupSize(activity.groupSize)}
                   </td>
-                  <td className="col-duration">{activity.duration}</td>
+                  <td className="col-duration">
+                    {activity.duration ? activity.duration : "-"}
+                  </td>
                   <td>
                     <StatusBadge status={activity.status} />
                   </td>

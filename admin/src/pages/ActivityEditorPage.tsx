@@ -739,18 +739,6 @@ function PublishPreviewModal({
   );
 
   useEffect(() => {
-    if (!visible) return;
-
-    setActivePreviewTabId((current) => {
-      if (current && previewTabs.some((tab) => tab.id === current)) {
-        return current;
-      }
-
-      return previewTabs[0]?.id ?? null;
-    });
-  }, [previewTabs, visible]);
-
-  useEffect(() => {
     if (visible) {
       document.body.classList.add("activity-modal-open");
       return;

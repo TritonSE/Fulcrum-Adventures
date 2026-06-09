@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
@@ -41,24 +41,17 @@ const ITEMS_PER_PAGE = 10;
 
 type SortValue = "-createdAt" | "title" | "-title" | "-updatedAt";
 type GradeLevel = "K-2" | "3-5" | "6-8" | "9-12";
-type GroupSize = "Small (3-15)" | "Medium (15-30)" | "Large (30+)";
 
 type DashboardFilters = {
   category?: Category[];
   duration?: Duration[];
   gradeLevel?: GradeLevel[];
-  groupSize?: GroupSize[];
   energyLevel?: EnergyLevel;
   environment?: Environment[];
   setup?: Setup;
 };
 
-type MultiFilterKey =
-  | "category"
-  | "duration"
-  | "gradeLevel"
-  | "groupSize"
-  | "environment";
+type MultiFilterKey = "category" | "duration" | "gradeLevel" | "environment";
 
 const sortOptions: { label: string; value: SortValue }[] = [
   { label: "A - Z", value: "title" },
@@ -91,11 +84,6 @@ const filterSections = [
     options: ["K-2", "3-5", "6-8", "9-12"],
   },
   {
-    key: "groupSize",
-    label: "Group Size",
-    options: ["Small (3-15)", "Medium (15-30)", "Large (30+)"],
-  },
-  {
     key: "energyLevel",
     label: "Energy Level",
     options: ["Low", "Medium", "High"],
@@ -116,7 +104,6 @@ const multiFilterKeys: MultiFilterKey[] = [
   "category",
   "duration",
   "gradeLevel",
-  "groupSize",
   "environment",
 ];
 
@@ -128,7 +115,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts)
+  const [trueTotalActivities, setTrueTotalActivities] = useState(0);
   const [categoryCounts, setCategoryCounts] =
     useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
@@ -146,7 +133,23 @@ export default function Dashboard() {
   const [isStatsLoading, setIsStatsLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
   const [toastKey, setToastKey] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const sortFilterActionsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        sortFilterActionsRef.current &&
+        !sortFilterActionsRef.current.contains(target)
+      ) {
+        setIsSortDropdownOpen(false);
+        setIsFilterDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const getActivityData = async () => {
@@ -172,9 +175,6 @@ export default function Dashboard() {
       if (appliedFilters.gradeLevel?.length) {
         request.gradeLevel = appliedFilters.gradeLevel;
       }
-      if (appliedFilters.groupSize?.length) {
-        request.groupSize = appliedFilters.groupSize;
-      }
       if (appliedFilters.energyLevel) {
         request.energyLevel = appliedFilters.energyLevel;
       }
@@ -195,7 +195,7 @@ export default function Dashboard() {
       setIsLoading(false);
     };
     getActivityData();
-  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters, refreshKey]);
+  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
 
   useEffect(() => {
     const getActivityStatsData = async () => {
@@ -218,20 +218,22 @@ export default function Dashboard() {
       setIsStatsLoading(false);
     };
     getActivityStatsData();
-  }, [refreshKey]);
+  }, []);
 
   useEffect(() => {
-    const nextToastMessage = (location.state as { toastMessage?: string } | null)?.toastMessage;
+    const nextToastMessage = (
+      location.state as { toastMessage?: string } | null
+    )?.toastMessage;
     if (!nextToastMessage) return;
 
-    setToastMessage(nextToastMessage);
-    setToastKey((prev) => prev + 1);
-    navigate(location.pathname, { replace: true, state: null });
-  }, [location.pathname, location.state, navigate]);
+    const toastTimeoutId = window.setTimeout(() => {
+      setToastMessage(nextToastMessage);
+      setToastKey((prev) => prev + 1);
+      navigate(location.pathname, { replace: true, state: null });
+    }, 0);
 
-  const refreshDashboardData = () => {
-    setRefreshKey((key) => key + 1);
-  };
+    return () => window.clearTimeout(toastTimeoutId);
+  }, [location.pathname, location.state, navigate]);
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -245,6 +247,29 @@ export default function Dashboard() {
 
   const handleEditActivity = (id: string) => {
     navigate(`/activities/${id}/edit`);
+  };
+
+  const handleActivityDeleted = (deletedActivity: Activity) => {
+    setActivities((prevActivities) => {
+      const nextActivities = prevActivities.filter(
+        (activity) => activity._id !== deletedActivity._id,
+      );
+      if (nextActivities.length === 0 && currentPage > 1) {
+        setCurrentPage((page) => Math.max(1, page - 1));
+      }
+      return nextActivities;
+    });
+
+    setTrueTotalActivities((total) => Math.max(0, total - 1));
+
+    setCategoryCounts((prevCounts) => {
+      if (!prevCounts) return prevCounts;
+      const nextCounts = { ...prevCounts };
+      deletedActivity.category.forEach((category) => {
+        nextCounts[category] = Math.max(0, nextCounts[category] - 1);
+      });
+      return nextCounts;
+    });
   };
 
   const toggleSortDropdown = () => {
@@ -359,7 +384,10 @@ export default function Dashboard() {
                 >
                   Mailing List
                 </Button>
-                <Button icon={AddIcon} onClick={() => navigate("/activities/new")}>
+                <Button
+                  icon={AddIcon}
+                  onClick={() => navigate("/activities/new")}
+                >
                   Create New Activity
                 </Button>
               </div>
@@ -376,7 +404,6 @@ export default function Dashboard() {
             </div>
 
             <div className="search-input-container" style={{ display: "none" }}>
-              {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
               <img
                 src={SearchIcon}
                 className="search-input-icon"
@@ -400,12 +427,13 @@ export default function Dashboard() {
             </div>
 
             <div className="filter-row">
-              {/* Toggle tabs for All / Draft / Published */}
               <div className="status-tabs-container">
                 {(["All", "Draft", "Published"] as const).map((tab) => (
                   <button
                     key={tab}
-                    className={`status-tab ${statusFilter === tab ? "active" : ""}`}
+                    className={`status-tab ${
+                      statusFilter === tab ? "active" : ""
+                    }`}
                     onClick={() => handleStatusFilterChange(tab)}
                   >
                     {tab}
@@ -413,7 +441,7 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              <div className="sort-filter-actions">
+              <div className="sort-filter-actions" ref={sortFilterActionsRef}>
                 <div className="dropdown-control">
                   <button
                     className={`sort-btn ${
@@ -463,7 +491,11 @@ export default function Dashboard() {
                   <button
                     className={`filter-btn ${
                       isFilterDropdownOpen || hasAppliedFilters ? "active" : ""
-                    } ${activities.length === 0 && !hasAppliedFilters ? "empty" : ""}`}
+                    } ${
+                      activities.length === 0 && !hasAppliedFilters
+                        ? "empty"
+                        : ""
+                    }`}
                     onClick={toggleFilterDropdown}
                     aria-expanded={isFilterDropdownOpen}
                     aria-haspopup="dialog"
@@ -596,7 +628,8 @@ export default function Dashboard() {
             <DashboardTable
               activities={activities}
               onEditActivity={handleEditActivity}
-              onDataChange={refreshDashboardData}
+              categoryFilters={appliedFilters.category}
+              onDeleteActivity={handleActivityDeleted}
             />
           </div>
 

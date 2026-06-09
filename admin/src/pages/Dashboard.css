@@ -177,10 +177,19 @@
 }
 
 .sort-btn:hover,
-.filter-btn:hover,
+.filter-btn:hover {
+  background-color: #f5f5f5;
+}
+
 .sort-btn.active,
 .filter-btn.active {
-  background-color: #f5f5f5;
+  background-color: #153a7a;
+  color: #ffffff;
+}
+
+.sort-btn.active:hover,
+.filter-btn.active:hover {
+  background-color: #153a7a;
 }
 
 .sort-btn.empty,
@@ -375,16 +384,16 @@
 
 .clear-filters-btn {
   width: 119px;
-  border: 1px solid #ebebeb;
-  background: #ebebeb;
+  border: 1px solid #153a7a;
+  background: #ffffff;
   color: #153a7a;
 }
 
 .apply-filters-btn {
   width: 121px;
   border: 1px solid #153a7a;
-  background: #f9f9f9;
-  color: #153a7a;
+  background: #153a7a;
+  color: #ffffff;
 }
 
 .clear-filters-btn:hover {
@@ -392,11 +401,11 @@
 }
 
 .apply-filters-btn:hover {
-  background: #ebebeb;
-  color: #153a7a;
+  background: #0e2d63;
 }
 
 .table-wrapper {
+  min-width: 1200px;
   background: transparent;
   border-radius: 0;
   box-shadow: none;
