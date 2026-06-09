@@ -72,6 +72,62 @@ function parseActivitySort(value: string | undefined): string {
   return "-createdAt";
 }
 
+const UNTITLED_ACTIVITY_BASE = "Untitled Activity";
+
+async function resolveDraftTitle(excludeActivityId?: string): Promise<string> {
+  const filter: Record<string, unknown> = {
+    title: new RegExp(`^${escapeRegex(UNTITLED_ACTIVITY_BASE)}(?:\\s+(\\d+))?$`),
+  };
+
+  if (excludeActivityId && isValidObjectId(excludeActivityId)) {
+    filter._id = { $ne: excludeActivityId };
+  }
+
+  const activities = await Activity.find(filter).select("title").lean<{ title?: string }[]>();
+  const usedNumbers = new Set<number>();
+
+  activities.forEach((activity) => {
+    const title = activity.title?.trim();
+    if (!title) return;
+
+    if (title === UNTITLED_ACTIVITY_BASE) {
+      usedNumbers.add(1);
+      return;
+    }
+
+    const match = /^Untitled Activity\s+(\d+)$/.exec(title);
+    if (match?.[1]) {
+      usedNumbers.add(Number(match[1]));
+    }
+  });
+
+  let nextNumber = 1;
+  while (usedNumbers.has(nextNumber)) {
+    nextNumber += 1;
+  }
+
+  return `${UNTITLED_ACTIVITY_BASE} ${nextNumber}`;
+}
+
+async function applyDraftTitleDefaults(
+  body: Record<string, unknown>,
+  excludeActivityId?: string,
+): Promise<Record<string, unknown>> {
+  if (body.status !== "Draft") {
+    return body;
+  }
+
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  if (title.length > 0) {
+    return body;
+  }
+
+  return {
+    ...body,
+    title: await resolveDraftTitle(excludeActivityId),
+  };
+}
+
 export async function listActivities(req: Request, res: Response) {
   const status = req.query.status as string | undefined;
   const search = req.query.search as string | undefined;
@@ -162,21 +218,22 @@ export async function getActivity(req: Request, res: Response) {
 
 export async function createActivity(req: Request, res: Response) {
   const body = applyThumbnailFields(req.body as Record<string, unknown>);
-  const activity = await Activity.create({ ...body, status: "Draft" });
+  const draftBody = await applyDraftTitleDefaults({ ...body, status: "Draft" });
+  const activity = await Activity.create(draftBody);
   res.status(201).json(activity);
 }
 
 export async function updateActivity(req: Request, res: Response) {
   const id = routeParam(req.params.id);
   const body = await applyThumbnailFieldsForUpdate(id, req.body as Record<string, unknown>);
-  const activity = await Activity.findByIdAndUpdate(id, body, {
-    returnDocument: "after",
-    runValidators: true,
-  });
+  const draftBody = await applyDraftTitleDefaults(body, id);
+  const activity = await Activity.findById(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }
+  activity.set(draftBody);
+  await activity.save();
   res.json(activity);
 }
 
@@ -188,15 +245,13 @@ export async function updateActivityStatus(req: Request, res: Response) {
   }
 
   const id = routeParam(req.params.id);
-  const activity = await Activity.findByIdAndUpdate(
-    id,
-    { status },
-    { returnDocument: "after", runValidators: true },
-  );
+  const activity = await Activity.findById(id);
   if (!activity) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }
+  activity.set("status", status);
+  await activity.save();
   res.json(activity);
 }
 

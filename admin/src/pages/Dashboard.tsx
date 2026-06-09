@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import DashboardTable from "../components/DashboardTable";
 import { Button } from "../components/Button";
 import { SearchBar } from "../components/SearchBar";
 import { Pagination } from "../components/Pagination";
+import { Toast } from "../components/Toast";
 import type { Activity } from "../types/activity";
 import {
   fetchActivities,
@@ -110,8 +112,10 @@ function isMultiFilterKey(key: keyof DashboardFilters): key is MultiFilterKey {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [trueTotalActivities, setTrueTotalActivities] = useState(0); // True total number of activities in the database without filters (used for category counts)
+  const [trueTotalActivities, setTrueTotalActivities] = useState(0);
   const [categoryCounts, setCategoryCounts] =
     useState<Record<Category, number>>();
   const [totalPages, setTotalPages] = useState(1);
@@ -127,6 +131,9 @@ export default function Dashboard() {
   >("All");
   const [isLoading, setIsLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastKey, setToastKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const sortFilterActionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -189,7 +196,14 @@ export default function Dashboard() {
       setIsLoading(false);
     };
     getActivityData();
-  }, [currentPage, statusFilter, searchQuery, sort, appliedFilters]);
+  }, [
+    currentPage,
+    statusFilter,
+    searchQuery,
+    sort,
+    appliedFilters,
+    refreshKey,
+  ]);
 
   useEffect(() => {
     const getActivityStatsData = async () => {
@@ -212,7 +226,22 @@ export default function Dashboard() {
       setIsStatsLoading(false);
     };
     getActivityStatsData();
-  }, []);
+  }, [refreshKey]);
+
+  useEffect(() => {
+    const nextToastMessage = (
+      location.state as { toastMessage?: string } | null
+    )?.toastMessage;
+    if (!nextToastMessage) return;
+
+    const toastTimeoutId = window.setTimeout(() => {
+      setToastMessage(nextToastMessage);
+      setToastKey((prev) => prev + 1);
+      navigate(location.pathname, { replace: true, state: null });
+    }, 0);
+
+    return () => window.clearTimeout(toastTimeoutId);
+  }, [location.pathname, location.state, navigate]);
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -225,8 +254,11 @@ export default function Dashboard() {
   };
 
   const handleEditActivity = (id: string) => {
-    console.log("Edit activity clicked:", id);
-    // Future: navigate to the edit page
+    navigate(`/activities/${id}/edit`);
+  };
+
+  const refreshDashboardData = () => {
+    setRefreshKey((key) => key + 1);
   };
 
   const handleActivityDeleted = (deletedActivity: Activity) => {
@@ -360,13 +392,16 @@ export default function Dashboard() {
                 <Button
                   icon={MailingListIcon}
                   variant="secondary-left"
-                  onClick={() => {
-                    window.location.href = "/mailing-list";
-                  }}
+                  onClick={() => navigate("/mailing-list")}
                 >
                   Mailing List
                 </Button>
-                <Button icon={AddIcon}>Create New Activity</Button>
+                <Button
+                  icon={AddIcon}
+                  onClick={() => navigate("/activities/new")}
+                >
+                  Create New Activity
+                </Button>
               </div>
             </div>
             <div className="category-cards-container">
@@ -381,7 +416,6 @@ export default function Dashboard() {
             </div>
 
             <div className="search-input-container" style={{ display: "none" }}>
-              {/* hiding the old search input to use the new dashboard controls if needed. Actually we want the search input */}
               <img
                 src={SearchIcon}
                 className="search-input-icon"
@@ -405,12 +439,13 @@ export default function Dashboard() {
             </div>
 
             <div className="filter-row">
-              {/* Toggle tabs for All / Draft / Published */}
               <div className="status-tabs-container">
                 {(["All", "Draft", "Published"] as const).map((tab) => (
                   <button
                     key={tab}
-                    className={`status-tab ${statusFilter === tab ? "active" : ""}`}
+                    className={`status-tab ${
+                      statusFilter === tab ? "active" : ""
+                    }`}
                     onClick={() => handleStatusFilterChange(tab)}
                   >
                     {tab}
@@ -468,7 +503,11 @@ export default function Dashboard() {
                   <button
                     className={`filter-btn ${
                       isFilterDropdownOpen || hasAppliedFilters ? "active" : ""
-                    } ${activities.length === 0 && !hasAppliedFilters ? "empty" : ""}`}
+                    } ${
+                      activities.length === 0 && !hasAppliedFilters
+                        ? "empty"
+                        : ""
+                    }`}
                     onClick={toggleFilterDropdown}
                     aria-expanded={isFilterDropdownOpen}
                     aria-haspopup="dialog"
@@ -603,6 +642,7 @@ export default function Dashboard() {
               onEditActivity={handleEditActivity}
               categoryFilters={appliedFilters.category}
               onDeleteActivity={handleActivityDeleted}
+              onDataChange={refreshDashboardData}
             />
           </div>
 
@@ -613,6 +653,13 @@ export default function Dashboard() {
           />
         </div>
       )}
+      {toastMessage ? (
+        <Toast
+          key={toastKey}
+          message={toastMessage}
+          onClose={() => setToastMessage("")}
+        />
+      ) : null}
     </div>
   );
 }

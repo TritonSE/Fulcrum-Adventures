@@ -14,7 +14,17 @@ export const CategoryTag: React.FC<CategoryTagProps> = ({
   selected = false,
   onClick,
 }) => {
-  const classes = ["tag", "tag-category", selected && "tag-category--selected"]
+  if (!category) {
+    return null;
+  }
+  const formattedCategory = category.toLowerCase().replace(" ", "-");
+
+  const classes = [
+    "tag",
+    "tag-category",
+    `tag-category--${formattedCategory}`,
+    selected && "tag-category--selected",
+  ]
     .filter(Boolean)
     .join(" ");
 

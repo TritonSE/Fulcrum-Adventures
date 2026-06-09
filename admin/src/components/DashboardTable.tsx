@@ -1,10 +1,8 @@
-import type { Activity } from "../types/activity";
+import type { Activity, Category } from "../types/activity";
 import { useEffect, useState } from "react";
 import DeleteIcon from "../../icons/delete.svg";
 import UnpublishIcon from "../../icons/unpublish.svg";
 
-// Import existing components that match the column data
-// (Assuming these exist and match the design based on their names)
 import { CategoryTag } from "./CategoryTag";
 import { EnergyTag } from "./EnergyTag";
 import { StatusBadge } from "./StatusBadge";
@@ -17,11 +15,12 @@ import { ConfirmationPopup } from "./ConfirmationPopup";
 interface DashboardTableProps {
   activities: Activity[];
   onEditActivity: (activityId: string) => void;
-  categoryFilters?: Activity["category"];
+  categoryFilters?: Category[];
   onDeleteActivity?: (activity: Activity) => void;
+  onDataChange?: () => void;
 }
 
-const CATEGORY_ORDER: Activity["category"] = [
+const CATEGORY_ORDER: Category[] = [
   "Opener",
   "Icebreaker",
   "Connection",
@@ -30,15 +29,15 @@ const CATEGORY_ORDER: Activity["category"] = [
   "Team Challenge",
 ];
 
-const sortCategoriesByOrder = (categories: Activity["category"]) =>
+const sortCategoriesByOrder = (categories: Category[]) =>
   categories
     .slice()
     .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
 
 const getPrimaryCategory = (
-  categories: Activity["category"],
-  filterCategories?: Activity["category"],
-) => {
+  categories: Category[],
+  filterCategories?: Category[],
+): Category | null => {
   if (filterCategories?.length) {
     const filteredCategories = CATEGORY_ORDER.filter(
       (category) =>
@@ -49,7 +48,7 @@ const getPrimaryCategory = (
     }
   }
 
-  return sortCategoriesByOrder(categories)[0];
+  return sortCategoriesByOrder(categories)[0] ?? null;
 };
 
 export default function DashboardTable({
@@ -57,6 +56,7 @@ export default function DashboardTable({
   onEditActivity,
   categoryFilters,
   onDeleteActivity,
+  onDataChange,
 }: DashboardTableProps) {
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
@@ -68,7 +68,6 @@ export default function DashboardTable({
   const [activityToDeleteId, setActivityToDeleteId] = useState<string | null>(
     null,
   );
-  const [prevActivities, setPrevActivities] = useState(activities);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -83,12 +82,6 @@ export default function DashboardTable({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (prevActivities !== activities) {
-    setPrevActivities(activities);
-    setOpenActionMenuId(null);
-  }
-
-  // Helper to format the grade range from min and max numbers to "K-12", "3-5", etc.
   const formatGradeRange = (
     range: { min: number; max: number } | null | undefined,
   ) => {
@@ -100,7 +93,6 @@ export default function DashboardTable({
     return `${minText}-${range.max}`;
   };
 
-  // Helper to format group size
   const formatGroupSize = (
     size:
       | {
@@ -128,8 +120,7 @@ export default function DashboardTable({
   const handleUnpublishActivity = async (activityId: string) => {
     const result = await updateActivityStatus(activityId, "Draft");
     if (result.success) {
-      activities.filter((activity) => activity._id === activityId)[0].status =
-        "Draft";
+      onDataChange?.();
       showUnpublishedToast(activityId);
     } else {
       console.error("Failed to unpublish activity: ", result.error);
@@ -141,8 +132,7 @@ export default function DashboardTable({
     if (!result.success) {
       console.error("Failed to republish activity: ", result.error);
     } else {
-      activities.filter((activity) => activity._id === activityId)[0].status =
-        "Published";
+      onDataChange?.();
       setToastMessage("");
     }
   };
@@ -164,6 +154,7 @@ export default function DashboardTable({
       if (activityToDelete) {
         onDeleteActivity?.(activityToDelete);
       }
+      onDataChange?.();
       setShowDeleteConfirmationPopup(false);
       setToastActionText("");
       setToastAction(null);
@@ -174,170 +165,184 @@ export default function DashboardTable({
     }
   };
 
-  return activities.length > 0 ? (
-    <div className="table-container">
-      <table className="dashboard-table">
-        <colgroup>
-          <col className="title-col" />
-          <col className="category-col" />
-          <col className="energy-col" />
-          <col className="grade-col" />
-          <col className="group-col" />
-          <col className="duration-col" />
-          <col className="status-col" />
-          <col className="actions-col" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>
-              <span className="th-content">Title</span>
-            </th>
-            <th>
-              <span className="th-content">Category</span>
-            </th>
-            <th>
-              <span className="th-content">Energy</span>
-            </th>
-            <th>
-              <span className="th-content">Grade Level</span>
-            </th>
-            <th>
-              <span className="th-content">Group Size</span>
-            </th>
-            <th>
-              <span className="th-content">Duration</span>
-            </th>
-            <th>Status</th>
-            <th>{/* Actions column (three dots) */}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {activities.map((activity) => (
-            <tr
-              key={activity._id}
-              className="table-row"
-              onClick={() => onEditActivity(activity._id)}
-            >
-              <td className="col-title">{activity.title}</td>
-              <td className="col-category">
-                <div className="category-tag-container">
-                  {(() => {
-                    const primaryCategory = getPrimaryCategory(
-                      activity.category,
-                      categoryFilters,
-                    );
-                    const extraCategories = sortCategoriesByOrder(
-                      activity.category,
-                    ).filter((category) => category !== primaryCategory);
+  return (
+    <>
+      {activities.length > 0 ? (
+        <div className="table-container">
+          <table className="dashboard-table">
+            <colgroup>
+              <col className="title-col" />
+              <col className="category-col" />
+              <col className="energy-col" />
+              <col className="grade-col" />
+              <col className="group-col" />
+              <col className="duration-col" />
+              <col className="status-col" />
+              <col className="actions-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>
+                  <span className="th-content">Title</span>
+                </th>
+                <th>
+                  <span className="th-content">Category</span>
+                </th>
+                <th>
+                  <span className="th-content">Energy</span>
+                </th>
+                <th>
+                  <span className="th-content">Grade Level</span>
+                </th>
+                <th>
+                  <span className="th-content">Group Size</span>
+                </th>
+                <th>
+                  <span className="th-content">Duration</span>
+                </th>
+                <th>Status</th>
+                <th>{/* Actions column (three dots) */}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activities.map((activity) => (
+                <tr
+                  key={activity._id}
+                  className="table-row"
+                  onClick={() => onEditActivity(activity._id)}
+                >
+                  <td className="col-title">{activity.title}</td>
+                  <td className="col-category">
+                    <div className="category-tag-container">
+                      {(() => {
+                        const primaryCategory = getPrimaryCategory(
+                          activity.category,
+                          categoryFilters,
+                        );
+                        if (!primaryCategory) return null;
 
-                    return (
-                      <>
-                        <CategoryTag category={primaryCategory} selected />
-                        {extraCategories.length > 0 && (
-                          <div className="plus-categories-tag">
-                            +{extraCategories.length}
-                            <div className="category-tooltip" role="tooltip">
-                              {extraCategories.map((category, index) => (
-                                <CategoryTag
-                                  category={category}
-                                  key={`${category}-${index}`}
-                                  selected
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </div>
-              </td>
-              <td className="col-energy">
-                <EnergyTag level={formatEnergyLevel(activity.energyLevel)} />
-              </td>
-              <td className="col-grade">
-                {formatGradeRange(activity.gradeRange)}
-              </td>
-              <td className="col-group">
-                {formatGroupSize(activity.groupSize)}
-              </td>
-              <td className="col-duration">
-                {activity.duration ? activity.duration : "-"}
-              </td>
-              <td>
-                <StatusBadge status={activity.status} />
-              </td>
-              <td className="col-actions">
-                <div className="action-menu-wrapper">
-                  <button
-                    className={`action-btn ${
-                      openActionMenuId === activity._id ? "active" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenActionMenuId((openId) =>
-                        openId === activity._id ? null : activity._id,
-                      );
-                    }}
-                    aria-expanded={openActionMenuId === activity._id}
-                    aria-haspopup="menu"
-                    aria-label="More options"
-                  >
-                    <span className="action-btn-dots" aria-hidden="true">
-                      &#8942;
-                    </span>
-                  </button>
-                  {openActionMenuId === activity._id && (
-                    <div
-                      className={`activity-action-menu ${
-                        activity.status === "Draft" ? "delete-only" : ""
-                      }`}
-                      role="menu"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {activity.status !== "Draft" && (
-                        <button
-                          type="button"
-                          className="activity-action-menu-item"
-                          role="menuitem"
-                          onClick={() => {
-                            setOpenActionMenuId(null);
-                            handleUnpublishActivity(activity._id);
-                          }}
-                        >
-                          <img
-                            src={UnpublishIcon}
-                            className="activity-action-menu-icon"
-                            alt=""
-                          />
-                          Unpublish Activity
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="activity-action-menu-item danger"
-                        role="menuitem"
-                        onClick={() => {
-                          setOpenActionMenuId(null);
-                          setActivityToDeleteId(activity._id);
-                          setShowDeleteConfirmationPopup(true);
-                        }}
-                      >
-                        <img
-                          src={DeleteIcon}
-                          className="activity-action-menu-icon"
-                          alt=""
-                        />
-                        Delete Activity
-                      </button>
+                        const extraCategories = sortCategoriesByOrder(
+                          activity.category,
+                        ).filter((category) => category !== primaryCategory);
+
+                        return (
+                          <>
+                            <CategoryTag category={primaryCategory} selected />
+                            {extraCategories.length > 0 && (
+                              <div className="plus-categories-tag">
+                                +{extraCategories.length}
+                                <div
+                                  className="category-tooltip"
+                                  role="tooltip"
+                                >
+                                  {extraCategories.map((category, index) => (
+                                    <CategoryTag
+                                      category={category}
+                                      key={`${category}-${index}`}
+                                      selected
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  </td>
+                  <td className="col-energy">
+                    <EnergyTag level={formatEnergyLevel(activity.energyLevel)} />
+                  </td>
+                  <td className="col-grade">
+                    {formatGradeRange(activity.gradeRange)}
+                  </td>
+                  <td className="col-group">
+                    {formatGroupSize(activity.groupSize)}
+                  </td>
+                  <td className="col-duration">
+                    {activity.duration ? activity.duration : "-"}
+                  </td>
+                  <td>
+                    <StatusBadge status={activity.status} />
+                  </td>
+                  <td className="col-actions">
+                    <div className="action-menu-wrapper">
+                      <button
+                        className={`action-btn ${
+                          openActionMenuId === activity._id ? "active" : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenActionMenuId((openId) =>
+                            openId === activity._id ? null : activity._id,
+                          );
+                        }}
+                        aria-expanded={openActionMenuId === activity._id}
+                        aria-haspopup="menu"
+                        aria-label="More options"
+                      >
+                        <span className="action-btn-dots" aria-hidden="true">
+                          &#8942;
+                        </span>
+                      </button>
+                      {openActionMenuId === activity._id && (
+                        <div
+                          className={`activity-action-menu ${
+                            activity.status === "Draft" ? "delete-only" : ""
+                          }`}
+                          role="menu"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {activity.status !== "Draft" && (
+                            <button
+                              type="button"
+                              className="activity-action-menu-item"
+                              role="menuitem"
+                              onClick={() => {
+                                setOpenActionMenuId(null);
+                                handleUnpublishActivity(activity._id);
+                              }}
+                            >
+                              <img
+                                src={UnpublishIcon}
+                                className="activity-action-menu-icon"
+                                alt=""
+                              />
+                              Unpublish Activity
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="activity-action-menu-item danger"
+                            role="menuitem"
+                            onClick={() => {
+                              setOpenActionMenuId(null);
+                              setActivityToDeleteId(activity._id);
+                              setShowDeleteConfirmationPopup(true);
+                            }}
+                          >
+                            <img
+                              src={DeleteIcon}
+                              className="activity-action-menu-icon"
+                              alt=""
+                            />
+                            Delete Activity
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="no-activities-container">
+          <p className="no-activities-text">No activities found.</p>
+        </div>
+      )}
+
       <ConfirmationPopup
         isOpen={showDeleteConfirmationPopup}
         title="Delete Activity"
@@ -357,10 +362,6 @@ export default function DashboardTable({
           onClose={() => setToastMessage("")}
         />
       )}
-    </div>
-  ) : (
-    <div className="no-activities-container">
-      <p className="no-activities-text">No activities found.</p>
-    </div>
+    </>
   );
 }

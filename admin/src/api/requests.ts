@@ -16,7 +16,7 @@ type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
  * See https://vitejs.dev/guide/env-and-mode for more info about env variables
  * in Vite projects.
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 /**
  * A wrapper around the built-in `fetch()` function that abstracts away some of
