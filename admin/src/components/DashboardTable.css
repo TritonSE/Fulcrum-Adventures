@@ -6,13 +6,12 @@
   border-radius: 8px;
   background-color: #ffffff;
   border: 1px solid #6c6c6c;
-  overflow: visible !important;
 }
 
 .dashboard-table {
   width: 100%;
   table-layout: fixed;
-  border-collapse: collapse;
+  border-collapse: separate;
   border-spacing: 0;
   margin: 0;
   text-align: left;
@@ -51,11 +50,12 @@
 }
 
 .dashboard-table thead {
-  background-color: #153a7a;
+  background-color: transparent;
 }
 
 .dashboard-table th {
   padding: 16px 24px;
+  background-color: #153a7a;
   font-family: "Instrument Sans";
   font-weight: 700;
   font-size: 14px;
@@ -87,14 +87,13 @@
 
 .dashboard-table .table-row {
   display: table-row;
-  background: var(--Functional-Background, #f9f9f9);
-  border-bottom: 1px solid #6c6c6c;
+  background: transparent;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 72px;
 }
 
-.dashboard-table .table-row:last-child {
+.dashboard-table .table-row:last-child td {
   border-bottom: none;
 }
 
@@ -107,17 +106,23 @@
 }
 
 .dashboard-table .table-row:hover {
-  background: var(--Neutral-Gray1, #f2f2f2);
+  background: transparent;
 }
 
 .dashboard-table td {
   padding: 16px 24px;
+  background: var(--Functional-Background, #f9f9f9);
+  border-bottom: 1px solid #6c6c6c;
   vertical-align: middle;
   font-family: "Instrument Sans";
   font-size: 14px;
   color: #153a7a;
   letter-spacing: 0.28px;
   line-height: 1.5;
+}
+
+.dashboard-table .table-row:hover td {
+  background: var(--Neutral-Gray1, #f2f2f2);
 }
 
 .category-tag-container {
