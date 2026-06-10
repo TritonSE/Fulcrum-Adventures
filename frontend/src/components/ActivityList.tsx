@@ -16,6 +16,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 type ActivityListProps = {
   header?: string;
   activities: Activity[];
+  listRef?: React.Ref<FlatList<Activity>>;
   variant?: "card" | "condensed";
   onActivityPress?: (activity: Activity) => void;
   onSaveToggle?: (id: string) => void;
@@ -41,6 +42,7 @@ type ActivityListProps = {
 export const ActivityList: React.FC<ActivityListProps> = ({
   header = "",
   activities,
+  listRef,
   variant = "card",
   onActivityPress,
   onSaveToggle,
@@ -146,6 +148,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
         />
       ) : (
         <FlatList
+          ref={listRef}
           data={activities}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => renderCard(item)}

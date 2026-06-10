@@ -1,4 +1,9 @@
+import { useFocusEffect } from "expo-router";
+import { useCallback, useRef } from "react";
 import { View } from "react-native";
+
+import type { Activity } from "@/types/activity";
+import type { FlatList } from "react-native";
 
 import { ActivityList } from "@/components/ActivityList";
 import { POPULAR_TITLES } from "@/constants/homeSections";
@@ -8,8 +13,17 @@ import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeade
 
 export default function PopularScreen() {
   const { activities: stateActivities, toggleSaved } = useActivities();
+  const listRef = useRef<FlatList<Activity>>(null);
   const sourceActivities = stateActivities.length > 0 ? stateActivities : mockActivities;
   const activities = sourceActivities.filter((activity) => POPULAR_TITLES.includes(activity.title));
+
+  useFocusEffect(
+    useCallback(() => {
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      });
+    }, []),
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
@@ -17,6 +31,7 @@ export default function PopularScreen() {
 
       <View style={{ flex: 1 }}>
         <ActivityList
+          listRef={listRef}
           activities={activities}
           onSaveToggle={toggleSaved}
           variant="card"
