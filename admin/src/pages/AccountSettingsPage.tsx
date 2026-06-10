@@ -123,16 +123,30 @@ export function AccountSettingsPage() {
     setAllowedEmails(allowedEmails.filter((item) => item !== target));
   }
 
+  function adminEmailsWithPendingInput(): string[] | null {
+    const value = newAdminEmail.trim().toLowerCase();
+    if (!value) return allowedEmails;
+    if (!isValidEmail(value)) return null;
+    if (allowedEmails.includes(value)) return allowedEmails;
+    return [...allowedEmails, value];
+  }
+
   async function onSaveAdmins(e: FormEvent) {
     e.preventDefault();
+    const emailsToSave = adminEmailsWithPendingInput();
+    if (!emailsToSave) {
+      setToast({ message: "Enter a valid email to add.", variant: "error" });
+      return;
+    }
     setAdminsSaving(true);
-    const result = await updateAllowedAdminEmails(allowedEmails);
+    const result = await updateAllowedAdminEmails(emailsToSave);
     setAdminsSaving(false);
     if (!result.ok) {
       setToast({ message: result.message, variant: "error" });
       return;
     }
     setAllowedEmails(result.data.emails);
+    setNewAdminEmail("");
     setToast({ message: "Changes successfully saved!", variant: "success" });
   }
 
