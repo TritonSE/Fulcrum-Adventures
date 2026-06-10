@@ -4,7 +4,7 @@ import { ActivityList } from "../components/ActivityList";
 import { RECOMMENDED_TITLES } from "../constants/homeSections";
 import { useActivities } from "../Context/useActivities";
 import { mockActivities } from "../data/mockActivities";
-import { applyActivityStateAndMediaByTitle } from "../utils/activityState";
+import { applyActivityState } from "../utils/activityState";
 
 import { SeeAll } from "./SeeAll";
 
@@ -31,7 +31,7 @@ export function HomeRecommendedSection() {
   const { activities } = useActivities();
 
   // Filter based on admin-selected list and show only 4 for the preview
-  const recommendedActivities = applyActivityStateAndMediaByTitle(
+  const recommendedActivities = applyActivityState(
     mockActivities.filter((a) => RECOMMENDED_TITLES.includes(a.title)).slice(0, 4),
     activities,
   );

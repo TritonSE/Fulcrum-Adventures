@@ -4,7 +4,7 @@ import { ActivityList } from "../components/ActivityList";
 import { POPULAR_TITLES } from "../constants/homeSections";
 import { useActivities } from "../Context/useActivities";
 import { mockActivities } from "../data/mockActivities";
-import { applyActivityStateAndMediaByTitle } from "../utils/activityState";
+import { applyActivityState } from "../utils/activityState";
 
 import { SeeAll } from "./SeeAll";
 
@@ -31,7 +31,7 @@ export function HomePopularSection() {
   const { activities } = useActivities();
 
   // Filter based on the "encoded" list and show only 4 for the preview
-  const popularActivities = applyActivityStateAndMediaByTitle(
+  const popularActivities = applyActivityState(
     mockActivities.filter((a) => POPULAR_TITLES.includes(a.title)).slice(0, 4),
     activities,
   );

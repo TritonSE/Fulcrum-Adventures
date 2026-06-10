@@ -5,11 +5,11 @@ import { POPULAR_TITLES } from "@/constants/homeSections";
 import { useActivities } from "@/Context/useActivities";
 import { mockActivities } from "@/data/mockActivities";
 import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeaderSection";
-import { applyActivityStateAndMediaByTitle } from "@/utils/activityState";
+import { applyActivityState } from "@/utils/activityState";
 
 export default function PopularScreen() {
   const { activities: stateActivities, toggleSaved } = useActivities();
-  const activities = applyActivityStateAndMediaByTitle(
+  const activities = applyActivityState(
     mockActivities.filter((activity) => POPULAR_TITLES.includes(activity.title)),
     stateActivities,
   );
