@@ -4,6 +4,7 @@ import { ActivityList } from "../components/ActivityList";
 import { RECOMMENDED_TITLES } from "../constants/homeSections";
 import { useActivities } from "../Context/useActivities";
 import { mockActivities } from "../data/mockActivities";
+import { applyActivityStateAndMediaByTitle } from "../utils/activityState";
 
 import { SeeAll } from "./SeeAll";
 
@@ -28,12 +29,12 @@ const styles = StyleSheet.create({
 
 export function HomeRecommendedSection() {
   const { activities } = useActivities();
-  const sourceActivities = activities.length > 0 ? activities : mockActivities;
 
   // Filter based on admin-selected list and show only 4 for the preview
-  const recommendedActivities = sourceActivities
-    .filter((a) => RECOMMENDED_TITLES.includes(a.title))
-    .slice(0, 4);
+  const recommendedActivities = applyActivityStateAndMediaByTitle(
+    mockActivities.filter((a) => RECOMMENDED_TITLES.includes(a.title)).slice(0, 4),
+    activities,
+  );
 
   return (
     <View>

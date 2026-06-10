@@ -5,12 +5,13 @@ import { RECOMMENDED_TITLES } from "@/constants/homeSections";
 import { useActivities } from "@/Context/useActivities";
 import { mockActivities } from "@/data/mockActivities";
 import { HomePopUpPageHeaderSection } from "@/home_components/HomePopUpPageHeaderSection";
+import { applyActivityStateAndMediaByTitle } from "@/utils/activityState";
 
 export default function RecommendedScreen() {
   const { activities: stateActivities, toggleSaved } = useActivities();
-  const sourceActivities = stateActivities.length > 0 ? stateActivities : mockActivities;
-  const activities = sourceActivities.filter((activity) =>
-    RECOMMENDED_TITLES.includes(activity.title),
+  const activities = applyActivityStateAndMediaByTitle(
+    mockActivities.filter((activity) => RECOMMENDED_TITLES.includes(activity.title)),
+    stateActivities,
   );
 
   return (
