@@ -7,6 +7,7 @@ declare global {
       userId: string;
       email: string;
       role: UserRole;
+      isActive?: boolean;
     }
 
     // eslint-disable-next-line ts/consistent-type-definitions -- Express augmentation requires interface

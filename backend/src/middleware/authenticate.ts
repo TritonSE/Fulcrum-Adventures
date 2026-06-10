@@ -25,6 +25,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       userId: dbUser ? String(dbUser._id) : firebaseUser.userId,
       email: firebaseUser.email,
       role: dbUser?.role ?? firebaseUser.role,
+      isActive: dbUser ? dbUser.isActive !== false : true,
     };
     next();
   } catch (error) {

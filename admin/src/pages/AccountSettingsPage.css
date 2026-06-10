@@ -137,3 +137,13 @@
 .admin-email-list__icon-btn:hover {
   background: #f3f3f3;
 }
+
+.admin-email-list__icon-btn:disabled {
+  cursor: not-allowed;
+  color: #9ca3af;
+  background: #f8fafc;
+}
+
+.admin-email-list__icon-btn:disabled:hover {
+  background: #f8fafc;
+}

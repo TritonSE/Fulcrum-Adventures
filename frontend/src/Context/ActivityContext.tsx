@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 
 import { getActivityById } from "../data/mockActivities";
 import { mapApiActivityToActivity } from "../services/activityMapper";
@@ -9,6 +10,7 @@ import { ActivityContext } from "./activityContextValue";
 
 import type { Activity } from "../types/activity";
 import type { Playlist } from "./activityContextValue";
+import type { AppStateStatus } from "react-native";
 
 const LOCAL_ACTIVITY_STATE_KEY = "fulcrum-adventures:activity-state:v1";
 
@@ -191,6 +193,7 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   const currentActivitiesRef = useRef<Activity[]>([]);
   const lastSuccessfulActivitiesRef = useRef<Activity[]>([]);
   const persistedActivityStateRef = useRef<PersistedActivityState>(EMPTY_PERSISTED_STATE);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
     currentActivitiesRef.current = activities;
@@ -232,6 +235,24 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void refreshActivities();
+  }, [refreshActivities]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      const previousAppState = appStateRef.current;
+      appStateRef.current = nextAppState;
+
+      if (
+        (previousAppState === "background" || previousAppState === "inactive") &&
+        nextAppState === "active"
+      ) {
+        void refreshActivities();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [refreshActivities]);
 
   useEffect(() => {

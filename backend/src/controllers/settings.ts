@@ -34,15 +34,18 @@ function parseEmailList(raw: unknown): string[] | null {
 }
 
 async function getManagedAdminEmails(): Promise<string[]> {
-  const [allowedRows, activeUsers] = await Promise.all([
+  const [allowedRows, activeSuperAdmins] = await Promise.all([
     AllowedAdminEmail.find().select("email").lean(),
-    User.find({ isActive: { $ne: false } })
+    User.find({ role: "super_admin", isActive: { $ne: false } })
       .select("email")
       .lean(),
   ]);
 
   return [
-    ...new Set([...allowedRows.map((row) => row.email), ...activeUsers.map((user) => user.email)]),
+    ...new Set([
+      ...allowedRows.map((row) => row.email),
+      ...activeSuperAdmins.map((user) => user.email),
+    ]),
   ].sort();
 }
 
@@ -62,7 +65,7 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
   }
 
   const user = await User.findById(userId);
-  if (!user) {
+  if (!user || user.isActive === false) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

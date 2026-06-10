@@ -43,6 +43,7 @@ export function AccountSettingsPage() {
   const [adminsSaving, setAdminsSaving] = useState(false);
 
   const isSuperAdmin = user?.role === "super_admin";
+  const currentUserEmail = email.trim().toLowerCase();
 
   useEffect(() => {
     fetchCurrentUser().then((fresh) => {
@@ -120,6 +121,10 @@ export function AccountSettingsPage() {
   }
 
   function onRemoveAdminEmail(target: string) {
+    if (target === currentUserEmail) {
+      setToast({ message: "You cannot remove your own admin access.", variant: "error" });
+      return;
+    }
     setAllowedEmails(allowedEmails.filter((item) => item !== target));
   }
 
@@ -247,24 +252,30 @@ export function AccountSettingsPage() {
             <label className="settings-card__label settings-card__label--section">Admin Email</label>
 
             <ul className="admin-email-list">
-              {allowedEmails.map((adminEmail) => (
-                <li key={adminEmail} className="admin-email-list__row">
-                  <TextField
-                    value={adminEmail}
-                    onChange={() => {}}
-                    type="email"
-                    readOnly
-                  />
-                  <button
-                    type="button"
-                    className="admin-email-list__icon-btn admin-email-list__icon-btn--remove"
-                    onClick={() => onRemoveAdminEmail(adminEmail)}
-                    aria-label={`Remove ${adminEmail}`}
-                  >
-                    −
-                  </button>
-                </li>
-              ))}
+              {allowedEmails.map((adminEmail) => {
+                const isCurrentUser = adminEmail === currentUserEmail;
+
+                return (
+                  <li key={adminEmail} className="admin-email-list__row">
+                    <TextField
+                      value={adminEmail}
+                      onChange={() => {}}
+                      type="email"
+                      readOnly
+                    />
+                    <button
+                      type="button"
+                      className="admin-email-list__icon-btn admin-email-list__icon-btn--remove"
+                      onClick={() => onRemoveAdminEmail(adminEmail)}
+                      aria-label={`Remove ${adminEmail}`}
+                      disabled={isCurrentUser}
+                      title={isCurrentUser ? "You cannot remove your own admin access." : undefined}
+                    >
+                      −
+                    </button>
+                  </li>
+                );
+              })}
               <li className="admin-email-list__row admin-email-list__row--add">
                 <TextField
                   value={newAdminEmail}

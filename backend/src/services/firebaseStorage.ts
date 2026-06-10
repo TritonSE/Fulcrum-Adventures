@@ -19,12 +19,28 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+function getStorageBucketName(): string {
+  const rawBucket = getRequiredEnv("FIREBASE_STORAGE_BUCKET");
+  const bucketName = rawBucket
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/^gs:\/\//, "")
+    .replace(/\/+$/, "");
+
+  if (!bucketName) {
+    throw new Error("FIREBASE_STORAGE_BUCKET must be a valid bucket name.");
+  }
+
+  return bucketName;
+}
+
 function getBucket() {
   const missingVars = REQUIRED_ENV_VARS.filter((name) => !process.env[name]);
   if (missingVars.length > 0) {
     throw new Error(`Missing Firebase Storage environment variables: ${missingVars.join(", ")}`);
   }
 
+  const storageBucket = getStorageBucketName();
   const app =
     getApps()[0] ??
     initializeApp({
@@ -33,10 +49,10 @@ function getBucket() {
         clientEmail: getRequiredEnv("FIREBASE_CLIENT_EMAIL"),
         privateKey: getRequiredEnv("FIREBASE_PRIVATE_KEY").replace(/\\n/g, "\n"),
       }),
-      storageBucket: getRequiredEnv("FIREBASE_STORAGE_BUCKET"),
+      storageBucket,
     });
 
-  return getStorage(app).bucket();
+  return getStorage(app).bucket(storageBucket);
 }
 
 function getStoragePath(activityId: string, originalName: string): string {
