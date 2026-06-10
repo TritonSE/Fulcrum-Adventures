@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getActivityById } from "../data/mockActivities";
@@ -8,6 +9,60 @@ import { ActivityContext } from "./activityContextValue";
 
 import type { Activity } from "../types/activity";
 import type { Playlist } from "./activityContextValue";
+
+const LOCAL_ACTIVITY_STATE_KEY = "fulcrum-adventures:activity-state:v1";
+
+type PersistedActivityState = {
+  savedActivityIds: string[];
+  downloadedActivityIds: string[];
+  viewedActivityTimestamps: Record<string, number>;
+  playlists: Playlist[];
+  activitySnapshots: Activity[];
+};
+
+const EMPTY_PERSISTED_STATE: PersistedActivityState = {
+  savedActivityIds: [],
+  downloadedActivityIds: [],
+  viewedActivityTimestamps: {},
+  playlists: [],
+  activitySnapshots: [],
+};
+
+function getStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+function normalizePersistedState(value: unknown): PersistedActivityState {
+  if (!value || typeof value !== "object") return EMPTY_PERSISTED_STATE;
+
+  const state = value as Partial<PersistedActivityState>;
+  const viewedActivityTimestamps =
+    state.viewedActivityTimestamps && typeof state.viewedActivityTimestamps === "object"
+      ? Object.fromEntries(
+          Object.entries(state.viewedActivityTimestamps).filter(
+            ([id, timestamp]) => typeof id === "string" && typeof timestamp === "number",
+          ),
+        )
+      : {};
+  const activitySnapshots = Array.isArray(state.activitySnapshots)
+    ? state.activitySnapshots.filter(
+        (activity): activity is Activity =>
+          Boolean(activity) &&
+          typeof activity === "object" &&
+          typeof (activity as Partial<Activity>).id === "string",
+      )
+    : [];
+
+  return {
+    savedActivityIds: getStringArray(state.savedActivityIds),
+    downloadedActivityIds: getStringArray(state.downloadedActivityIds),
+    viewedActivityTimestamps,
+    playlists: Array.isArray(state.playlists) ? state.playlists : [],
+    activitySnapshots,
+  };
+}
 
 function mergeLocalActivityState(previous: Activity[], next: Activity[]) {
   const previousById = new Map(previous.map((activity) => [activity.id, activity]));
@@ -44,6 +99,81 @@ function mergeLocalActivityState(previous: Activity[], next: Activity[]) {
   return [...mergedActivities, ...localOnlyActivities];
 }
 
+function applyPersistedActivityState(
+  activities: Activity[],
+  persistedState: PersistedActivityState,
+) {
+  const savedIds = new Set(persistedState.savedActivityIds);
+  const downloadedIds = new Set(persistedState.downloadedActivityIds);
+  const activityIds = new Set(activities.map((activity) => activity.id));
+  const snapshotById = new Map(
+    persistedState.activitySnapshots.map((activity) => [activity.id, activity]),
+  );
+  const playlistActivityIds = persistedState.playlists.flatMap((playlist) => playlist.activityIds);
+
+  const mergedActivities = activities.map((activity) => ({
+    ...activity,
+    isSaved: savedIds.has(activity.id),
+    isDownloaded: downloadedIds.has(activity.id),
+    lastViewedAt: persistedState.viewedActivityTimestamps[activity.id] ?? activity.lastViewedAt,
+  }));
+
+  const localOnlyIds = new Set([
+    ...persistedState.savedActivityIds,
+    ...persistedState.downloadedActivityIds,
+    ...Object.keys(persistedState.viewedActivityTimestamps),
+    ...playlistActivityIds,
+  ]);
+
+  localOnlyIds.forEach((id) => {
+    if (activityIds.has(id)) return;
+
+    const localActivity = snapshotById.get(id) ?? getActivityById(id);
+    if (!localActivity) return;
+
+    mergedActivities.push({
+      ...localActivity,
+      isSaved: savedIds.has(id),
+      isDownloaded: downloadedIds.has(id),
+      lastViewedAt: persistedState.viewedActivityTimestamps[id] ?? localActivity.lastViewedAt,
+    });
+  });
+
+  return mergedActivities;
+}
+
+function createPersistedActivityState(
+  activities: Activity[],
+  playlists: Playlist[],
+): PersistedActivityState {
+  const playlistActivityIds = new Set(playlists.flatMap((playlist) => playlist.activityIds));
+  const activitySnapshots = activities.filter(
+    (activity) =>
+      activity.isSaved ||
+      activity.isDownloaded ||
+      typeof activity.lastViewedAt === "number" ||
+      playlistActivityIds.has(activity.id),
+  );
+
+  return {
+    savedActivityIds: activities
+      .filter((activity) => activity.isSaved)
+      .map((activity) => activity.id),
+    downloadedActivityIds: activities
+      .filter((activity) => activity.isDownloaded)
+      .map((activity) => activity.id),
+    viewedActivityTimestamps: activities.reduce<Record<string, number>>((timestamps, activity) => {
+      if (typeof activity.lastViewedAt === "number") {
+        timestamps[activity.id] = activity.lastViewedAt;
+      }
+
+      return timestamps;
+    }, {}),
+    playlists,
+    activitySnapshots,
+  };
+}
+
 function addMockActivity(previous: Activity[], id: string, changes: Partial<Activity>) {
   const mockActivity = getActivityById(id);
   if (!mockActivity) return previous;
@@ -57,8 +187,10 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   const [activitiesError, setActivitiesError] = useState<string | null>(null);
   const [isUsingCachedActivities, setIsUsingCachedActivities] = useState(false);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [hasLoadedLocalState, setHasLoadedLocalState] = useState(false);
   const currentActivitiesRef = useRef<Activity[]>([]);
   const lastSuccessfulActivitiesRef = useRef<Activity[]>([]);
+  const persistedActivityStateRef = useRef<PersistedActivityState>(EMPTY_PERSISTED_STATE);
 
   useEffect(() => {
     currentActivitiesRef.current = activities;
@@ -71,7 +203,10 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const apiActivities = await activitiesApi.listAll({ status: "Published" });
-      const nextActivities = apiActivities.map(mapApiActivityToActivity);
+      const nextActivities = applyPersistedActivityState(
+        apiActivities.map(mapApiActivityToActivity),
+        persistedActivityStateRef.current,
+      );
       setActivities((previous) => {
         const mergedActivities = mergeLocalActivityState(previous, nextActivities);
         lastSuccessfulActivitiesRef.current = mergedActivities;
@@ -98,6 +233,52 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void refreshActivities();
   }, [refreshActivities]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadLocalState = async () => {
+      try {
+        const storedState = await AsyncStorage.getItem(LOCAL_ACTIVITY_STATE_KEY);
+        const parsedState: unknown = storedState ? JSON.parse(storedState) : EMPTY_PERSISTED_STATE;
+        const persistedState = normalizePersistedState(parsedState);
+
+        if (!isMounted) return;
+
+        persistedActivityStateRef.current = persistedState;
+        setPlaylists(persistedState.playlists);
+        setActivities((previous) => applyPersistedActivityState(previous, persistedState));
+      } catch {
+        // Keep the app usable even if local storage is unavailable or corrupted.
+      } finally {
+        if (isMounted) setHasLoadedLocalState(true);
+      }
+    };
+
+    void loadLocalState();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedLocalState || isLoadingActivities) return;
+
+    const hasPersistedActivityState =
+      persistedActivityStateRef.current.savedActivityIds.length > 0 ||
+      persistedActivityStateRef.current.downloadedActivityIds.length > 0 ||
+      Object.keys(persistedActivityStateRef.current.viewedActivityTimestamps).length > 0;
+
+    if (activities.length === 0 && hasPersistedActivityState) {
+      return;
+    }
+
+    const persistedState = createPersistedActivityState(activities, playlists);
+    persistedActivityStateRef.current = persistedState;
+
+    void AsyncStorage.setItem(LOCAL_ACTIVITY_STATE_KEY, JSON.stringify(persistedState));
+  }, [activities, hasLoadedLocalState, isLoadingActivities, playlists]);
 
   const markViewed = (id: string) => {
     const now = Date.now();
@@ -200,9 +381,13 @@ export function ActivityProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleDownload = (id: string) => {
-    setActivities((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, isDownloaded: !a.isDownloaded } : a)),
-    );
+    setActivities((prev) => {
+      if (!prev.some((activity) => activity.id === id)) {
+        return addMockActivity(prev, id, { isDownloaded: true });
+      }
+
+      return prev.map((a) => (a.id === id ? { ...a, isDownloaded: !a.isDownloaded } : a));
+    });
   };
 
   const toggleHistory = (id: string) => {

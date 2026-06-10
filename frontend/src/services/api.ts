@@ -6,7 +6,7 @@ declare const process: {
   };
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:4000";
+const DEFAULT_API_BASE_URL = "https://fulcrum-backend.vercel.app";
 const DEFAULT_ACTIVITIES_PAGE_SIZE = 30;
 
 export const API_BASE_URL =

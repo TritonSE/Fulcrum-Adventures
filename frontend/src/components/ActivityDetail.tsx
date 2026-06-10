@@ -710,7 +710,7 @@ function getCustomTabs(activity: Activity): CustomTabData[] {
 }
 
 export default function ActivityDetail({ activity, onBack, onOpenNotes }: ActivityDetailProps) {
-  const { activities } = useActivities();
+  const { activities, toggleDownload } = useActivities();
   const currentActivity = activities.find((a) => a.id === activity.id) ?? activity;
 
   const displayCategories = getSortedCategories(activity.categories || activity.category);
@@ -783,6 +783,22 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
   const handleScrollViewLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
     setScrollViewHeight(height);
+  };
+
+  const handleDownloadPress = () => {
+    if (!currentActivity.isDownloaded) {
+      toggleDownload(activity.id);
+    }
+
+    setNotification("download");
+  };
+
+  const handleNotificationAction = () => {
+    if (notification === "download") {
+      router.push("/saved/DownloadsScreen");
+    }
+
+    hideNotification();
   };
 
   return (
@@ -861,10 +877,7 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
               </View>
 
               <View style={styles.actionIcons}>
-                <TouchableOpacity
-                  style={styles.actionIconCircle}
-                  onPress={() => setNotification("download")}
-                >
+                <TouchableOpacity style={styles.actionIconCircle} onPress={handleDownloadPress}>
                   <DownloadIcon />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionIconCircle} onPress={onOpenNotes}>
@@ -1099,7 +1112,10 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
             <Text style={styles.notificationText} numberOfLines={1}>
               {notification === "download" ? "Activity downloaded!" : "Activity bookmarked!"}
             </Text>
-            <TouchableOpacity style={styles.notificationActionBtn} onPress={hideNotification}>
+            <TouchableOpacity
+              style={styles.notificationActionBtn}
+              onPress={handleNotificationAction}
+            >
               <Text style={styles.notificationActionText}>
                 {notification === "download" ? "View" : "Playlists"}
               </Text>
