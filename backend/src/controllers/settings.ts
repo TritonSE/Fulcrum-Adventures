@@ -105,8 +105,15 @@ export async function updateAllowedAdminEmails(req: Request, res: Response): Pro
     await AllowedAdminEmail.insertMany(emails.map((email) => ({ email })));
   }
 
-  await User.updateMany({ role: "admin", email: { $in: emails } }, { $set: { isActive: true } });
-  await User.updateMany({ role: "admin", email: { $nin: emails } }, { $set: { isActive: false } });
+  const managedRoles = ["admin", "super_admin"] as const;
+  await User.updateMany(
+    { role: { $in: managedRoles }, email: { $in: emails } },
+    { $set: { isActive: true } },
+  );
+  await User.updateMany(
+    { role: { $in: managedRoles }, email: { $nin: emails } },
+    { $set: { isActive: false } },
+  );
 
   res.json({ emails: await getManagedAdminEmails(), message: "Admin access updated." });
 }
