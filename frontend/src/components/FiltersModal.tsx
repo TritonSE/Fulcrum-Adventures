@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -34,8 +35,26 @@ type Props = {
   onApply: (filters: FilterState) => void;
 };
 
+const DRAWER_OFFSET = 720;
+const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
+
 // --- STYLES (Moved to Top) ---
 const styles = StyleSheet.create({
+  modalRoot: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: DRAWER_BACKDROP_COLOR,
+  },
+  sheet: {
+    height: "88%",
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    overflow: "hidden",
+  },
   container: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
     flexDirection: "row",
@@ -340,10 +359,39 @@ const FiltersModalContent = ({ initial, onClose, onApply }: Omit<Props, "visible
 export const FiltersModal = ({ visible, initial, onClose, onApply }: Props) => {
   const initialKey = useMemo(() => JSON.stringify(initial), [initial]);
   const contentKey = visible ? `open-${initialKey}` : "closed";
+  const [sheetY] = useState(() => new Animated.Value(DRAWER_OFFSET));
+
+  useEffect(() => {
+    if (!visible) return;
+    sheetY.setValue(DRAWER_OFFSET);
+    Animated.timing(sheetY, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [sheetY, visible]);
+
+  const closeWithAnimation = () => {
+    Animated.timing(sheetY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(onClose);
+  };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <FiltersModalContent key={contentKey} initial={initial} onClose={onClose} onApply={onApply} />
+    <Modal visible={visible} transparent animationType="none" onRequestClose={closeWithAnimation}>
+      <View style={styles.modalRoot}>
+        <Pressable style={styles.backdrop} onPress={closeWithAnimation} />
+        <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetY }] }]}>
+          <FiltersModalContent
+            key={contentKey}
+            initial={initial}
+            onClose={closeWithAnimation}
+            onApply={onApply}
+          />
+        </Animated.View>
+      </View>
     </Modal>
   );
 };

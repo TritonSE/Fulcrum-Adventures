@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import BookmarkFilledIcon from "../../../assets/icons/bookmark-filled.svg";
@@ -9,10 +9,13 @@ import CloseButton from "../../../assets/icons/CloseButton.svg";
 import { useActivities } from "../../Context/ActivityContext";
 import { Typography } from "../../styles/typo";
 
+const DRAWER_OFFSET = 620;
+const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
+
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: DRAWER_BACKDROP_COLOR,
   },
   sheet: {
     position: "absolute",
@@ -181,7 +184,24 @@ export default function LibraryPopupModalScreen() {
     onAction?: () => void;
   } | null>(null);
   const [toastAnim] = useState(() => new Animated.Value(0));
+  const [sheetY] = useState(() => new Animated.Value(DRAWER_OFFSET));
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    Animated.timing(sheetY, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [sheetY]);
+
+  const closeDrawer = () => {
+    Animated.timing(sheetY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(() => router.back());
+  };
 
   const showInlineToast = (toast: {
     message: string;
@@ -244,13 +264,13 @@ export default function LibraryPopupModalScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Pressable style={styles.backdrop} onPress={() => router.back()} />
+      <Pressable style={styles.backdrop} onPress={closeDrawer} />
 
-      <View style={styles.sheet}>
+      <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetY }] }]}>
         <View style={styles.headerRow}>
           <Text style={[Typography.displayMdBold, { color: "#153A7A" }]}>Library</Text>
 
-          <Pressable onPress={() => router.back()} style={styles.closeBtn} hitSlop={12}>
+          <Pressable onPress={closeDrawer} style={styles.closeBtn} hitSlop={12}>
             <CloseButton width={40} height={40} />
           </Pressable>
         </View>
@@ -339,7 +359,7 @@ export default function LibraryPopupModalScreen() {
             }}
           />
         )}
-      </View>
+      </Animated.View>
 
       {popupToast && (
         <Animated.View
