@@ -100,11 +100,10 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     backgroundColor: "#F2F3F5",
-    justifyContent: "center",
-    alignItems: "center",
     marginRight: 12,
+    overflow: "hidden",
   },
-  colorDot: { width: 22, height: 22, borderRadius: 6 },
+  colorDot: { width: "100%", height: "100%", borderRadius: 12 },
   checkCircle: {
     width: 28,
     height: 28,
@@ -123,10 +122,10 @@ const styles = StyleSheet.create({
   },
   toast: {
     backgroundColor: "#22C55E",
-    width: 310,
-    height: 38,
+    width: "100%",
+    minHeight: 52,
     borderRadius: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -203,6 +202,16 @@ export default function LibraryPopupModalScreen() {
     }).start(() => router.back());
   };
 
+  const hideInlineToast = () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    Animated.timing(toastAnim, { toValue: 0, duration: 220, useNativeDriver: true }).start(() =>
+      setPopupToast(null),
+    );
+  };
+
   const showInlineToast = (toast: {
     message: string;
     actionLabel?: string;
@@ -213,16 +222,6 @@ export default function LibraryPopupModalScreen() {
     toastAnim.setValue(0);
     Animated.timing(toastAnim, { toValue: 1, duration: 280, useNativeDriver: true }).start();
     toastTimerRef.current = setTimeout(() => hideInlineToast(), 3500);
-  };
-
-  const hideInlineToast = () => {
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = null;
-    }
-    Animated.timing(toastAnim, { toValue: 0, duration: 220, useNativeDriver: true }).start(() =>
-      setPopupToast(null),
-    );
   };
 
   const toggleBookmark = () => {
@@ -366,9 +365,8 @@ export default function LibraryPopupModalScreen() {
           style={{
             position: "absolute",
             bottom: 24,
-            left: 0,
-            right: 0,
-            alignItems: "center",
+            left: 24,
+            right: 24,
             zIndex: 999,
             opacity: toastAnim,
             transform: [

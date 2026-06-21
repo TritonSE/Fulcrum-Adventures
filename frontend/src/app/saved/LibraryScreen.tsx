@@ -29,6 +29,7 @@ import { showToast } from "../../utils/toast";
 
 const COLORS = ["#1322C6", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
 const DEFAULT_PLAYLIST_COLOR = COLORS[0];
+const PRIMARY_BLUE = "#153A7A";
 const CLOSE_ICON_SIZE = 20;
 const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
 const DRAWER_OFFSET = 620;
@@ -75,6 +76,88 @@ export default function LibraryScreen() {
   const hidePopupToast = () => {
     Animated.timing(popupToastAnim, { toValue: 0, duration: 220, useNativeDriver: true }).start(
       () => setPopupToast(null),
+    );
+  };
+
+  const renderInlineToast = (bottom = 24) => {
+    if (!popupToast) return null;
+
+    return (
+      <Animated.View
+        style={{
+          position: "absolute",
+          bottom,
+          left: 24,
+          right: 24,
+          zIndex: 999,
+          opacity: popupToastAnim,
+          transform: [
+            {
+              translateY: popupToastAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [16, 0],
+              }),
+            },
+          ],
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#22C55E",
+            width: "100%",
+            minHeight: 52,
+            borderRadius: 16,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
+            <View
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 13,
+                backgroundColor: "rgba(255,255,255,0.85)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="checkmark" size={16} color="#1F2A44" />
+            </View>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "800",
+                fontFamily: "InstrumentSans_700Bold",
+                fontSize: 14,
+              }}
+              numberOfLines={1}
+            >
+              {popupToast.message}
+            </Text>
+          </View>
+          {popupToast.actionLabel && (
+            <Pressable
+              onPress={() => {
+                popupToast.onAction?.();
+              }}
+              style={{
+                paddingVertical: 2,
+                paddingHorizontal: 10,
+                borderRadius: 999,
+                borderWidth: 1.5,
+                borderColor: "rgba(255,255,255,0.9)",
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 12, fontFamily: "InstrumentSans_700Bold" }}>
+                {popupToast.actionLabel}
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </Animated.View>
     );
   };
 
@@ -246,10 +329,15 @@ export default function LibraryScreen() {
     setPlaylistToDelete(null);
 
     setTimeout(() => {
-      showToast("Playlist deleted!", {
+      showPopupToast({
+        message: "Playlist deleted!",
         actionLabel: "Undo",
-        onAction: () => restorePlaylist(deleted, index),
+        onAction: () => {
+          restorePlaylist(deleted, index);
+          hidePopupToast();
+        },
       });
+      setTimeout(() => hidePopupToast(), 3500);
     }, 0);
   };
 
@@ -416,6 +504,8 @@ export default function LibraryScreen() {
         )}
       </ScrollView>
 
+      {!libraryPopupVisible && renderInlineToast(insets.bottom + 24)}
+
       <Modal visible={manageVisible} transparent animationType="none" onRequestClose={closeManage}>
         <Pressable
           style={{
@@ -566,10 +656,12 @@ export default function LibraryScreen() {
 
                 <Text
                   style={{
-                    color: "#153A7A",
+                    color: PRIMARY_BLUE,
                     paddingTop: 24,
                     marginBottom: 8,
-                    ...Typography.displayXSmBold,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
                   }}
                 >
                   Playlist Name
@@ -593,10 +685,12 @@ export default function LibraryScreen() {
 
                 <Text
                   style={{
-                    color: "#153A7A",
+                    color: PRIMARY_BLUE,
                     paddingTop: 24,
                     marginBottom: 10,
-                    ...Typography.displayXSmBold,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
                   }}
                 >
                   Choose Color
@@ -610,14 +704,22 @@ export default function LibraryScreen() {
                         key={color}
                         onPress={() => setColorDraft(color)}
                         style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 7,
-                          backgroundColor: color,
+                          width: 54,
+                          height: 54,
+                          borderRadius: 11,
                           borderWidth: selected ? 3 : 0,
-                          borderColor: selected ? "#153A7A" : "transparent",
+                          borderColor: selected ? PRIMARY_BLUE : "transparent",
+                          padding: 3,
                         }}
-                      />
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            borderRadius: 7,
+                            backgroundColor: color,
+                          }}
+                        />
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -664,7 +766,7 @@ export default function LibraryScreen() {
                         justifyContent: "center",
                       }}
                     >
-                      <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Save</Text>
+                      <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Save</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -793,7 +895,15 @@ export default function LibraryScreen() {
                   </Pressable>
                 </View>
 
-                <Text style={{ color: "#153A7A", marginBottom: 7, ...Typography.displayXSmBold }}>
+                <Text
+                  style={{
+                    color: PRIMARY_BLUE,
+                    marginBottom: 7,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
+                  }}
+                >
                   Playlist Name
                 </Text>
                 <TextInput
@@ -817,29 +927,42 @@ export default function LibraryScreen() {
 
                 <Text
                   style={{
-                    color: "#153A7A",
+                    color: PRIMARY_BLUE,
                     paddingTop: 24,
                     marginBottom: 10,
-                    ...Typography.displayXSmBold,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
                   }}
                 >
                   Choose Color
                 </Text>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  {COLORS.map((c) => (
-                    <Pressable
-                      key={c}
-                      onPress={() => setCreateColor(c)}
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 7,
-                        backgroundColor: c,
-                        borderWidth: c === createColor ? 3 : 0,
-                        borderColor: c === createColor ? "#153A7A" : "transparent",
-                      }}
-                    />
-                  ))}
+                  {COLORS.map((c) => {
+                    const selected = c === createColor;
+                    return (
+                      <Pressable
+                        key={c}
+                        onPress={() => setCreateColor(c)}
+                        style={{
+                          width: 54,
+                          height: 54,
+                          borderRadius: 11,
+                          borderWidth: selected ? 3 : 0,
+                          borderColor: selected ? PRIMARY_BLUE : "transparent",
+                          padding: 3,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            borderRadius: 7,
+                            backgroundColor: c,
+                          }}
+                        />
+                      </Pressable>
+                    );
+                  })}
                 </View>
 
                 <View
@@ -1044,21 +1167,10 @@ export default function LibraryScreen() {
                         width: 44,
                         height: 44,
                         borderRadius: 12,
-                        backgroundColor: "#F2F3F5",
-                        justifyContent: "center",
-                        alignItems: "center",
+                        backgroundColor: item.color,
                         marginRight: 12,
                       }}
-                    >
-                      <View
-                        style={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: 6,
-                          backgroundColor: item.color,
-                        }}
-                      />
-                    </View>
+                    />
                     <View style={{ flex: 1, gap: 8 }}>
                       <Text style={[Typography.displayXSmBold, { color: "#153A7A" }]}>
                         {item.name}
@@ -1101,86 +1213,7 @@ export default function LibraryScreen() {
         </Animated.View>
 
         {/* Toast inside modal */}
-        {popupToast && (
-          <Animated.View
-            style={{
-              position: "absolute",
-              bottom: 24,
-              left: 0,
-              right: 0,
-              alignItems: "center",
-              zIndex: 999,
-              opacity: popupToastAnim,
-              transform: [
-                {
-                  translateY: popupToastAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [16, 0],
-                  }),
-                },
-              ],
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#22C55E",
-                width: 310,
-                height: 38,
-                borderRadius: 16,
-                paddingHorizontal: 10,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
-                <View
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    backgroundColor: "rgba(255,255,255,0.85)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="checkmark" size={16} color="#1F2A44" />
-                </View>
-                <Text
-                  style={{
-                    color: "white",
-                    fontWeight: "800",
-                    fontFamily: "InstrumentSans_700Bold",
-                    fontSize: 14,
-                  }}
-                  numberOfLines={1}
-                >
-                  {popupToast.message}
-                </Text>
-              </View>
-              {popupToast.actionLabel && (
-                <Pressable
-                  onPress={() => {
-                    popupToast.onAction?.();
-                  }}
-                  style={{
-                    paddingVertical: 2,
-                    paddingHorizontal: 10,
-                    borderRadius: 999,
-                    borderWidth: 1.5,
-                    borderColor: "rgba(255,255,255,0.9)",
-                  }}
-                >
-                  <Text
-                    style={{ color: "white", fontSize: 12, fontFamily: "InstrumentSans_700Bold" }}
-                  >
-                    {popupToast.actionLabel}
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-          </Animated.View>
-        )}
+        {renderInlineToast()}
       </Modal>
     </View>
   );

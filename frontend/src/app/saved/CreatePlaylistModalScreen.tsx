@@ -18,6 +18,7 @@ import { showToast } from "../../utils/toast";
 
 const COLORS = ["#1322C6", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
 const DEFAULT_PLAYLIST_COLOR = COLORS[0];
+const PRIMARY_BLUE = "#153A7A";
 const DRAWER_OFFSET = 500;
 
 const styles = StyleSheet.create({
@@ -68,10 +69,10 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: "#153A7A",
+    color: PRIMARY_BLUE,
     fontFamily: "LeagueSpartan_700Bold",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 20,
+    lineHeight: 24,
     marginBottom: 8,
   },
 
@@ -92,13 +93,18 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   colorSwatch: {
-    width: 48,
-    height: 48,
-    borderRadius: 7,
+    width: 54,
+    height: 54,
+    borderRadius: 11,
+    padding: 3,
   },
   colorSwatchSelected: {
     borderWidth: 3,
-    borderColor: "#153A7A",
+    borderColor: PRIMARY_BLUE,
+  },
+  colorSwatchFill: {
+    flex: 1,
+    borderRadius: 7,
   },
 
   bottomBar: {
@@ -255,9 +261,11 @@ export default function CreatePlaylistModalScreen() {
           {/* Playlist Name */}
           <Text
             style={{
-              color: "#153A7A",
+              color: PRIMARY_BLUE,
               marginBottom: 7,
-              ...Typography.displayXSmBold,
+              fontFamily: "LeagueSpartan_700Bold",
+              fontSize: 20,
+              lineHeight: 24,
             }}
           >
             Playlist Name
@@ -283,10 +291,12 @@ export default function CreatePlaylistModalScreen() {
           {/* Choose Color */}
           <Text
             style={{
-              color: "#153A7A",
+              color: PRIMARY_BLUE,
               paddingTop: 24,
               marginBottom: 10,
-              ...Typography.displayXSmBold,
+              fontFamily: "LeagueSpartan_700Bold",
+              fontSize: 20,
+              lineHeight: 24,
             }}
           >
             Choose Color
@@ -299,12 +309,10 @@ export default function CreatePlaylistModalScreen() {
                 <Pressable
                   key={c}
                   onPress={() => setColor(c)}
-                  style={[
-                    styles.colorSwatch,
-                    { backgroundColor: c },
-                    selected && styles.colorSwatchSelected,
-                  ]}
-                />
+                  style={[styles.colorSwatch, selected && styles.colorSwatchSelected]}
+                >
+                  <View style={[styles.colorSwatchFill, { backgroundColor: c }]} />
+                </Pressable>
               );
             })}
           </View>

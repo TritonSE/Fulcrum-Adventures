@@ -21,6 +21,7 @@ import { showToast } from "../../utils/toast";
 import type { Activity } from "../../types/activity";
 
 const COLORS = ["#1322C6", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
+const PRIMARY_BLUE = "#153A7A";
 const CLOSE_ICON_SIZE = 20;
 const DRAWER_OFFSET = 620;
 const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
@@ -177,6 +178,8 @@ export default function PlaylistScreen() {
         <ActivityList
           header=""
           activities={playlistActivities}
+          showHeader={false}
+          contentContainerStyle={{ paddingTop: 8 }}
           isEditing={isReordering}
           onReorder={(newOrder) =>
             reorderPlaylistActivities(
@@ -228,7 +231,7 @@ export default function PlaylistScreen() {
                 }}
                 style={{ paddingVertical: 14, paddingHorizontal: 16 }}
               >
-                <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>
+                <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>
                   {isReordering ? "Done Rearranging" : "Rearrange"}
                 </Text>
               </Pressable>
@@ -236,7 +239,7 @@ export default function PlaylistScreen() {
               <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
 
               <Pressable onPress={openEdit} style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-                <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Edit Playlist</Text>
+                <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Edit Playlist</Text>
               </Pressable>
 
               <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
@@ -282,7 +285,7 @@ export default function PlaylistScreen() {
                   <Text
                     style={[
                       Typography.displayMdBold,
-                      { color: "#1E2A5A", fontSize: 30, lineHeight: 30 },
+                      { color: PRIMARY_BLUE, fontSize: 30, lineHeight: 30 },
                     ]}
                   >
                     Edit Playlist
@@ -302,18 +305,18 @@ export default function PlaylistScreen() {
                     }}
                     hitSlop={12}
                   >
-                    <Ionicons name="close-outline" size={CLOSE_ICON_SIZE} color="#1E2A5A" />
+                    <Ionicons name="close-outline" size={CLOSE_ICON_SIZE} color={PRIMARY_BLUE} />
                   </Pressable>
                 </View>
 
                 <Text
                   style={{
-                    color: "#1E2A5A",
+                    color: PRIMARY_BLUE,
                     marginTop: 16,
                     marginBottom: 8,
                     fontFamily: "LeagueSpartan_700Bold",
-                    fontSize: 14,
-                    lineHeight: 18,
+                    fontSize: 20,
+                    lineHeight: 24,
                   }}
                 >
                   Playlist Name
@@ -329,7 +332,7 @@ export default function PlaylistScreen() {
                     borderRadius: 12,
                     paddingHorizontal: 14,
                     paddingVertical: 12,
-                    color: "#1E2A5A",
+                    color: PRIMARY_BLUE,
                     fontFamily: "InstrumentSans_400Regular",
                     fontSize: 14,
                     lineHeight: 20,
@@ -338,12 +341,12 @@ export default function PlaylistScreen() {
 
                 <Text
                   style={{
-                    color: "#1E2A5A",
+                    color: PRIMARY_BLUE,
                     marginTop: 18,
                     marginBottom: 10,
                     fontFamily: "LeagueSpartan_700Bold",
-                    fontSize: 14,
-                    lineHeight: 18,
+                    fontSize: 20,
+                    lineHeight: 24,
                   }}
                 >
                   Choose Color
@@ -357,14 +360,22 @@ export default function PlaylistScreen() {
                         key={color}
                         onPress={() => setColorDraft(color)}
                         style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 7,
-                          backgroundColor: color,
+                          width: 54,
+                          height: 54,
+                          borderRadius: 11,
                           borderWidth: selected ? 3 : 0,
-                          borderColor: selected ? "#111" : "transparent",
+                          borderColor: selected ? PRIMARY_BLUE : "transparent",
+                          padding: 3,
                         }}
-                      />
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            borderRadius: 7,
+                            backgroundColor: color,
+                          }}
+                        />
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -398,7 +409,7 @@ export default function PlaylistScreen() {
                         justifyContent: "center",
                       }}
                     >
-                      <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Reset All</Text>
+                      <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Reset All</Text>
                     </Pressable>
 
                     <Pressable
@@ -408,13 +419,13 @@ export default function PlaylistScreen() {
                         paddingVertical: 12,
                         borderRadius: 22,
                         borderWidth: 2,
-                        borderColor: "#2F3E75",
+                        borderColor: PRIMARY_BLUE,
                         backgroundColor: "white",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Save</Text>
+                      <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Save</Text>
                     </Pressable>
                   </View>
                 </View>
