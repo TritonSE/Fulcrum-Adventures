@@ -86,6 +86,13 @@ export const styles = StyleSheet.create({
     paddingLeft: 2,
     paddingBottom: 8,
   },
+  errorText: {
+    color: "#A63A3A",
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    lineHeight: 21,
+    paddingBottom: 8,
+  },
   filtersContainer: {
     display: "flex",
     flexDirection: "row",

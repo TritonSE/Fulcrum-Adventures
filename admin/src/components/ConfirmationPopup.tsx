@@ -30,7 +30,7 @@ export const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
         <p className="popup-message">{message}</p>
 
         <div className="popup-actions">
-          <Button variant="secondary-left" onClick={onCancel} icon={false}>
+          <Button variant="secondary-left" onClick={onCancel} showIcon={false}>
             {cancelText}
           </Button>
           {/* Using a custom class for the red destructive button */}
@@ -38,7 +38,7 @@ export const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
             variant="primary"
             className="button--destructive"
             onClick={onConfirm}
-            icon={false}
+            showIcon={false}
           >
             {confirmText}
           </Button>

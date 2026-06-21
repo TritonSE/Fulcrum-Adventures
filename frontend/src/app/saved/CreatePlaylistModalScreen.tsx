@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import CloseButton from "../../../assets/icons/CloseButton.svg";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 

@@ -1,5 +1,6 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet } from "react-native";
 
+import { useActivities } from "@/Context/useActivities";
 import { HomeBrowseCategorySection } from "@/home_components/HomeBrowseCategorySection";
 import { HomeHeaderSection } from "@/home_components/HomeHeaderSection";
 import { HomeMailingListSection } from "@/home_components/HomeMailingListSection";
@@ -13,11 +14,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9F9F9",
     gap: 32,
   },
+  contentContainer: {
+    paddingBottom: 40,
+  },
 });
 
 export default function HomeScreen() {
+  const { isLoadingActivities, refreshActivities } = useActivities();
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="interactive"
+      automaticallyAdjustKeyboardInsets
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoadingActivities}
+          onRefresh={() => {
+            void refreshActivities();
+          }}
+        />
+      }
+    >
       <HomeHeaderSection />
       <HomeBrowseCategorySection />
       <HomeRecentBookmarksSection bookmarkedActivities={[]} />

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Line, Path } from "react-native-svg";
@@ -14,7 +14,10 @@ import TeamChallengeGraphic from "../../../assets/category-headers/TeamChallenge
 import { ActivityCard } from "../../components/ActivityCard";
 import { FiltersModal } from "../../components/FiltersModal";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "../../constants/activityColors";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
+import { mapApiActivityToActivity } from "../../services/activityMapper";
+import { activitiesApi } from "../../services/api";
+import { applyActivityState } from "../../utils/activityState";
 
 import type { FilterState } from "../../components/FiltersModal";
 import type { Activity, Category } from "../../types/activity";
@@ -100,6 +103,12 @@ const defaultFilters: FilterState = {
 };
 
 function matchesFilters(activity: Activity, filters: FilterState): boolean {
+  if (filters.category) {
+    const activityCategories =
+      activity.categories ?? (activity.category ? [activity.category] : []);
+    if (!activityCategories.includes(filters.category)) return false;
+  }
+
   if (filters.setupProps) {
     if (filters.setupProps === "Props" && activity.materials.length === 0) return false;
     if (filters.setupProps === "No Props" && activity.materials.length > 0) return false;
@@ -216,6 +225,13 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     letterSpacing: 0.28,
   },
+  errorText: {
+    color: "#B42318",
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    lineHeight: 21,
+    paddingBottom: 14,
+  },
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
@@ -229,19 +245,48 @@ export default function CategoryScreen() {
   const color = CATEGORY_COLORS[categoryName] ?? DEFAULT_CATEGORY_COLOR;
   const description = CATEGORY_DESCRIPTIONS[categoryName] ?? "";
 
-  const { activities: allActivities, toggleSaved } = useActivities();
+  const { activities: stateActivities, refreshActivities, toggleSaved } = useActivities();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [apiCategoryActivities, setApiCategoryActivities] = useState<Activity[]>([]);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [isLoadingCategoryActivities, setIsLoadingCategoryActivities] = useState(true);
 
-  const categoryActivities = allActivities.filter((activity) => {
+  const contextCategoryActivities = stateActivities.filter((activity) => {
     const activityCategories =
       activity.categories ?? (activity.category ? [activity.category] : []);
     return activityCategories.includes(categoryName);
   });
 
+  const categoryActivities =
+    apiCategoryActivities.length > 0
+      ? applyActivityState(apiCategoryActivities, stateActivities)
+      : contextCategoryActivities;
   const activities = categoryActivities.filter((a) => matchesFilters(a, filters));
 
   const Graphic = CATEGORY_GRAPHICS[categoryName];
+
+  const loadCategoryActivities = useCallback(async () => {
+    setIsLoadingCategoryActivities(true);
+    setCategoryError(null);
+
+    try {
+      const apiActivities = await activitiesApi.listAll({
+        status: "Published",
+        category: categoryName,
+      });
+      setApiCategoryActivities(apiActivities.map(mapApiActivityToActivity));
+    } catch (error) {
+      setCategoryError(error instanceof Error ? error.message : "Unable to load activities.");
+      setApiCategoryActivities([]);
+    } finally {
+      setIsLoadingCategoryActivities(false);
+    }
+  }, [categoryName]);
+
+  useEffect(() => {
+    void loadCategoryActivities();
+  }, [loadCategoryActivities]);
 
   return (
     <View style={styles.container}>
@@ -271,6 +316,11 @@ export default function CategoryScreen() {
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        refreshing={isLoadingCategoryActivities}
+        onRefresh={() => {
+          void refreshActivities();
+          void loadCategoryActivities();
+        }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
@@ -294,6 +344,7 @@ export default function CategoryScreen() {
                 <FilterIcon />
               </Pressable>
             </View>
+            {categoryError && <Text style={styles.errorText}>{categoryError}</Text>}
           </View>
         }
       />

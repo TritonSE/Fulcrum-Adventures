@@ -1,0 +1,43 @@
+.account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.account-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+}
+
+.account-menu__item--settings {
+  color: #153a7a;
+}
+
+.account-menu__item--settings:hover {
+  background: #f3f3f3;
+}
+
+.account-menu__item--logout {
+  color: #ef4444;
+}
+
+.account-menu__item--logout:hover {
+  background: #fef2f2;
+}

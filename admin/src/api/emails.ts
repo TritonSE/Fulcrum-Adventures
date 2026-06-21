@@ -1,0 +1,12 @@
+import axios from "axios";
+
+import type { EmailsListResponse } from "../types/email";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
+});
+
+export async function fetchAllEmails(): Promise<EmailsListResponse> {
+  const { data } = await api.get<EmailsListResponse>("/api/emails/all");
+  return data;
+}

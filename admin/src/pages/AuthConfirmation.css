@@ -1,0 +1,13 @@
+.auth-confirmation__card {
+  gap: 24px;
+}
+
+.auth-confirmation__message {
+  margin: 0;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.28px;
+  color: #153a7a;
+  text-align: center;
+}

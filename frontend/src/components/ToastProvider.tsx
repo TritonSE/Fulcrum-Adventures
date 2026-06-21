@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-use-before-define */
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, {
   createContext,
@@ -128,6 +129,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const ctx = use(ToastContext);
   if (!ctx) throw new Error("useToast must be used inside ToastProvider");

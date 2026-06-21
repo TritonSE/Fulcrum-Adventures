@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { ActivityList } from "../components/ActivityList";
 import { POPULAR_TITLES } from "../constants/homeSections";
-import { useActivities } from "../Context/ActivityContext";
+import { useActivities } from "../Context/useActivities";
+import { mockActivities } from "../data/mockActivities";
 
 import { SeeAll } from "./SeeAll";
 
@@ -27,9 +28,12 @@ const styles = StyleSheet.create({
 
 export function HomePopularSection() {
   const { activities } = useActivities();
+  const sourceActivities = activities.length > 0 ? activities : mockActivities;
 
   // Filter based on the "encoded" list and show only 4 for the preview
-  const popularActivities = activities.filter((a) => POPULAR_TITLES.includes(a.title)).slice(0, 4);
+  const popularActivities = sourceActivities
+    .filter((a) => POPULAR_TITLES.includes(a.title))
+    .slice(0, 4);
 
   return (
     <View>
@@ -42,6 +46,7 @@ export function HomePopularSection() {
         variant="condensed"
         horizontal={true}
         showHeader={false}
+        showApiStatus={false}
       />
     </View>
   );

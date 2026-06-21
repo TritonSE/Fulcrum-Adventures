@@ -20,14 +20,11 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    gap: 12,
     width: "100%",
   },
   backButton: {
-    position: "absolute",
-    left: 0,
-    zIndex: 10,
+    flexShrink: 0,
   },
   arrowIcon: {
     width: 40,
@@ -40,39 +37,19 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "700",
     color: "#FFF",
-    textAlign: "center",
-  },
-  blurbContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 12,
-  },
-  blurbText: {
-    fontFamily: "Instrument Sans",
-    fontSize: 14,
-    color: "#153A7A",
-    lineHeight: 22,
-    fontWeight: "400",
+    textAlign: "left",
+    flexShrink: 1,
   },
 });
-
-// Defining the blurbs based on section name
-const blurbs: Record<string, string> = {
-  Popular:
-    "The most played and clicked activities on the app—these community favorites are tried, tested, and loved for keeping the energy high!",
-  Recommended:
-    "Our top picks to help you get started—staff selected activities designed to spark connection and get your group engaged!",
-};
 
 export function HomePopUpPageHeaderSection({
   sectionName,
 }: {
   sectionName: string;
-  rightPadding?: number; // Optional now that we centered everything
+  rightPadding?: number;
 }) {
   return (
     <View style={styles.wrapper}>
-      {/* BLUE HEADER PART */}
       <View style={styles.headerBackground}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={20}>
@@ -86,12 +63,6 @@ export function HomePopUpPageHeaderSection({
           </Text>
         </View>
       </View>
-
-      {blurbs[sectionName] && (
-        <View style={styles.blurbContainer}>
-          <Text style={styles.blurbText}>{blurbs[sectionName]}</Text>
-        </View>
-      )}
     </View>
   );
 }

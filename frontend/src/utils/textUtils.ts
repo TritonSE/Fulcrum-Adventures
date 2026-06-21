@@ -12,6 +12,7 @@ export const formatDuration = (range: Range): string => {
 };
 
 export const formatGroupSize = (range: Range): string => {
+  if ("anySize" in range && range.anySize) return "Any size";
   if (range.max >= 99) return `${range.min}+`;
   if (range.min === range.max) return range.min.toString();
   return `${range.min}-${range.max}`;

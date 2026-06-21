@@ -1,0 +1,26 @@
+.create-account__card {
+  padding: 40px 60px;
+}
+
+@media (max-width: 540px) {
+  .create-account__card {
+    padding: 32px 24px;
+  }
+}
+
+.create-account__password-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.create-account__sign-in-link {
+  color: #153a7a;
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+.create-account__sign-in-link:hover {
+  color: #0e2d63;
+}

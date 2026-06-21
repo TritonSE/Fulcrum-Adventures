@@ -1,7 +1,7 @@
 import React from "react";
 import "./Tags.css";
 
-type StatusType = "Published" | "Draft";
+type StatusType = "Published" | "Draft" | "Archived";
 
 interface StatusBadgeProps {
   status: StatusType;

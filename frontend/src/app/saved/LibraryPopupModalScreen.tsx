@@ -6,7 +6,7 @@ import { Animated, FlatList, Pressable, StyleSheet, Text, View } from "react-nat
 import BookmarkFilledIcon from "../../../assets/icons/bookmark-filled.svg";
 import BookmarkIcon from "../../../assets/icons/bookmark.svg";
 import CloseButton from "../../../assets/icons/CloseButton.svg";
-import { useActivities } from "../../Context/ActivityContext";
+import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 
 const DRAWER_OFFSET = 620;

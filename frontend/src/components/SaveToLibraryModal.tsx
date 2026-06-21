@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-use-before-define */
 import React, { useMemo, useState } from "react";
 import {
   FlatList,

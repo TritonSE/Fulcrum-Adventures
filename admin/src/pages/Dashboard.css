@@ -1,0 +1,447 @@
+.dashboard-container {
+  overflow-x: auto;
+  padding: 144px 120px 80px 120px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+}
+
+.header-and-category-cards-container {
+  width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.header-text {
+  color: var(--Primary, #153a7a);
+  font-family: "League Spartan";
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 104%; /* 37.44px */
+  margin: 0;
+}
+
+.header-buttons-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.category-cards-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.search-input-container {
+  display: flex;
+  position: relative;
+  height: 43px;
+  width: 100%;
+  padding: 0 16px;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--Functional-Surface, #fff);
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.search-input-icon {
+  position: absolute;
+  align-self: center;
+  left: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 12px 12px 32px;
+  justify-self: center;
+  border: none;
+  outline: none;
+  background: #ffffff;
+  color: #153a7a;
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.32px;
+}
+
+.search-input::placeholder {
+  color: var(--Primary, #153a7a);
+  font-family: "Instrument Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.32px;
+}
+
+.dashboard-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.search-container {
+  width: 100%; /* For full width search bar */
+}
+
+.filter-row {
+  display: flex;
+  width: 1200px;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-tabs-container {
+  display: flex;
+  height: 47px;
+  padding: 0px 8px;
+  align-items: center;
+  gap: 12px;
+  border-radius: 8px;
+  background: var(--Functional-Surface, #fff);
+
+  /* Button Elevation */
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.status-tab {
+  width: 145px;
+  padding: 8px 48px;
+  border: none;
+  background: transparent;
+  color: #153a7a;
+  font-family: "League Spartan";
+  font-weight: 500;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  line-height: 1.04;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-tab:last-child {
+  border-right: none;
+}
+
+.status-tab.active {
+  background-color: #153a7a;
+  color: #f9f9f9;
+}
+
+.sort-filter-actions {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  align-items: flex-start;
+}
+
+.dropdown-control {
+  position: relative;
+}
+
+.sort-btn,
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid #153a7a;
+  background: white;
+  color: #153a7a;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.08));
+}
+
+.sort-btn:hover,
+.filter-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.sort-btn.active,
+.filter-btn.active {
+  background-color: #153a7a;
+  color: #ffffff;
+}
+
+.sort-btn.active:hover,
+.filter-btn.active:hover {
+  background-color: #153a7a;
+}
+
+.sort-btn.empty,
+.filter-btn.empty {
+  border-color: #b4b4b4;
+  color: #b4b4b4;
+}
+
+.sort-dropdown,
+.filters-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 10;
+  border-radius: 8px;
+  background: #f9f9f9;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid #d9d9d9;
+}
+
+.sort-dropdown {
+  width: 139px;
+  min-width: 139px;
+  max-width: 139px;
+  padding: 12px 16px;
+  background: #ffffff;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.sort-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 37px;
+  padding: 8px;
+  border: none;
+  border-bottom: 1px solid #b4b4b4;
+  background: transparent;
+  color: #153a7a;
+  cursor: pointer;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  letter-spacing: 0.28px;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.sort-option:last-child {
+  border-bottom: none;
+}
+
+.sort-option:hover,
+.sort-option.selected {
+  background: #ebebeb;
+}
+
+.filters-dropdown {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  height: 394px;
+  overflow: hidden;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.filters-dropdown-content {
+  height: 324px;
+  overflow-y: auto;
+  padding: 12px 15px 16px;
+  box-sizing: border-box;
+  scrollbar-color: #d9d9d9 transparent;
+  scrollbar-width: thin;
+}
+
+.filters-dropdown-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filters-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filters-dropdown-content::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 20px;
+}
+
+.filter-section + .filter-section {
+  margin-top: 24px;
+}
+
+.filter-section-title {
+  margin: 0 0 8px;
+  color: #153f7a;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.filter-tag {
+  min-height: 26px;
+  padding: 4px 16px;
+  border: 1px solid #ebebeb;
+  border-radius: 40px;
+  background: #ffffff;
+  color: #153a7a;
+  cursor: pointer;
+  font-family: "Instrument Sans";
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.24px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.filter-tag:hover,
+.filter-tag.selected {
+  background: #ebebeb;
+}
+
+.filter-tag.selected {
+  border-color: #153a7a;
+  font-weight: 500;
+}
+
+.energy-filter-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 59px;
+  height: 23px;
+  overflow: hidden;
+}
+
+.energy-filter-icon-btn {
+  display: flex;
+  width: 13px;
+  height: 19px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.energy-filter-icon {
+  display: block;
+  width: 13px;
+  height: 19px;
+}
+
+.filters-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px;
+  height: 68px;
+  background: #f9f9f9;
+  border-top: 1px solid #ebebeb;
+  border-radius: 0 0 8px 8px;
+  box-sizing: border-box;
+}
+
+.clear-filters-btn,
+.apply-filters-btn {
+  height: 36px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  padding: 8px 0;
+}
+
+.clear-filters-btn {
+  width: 119px;
+  border: 1px solid #153a7a;
+  background: #ffffff;
+  color: #153a7a;
+}
+
+.apply-filters-btn {
+  width: 121px;
+  border: 1px solid #153a7a;
+  background: #153a7a;
+  color: #ffffff;
+}
+
+.clear-filters-btn:hover {
+  background: #ebebeb;
+}
+
+.apply-filters-btn:hover {
+  background: #0e2d63;
+}
+
+.table-wrapper {
+  min-width: 1200px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 30px;
+}
+
+.loading-text {
+  color: #153a7a;
+  font-family: "League Spartan";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.04; /* 24.96px */
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 8px solid #e5e7eb; /* track */
+  border-top-color: #153a7a; /* active arc */
+  animation: spin 0.9s linear infinite;
+  box-sizing: border-box;
+}
