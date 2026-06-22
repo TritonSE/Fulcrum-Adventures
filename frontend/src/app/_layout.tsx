@@ -50,14 +50,14 @@ export default function RootLayout() {
                 name="saved/LibraryPopupModalScreen"
                 options={{
                   presentation: "transparentModal",
-                  animation: "slide_from_bottom",
+                  animation: "none",
                 }}
               />
               <Stack.Screen
                 name="saved/CreatePlaylistModalScreen"
                 options={{
                   presentation: "transparentModal",
-                  animation: "slide_from_bottom",
+                  animation: "none",
                 }}
               />
             </Stack>

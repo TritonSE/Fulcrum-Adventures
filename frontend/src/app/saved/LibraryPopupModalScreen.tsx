@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import BookmarkFilledIcon from "../../../assets/icons/bookmark-filled.svg";
@@ -9,10 +9,13 @@ import CloseButton from "../../../assets/icons/CloseButton.svg";
 import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 
+const DRAWER_OFFSET = 620;
+const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
+
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: DRAWER_BACKDROP_COLOR,
   },
   sheet: {
     position: "absolute",
@@ -97,11 +100,10 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     backgroundColor: "#F2F3F5",
-    justifyContent: "center",
-    alignItems: "center",
     marginRight: 12,
+    overflow: "hidden",
   },
-  colorDot: { width: 22, height: 22, borderRadius: 6 },
+  colorDot: { width: "100%", height: "100%", borderRadius: 12 },
   checkCircle: {
     width: 28,
     height: 28,
@@ -120,10 +122,10 @@ const styles = StyleSheet.create({
   },
   toast: {
     backgroundColor: "#22C55E",
-    width: 310,
-    height: 38,
+    width: "100%",
+    minHeight: 52,
     borderRadius: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -181,7 +183,24 @@ export default function LibraryPopupModalScreen() {
     onAction?: () => void;
   } | null>(null);
   const [toastAnim] = useState(() => new Animated.Value(0));
+  const [sheetY] = useState(() => new Animated.Value(DRAWER_OFFSET));
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    Animated.timing(sheetY, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [sheetY]);
+
+  const closeDrawer = () => {
+    Animated.timing(sheetY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(() => router.back());
+  };
 
   const hideInlineToast = () => {
     if (toastTimerRef.current) {
@@ -244,13 +263,13 @@ export default function LibraryPopupModalScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Pressable style={styles.backdrop} onPress={() => router.back()} />
+      <Pressable style={styles.backdrop} onPress={closeDrawer} />
 
-      <View style={styles.sheet}>
+      <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetY }] }]}>
         <View style={styles.headerRow}>
           <Text style={[Typography.displayMdBold, { color: "#153A7A" }]}>Library</Text>
 
-          <Pressable onPress={() => router.back()} style={styles.closeBtn} hitSlop={12}>
+          <Pressable onPress={closeDrawer} style={styles.closeBtn} hitSlop={12}>
             <CloseButton width={40} height={40} />
           </Pressable>
         </View>
@@ -339,16 +358,15 @@ export default function LibraryPopupModalScreen() {
             }}
           />
         )}
-      </View>
+      </Animated.View>
 
       {popupToast && (
         <Animated.View
           style={{
             position: "absolute",
             bottom: 24,
-            left: 0,
-            right: 0,
-            alignItems: "center",
+            left: 24,
+            right: 24,
             zIndex: 999,
             opacity: toastAnim,
             transform: [

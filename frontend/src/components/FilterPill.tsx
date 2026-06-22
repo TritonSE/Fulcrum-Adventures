@@ -1,29 +1,50 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 
-type Props = { label: string; selected: boolean; onPress: () => void };
+type Props = {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  variant?: "default" | "category";
+};
+
+const PRIMARY_COLOR = "#153A7A";
+const NATURAL_GRAPH_COLOR = "#EBEBEB";
 
 const styles = StyleSheet.create({
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#D5D9E2",
+    borderColor: NATURAL_GRAPH_COLOR,
     backgroundColor: "#fff",
-    margin: 4,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  selected: {
-    borderColor: "#153A7A",
-    backgroundColor: "#153A7A",
+  selectedDefault: {
+    borderColor: PRIMARY_COLOR,
+    backgroundColor: PRIMARY_COLOR,
+  },
+  selectedCategory: {
+    borderColor: "transparent",
+    backgroundColor: PRIMARY_COLOR,
+  },
+  text: {
+    color: PRIMARY_COLOR,
+    fontFamily: "InstrumentSans_400Regular",
+    fontSize: 14,
     fontWeight: "500",
+    lineHeight: 20,
   },
-  text: { color: "#153A7A", fontWeight: "400" },
-  textSelected: { color: "#fff" },
+  textSelected: { color: "#FFFFFF" },
 });
 
-export const FilterPill = ({ label, selected, onPress }: Props) => {
+export const FilterPill = ({ label, selected, onPress, variant = "default" }: Props) => {
+  const selectedPillStyle =
+    variant === "category" ? styles.selectedCategory : styles.selectedDefault;
+
   return (
-    <Pressable onPress={onPress} style={[styles.pill, selected && styles.selected]}>
+    <Pressable onPress={onPress} style={[styles.pill, selected && selectedPillStyle]}>
       <Text style={[styles.text, selected && styles.textSelected]}>{label}</Text>
     </Pressable>
   );
