@@ -16,12 +16,15 @@ import { useActivities } from "../../Context/useActivities";
 import { Typography } from "../../styles/typo";
 import { showToast } from "../../utils/toast";
 
-const COLORS = ["#153A7A", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
+const COLORS = ["#1322C6", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
+const DEFAULT_PLAYLIST_COLOR = COLORS[0];
+const PRIMARY_BLUE = "#153A7A";
+const DRAWER_OFFSET = 500;
 
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.25)",
   },
 
   sheetWrap: {
@@ -59,20 +62,17 @@ const styles = StyleSheet.create({
   },
 
   closeBtn: {
-    //   width: 36,
-    //   height: 36,
     borderRadius: 40,
     borderWidth: 1,
-    borderColor: "#153A7A",
-    //   justifyContent: "center",
-    //   alignItems: "center",
+    borderColor: "#EBEBEB",
+    backgroundColor: "white",
   },
 
   label: {
-    color: "#153A7A",
+    color: PRIMARY_BLUE,
     fontFamily: "LeagueSpartan_700Bold",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 20,
+    lineHeight: 24,
     marginBottom: 8,
   },
 
@@ -93,13 +93,18 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   colorSwatch: {
-    width: 48,
-    height: 48,
-    borderRadius: 7,
+    width: 54,
+    height: 54,
+    borderRadius: 11,
+    padding: 3,
   },
   colorSwatchSelected: {
     borderWidth: 3,
-    borderColor: "#153A7A",
+    borderColor: PRIMARY_BLUE,
+  },
+  colorSwatchFill: {
+    flex: 1,
+    borderRadius: 7,
   },
 
   bottomBar: {
@@ -159,13 +164,21 @@ export default function CreatePlaylistModalScreen() {
   const { createPlaylist, deletePlaylist, addToPlaylist, setSaved } = useActivities();
 
   const [name, setName] = useState("");
-  const [color, setColor] = useState(COLORS[2]);
+  const [color, setColor] = useState(DEFAULT_PLAYLIST_COLOR);
 
   const canCreate = name.trim().length > 0;
 
   const [lift] = useState(() => new Animated.Value(0));
+  const [sheetY] = useState(() => new Animated.Value(DRAWER_OFFSET));
 
   useEffect(() => {
+    Animated.timing(sheetY, {
+      toValue: 0,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
     const show = Keyboard.addListener("keyboardDidShow", (e) => {
       const h = e.endCoordinates?.height ?? 0;
       Animated.timing(lift, {
@@ -189,11 +202,21 @@ export default function CreatePlaylistModalScreen() {
       show.remove();
       hide.remove();
     };
-  }, [lift]);
+  }, [lift, sheetY]);
+
+  const closeDrawer = () => {
+    Keyboard.dismiss();
+    Animated.timing(sheetY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => router.back());
+  };
 
   const resetAll = () => {
     setName("");
-    setColor(COLORS[2]);
+    setColor(DEFAULT_PLAYLIST_COLOR);
   };
 
   const onCreate = () => {
@@ -219,16 +242,18 @@ export default function CreatePlaylistModalScreen() {
   return (
     <View style={{ flex: 1 }}>
       {/* Backdrop */}
-      <Pressable style={styles.backdrop} onPress={() => router.back()} />
+      <Pressable style={styles.backdrop} onPress={closeDrawer} />
 
       {/* Bottom sheet (animated up on keyboard) */}
-      <Animated.View style={[styles.sheetWrap, { transform: [{ translateY: lift }] }]}>
+      <Animated.View
+        style={[styles.sheetWrap, { transform: [{ translateY: Animated.add(sheetY, lift) }] }]}
+      >
         <View style={styles.sheet}>
           {/* Header */}
           <View style={styles.headerRow}>
             <Text style={[Typography.displayMdBold, { color: "#153A7A" }]}>Create Playlist</Text>
 
-            <Pressable onPress={() => router.back()} style={styles.closeBtn} hitSlop={10}>
+            <Pressable onPress={closeDrawer} style={styles.closeBtn} hitSlop={10}>
               <CloseButton width={40} height={40} />
             </Pressable>
           </View>
@@ -236,9 +261,11 @@ export default function CreatePlaylistModalScreen() {
           {/* Playlist Name */}
           <Text
             style={{
-              color: "#153A7A",
+              color: PRIMARY_BLUE,
               marginBottom: 7,
-              ...Typography.displayXSmBold,
+              fontFamily: "LeagueSpartan_700Bold",
+              fontSize: 20,
+              lineHeight: 24,
             }}
           >
             Playlist Name
@@ -264,10 +291,12 @@ export default function CreatePlaylistModalScreen() {
           {/* Choose Color */}
           <Text
             style={{
-              color: "#153A7A",
+              color: PRIMARY_BLUE,
               paddingTop: 24,
               marginBottom: 10,
-              ...Typography.displayXSmBold,
+              fontFamily: "LeagueSpartan_700Bold",
+              fontSize: 20,
+              lineHeight: 24,
             }}
           >
             Choose Color
@@ -280,12 +309,10 @@ export default function CreatePlaylistModalScreen() {
                 <Pressable
                   key={c}
                   onPress={() => setColor(c)}
-                  style={[
-                    styles.colorSwatch,
-                    { backgroundColor: c },
-                    selected && styles.colorSwatchSelected,
-                  ]}
-                />
+                  style={[styles.colorSwatch, selected && styles.colorSwatchSelected]}
+                >
+                  <View style={[styles.colorSwatchFill, { backgroundColor: c }]} />
+                </Pressable>
               );
             })}
           </View>

@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -19,8 +20,11 @@ import { showToast } from "../../utils/toast";
 
 import type { Activity } from "../../types/activity";
 
-const COLORS = ["#1F2A8A", "#4F6BD9", "#8BC34A", "#EF6C6C", "#E6D34E", "#55B97A"];
+const COLORS = ["#1322C6", "#4272D1", "#72CF1A", "#FF6B6B", "#ECD528", "#00BC7B"];
+const PRIMARY_BLUE = "#153A7A";
 const CLOSE_ICON_SIZE = 20;
+const DRAWER_OFFSET = 620;
+const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
 type Anchor = { x: number; y: number; width: number; height: number } | null;
 
 export default function PlaylistScreen() {
@@ -46,7 +50,18 @@ export default function PlaylistScreen() {
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [colorDraft, setColorDraft] = useState(COLORS[0]);
+  const [editDrawerY] = useState(() => new Animated.Value(DRAWER_OFFSET));
   const menuWidth = 220;
+
+  useEffect(() => {
+    if (!editVisible) return;
+    editDrawerY.setValue(DRAWER_OFFSET);
+    Animated.timing(editDrawerY, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [editDrawerY, editVisible]);
 
   const openMenu = () => {
     menuAnchorRef.current?.measureInWindow((x, y, width, height) => {
@@ -76,6 +91,14 @@ export default function PlaylistScreen() {
     setEditVisible(true);
   };
 
+  const closeEdit = () => {
+    Animated.timing(editDrawerY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(() => setEditVisible(false));
+  };
+
   const saveEdit = () => {
     const trimmed = nameDraft.trim();
     if (!trimmed) return;
@@ -83,11 +106,16 @@ export default function PlaylistScreen() {
     const previousName = playlist.name;
     const previousColor = playlist.color;
     editPlaylist(playlist.id, trimmed, colorDraft);
-    setEditVisible(false);
-
-    showToast("Playlist updated", {
-      actionLabel: "Undo",
-      onAction: () => editPlaylist(playlist.id, previousName, previousColor),
+    Animated.timing(editDrawerY, {
+      toValue: DRAWER_OFFSET,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(() => {
+      setEditVisible(false);
+      showToast("Playlist updated", {
+        actionLabel: "Undo",
+        onAction: () => editPlaylist(playlist.id, previousName, previousColor),
+      });
     });
   };
 
@@ -150,6 +178,8 @@ export default function PlaylistScreen() {
         <ActivityList
           header=""
           activities={playlistActivities}
+          showHeader={false}
+          contentContainerStyle={{ paddingTop: 8 }}
           isEditing={isReordering}
           onReorder={(newOrder) =>
             reorderPlaylistActivities(
@@ -201,7 +231,7 @@ export default function PlaylistScreen() {
                 }}
                 style={{ paddingVertical: 14, paddingHorizontal: 16 }}
               >
-                <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>
+                <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>
                   {isReordering ? "Done Rearranging" : "Rearrange"}
                 </Text>
               </Pressable>
@@ -209,7 +239,7 @@ export default function PlaylistScreen() {
               <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
 
               <Pressable onPress={openEdit} style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-                <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Edit Playlist</Text>
+                <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Edit Playlist</Text>
               </Pressable>
 
               <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
@@ -225,177 +255,182 @@ export default function PlaylistScreen() {
         </Pressable>
       </Modal>
 
-      <Modal
-        visible={editVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditVisible(false)}
-      >
+      <Modal visible={editVisible} transparent animationType="none" onRequestClose={closeEdit}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <Pressable
-            style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "flex-end" }}
-            onPress={() => setEditVisible(false)}
+            style={{ flex: 1, backgroundColor: DRAWER_BACKDROP_COLOR, justifyContent: "flex-end" }}
+            onPress={closeEdit}
           >
-            <Pressable
-              onPress={() => {}}
-              style={{
-                backgroundColor: "white",
-                borderTopLeftRadius: 22,
-                borderTopRightRadius: 22,
-                paddingHorizontal: 24,
-                paddingTop: 24,
-              }}
-            >
-              <View
+            <Animated.View style={{ transform: [{ translateY: editDrawerY }] }}>
+              <Pressable
+                onPress={() => {}}
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  backgroundColor: "white",
+                  borderTopLeftRadius: 22,
+                  borderTopRightRadius: 22,
+                  paddingHorizontal: 24,
+                  paddingTop: 24,
                 }}
               >
-                <Text
-                  style={[
-                    Typography.displayMdBold,
-                    { color: "#1E2A5A", fontSize: 30, lineHeight: 30 },
-                  ]}
-                >
-                  Edit Playlist
-                </Text>
-
-                <Pressable
-                  onPress={() => setEditVisible(false)}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    borderWidth: 1,
-                    borderColor: "#EBEBEB",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "white",
-                  }}
-                  hitSlop={12}
-                >
-                  <Ionicons name="close-outline" size={CLOSE_ICON_SIZE} color="#1E2A5A" />
-                </Pressable>
-              </View>
-
-              <Text
-                style={{
-                  color: "#1E2A5A",
-                  marginTop: 16,
-                  marginBottom: 8,
-                  fontFamily: "LeagueSpartan_700Bold",
-                  fontSize: 14,
-                  lineHeight: 18,
-                }}
-              >
-                Playlist Name
-              </Text>
-
-              <TextInput
-                value={nameDraft}
-                onChangeText={setNameDraft}
-                placeholder="Enter Playlist Name"
-                placeholderTextColor="#153A7A"
-                style={{
-                  backgroundColor: "#F2F3F5",
-                  borderRadius: 12,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  color: "#1E2A5A",
-                  fontFamily: "InstrumentSans_400Regular",
-                  fontSize: 14,
-                  lineHeight: 20,
-                }}
-              />
-
-              <Text
-                style={{
-                  color: "#1E2A5A",
-                  marginTop: 18,
-                  marginBottom: 10,
-                  fontFamily: "LeagueSpartan_700Bold",
-                  fontSize: 14,
-                  lineHeight: 18,
-                }}
-              >
-                Choose Color
-              </Text>
-
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                {COLORS.map((color) => {
-                  const selected = color === colorDraft;
-                  return (
-                    <Pressable
-                      key={color}
-                      onPress={() => setColorDraft(color)}
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 7,
-                        backgroundColor: color,
-                        borderWidth: selected ? 3 : 0,
-                        borderColor: selected ? "#111" : "transparent",
-                      }}
-                    />
-                  );
-                })}
-              </View>
-
-              <View
-                style={{
-                  marginTop: 18,
-                  marginHorizontal: -24,
-                  backgroundColor: "#F9F9F9",
-                  borderBottomLeftRadius: 22,
-                  borderBottomRightRadius: 22,
-                  paddingBottom: 24,
-                }}
-              >
-                <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
-
                 <View
-                  style={{ paddingTop: 16, paddingHorizontal: 24, flexDirection: "row", gap: 12 }}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  <Pressable
-                    onPress={() => {
-                      setNameDraft(playlist.name);
-                      setColorDraft(playlist.color);
-                    }}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 12,
-                      borderRadius: 22,
-                      backgroundColor: "#EEF0F4",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                  <Text
+                    style={[
+                      Typography.displayMdBold,
+                      { color: PRIMARY_BLUE, fontSize: 30, lineHeight: 30 },
+                    ]}
                   >
-                    <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Reset All</Text>
-                  </Pressable>
+                    Edit Playlist
+                  </Text>
 
                   <Pressable
-                    onPress={saveEdit}
+                    onPress={closeEdit}
                     style={{
-                      flex: 1,
-                      paddingVertical: 12,
-                      borderRadius: 22,
-                      borderWidth: 2,
-                      borderColor: "#2F3E75",
-                      backgroundColor: "white",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      borderWidth: 1,
+                      borderColor: "#EBEBEB",
                       alignItems: "center",
                       justifyContent: "center",
+                      backgroundColor: "white",
                     }}
+                    hitSlop={12}
                   >
-                    <Text style={[Typography.bodyMd, { color: "#1E2A5A" }]}>Save</Text>
+                    <Ionicons name="close-outline" size={CLOSE_ICON_SIZE} color={PRIMARY_BLUE} />
                   </Pressable>
                 </View>
-              </View>
-            </Pressable>
+
+                <Text
+                  style={{
+                    color: PRIMARY_BLUE,
+                    marginTop: 16,
+                    marginBottom: 8,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
+                  }}
+                >
+                  Playlist Name
+                </Text>
+
+                <TextInput
+                  value={nameDraft}
+                  onChangeText={setNameDraft}
+                  placeholder="Enter Playlist Name"
+                  placeholderTextColor="#153A7A"
+                  style={{
+                    backgroundColor: "#F2F3F5",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    color: PRIMARY_BLUE,
+                    fontFamily: "InstrumentSans_400Regular",
+                    fontSize: 14,
+                    lineHeight: 20,
+                  }}
+                />
+
+                <Text
+                  style={{
+                    color: PRIMARY_BLUE,
+                    marginTop: 18,
+                    marginBottom: 10,
+                    fontFamily: "LeagueSpartan_700Bold",
+                    fontSize: 20,
+                    lineHeight: 24,
+                  }}
+                >
+                  Choose Color
+                </Text>
+
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  {COLORS.map((color) => {
+                    const selected = color === colorDraft;
+                    return (
+                      <Pressable
+                        key={color}
+                        onPress={() => setColorDraft(color)}
+                        style={{
+                          width: 54,
+                          height: 54,
+                          borderRadius: 11,
+                          borderWidth: selected ? 3 : 0,
+                          borderColor: selected ? PRIMARY_BLUE : "transparent",
+                          padding: 3,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            borderRadius: 7,
+                            backgroundColor: color,
+                          }}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                <View
+                  style={{
+                    marginTop: 18,
+                    marginHorizontal: -24,
+                    backgroundColor: "#F9F9F9",
+                    borderBottomLeftRadius: 22,
+                    borderBottomRightRadius: 22,
+                    paddingBottom: 24,
+                  }}
+                >
+                  <View style={{ height: 1, backgroundColor: "#EBEBEB" }} />
+
+                  <View
+                    style={{ paddingTop: 16, paddingHorizontal: 24, flexDirection: "row", gap: 12 }}
+                  >
+                    <Pressable
+                      onPress={() => {
+                        setNameDraft(playlist.name);
+                        setColorDraft(playlist.color);
+                      }}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 12,
+                        borderRadius: 22,
+                        backgroundColor: "#EEF0F4",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Reset All</Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={saveEdit}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 12,
+                        borderRadius: 22,
+                        borderWidth: 2,
+                        borderColor: PRIMARY_BLUE,
+                        backgroundColor: "white",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={[Typography.bodyMd, { color: PRIMARY_BLUE }]}>Save</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </Pressable>
+            </Animated.View>
           </Pressable>
         </KeyboardAvoidingView>
       </Modal>

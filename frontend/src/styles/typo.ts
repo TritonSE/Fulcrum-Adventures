@@ -50,12 +50,12 @@ export const Typography = {
     lineHeight: 24,
   },
   bodyMd: {
-    fontFamily: "InstrumentSans_500Medium",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 16,
     lineHeight: 22,
   },
   bodySm: {
-    fontFamily: "InstrumentSans_500Medium",
+    fontFamily: "InstrumentSans_400Regular",
     fontSize: 14,
     lineHeight: 20,
   },
