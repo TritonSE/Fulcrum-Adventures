@@ -6,8 +6,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackButton from "../../../assets/icons/back_button.svg";
 import { ActivityCard } from "../../components/ActivityCard";
 import { DragList } from "../../components/DragList";
+import { Navbar } from "../../components/Navbar";
 import SwipeToDelete from "../../components/SwipeToDelete";
 import { useActivities } from "../../Context/useActivities";
+
+import type { TabName } from "../../components/Navbar";
+
+const tabRoutes: Record<TabName, "/home" | "/search" | "/library"> = {
+  Home: "/home",
+  Search: "/search",
+  Library: "/library",
+};
 
 export default function BookmarksScreen() {
   const { bookmarkedActivities, reorderBookmarks, setSaved, markViewed } = useActivities();
@@ -19,8 +28,12 @@ export default function BookmarksScreen() {
     router.push(`/activity/${id}`);
   };
 
+  const handleSwitchTab = (tab: TabName) => {
+    router.navigate(tabRoutes[tab]);
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
       <View
         style={{
           paddingTop: insets.top + 8,
@@ -120,6 +133,8 @@ export default function BookmarksScreen() {
           />
         )}
       </View>
+
+      <Navbar currentTab="Library" onSwitchTab={handleSwitchTab} />
     </View>
   );
 }
