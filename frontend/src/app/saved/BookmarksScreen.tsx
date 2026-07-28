@@ -53,9 +53,9 @@ export default function BookmarksScreen() {
         <Text
           style={{
             marginLeft: 12,
-            marginBottom: 5,
             fontFamily: "LeagueSpartan_700Bold",
             fontSize: 28,
+            lineHeight: 30,
             color: "#FFF",
           }}
         >
