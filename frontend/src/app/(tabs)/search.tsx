@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
+import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
@@ -345,8 +346,7 @@ export function SearchPage() {
                     <CategoryCardBig
                       category={category}
                       onPress={() => {
-                        setFilters({ ...filters, category });
-                        setRecentSearches(addToRecentSearches(category, recentSearches));
+                        router.push(`/category/${encodeURIComponent(category)}`);
                       }}
                     />
                   </View>
