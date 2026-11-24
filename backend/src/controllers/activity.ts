@@ -129,7 +129,7 @@ async function applyDraftTitleDefaults(
 }
 
 export async function listActivities(req: Request, res: Response) {
-  const status = req.query.status as string | undefined;
+  const status = req.authUser ? (req.query.status as string | undefined) : "Published";
   const search = req.query.search as string | undefined;
   const categories = parseQueryList(req.query.category as string | string[] | undefined);
   const durations = parseQueryList(req.query.duration as string | string[] | undefined);
@@ -209,7 +209,7 @@ export async function getActivity(req: Request, res: Response) {
   }
 
   const activity = await Activity.findById(id);
-  if (!activity) {
+  if (!activity || (!req.authUser && activity.status !== "Published")) {
     res.status(404).json({ error: "Activity not found" });
     return;
   }

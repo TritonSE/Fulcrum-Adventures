@@ -25,7 +25,8 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       userId: dbUser ? String(dbUser._id) : firebaseUser.userId,
       email: firebaseUser.email,
       role: dbUser?.role ?? firebaseUser.role,
-      isActive: dbUser ? dbUser.isActive !== false : true,
+      // Firebase identity alone does not grant access to the admin API.
+      isActive: Boolean(dbUser && dbUser.isActive !== false),
     };
     next();
   } catch (error) {

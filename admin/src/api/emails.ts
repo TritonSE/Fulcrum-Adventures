@@ -1,12 +1,8 @@
-import axios from "axios";
+import { get } from "./requests";
 
 import type { EmailsListResponse } from "../types/email";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
-});
-
 export async function fetchAllEmails(): Promise<EmailsListResponse> {
-  const { data } = await api.get<EmailsListResponse>("/api/emails/all");
-  return data;
+  const response = await get("/api/emails/all");
+  return response.json() as Promise<EmailsListResponse>;
 }

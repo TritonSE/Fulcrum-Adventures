@@ -1,4 +1,5 @@
 import { ACTIVITY_API_BASE_URL } from "./activityApi";
+import { getAuthToken } from "./auth";
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -16,18 +17,22 @@ export const uploadActivityThumbnail = async ({
   formData.append("mediaTarget", "thumbnail");
   formData.append("mediaType", "image");
   formData.append("file", file, file.name);
+  const token = await getAuthToken();
 
   const response = await fetch(
     `${trimTrailingSlash(apiBaseUrl)}/api/activities/${activityId}/media`,
     {
       method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
     },
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || `Media upload failed with status ${response.status}`);
+    throw new Error(
+      errorText || `Media upload failed with status ${response.status}`,
+    );
   }
 
   return response.json() as Promise<unknown>;

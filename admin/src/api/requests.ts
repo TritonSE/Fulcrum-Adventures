@@ -1,3 +1,5 @@
+import { getAuthToken } from "./auth";
+
 /**
  * Based on the TSE Fulcrum API client implementation by justinyaodu:
  * https://github.com/TritonSE/TSE-Fulcrum/blob/main/frontend/src/api.ts
@@ -16,7 +18,10 @@ type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
  * See https://vitejs.dev/guide/env-and-mode for more info about env variables
  * in Vite projects.
  */
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(
+  /\/+$/,
+  "",
+);
 
 /**
  * A wrapper around the built-in `fetch()` function that abstracts away some of
@@ -39,6 +44,10 @@ async function fetchRequest(
   const hasBody = body !== undefined;
 
   const newHeaders = { ...headers };
+  const token = await getAuthToken();
+  if (token) {
+    newHeaders.Authorization = `Bearer ${token}`;
+  }
   if (hasBody) {
     newHeaders["Content-Type"] = "application/json";
   }
@@ -172,7 +181,10 @@ export async function patch(
  * @param headers The headers of the request (optional)
  * @returns The Response object returned by `fetch()`
  */
-export async function del(url: string, headers: Record<string, string> = {}): Promise<Response> {
+export async function del(
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<Response> {
   const response = await fetchRequest(
     "DELETE",
     API_BASE_URL + url,

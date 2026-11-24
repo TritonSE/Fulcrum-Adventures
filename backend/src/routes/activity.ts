@@ -13,6 +13,9 @@ import {
   updateActivityStatus,
   uploadMedia,
 } from "../controllers/activity";
+import { authenticate } from "../middleware/authenticate";
+import { optionalAdmin } from "../middleware/optionalAdmin";
+import { requireRole } from "../middleware/requireRole";
 import { validateRequest } from "../middleware/validateRequest";
 import {
   createActivityBody,
@@ -21,6 +24,7 @@ import {
 } from "../validators/activity";
 
 const router = express.Router();
+const adminOnly = [authenticate, requireRole("admin", "super_admin")];
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -35,13 +39,13 @@ const upload = multer({
   },
 });
 
-router.get("/stats", getActivityStats);
-router.get("/", listActivitiesQuery, validateRequest, listActivities);
-router.get("/:id", getActivity);
-router.post("/", createActivityBody, validateRequest, createActivity);
-router.put("/:id", updateActivityBody, validateRequest, updateActivity);
-router.patch("/:id/status", updateActivityStatus);
-router.delete("/:id", deleteActivity);
-router.post("/:id/media", upload.single("file"), uploadMedia);
+router.get("/stats", adminOnly, getActivityStats);
+router.get("/", optionalAdmin, listActivitiesQuery, validateRequest, listActivities);
+router.get("/:id", optionalAdmin, getActivity);
+router.post("/", adminOnly, createActivityBody, validateRequest, createActivity);
+router.put("/:id", adminOnly, updateActivityBody, validateRequest, updateActivity);
+router.patch("/:id/status", adminOnly, updateActivityStatus);
+router.delete("/:id", adminOnly, deleteActivity);
+router.post("/:id/media", adminOnly, upload.single("file"), uploadMedia);
 
 export default router;
