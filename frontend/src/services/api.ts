@@ -1,7 +1,7 @@
 import type { ActivityStatus, ApiActivity, Setup } from "../types/activity";
 
 declare const process: {
-  env?: {
+  env: {
     EXPO_PUBLIC_API_BASE_URL?: string;
   };
 };
@@ -10,7 +10,7 @@ const DEFAULT_API_BASE_URL = "https://fulcrum-backend.vercel.app";
 const DEFAULT_ACTIVITIES_PAGE_SIZE = 30;
 
 export const API_BASE_URL =
-  process.env?.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE_URL;
+  process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE_URL;
 
 export class ApiError extends Error {
   status: number;

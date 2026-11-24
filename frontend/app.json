@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Fulcrum Adventures",
+    "slug": "fulcrum-adventures",
     "scheme": "fulcrum",
     "version": "1.0.0",
     "orientation": "portrait",
