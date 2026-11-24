@@ -193,3 +193,20 @@ export const activitiesApi = {
     return apiRequest<TActivity>(`/api/activities/${id}`);
   },
 };
+
+export const mailingListApi = {
+  // Bound signup requests so a stalled connection doesn't leave the button disabled forever.
+  async subscribe(email: string) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      return await apiRequest<{ message: string }>("/api/emails", {
+        method: "POST",
+        body: { email },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  },
+};

@@ -18,6 +18,9 @@ export default antfu({
 
   react: true,
 
+  // Tests use Node's built-in runner, not Vitest.
+  test: { overrides: { "test/no-import-node-test": "off" } },
+
   typescript: {
     tsconfigPath: "tsconfig.json",
     overrides: {

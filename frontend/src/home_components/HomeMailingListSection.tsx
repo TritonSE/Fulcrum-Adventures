@@ -1,4 +1,7 @@
+import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+
+import { mailingListApi } from "../services/api";
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -65,6 +68,38 @@ const styles = StyleSheet.create({
 });
 
 export function HomeMailingListSection() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ message: string; isError: boolean } | null>(null);
+  const submittingRef = useRef(false);
+
+  // Save the address to the same list staff can access in the admin portal.
+  const subscribe = async () => {
+    if (submittingRef.current) return;
+    const normalizedEmail = email.trim().toLowerCase();
+    if (
+      normalizedEmail.length > 254 ||
+      !/^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+      setFeedback({ message: "Please enter a valid email address.", isError: true });
+      return;
+    }
+
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    setFeedback(null);
+    try {
+      await mailingListApi.subscribe(normalizedEmail);
+      setEmail("");
+      setFeedback({ message: "You're on the list!", isError: false });
+    } catch {
+      setFeedback({ message: "Unable to sign up right now. Please try again.", isError: true });
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.card}>
@@ -74,6 +109,18 @@ export function HomeMailingListSection() {
         </Text>
 
         <TextInput
+          accessibilityLabel="Email address"
+          value={email}
+          onChangeText={(value) => {
+            setEmail(value);
+            setFeedback(null);
+          }}
+          editable={!isSubmitting}
+          maxLength={254}
+          returnKeyType="go"
+          onSubmitEditing={() => {
+            void subscribe();
+          }}
           placeholder="Enter email here"
           placeholderTextColor="#B4B4B4"
           keyboardType="email-address"
@@ -84,11 +131,24 @@ export function HomeMailingListSection() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Open mailing list signup"
+          accessibilityLabel="Sign up for the mailing list"
+          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
+          disabled={isSubmitting}
+          onPress={() => {
+            void subscribe();
+          }}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>Sign up</Text>
+          <Text style={styles.buttonText}>{isSubmitting ? "Signing up..." : "Sign up"}</Text>
         </Pressable>
+        {feedback && (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[styles.subtitle, feedback.isError && { color: "#A32121" }]}
+          >
+            {feedback.message}
+          </Text>
+        )}
       </View>
     </View>
   );

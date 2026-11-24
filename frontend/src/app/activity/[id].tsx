@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import ActivityDetail from "../../components/ActivityDetail";
+import NotesScreen from "../../components/NotesScreen";
 import { useActivities } from "../../Context/useActivities";
 import { getActivityById } from "../../data/mockActivities";
 import { mapApiActivityToActivity } from "../../services/activityMapper";
@@ -44,6 +45,7 @@ export default function ActivityDetailScreen() {
   const [activity, setActivity] = useState<Activity | undefined>(initialActivity);
   const [isLoading, setIsLoading] = useState(!initialActivity);
   const [error, setError] = useState<string | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -108,5 +110,20 @@ export default function ActivityDetailScreen() {
     );
   }
 
-  return <ActivityDetail activity={activity} onBack={() => router.back()} />;
+  return (
+    <View style={{ flex: 1 }}>
+      <ActivityDetail
+        activity={activity}
+        onBack={() => router.back()}
+        onOpenNotes={() => setShowNotes(true)}
+      />
+      {showNotes && (
+        <NotesScreen
+          key={activity.id}
+          activityId={activity.id}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
+    </View>
+  );
 }

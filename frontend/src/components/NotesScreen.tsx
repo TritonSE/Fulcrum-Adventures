@@ -1,9 +1,11 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 import NoteIcon from "../../assets/NoteIcon";
+import { loadActivityNotes, saveActivityNotes } from "../services/activityNotes";
 
 const ROW_HEIGHT = 44;
 const MONTHS = [
@@ -316,10 +318,17 @@ export type NotesScreenProps = {
   onClose: () => void;
 };
 
-export default function NotesScreen({ activityId: _activityId, onClose }: NotesScreenProps) {
+export default function NotesScreen({ activityId, onClose }: NotesScreenProps) {
   const [notesText, setNotesText] = useState("");
   const [rating, setRating] = useState(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [hasDate, setHasDate] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const savingRef = useRef(false);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -328,20 +337,80 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
   const dayScrollRef = useRef<ScrollView>(null);
   const timeScrollRef = useRef<ScrollView>(null);
 
-  const displayDate = formatDisplayDate(selectedMonth, selectedDay, selectedYear);
   const daysInSelectedMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+  const safeSelectedDay = Math.min(selectedDay, daysInSelectedMonth);
+  const displayDate = formatDisplayDate(selectedMonth, safeSelectedDay, selectedYear);
   const dayOptions = Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1);
+  const disabled = isLoading || isSaving || loadFailed;
+
+  // Restore the saved note each time this activity's sheet opens.
+  useEffect(() => {
+    let mounted = true;
+    void loadActivityNotes(AsyncStorage, activityId)
+      .then((notes) => {
+        if (!mounted) return;
+        setNotesText(notes.text);
+        setRating(notes.rating);
+        setHasDate(notes.date !== null);
+        setShowDatePicker(false);
+        if (notes.date) {
+          const date = new Date(notes.date);
+          setSelectedYear(date.getFullYear());
+          setSelectedMonth(date.getMonth());
+          setSelectedDay(date.getDate());
+          setSelectedTimeIndex(date.getHours());
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setLoadFailed(true);
+        setError("Unable to load your notes. Please try again.");
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [activityId, loadAttempt]);
+
+  // Keep the sheet open if saving fails, preserving the user's draft for retry.
+  const saveNotes = async () => {
+    if (disabled || savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await saveActivityNotes(AsyncStorage, activityId, {
+        text: notesText,
+        rating,
+        date: hasDate
+          ? new Date(selectedYear, selectedMonth, safeSelectedDay, selectedTimeIndex).toISOString()
+          : null,
+      });
+      onClose();
+    } catch {
+      setError("Unable to save your notes. Please try again.");
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  };
 
   const openDatePicker = () => {
-    const now = getCurrentDateState();
-    setSelectedMonth(now.month);
-    setSelectedDay(now.day);
-    setSelectedYear(now.year);
-    setSelectedTimeIndex(now.timeIndex);
-    setShowDatePicker(true);
+    if (!hasDate) {
+      const now = getCurrentDateState();
+      setSelectedMonth(now.month);
+      setSelectedDay(now.day);
+      setSelectedYear(now.year);
+      setSelectedTimeIndex(now.timeIndex);
+    }
+    setHasDate(true);
+    setShowDatePicker((visible) => !visible);
   };
 
   const clearDate = () => {
+    setHasDate(false);
     setShowDatePicker(false);
   };
 
@@ -351,15 +420,20 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
       // With a single top spacer of ROW_HEIGHT, scrolling to i * ROW_HEIGHT
       // keeps row i centered in the 3-row viewport.
       monthScrollRef.current?.scrollTo({ y: selectedMonth * ROW_HEIGHT, animated: false });
-      dayScrollRef.current?.scrollTo({ y: (selectedDay - 1) * ROW_HEIGHT, animated: false });
+      dayScrollRef.current?.scrollTo({ y: (safeSelectedDay - 1) * ROW_HEIGHT, animated: false });
       timeScrollRef.current?.scrollTo({ y: selectedTimeIndex * ROW_HEIGHT, animated: false });
     }, 100);
     return () => clearTimeout(t);
-  }, [showDatePicker, selectedMonth, selectedDay, selectedTimeIndex]);
+  }, [showDatePicker, selectedMonth, safeSelectedDay, selectedTimeIndex]);
 
   return (
     <View style={styles.overlay}>
-      <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
+      <TouchableOpacity
+        style={{ flex: 1 }}
+        activeOpacity={1}
+        onPress={onClose}
+        disabled={isSaving}
+      />
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -371,6 +445,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
           <TouchableOpacity
             style={styles.closeButton}
             onPress={onClose}
+            disabled={isSaving}
             accessibilityRole="button"
             accessibilityLabel="Close"
           >
@@ -379,6 +454,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
         </View>
 
         <ScrollView
+          pointerEvents={disabled ? "none" : "auto"}
           style={styles.scrollContent}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={true}
@@ -387,9 +463,13 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
           <View style={styles.dateSection}>
             <View style={styles.dateRow}>
               <Text style={styles.rowLabel}>Date</Text>
-              {showDatePicker ? (
+              {hasDate ? (
                 <View style={styles.dateRowRight}>
-                  <Text style={styles.rowValue}>{displayDate}</Text>
+                  <TouchableOpacity onPress={openDatePicker} accessibilityLabel="Edit note date">
+                    <Text style={styles.rowValue}>
+                      {displayDate} · {TIMES[selectedTimeIndex]}
+                    </Text>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     onPress={clearDate}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -466,7 +546,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                       style={[
                         styles.pickerRowCell,
                         { height: ROW_HEIGHT },
-                        selectedDay === d && styles.pickerRowCellSelected,
+                        safeSelectedDay === d && styles.pickerRowCellSelected,
                       ]}
                       onPress={() => {
                         setSelectedDay(d);
@@ -479,7 +559,7 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
                       <Text
                         style={[
                           styles.pickerCellText,
-                          selectedDay === d && styles.pickerCellTextSelected,
+                          safeSelectedDay === d && styles.pickerCellTextSelected,
                         ]}
                       >
                         {getDayLabel(d, selectedMonth, selectedYear)}
@@ -565,6 +645,8 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
           <View style={{ height: 8 }} />
 
           <TextInput
+            accessibilityLabel="Activity notes"
+            editable={!disabled}
             style={styles.notesInput}
             placeholder="Add notes..."
             placeholderTextColor="#B4B4B4"
@@ -575,12 +657,38 @@ export default function NotesScreen({ activityId: _activityId, onClose }: NotesS
           />
         </ScrollView>
 
+        {isLoading && <Text style={{ textAlign: "center" }}>Loading notes...</Text>}
+        {error && (
+          <Text accessibilityLiveRegion="polite" style={{ textAlign: "center", color: "#A32121" }}>
+            {error}
+          </Text>
+        )}
+        {loadFailed && (
+          <TouchableOpacity
+            onPress={() => {
+              setIsLoading(true);
+              setLoadFailed(false);
+              setError(null);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+          >
+            <Text style={{ textAlign: "center", color: "#153F7A" }}>Retry loading notes</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+          <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={isSaving}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={onClose}>
-            <Text style={styles.saveButtonText}>Save</Text>
+          <TouchableOpacity
+            style={[styles.saveButton, disabled && { opacity: 0.5 }]}
+            onPress={() => {
+              void saveNotes();
+            }}
+            disabled={disabled}
+            accessibilityState={{ disabled, busy: isSaving }}
+          >
+            <Text style={styles.saveButtonText}>{isSaving ? "Saving..." : "Save"}</Text>
           </TouchableOpacity>
         </View>
       </View>

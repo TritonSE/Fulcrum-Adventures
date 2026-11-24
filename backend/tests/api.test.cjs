@@ -166,3 +166,63 @@ test("invalid credentials are rejected rather than silently treated as anonymous
   assert.equal((await request("/api/activities", { token: "invalid" })).status, 401);
   assert.equal((await request("/api/emails/all", { token: "invalid" })).status, 401);
 });
+
+test("public signup validates input before writing to the database", async () => {
+  const write = mock.method(Email, "updateOne", async () => ({}));
+  for (const email of [
+    undefined,
+    "",
+    "bad-address",
+    "a@",
+    "@example.com",
+    { email: "a@example.com" },
+    `${"a".repeat(250)}@example.com`,
+  ]) {
+    const response = await request("/api/emails", { method: "POST", body: { email } });
+    assert.equal(response.status, 400);
+  }
+  assert.equal(write.mock.callCount(), 0);
+});
+
+test("public signup normalizes addresses and saves repeated signups only once", async () => {
+  const subscribers = new Set();
+  const write = mock.method(Email, "updateOne", async (filter, update, options) => {
+    assert.deepEqual(filter, { email: "reader+news@example.com" });
+    assert.deepEqual(update, { $setOnInsert: filter });
+    assert.equal(options.upsert, true);
+    subscribers.add(filter.email);
+  });
+  for (const email of [" Reader+News@Example.com ", "reader+news@example.com"]) {
+    const response = await request("/api/emails", { method: "POST", body: { email } });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { message: "You're on the list!" });
+  }
+  assert.equal(write.mock.callCount(), 2);
+  assert.equal(subscribers.size, 1);
+});
+
+test("concurrent duplicate signup is successful without revealing subscriber details", async () => {
+  mock.method(Email, "updateOne", async () => {
+    throw Object.assign(new Error("Duplicate email"), { code: 11000 });
+  });
+  const response = await request("/api/emails", {
+    method: "POST",
+    body: { email: "reader@example.com" },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { message: "You're on the list!" });
+});
+
+test("a database failure does not produce a false signup success", async () => {
+  mock.method(Email, "updateOne", async () => {
+    throw new Error("Database unavailable");
+  });
+  const response = await request("/api/emails", {
+    method: "POST",
+    body: { email: "reader@example.com" },
+  });
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    error: "Unable to sign up right now. Please try again.",
+  });
+});
