@@ -2,6 +2,8 @@
 
 # Frontend:
 
+Use Node 22.23.4 (`cd frontend && nvm install && nvm use` if you use nvm). The app uses Expo SDK 57 and requires iOS 16.4 or later.
+
 1. install expo go on your phone
 2. cd frontend, npm install, npm start, scan qr code on your phone
 3. when developing: when you save it should auto reload. console logs appear in terminal, shake your device for debugging, and if you need to clear cache use npm start -- -c.
@@ -21,6 +23,10 @@ npm run lint-check to check all lint errors or code style issues without modifyi
 # Release preparation
 
 Run EAS commands from `frontend/`. `eas.json` provides an internal preview build and a store production build with automatic build-number increments. Production Android submissions target the internal testing track as a draft. iOS submissions upload to App Store Connect/TestFlight; public release still requires App Review.
+
+iOS builds use the pinned Xcode 27.2 image and Expo SDK 57's `expo-build-properties` scene-lifecycle option. Both are needed for iOS 27 SDK builds and Apple's April 2027 upload requirement. Keep `ios.enableSceneSupport` enabled while on SDK 57. It requires Expo 57.0.23 or newer; the lockfile pins a newer patch. See [Expo's scene support configuration](https://docs.expo.dev/versions/v57.0.0/sdk/build-properties/#pluginconfigtypeios) and [EAS build images](https://docs.expo.dev/build-reference/infrastructure/). SDK 58 requires migrating or patching `react-native-draggable-flatlist` first because version 4.0.3 calls the removed `InteractionManager` API ([upstream issue](https://github.com/computerjazz/react-native-draggable-flatlist/issues/627)).
+
+TypeScript stays on 5.9 for compatibility with the current ESLint plugins; `expo.install.exclude` skips only TypeScript's suggested upgrade. Expo's native dependency checks remain enabled.
 
 The app is linked to the `fulcrum-adventures` Expo organization. The registered iOS bundle ID is `com.fulcrumadventures.app`, and the App Store Connect app ID is `6838847564`. Apple signing and submission credentials have been configured in EAS under the client's individual account. Android account setup and `android.package` are still pending. Store signing and submission credentials in EAS, never in Git or `EXPO_PUBLIC_` variables. The client handles Apple credential renewals when required.
 
@@ -42,7 +48,7 @@ cd ../admin
 npm run build
 ```
 
-Use Node 22.18+ for the frontend's built-in TypeScript test runner. Backend integration tests exercise HTTP routes with Firebase and MongoDB mocked; they do not prove the deployed configuration works. Expo export verifies JS/assets, not native signing or device behavior.
+Backend integration tests exercise HTTP routes with Firebase and MongoDB mocked; they do not prove the deployed configuration works. Expo export verifies JS/assets, not native signing or device behavior. After the SDK upgrade, create a new production build and upload it to TestFlight. Check cold launch, tab navigation, activity videos, swipe-to-delete, drag-to-reorder, notes persistence, signup, and the privacy link on a real device before submitting it for App Review.
 
 Before store submission: replace the placeholder icon/launch artwork; have the client review the privacy policy and support contact; complete screenshots, ratings, disclosures, and support details; test on real iOS and Android devices (and iPad while `supportsTablet` is enabled). Verify the admin can edit/upload/publish and view signups, anonymous users cannot access admin data, signup handles failures, and Notes persist after reopening/restarting.
 

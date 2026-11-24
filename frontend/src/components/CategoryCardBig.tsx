@@ -1,4 +1,4 @@
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 
 import ActiveGraphic from "../../assets/images/active_graphic.png";
 import ConnectionGraphic from "../../assets/images/connection_graphic.png";
@@ -12,7 +12,7 @@ import { styles } from "./CategoryCardBig.styles";
 
 import type { Category } from "../types/activity";
 import type React from "react";
-import type { ImageSourcePropType } from "react-native";
+import type { ImageSourcePropType, ImageURISource } from "react-native";
 
 const CATEGORY_GRAPHICS: Record<Category, ImageSourcePropType> = {
   Opener: OpenerGraphic as ImageSourcePropType,
@@ -41,7 +41,11 @@ type CategoryCardBigProps = {
 export const CategoryCardBig: React.FC<CategoryCardBigProps> = ({ category, onPress }) => {
   const textColor = CATEGORY_COLORS[category];
   const categoryGraphic = CATEGORY_GRAPHICS[category];
-  const src = Image.resolveAssetSource(categoryGraphic);
+  // Metro embeds image dimensions directly on web; resolveAssetSource is native-only.
+  const { width = 0, height = 0 } =
+    Platform.OS === "web"
+      ? (categoryGraphic as ImageURISource)
+      : Image.resolveAssetSource(categoryGraphic);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
@@ -60,7 +64,7 @@ export const CategoryCardBig: React.FC<CategoryCardBigProps> = ({ category, onPr
         {/* Render the PNG at half the original width/height since it was exported at 2x. */}
         <Image
           source={categoryGraphic}
-          style={{ width: src.width / 2, height: src.height / 2, resizeMode: "contain" }}
+          style={{ width: width / 2, height: height / 2, resizeMode: "contain" }}
         />
       </View>
     </TouchableOpacity>

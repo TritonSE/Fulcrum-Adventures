@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";
 import { useActivities } from "../Context/useActivities";
@@ -14,10 +14,8 @@ type HomeRecentBookmarksSectionProps = {
   bookmarkedActivities?: Activity[];
 };
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const LIST_HORIZONTAL_PADDING = 24;
 const CARD_HORIZONTAL_SPACING = 24;
-const CARD_ITEM_WIDTH = SCREEN_WIDTH - LIST_HORIZONTAL_PADDING * 2;
 
 const styles = StyleSheet.create({
   sectionContainer: {
@@ -46,9 +44,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: LIST_HORIZONTAL_PADDING,
   },
-  cardItemWrapper: {
-    width: CARD_ITEM_WIDTH,
-  },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -65,7 +60,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#153F7A",
   },
   emptyContainer: {
-    width: CARD_ITEM_WIDTH,
     paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -82,6 +76,8 @@ const styles = StyleSheet.create({
 export function HomeRecentBookmarksSection({
   bookmarkedActivities,
 }: HomeRecentBookmarksSectionProps) {
+  const { width } = useWindowDimensions();
+  const cardItemWidth = Math.max(0, width - LIST_HORIZONTAL_PADDING * 2);
   const { toggleSaved, bookmarkedActivities: contextBookmarks } = useActivities();
   const activities =
     bookmarkedActivities && bookmarkedActivities.length > 0
@@ -118,7 +114,7 @@ export function HomeRecentBookmarksSection({
           <FlatList
             data={activities}
             renderItem={({ item }) => (
-              <View style={styles.cardItemWrapper}>
+              <View style={{ width: cardItemWidth }}>
                 <ActivityCard
                   activity={item}
                   onPress={() => router.push(`/activity/${item.id}`)}
@@ -133,7 +129,7 @@ export function HomeRecentBookmarksSection({
             contentContainerStyle={styles.scrollContent}
             ItemSeparatorComponent={() => <View style={{ width: CARD_HORIZONTAL_SPACING }} />}
             decelerationRate="fast"
-            snapToInterval={CARD_ITEM_WIDTH + CARD_HORIZONTAL_SPACING}
+            snapToInterval={cardItemWidth + CARD_HORIZONTAL_SPACING}
             snapToAlignment="start"
             disableIntervalMomentum={true}
             onViewableItemsChanged={onViewableItemsChanged}
@@ -152,7 +148,7 @@ export function HomeRecentBookmarksSection({
           )}
         </>
       ) : (
-        <View style={styles.emptyContainer}>
+        <View style={[styles.emptyContainer, { width: cardItemWidth }]}>
           <Text style={styles.emptyText}>No recent bookmarks.</Text>
         </View>
       )}
