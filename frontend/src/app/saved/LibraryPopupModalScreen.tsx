@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import BookmarkFilledIcon from "../../../assets/icons/bookmark-filled.svg";
@@ -14,7 +14,7 @@ const DRAWER_BACKDROP_COLOR = "rgba(0,0,0,0.25)";
 
 const styles = StyleSheet.create({
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: DRAWER_BACKDROP_COLOR,
   },
   sheet: {

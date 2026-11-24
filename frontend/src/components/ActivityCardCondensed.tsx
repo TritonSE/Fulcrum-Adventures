@@ -1,4 +1,3 @@
-import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import BookmarkFilledIcon from "../../assets/icons/bookmark-filled.svg";
@@ -17,6 +16,7 @@ import {
 import { styles } from "./ActivityCardCondensed.styles";
 
 import type { Activity } from "../types/activity";
+import type React from "react";
 
 type ActivityCardCondensedProps = {
   activity: Activity;

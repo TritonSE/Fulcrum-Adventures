@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import HomeFilledIcon from "../../assets/icons/home-filled.svg";
@@ -9,6 +8,8 @@ import SearchFilledIcon from "../../assets/icons/search-filled.svg";
 import SearchIcon from "../../assets/icons/search.svg";
 
 import { styles } from "./Navbar.styles";
+
+import type React from "react";
 
 export type TabName = "Home" | "Search" | "Library";
 

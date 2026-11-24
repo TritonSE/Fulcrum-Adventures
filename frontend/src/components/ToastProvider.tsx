@@ -1,18 +1,12 @@
 /* eslint-disable ts/no-use-before-define */
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { registerToast } from "../utils/toast";
+
+import type React from "react";
 
 export type ToastOptions = {
   message: string;

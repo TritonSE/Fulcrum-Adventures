@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/refs -- DragList intentionally reads/writes refs during render to maintain stable gesture handlers and animated values */
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Animated, PanResponder, ScrollView, View } from "react-native";
+
+import type React from "react";
 
 type DragListProps<T extends { id: string }> = {
   data: T[];

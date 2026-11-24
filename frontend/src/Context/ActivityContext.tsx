@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
 import { getActivityById } from "../data/mockActivities";
@@ -10,6 +10,7 @@ import { ActivityContext } from "./activityContextValue";
 
 import type { Activity } from "../types/activity";
 import type { Playlist } from "./activityContextValue";
+import type React from "react";
 import type { AppStateStatus } from "react-native";
 
 const LOCAL_ACTIVITY_STATE_KEY = "fulcrum-adventures:activity-state:v1";

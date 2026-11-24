@@ -1,9 +1,10 @@
 /* eslint-disable ts/no-use-before-define */
 import { Ionicons } from "@expo/vector-icons";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Animated, Pressable, StyleSheet } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
+import type React from "react";
 import type { ViewStyle } from "react-native";
 
 type Props = {

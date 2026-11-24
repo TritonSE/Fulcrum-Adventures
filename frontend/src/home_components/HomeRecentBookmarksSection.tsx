@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ActivityCard } from "../components/ActivityCard";

@@ -1,9 +1,7 @@
-import React from "react";
-
 import { Navbar } from "./Navbar"; // adjust import path if needed
 
 import type { TabName } from "./Navbar";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 
 const routeToTab: Record<string, TabName> = {
   home: "Home",

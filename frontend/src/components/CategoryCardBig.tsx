@@ -1,4 +1,3 @@
-import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import ActiveGraphic from "../../assets/images/active_graphic.png";
@@ -12,6 +11,7 @@ import { CATEGORY_COLORS } from "../constants/activityColors";
 import { styles } from "./CategoryCardBig.styles";
 
 import type { Category } from "../types/activity";
+import type React from "react";
 import type { ImageSourcePropType } from "react-native";
 
 const CATEGORY_GRAPHICS: Record<Category, ImageSourcePropType> = {

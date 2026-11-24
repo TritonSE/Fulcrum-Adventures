@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import React from "react";
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 import { useActivities } from "../Context/useActivities";
@@ -11,6 +10,7 @@ import { DragList } from "./DragList";
 import SwipeToDelete from "./SwipeToDelete";
 
 import type { Activity } from "../types/activity";
+import type React from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 
 type ActivityListProps = {
