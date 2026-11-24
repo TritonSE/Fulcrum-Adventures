@@ -27,6 +27,13 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-router"]
+    "plugins": ["expo-font", "expo-router"],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "69577a18-3788-466f-8845-7b5683a260bf"
+      }
+    },
+    "owner": "fulcrum-adventures"
   }
 }
