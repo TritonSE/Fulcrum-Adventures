@@ -22,7 +22,7 @@ npm run lint-check to check all lint errors or code style issues without modifyi
 
 Run EAS commands from `frontend/`. `eas.json` provides an internal preview build and a store production build with automatic build-number increments. Production Android submissions target the internal testing track as a draft. iOS submissions upload to App Store Connect/TestFlight; public release still requires App Review.
 
-Account setup is deliberately unfinished: confirm the permanent `ios.bundleIdentifier` and `android.package` in `frontend/app.json`, then link the client-controlled Expo project (including `owner` and `extra.eas.projectId`). An identifier such as `com.fulcrumadventures.app` is only a suggestion, not a registered value. Set `submit.production.ios.ascAppId` in `frontend/eas.json` after creating the App Store Connect app record. Store signing and submission credentials in EAS, never in Git or `EXPO_PUBLIC_` variables. The client must create the initial Apple signing credentials because this is an individual Apple Developer account.
+The app is linked to the `fulcrum-adventures` Expo organization. The registered iOS bundle ID is `com.fulcrumadventures.app`, and the App Store Connect app ID is `6838847564`. Apple signing and submission credentials have been configured in EAS under the client's individual account. Android account setup and `android.package` are still pending. Store signing and submission credentials in EAS, never in Git or `EXPO_PUBLIC_` variables. The client handles Apple credential renewals when required.
 
 Both build profiles currently use `https://fulcrum-backend.vercel.app`. Deploy the backend and admin changes together before testing the mobile signup against that server. The public mobile app needs no login; admin requests send Firebase tokens. Anonymous activity reads only return published activities. Public `POST /api/emails` stores a validated, normalized, unique address in the admin mailing list; it does not send newsletters or confirmation emails.
 
@@ -44,6 +44,17 @@ npm run build
 
 Use Node 22.18+ for the frontend's built-in TypeScript test runner. Backend integration tests exercise HTTP routes with Firebase and MongoDB mocked; they do not prove the deployed configuration works. Expo export verifies JS/assets, not native signing or device behavior.
 
-Before store submission: replace the placeholder icon/launch artwork; add the approved privacy policy in the app and store listings; complete screenshots, ratings, disclosures, and support details; test on real iOS and Android devices (and iPad while `supportsTablet` is enabled). Verify the admin can edit/upload/publish and view signups, anonymous users cannot access admin data, signup handles failures, and Notes persist after reopening/restarting.
+Before store submission: replace the placeholder icon/launch artwork; have the client review the privacy policy and support contact; complete screenshots, ratings, disclosures, and support details; test on real iOS and Android devices (and iPad while `supportsTablet` is enabled). Verify the admin can edit/upload/publish and view signups, anonymous users cannot access admin data, signup handles failures, and Notes persist after reopening/restarting.
+
+## Privacy and support page
+
+One public page lives at `admin/public/privacy.html`, using the existing Fulcrum logo and locally hosted fonts. It is independent of admin login and Firebase. Vercel rewrites `/privacy` to this file; locally, open `/privacy.html` on the admin dev server. The mobile Home screen links to it beneath mailing signup.
+
+- Privacy Policy URL: `https://fulcrum-admin-nine.vercel.app/privacy`
+- Support URL: `https://fulcrum-admin-nine.vercel.app/privacy#support`
+
+The contact inbox is `info@fulcrumadventures.com`, as published on [Fulcrum's contact page](https://fulcrumadventures.com/contact). Have the client confirm that staff will handle app support and mailing-list removal there and review the described data practices before App Review. The app currently stores signup addresses; it does not send newsletters or implement automated unsubscribe processing. Staff must handle removal requests. Keep the policy updated when data handling changes. The policy page does not replace the separate App Store privacy disclosures or Google Play Data safety form.
+
+Deploy the admin change before distributing a mobile build with the new link. Rebuild the mobile app to include the link; editing policy text later only requires redeploying the admin website. Font licenses are included in `admin/public/fonts/`.
 
 References: [Expo build configuration](https://docs.expo.dev/build/eas-json/), [Apple signing permissions](https://docs.expo.dev/app-signing/apple-developer-program-roles-and-permissions/), [build images](https://docs.expo.dev/build-reference/infrastructure/).
