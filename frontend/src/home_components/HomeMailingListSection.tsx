@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { mailingListApi } from "../services/api";
+
+const PRIVACY_URL = "https://fulcrum-admin-nine.vercel.app/privacy";
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -64,6 +66,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 44,
     fontWeight: "400",
+  },
+  privacyLink: {
+    minHeight: 44,
+    marginTop: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  privacyLinkText: {
+    color: "#153F7A",
+    fontFamily: "Instrument Sans",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
 });
 
@@ -149,6 +163,21 @@ export function HomeMailingListSection() {
             {feedback.message}
           </Text>
         )}
+        <Pressable
+          accessibilityRole="link"
+          accessibilityHint="Opens the privacy policy and support page in your browser"
+          onPress={() => {
+            void Linking.openURL(PRIVACY_URL).catch(() => {
+              setFeedback({
+                message: "Unable to open the privacy page. Please try again.",
+                isError: true,
+              });
+            });
+          }}
+          style={styles.privacyLink}
+        >
+          <Text style={styles.privacyLinkText}>Privacy &amp; support</Text>
+        </Pressable>
       </View>
     </View>
   );
