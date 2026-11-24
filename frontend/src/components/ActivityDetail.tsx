@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
-    flex: 0,
+    flexShrink: 0,
   },
   actionIconCircle: {
     display: "flex",
@@ -880,7 +880,12 @@ export default function ActivityDetail({ activity, onBack, onOpenNotes }: Activi
                 <TouchableOpacity style={styles.actionIconCircle} onPress={handleDownloadPress}>
                   <DownloadIcon />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionIconCircle} onPress={onOpenNotes}>
+                <TouchableOpacity
+                  style={styles.actionIconCircle}
+                  onPress={onOpenNotes}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open activity notes"
+                >
                   <NoteIcon />
                 </TouchableOpacity>
                 <TouchableOpacity
