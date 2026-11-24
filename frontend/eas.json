@@ -10,7 +10,7 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://fulcrum-backend.vercel.app"
       },
       "ios": {
-        "image": "sdk-54"
+        "image": "auto"
       },
       "android": {
         "buildType": "apk"
@@ -24,7 +24,7 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://fulcrum-backend.vercel.app"
       },
       "ios": {
-        "image": "sdk-54"
+        "image": "auto"
       },
       "android": {
         "buildType": "app-bundle"
